@@ -1,3 +1,6 @@
+;;!!! SchemeSpheres prelude for Gambit
+;; .author Alvaro Castro-Castilla, 2014. All rights reserved
+
 ;;! DEFINE-MACRO in terms of syntax-case
 (define-syntax (define-macro x)
   (syntax-case x ()
