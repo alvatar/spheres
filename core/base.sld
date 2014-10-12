@@ -2,7 +2,51 @@
 ;; .author Alvaro Castro-Castilla, 2012-2104. All rights reserved.
 
 (define-library (spheres base)
-  (export)
+  (export define-macro
+          letrec*
+          add-cond-expand-feature!
+          and-let*
+          let-rest
+          receive
+          let-values
+          let*-values
+          case-lambda
+          rec
+          cond
+          case
+          lambda*
+          define*
+          ++!
+          ++
+          --!
+          --!
+          aif
+          when
+          unless
+          begin0
+          push!
+          string-null?
+          pv
+          ps
+          let/cc
+          dotimes
+          symbol->keyword
+          keyword->symbol
+          ->string
+          ->symbol
+          ->keyword
+          string-append-anything
+          symbol-append
+          check-arg
+          values->list
+          values->vector
+          values->length
+          values-ref
+          pred2?+
+          eq?+
+          eqv?+
+          equal?+
+          type)
   (cond-expand
    (gambit
     (import (gambit)))
@@ -109,7 +153,10 @@
                     features)
                  ((cond-expand (feature-id body ...) more-clauses ...)
                   (cond-expand more-clauses ...))))))))))
-   (else))
+   (else
+    (define-macro add-cond-expand-feature!
+      (lambda (new-feature)
+        (error "not implemented")))))
 
   ;;! SRFI-2 AND-LET*: an AND with local bindings, a guarded LET* special form
   ;; .author Álvaro Castro-Castilla (Ported to syntax-rules)
@@ -941,32 +988,5 @@
     (syntax-rules ()
       ((_ ?a ?b)
        (pred2?+ equal? ?a ?b))))
-
-
-  ;;------------------------------------------------------------------------------
-  ;;!! TODO: R7RS definition
-  
-  ;; Define values allows sharing state between functions
-  ;; UNTESTED
-  ;; (define-values (inc dec reset)
-  ;;   (let ((state 0))
-  ;;     (define (inc)  (set! state (+ state 1)) state)
-  ;;     (define (dec)  (set! state (- state 1)) state)
-  ;;     (define (reset)(set! state 0)           state)
-  ;;     (values inc dec reset)))
-
-  ;; (define-syntax define-values
-  ;;   (syntax-rules ()
-  ;;     ((_ "gentmp" (tmp ...) () (var ...) expr)
-  ;;      (begin (define var (undefined)) ...
-  ;;             (receive (tmp ...) expr
-  ;;                      (set! var tmp) ...
-  ;;                      (undefined))))
-  ;;     ((_ "gentmp" (tmp ...) (v v2 ...) (var ...) expr)
-  ;;      (define-values "gentmp" (tmp ... tmp1) (v2 ...) (var ...) expr))
-  ;;     ((_ (var  ...) expr)
-  ;;      (define-values "gentmp" () (var ...) (var ...) expr))
-  ;;     ((_ . else)
-  ;;      (syntax-error "malformed define-values" (define-values . else)))))
   
   (include "base.scm"))
