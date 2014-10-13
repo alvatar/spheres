@@ -2,8 +2,7 @@
 ;; .author Oleg Kiselyov
 ;; .author Álvaro Castro Castilla, 2013-2014
 
-(define-library (spheres assert)
-
+(define-library (spheres/core assert)
   (export assert
           assure
           assertion-violation

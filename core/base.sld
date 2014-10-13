@@ -1,7 +1,7 @@
 ;;!!! Base extensions for Scheme Spheres
 ;; .author Alvaro Castro-Castilla, 2012-2104. All rights reserved.
 
-(define-library (spheres base)
+(define-library (spheres/core base)
   (export letrec*
           and-let*
           let-rest

@@ -2,7 +2,6 @@
 ;; .author Alvaro Castro-Castilla, 2012-2014. All rights reserved.
 
 (define-library (spheres/core functional)
-  
   (export cut
           cute
           define-associative
@@ -21,7 +20,6 @@
           uncurry
           memoize/key-gen
           memoize)
-
   (import (gambit))
 
   ;;------------------------------------------------------------------------------
@@ -29,10 +27,10 @@
   ;; Sebastian.Egner@philips.com, 5-Jun-2002.
   ;; adapted from the posting by Al Petrofsky <al@petrofsky.org>
   ;; placed in the public domain.
-
-  ;;! cut
   ;; Modified by Álvaro Castro-Castilla 2012
   ;; Made internal syntaxes private with letrec
+
+  ;;! cut
   (define-syntax cut
     ;; (srfi-26-internal-cut slot-names combination . se)
     ;;   transformer used internally
