@@ -23,7 +23,7 @@
             (write-report*
              (syntax-rules ()
                ((_ rev-prologue () prefix)
-                (k!reverse () (nl . rev-prologue) (k!id !)))
+                (k!reverse () (#\newline . rev-prologue) (k!id !)))
                ((_ rev-prologue (x . rest) prefix)
                 (symbol?? x
                           (write-report* (x ": " 'x (string #\newline) . rev-prologue) 
@@ -70,7 +70,7 @@
                 (or exprs
                     (begin (vars-of () exprs
                                     (write-report ! 
-                                                  ("failed assertion: " 'exprs nl "bindings")))
+                                                  ("failed assertion: " 'exprs #\newline "bindings")))
                            (error "assertion failure"))))
                ((_ exprs others)
                 (or exprs
