@@ -4,22 +4,6 @@
 
 (load ##syntax-case-file)
 
-(define (expander:include file)
-  (for-each eval (with-input-from-file file read-all)))
-
-(define (expander:include-library-definition file)
-  (define (filter f l)
-    (let recur ((l l))
-      (if (null? l) '()
-          (let ((head (car l)))
-            (if (f head) (cons head (filter f (cdr l)))
-                (filter f (cdr l)))))))
-  (let* ((file-sexps (with-input-from-file file read))
-         (define-library-args (cdr file-sexps))
-         (syntax-defines (filter (lambda (sexp) (eq? (car sexp) 'define-syntax))
-                                 define-library-args)))
-    (for-each eval syntax-defines)))
-
 ;;------------------------------------------------------------------------------
 ;;!! Macro utils
 
@@ -238,140 +222,32 @@
           (set! import-seq (cons lib import-seq)))
       (cdr import-seq))))
 
+(define^ (expander:include file)
+  (for-each eval (with-input-from-file file read-all)))
 
-;;------------------------------------------------------------------------------
-;;!! Including and loading
+(define^ (expander:include-library-definition file)
+  (define (filter f l)
+    (let recur ((l l))
+      (if (null? l) '()
+          (let ((head (car l)))
+            (if (f head) (cons head (filter f (cdr l)))
+                (filter f (cdr l)))))))
+  (let* ((file-sexps (with-input-from-file file read))
+         (define-library-args (cdr file-sexps))
+         (syntax-defines (filter (lambda (sexp) (eq? (car sexp) 'define-syntax))
+                                 define-library-args)))
+    (for-each eval syntax-defines)))
 
-;; ;;! Include module and dependencies
-;; (define ##include-module-and-dependencies #f)
-
-;; ;;! Load module and dependencies
-;; (define ##load-module-and-dependencies #f)
-
-;; (let* ((*loaded-modules* '())
-;;        (*included-modules* '())
-;;        (include-single-module
-;;         (lambda (module options)
-;;           (let* ((verbose (and (memq 'verbose options) #t))
-;;                  (sphere (%module-sphere module))
-;;                  (module-name (symbol->string (%module-id module))))
-;;             (if sphere
-;;                 (let ((include-file (string-append (%module-path-src module)
-;;                                                    (%module-filename-scm module))))                  
-;;                   (if (not (member (%module-normalize module override-version: '()) *included-modules*))
-;;                       (begin
-;;                         (if verbose
-;;                             (display (string-append "-- source included -- " (object->string module) "\n")))
-;;                         (set! *included-modules* (cons (%module-normalize module override-version: '()) *included-modules*))
-;;                         (expander:include include-file))))
-;;                 (begin
-;;                   (if (not (member (%module-normalize module override-version: '()) *included-modules*))
-;;                       (begin
-;;                         (if verbose
-;;                             (display (string-append "-- source included -- " (object->string module) "\n")))
-;;                         (set! *included-modules* (cons (%module-normalize module override-version: '()) *included-modules*))
-;;                         (expander:include (%module-filename-scm module)))))))))
-;;        (load-single-module
-;;         (lambda (module options)
-;;           (%check-module module '##load-module-and-dependencies#load-single-module)
-;;           (let ((verbose (and (memq 'verbose options) #t))
-;;                 (includes (and (memq 'includes options) #t))
-;;                 (sphere (%module-sphere module)))
-;;             (let ((header-module (%module-header module)))
-;;               (if header-module
-;;                   (expander:include (string-append (%module-path-src header-module)
-;;                                                    (%module-filename-scm header-module))))
-;;               (if includes
-;;                   (for-each (lambda (m) (include-single-module m '(verbose)))
-;;                             (%module-shallow-dependencies-to-include module)))
-;;               (if sphere
-;;                   (let ((file-o (string-append (%sphere-path sphere) (default-lib-directory) (%module-filename-o module)))
-;;                         (file-scm (string-append (%sphere-path sphere) (default-source-directory) (%module-filename-scm module))))
-;;                     (cond ((file-exists? file-o)
-;;                            (if verbose
-;;                                (display (string-append "-- object loaded -- " (object->string module) "\n")))
-;;                            (load file-o)
-;;                                         ;(pp file-o)
-;;                            file-o)
-;;                           ((file-exists? file-scm)
-;;                            (load file-scm)
-;;                            (if verbose
-;;                                (display (string-append "-- source loaded -- " (object->string module) "\n")))
-;;                            file-scm)
-;;                           (else
-;;                            (error (string-append "Module: "
-;;                                                  (object->string module)
-;;                                                  " cannot be found in current sphere's path"))))
-;;                     (set! *loaded-modules* (cons (%module-normalize module override-version: '()) *loaded-modules*)))
-;;                   (begin (if verbose
-;;                              (display (string-append "-- object loaded -- " (object->string module) "\n")))
-;;                          (load (%module-filename-scm module)))))))))
-;;   (set!
-;;    ##include-module-and-dependencies
-;;    (lambda (root-module options)
-;;      (let ((force-include (and (memq 'force options) #f)))
-;;        (let recur ((module root-module))
-;;          (if (or force-include
-;;                  (not (member (%module-normalize module override-version: '()) *included-modules*)))
-;;              (begin (for-each recur (%module-shallow-dependencies-to-include module))
-;;                     (include-single-module module '(verbose #t))))))))
-;;   (set!
-;;    ##load-module-and-dependencies
-;;    (lambda (root-module options)
-;;      ;; Get options, as #t or #f
-;;      (let ((omit-root (and (memq 'omit-root options) #t)))
-;;        (let recur ((module root-module))
-;;          (if (not (member (%module-normalize module override-version: '()) *loaded-modules*))
-;;              (begin (for-each recur (%module-shallow-dependencies-to-load module))
-;;                     (or (and omit-root (equal? root-module module))
-;;                         (load-single-module module options)))))))))
-
-;; ;;! import-include macro
-;; (define-macro (##spheres-include . module)
-;;   (cond
-;;    ((string? (car module))
-;;     ;; If filename given, just include it (doesn't register as loaded module)
-;;     (if (string=? ".sld" (path-extension (car module)))
-;;         (expander:include-library-definition (car module))
-;;         (expander:include (car module))))
-;;    (else
-;;     (let ((module (if (null? (cdr module))
-;;                       (car module)
-;;                       ;; If it defines the sphere, process the sphere name to make it a keyword
-;;                       (cons (let ((first (car module)))
-;;                               (if (keyword? first)
-;;                                   first
-;;                                   (let ((str (apply string
-;;                                                     (string->list
-;;                                                      (symbol->string first)))))
-;;                                     (string-shrink! str (- (string-length str) 1))
-;;                                     (string->keyword str))))
-;;                             (cdr module)))))
-;;       (%check-module module '##spheres-include)
-;;       `(##include-module-and-dependencies ',module '(verbose))))))
-
-;; ;;! import macro, loads dependencies
-;; (define-macro (##spheres-load . module)
-;;   (let* ((module (if (null? (cdr module))
-;;                      (car module)
-;;                      ;; If it defines the sphere, process the sphere name to make it a keyword
-;;                      (cons (let ((first (car module)))
-;;                              (if (keyword? first)
-;;                                  first
-;;                                  (let* ((str (symbol->string first))
-;;                                         (str-len (string-length str)))
-;;                                    (if (not (char=? (string-ref str (- str-len 1)) #\:))
-;;                                        (error "Sphere names should end with ':'"))
-;;                                    (string-shrink! str (- str-len 1))                                   
-;;                                    (string->keyword str))))
-;;                            (cdr module)))))
-;;     (%check-module module '##spheres-load)
-;;     `(##load-module-and-dependencies ',module '(verbose includes))))
-
-
-;;
-;;
-;; // REMOVE
-;;
-;;
-(define^ ##spheres-include (lambda (x) x))
+;;! Include and load all library files and dependencies
+(define^ (%load-library lib)
+  (let recur ((lib lib))
+    (for-each recur (%library-imports lib))
+    (let ((sld-file (%find-library-sld lib))
+          (procedures-file (or (%find-library-object lib)
+                               (%find-library-scm lib))))
+      (if sld-file
+          (begin (println "including: " sld-file)
+                 (expander:include-library-definition sld-file)))
+      (if procedures-file
+          (begin (println "loading: " procedures-file)
+                 (load procedures-file))))))
