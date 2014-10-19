@@ -58,20 +58,23 @@
 ;;!! R7RS libraries
 
 (define^ (%find-library lib)
-  (let* ((option-here (string-append
-                       "../" (symbol->string (car lib)) "/"
-                       (symbol->string (cadr lib))))
-         (option-system (string-append
-                         (path-expand "~~lib/")
-                         option-here)))
-    (let ((try-options (list (string-append option-here ".sld")
-                             (string-append option-here ".scm")
-                             (string-append option-system ".sld")
-                             (string-append option-system ".scm"))))
-      (let find ((l try-options))
-        (cond ((null? l) (error "Library not found"))
-              ((file-exists? (car l)) (car l))
-              (else (find (cdr l))))))))
+  (if (not (%library? lib)) (%library-error lib))
+  (let ((package (symbol->string (car lib)))
+        (module (and (= (length lib) 2) (cadr lib))))
+    (let* ((option-here (string-append
+                         "../" package "/"
+                         (symbol->string module)))
+           (option-system (string-append
+                           (path-expand "~~lib/")
+                           option-here)))
+      (let ((try-options (list (string-append option-here ".sld")
+                               (string-append option-here ".scm")
+                               (string-append option-system ".sld")
+                               (string-append option-system ".scm"))))
+        (let find ((l try-options))
+          (cond ((null? l) (error "Library not found"))
+                ((file-exists? (car l)) (car l))
+                (else (find (cdr l)))))))))
 
 ;;! Throw a library format error
 (define^ (%library-error lib)
@@ -206,12 +209,21 @@
                    (if (eq? e '=)
                        (string->keyword (symbol->string sphere))
                        e))
-                 deps))))
+                 deps)))
+        (remove-gambit-library
+         (lambda (deps)
+           (let recur ((deps deps))
+             (cond ((null? deps) '())
+                   ((equal? '(gambit) (car deps))
+                    (recur (cdr deps)))
+                   (else
+                    (cons (car deps) (recur (cdr deps)))))))))
     (let ((deps-pair (assq 'import (%library-declaration lib))))
       (if deps-pair
-          (expand-wildcards
-           (flatten-tag '##begin
-                        (expand-cond-features (cdr deps-pair))))
+          (remove-gambit-library
+           (expand-wildcards
+            (flatten-tag '##begin
+                         (expand-cond-features (cdr deps-pair)))))
           '()))))
 
 (define^ %library-imports-all
