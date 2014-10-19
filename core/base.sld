@@ -282,43 +282,42 @@
        (letrec ((?name ?expression)) ?name))))
 
   ;;! SRFI-61 A more general cond clause
+  (define-syntax $$cond/maybe-more
+    (syntax-rules ()
+      ((_ test consequent)
+       (if test
+           consequent))
+      ((_ test consequent clause ...)
+       (if test
+           consequent
+           (cond clause ...)))))
   (define-syntax cond
-    (letrec-syntax
-        ((%%cond/maybe-more
-          (syntax-rules ()
-            ((_ test consequent)
-             (if test
-                 consequent))
-            ((_ test consequent clause ...)
-             (if test
-                 consequent
-                 (cond clause ...))))))
-      (syntax-rules (=> else)
-        ((_ (else else1 else2 ...))
-         ;; the (if #t (begin ...)) wrapper ensures that there may be no
-         ;; internal definitions in the body of the clause.  R5RS mandates
-         ;; this in text (by referring to each subform of the clauses as
-         ;; <expression>) but not in its reference implementation of cond,
-         ;; which just expands to (begin ...) with no (if #t ...) wrapper.
-         (if #t (begin else1 else2 ...)))
-        ((_ (test => receiver) more-clause ...)
-         (let ((t test))
-           (%%cond/maybe-more t
-                              (receiver t)
-                              more-clause ...)))
-        ((_ (generator guard => receiver) more-clause ...)
-         (call-with-values (lambda () generator)
-           (lambda t
-             (%%cond/maybe-more (apply guard    t)
-                                (apply receiver t)
-                                more-clause ...))))
-        ((_ (test) more-clause ...)
-         (let ((t test))
-           (%%cond/maybe-more t t more-clause ...)))
-        ((_ (test body1 body2 ...) more-clause ...)
-         (%%cond/maybe-more test
-                            (begin body1 body2 ...)
-                            more-clause ...)))))
+    (syntax-rules (=> else)
+      ((_ (else else1 else2 ...))
+       ;; the (if #t (begin ...)) wrapper ensures that there may be no
+       ;; internal definitions in the body of the clause.  R5RS mandates
+       ;; this in text (by referring to each subform of the clauses as
+       ;; <expression>) but not in its reference implementation of cond,
+       ;; which just expands to (begin ...) with no (if #t ...) wrapper.
+       (if #t (begin else1 else2 ...)))
+      ((_ (test => receiver) more-clause ...)
+       (let ((t test))
+         ($$cond/maybe-more t
+                            (receiver t)
+                            more-clause ...)))
+      ((_ (generator guard => receiver) more-clause ...)
+       (call-with-values (lambda () generator)
+         (lambda t
+           ($$cond/maybe-more (apply guard    t)
+                              (apply receiver t)
+                              more-clause ...))))
+      ((_ (test) more-clause ...)
+       (let ((t test))
+         ($$cond/maybe-more t t more-clause ...)))
+      ((_ (test body1 body2 ...) more-clause ...)
+       ($$cond/maybe-more test
+                          (begin body1 body2 ...)
+                          more-clause ...))))
 
   ;;! SRFI-87 => in case clauses
   ;; Included in Alexpander for native availability
