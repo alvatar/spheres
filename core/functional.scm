@@ -78,14 +78,15 @@
 ;;------------------------------------------------------------------------------
 ;;!! Currying / uncurrying
 
-;;! Explicit currying of an arbitrary function
-(define (curry fun arg1 . args)
-  (if (pair? args)
-      (let ((all-args (cons arg1 args)))
-        (lambda x
-          (apply fun (append all-args x))))
-      (lambda x
-        (apply fun (cons arg1 x)))))
+;;! Right section
+(define (rsec proc . args)
+  (lambda x (apply proc
+              (reverse
+               (append (reverse args) (reverse x))))))
+
+;;! Curry or left section
+(define (curry proc . args)
+  (lambda x (apply proc (append args x))))
 
 ;;! Uncurrying
 ;; (uncurry (lambda (a) (lambda (b) (lambda (c) (+ a b c)))) 5 2 1)
@@ -98,33 +99,26 @@
 ;;!! Memoization
 
 ;;! Function computation memoization specifying a key generation procedure
+;; This procedure will be applied to the parameters to construct the key
 (define (memoize/key-gen key-gen f)
-  (let ((memos '()))                    ; OPTIMIZE: hash table!
+  (let ((cache (make-table)))
     (lambda args
       (let ((key (apply key-gen args)))
         (apply
          values
-         (cond
-          ((assoc key memos)
-           => cdr)
-          (else
-           (call-with-values
-               (lambda ()
-                 (apply f args))
-             (lambda results
-               (set! memos              ; Put the new result in memos
-                     (cons (cons key results)
-                           memos))
-               results)))))))))
+         (let ((v (table-ref cache key #f)))
+           (or v
+               (call-with-values (lambda () (apply f args))
+                 (lambda results
+                   (table-set! cache key results)
+                   results)))))))))
 
 ;;! Function computation memoization with default key generation
 (define (memoize f)
-  (let ((cache (make-table))
-	(not-found (gensym)))
+  (let ((cache (make-table)))
     (lambda k
-      (let ((v (table-ref cache k not-found)))
-	(if (eq? v not-found)
-	    (let ((res (apply f k)))
+      (let ((v (table-ref cache k #f)))
+	(or v
+            (let ((res (apply f k)))
 	      (table-set! cache k res)
-	      res)
-	    v)))))
+	      res))))))
