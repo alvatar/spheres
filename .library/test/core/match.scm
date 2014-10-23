@@ -1,1 +1,1 @@
-(%library-load '(spheres/core match))
+(%load-library '(spheres/core match))
