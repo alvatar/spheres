@@ -72,7 +72,7 @@
                                (string-append option-system ".sld")
                                (string-append option-system ".scm"))))
         (let find ((l try-options))
-          (cond ((null? l) (error "Library not found"))
+          (cond ((null? l) (error "Library not found -" lib))
                 ((file-exists? (car l)) (car l))
                 (else (find (cdr l)))))))))
 
@@ -127,7 +127,7 @@
         (or lib-decl
             (let* ((filesexps (with-input-from-file (%find-library lib) read-all))
                    (full-definition (assq 'define-library filesexps)))
-              (if (not full-definition) (error "Library declaration not found"))
+              (if (not full-definition) (error "Library declaration not found -" lib))
               (let ((declaration (cons
                                   (cadr full-definition) ;; add the library name
                                   (filter
