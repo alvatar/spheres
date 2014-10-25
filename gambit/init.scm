@@ -251,15 +251,19 @@
     (for-each eval syntax-defines)))
 
 ;;! Include and load all library files and dependencies
-(define^ (%load-library lib)
-  (let recur ((lib lib))
-    (for-each recur (%library-imports lib))
-    (let ((sld-file (%find-library-sld lib))
-          (procedures-file (or (%find-library-object lib)
-                               (%find-library-scm lib))))
-      (if sld-file
-          (begin (println "including: " sld-file)
-                 (expander:include-library-definition sld-file)))
-      (if procedures-file
-          (begin (println "loading: " procedures-file)
-                 (load procedures-file))))))
+(define^ %load-library
+  (let ((loaded-libs '()))
+    (lambda (lib)
+      (let recur ((lib lib))
+        (for-each recur (%library-imports lib))
+        (if (not (member lib loaded-libs))
+            (let ((sld-file (%find-library-sld lib))
+                  (procedures-file (or (%find-library-object lib)
+                                       (%find-library-scm lib))))
+              (set! loaded-libs (cons lib loaded-libs))
+              (if sld-file
+                  (begin (println "including: " sld-file)
+                         (expander:include-library-definition sld-file)))
+              (if procedures-file
+                  (begin (println "loading: " procedures-file)
+                         (load procedures-file)))))))))
