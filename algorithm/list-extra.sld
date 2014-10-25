@@ -1,7 +1,7 @@
 ;;!!! Additional list procedures
 ;; Alvaro Castro-Castilla, 2012-2014, All rights reserved.
 
-(define-library
+(define-library (spheres/algorithm list-extra)
   (export atom?
           xor
           snoc
@@ -70,6 +70,8 @@
           n-groups
           group
           ticker!)
+  (import (spheres/core base)
+          (spheres/algorithm list))
   
   ;;! Map applying the function only to the elements satisfying predicate
   (define-syntax map-if
@@ -113,7 +115,7 @@
 
       ;; Explicit
       ((_ (?vars ...) ((?p ?f ...) ...) ?l ...) ; entry for explicit vars case
-       (map-cond "expl-init" (?vars ...) ((?p ?f ...) ...) ?l ... ))
+       (map-cond "expl-init" (?vars ...) ((?p ?f ...) ...) ?l ...))
 
       ((_ "expl-init" (?vars ...) ((else ?f ...) . ?ct) ?l ...) ; error: else is first
        (error "Syntax error: else clause can't be first"))

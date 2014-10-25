@@ -101,5 +101,6 @@
           lset-xor!
           lset-diff+intersection
           lset-diff+intersection!)
+  (import (spheres/core base))
   
   (include "list.scm"))
