@@ -140,6 +140,53 @@
                             declaration)
                 declaration)))))))
 
+;;! Expand a form, processing its cond-expand-features
+(define^ (%expand-cond-features form)
+  (define expand-clauses
+    (lambda clauses
+      (define (feature-present? id)
+        (memq id (##cond-expand-features)))
+      (define (eval-feature-req? feature-req)
+        (define (eval-and-clause? req-list)
+          (or (null? req-list)
+              (and (eval-feature-req? (car req-list))
+                   (eval-and-clause? (cdr req-list)))))
+        (define (eval-or-clause? req-list)
+          (and (not (null? req-list))
+               (or (eval-feature-req? (car req-list))
+                   (eval-or-clause? (cdr req-list)))))
+        (define (eval-not-clause? req)
+          (not (eval-feature-req? req)))
+        (cond
+         ((not (pair? feature-req))
+          (feature-present? feature-req))
+         ((eq? 'and (car feature-req))
+          (eval-and-clause? (cdr feature-req)))
+         ((eq? 'or (car feature-req))
+          (eval-or-clause? (cdr feature-req)))
+         ((eq? 'not (car feature-req))
+          (apply eval-not-clause? (cdr feature-req)))
+         (else (error "Invalid <feature requirement>"))))
+      (define (do-cond-expand clauses)
+        (cond
+         ((null? clauses)  (error "Unfulfilled cond-expand"))
+         ((not (pair? (car clauses)))
+          (error "Invalid <cond-expand clause>"))
+         ((eq? 'else (caar clauses))
+          (or (null? (cdr clauses))
+              (error "else clause is not the final one"))
+          (cons '##begin (cdar clauses)))
+         ((eval-feature-req? (caar clauses))
+          (cons '##begin (cdar clauses)))
+         (else (do-cond-expand (cdr clauses)))))
+      (do-cond-expand clauses)))
+  (let recur ((form form))
+    (cond ((null? form) '())
+          ((and (pair? form) (eq? 'cond-expand (car form)))
+           (apply expand-clauses (cdr form)))
+          ((not (pair? form)) form)
+          (else (cons (recur (car form)) (recur (cdr form)))))))
+
 ;;! Get imports of the library
 (define^ (%library-imports lib)
   (define (flatten-tag tag lst)
@@ -151,60 +198,13 @@
        ((pair? (car lst))
         (cons (recur (car lst)) (recur (cdr lst))))
        (else (cons (car lst) (recur (cdr lst)))))))
-  (let ((expand-cond-features
-         (lambda (form)
-           (define expand-clauses
-             (lambda clauses
-               (define (feature-present? id)
-                 (memq id (##cond-expand-features)))
-               (define (eval-feature-req? feature-req)
-                 (define (eval-and-clause? req-list)
-                   (or (null? req-list)
-                       (and (eval-feature-req? (car req-list))
-                            (eval-and-clause? (cdr req-list)))))
-                 (define (eval-or-clause? req-list)
-                   (and (not (null? req-list))
-                        (or (eval-feature-req? (car req-list))
-                            (eval-or-clause? (cdr req-list)))))
-                 (define (eval-not-clause? req)
-                   (not (eval-feature-req? req)))
-                 (cond
-                  ((not (pair? feature-req))
-                   (feature-present? feature-req))
-                  ((eq? 'and (car feature-req))
-                   (eval-and-clause? (cdr feature-req)))
-                  ((eq? 'or (car feature-req))
-                   (eval-or-clause? (cdr feature-req)))
-                  ((eq? 'not (car feature-req))
-                   (apply eval-not-clause? (cdr feature-req)))
-                  (else (error "Invalid <feature requirement>"))))
-               (define (do-cond-expand clauses)
-                 (cond
-                  ((null? clauses)  (error "Unfulfilled cond-expand"))
-                  ((not (pair? (car clauses)))
-                   (error "Invalid <cond-expand clause>"))
-                  ((eq? 'else (caar clauses))
-                   (or (null? (cdr clauses))
-                       (error "else clause is not the final one"))
-                   (cons '##begin (cdar clauses)))
-                  ((eval-feature-req? (caar clauses))
-                   (cons '##begin (cdar clauses)))
-                  (else (do-cond-expand (cdr clauses)))))
-               (do-cond-expand clauses)))
-           (let recur ((form form))
-             (cond ((null? form) '())
-                   ((and (pair? form) (eq? 'cond-expand (car form)))
-                    (apply expand-clauses (cdr form)))
-                   ((not (pair? form)) form)
-                   (else (cons (recur (car form)) (recur (cdr form))))))))
-        (expand-wildcards
+  (let ((expand-wildcards
          (lambda (deps)
            (define map*
              (lambda (f l)
                (cond ((null? l) '())
                      ((not (pair? l)) (f l))
                      (else (cons (map* f (car l)) (map* f (cdr l)))))))
-
            (map* (lambda (e)
                    (if (eq? e '=)
                        (string->keyword (symbol->string sphere))
@@ -223,7 +223,7 @@
           (remove-gambit-library
            (expand-wildcards
             (flatten-tag '##begin
-                         (expand-cond-features (cdr deps-pair)))))
+                         (%expand-cond-features (cdr deps-pair)))))
           '()))))
 
 (define^ %library-imports-all
@@ -237,6 +237,7 @@
 (define^ (expander:include file)
   (for-each eval (with-input-from-file file read-all)))
 
+;; Expand cond-expand-features and eval syntax definitions
 (define^ (expander:include-library-definition file)
   (define (filter f l)
     (let recur ((l l))
@@ -246,9 +247,24 @@
                 (filter f (cdr l)))))))
   (let* ((file-sexps (with-input-from-file file read))
          (define-library-args (cdr file-sexps))
-         (syntax-defines (filter (lambda (sexp) (eq? (car sexp) 'define-syntax))
-                                 define-library-args)))
-    (for-each eval syntax-defines)))
+         (syntax-defines (filter (lambda (sexp) (let ((head-sexp (car sexp)))
+                                             (or (eq? head-sexp 'define-syntax)
+                                                 (eq? head-sexp '##begin)
+                                                 (eq? head-sexp 'begin))))
+                                 (%expand-cond-features define-library-args))))
+    (let recur ((sexps (%expand-cond-features define-library-args)))
+      (or (null? sexps)
+          (let ((head (car sexps)))
+            (if (and (pair? head) (not (null? head)))
+                (case (car head)
+                  ((define-syntax)
+                   (eval head)
+                   (recur (cdr sexps)))
+                  ((begin ##begin)
+                   (recur (cdr head))
+                   (recur (cdr sexps)))
+                  (else
+                   (recur (cdr sexps))))))))))
 
 ;;! Include and load all library files and dependencies
 (define^ %load-library
