@@ -669,7 +669,11 @@
   ;;   (let lp ((val val))
   ;;     (if (pred val) val (lp (error "Bad argument" val pred caller)))))
   (cond-expand
-   (debug
+   (optimize
+    (define-syntax check-arg
+      (syntax-rules ()
+        ((_ ?pred ?val ?caller) (void)))))
+   (else
     (define-syntax check-arg
       (syntax-rules ()
         ((_ ?pred ?val ?caller)
@@ -681,11 +685,7 @@
                 (error (string-append (object->string '?pred) " check failed with value "
                                       (object->string ?val)
                                       " in: "
-                                      (object->string '?caller))))))))))
-   (else
-    (define-syntax check-arg
-      (syntax-rules ()
-        ((_ ?pred ?val ?caller) (void))))))
+                                      (object->string '?caller)))))))))))
 
 
   ;;------------------------------------------------------------------------------
