@@ -1,4 +1,5 @@
 ;;!! Streams derived
+;; .author Philip L. Bewig
 
 (define-library (spheres/streams derived)
   (export define-stream

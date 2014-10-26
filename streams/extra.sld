@@ -1,3 +1,6 @@
+;;!! Streams extra procedures
+;; .author Philip L. Bewig
+
 (define-library (spheres/streams extra)
   (export stream-intersperse
           stream-permutations
