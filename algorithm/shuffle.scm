@@ -1,5 +1,5 @@
-;;; Copyright (c) Taylor Cambpell. Public domain.
-;;; Shuffle
+;;!!! Shuffle algorithms
+;; .author Taylor Campbell
 
 (cond-expand
  (optimize

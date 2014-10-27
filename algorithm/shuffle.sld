@@ -1,5 +1,5 @@
 ;;!!! Shuffle algorithms
-;; .author Taylor Cambpell. Public domain.
+;; .author Taylor Cambpell
 
 (define-library (spheres/algorithm shuffle)
   (export flip-coin
