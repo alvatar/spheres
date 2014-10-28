@@ -89,7 +89,7 @@
               (symbol? (car lib))
               (or (= len 1) (symbol? (cadr lib)))))))
 
-(define^ (%find-library-object lib)
+(define^ (%find-library-default-object lib)
   (let find-with-suffix ((found #f)
                          (i 1))
     (let ((f (string-append (path-strip-extension (%find-library lib))
@@ -98,7 +98,10 @@
           (find-with-suffix f (+ 1 i))
           found))))
 
-(define^ (%find-library-scm lib)
+(define^ (%find-library-path lib)
+  (path-directory (%find-library lib)))
+
+(define^ (%find-library-default-scm lib)
   (let ((f (string-append (path-strip-extension (%find-library lib)) ".scm")))
     (and (file-exists? f) f)))
 
@@ -238,7 +241,7 @@
   (for-each eval (with-input-from-file file read-all)))
 
 ;; Expand cond-expand-features and eval syntax definitions
-(define^ (expander:include-library-definition file)
+(define^ (%library-eval-syntax&find-includes file)
   (define (filter f l)
     (let recur ((l l))
       (if (null? l) '()
@@ -251,7 +254,8 @@
                                              (or (eq? head-sexp 'define-syntax)
                                                  (eq? head-sexp '##begin)
                                                  (eq? head-sexp 'begin))))
-                                 (%expand-cond-features define-library-args))))
+                                 (%expand-cond-features define-library-args)))
+         (found-includes '()))
     (let recur ((sexps (%expand-cond-features define-library-args)))
       (or (null? sexps)
           (let ((head (car sexps)))
@@ -260,11 +264,15 @@
                   ((define-syntax)
                    (eval head)
                    (recur (cdr sexps)))
+                  ((include)
+                   (set! found-includes (cons head found-includes))
+                   (recur (cdr sexps)))
                   ((begin ##begin)
                    (recur (cdr head))
                    (recur (cdr sexps)))
                   (else
-                   (recur (cdr sexps))))))))))
+                   (recur (cdr sexps))))))))
+    (reverse found-includes)))
 
 ;;! Include and load all library files and dependencies
 (define^ %load-library
@@ -274,12 +282,17 @@
         (for-each recur (%library-imports lib))
         (if (not (member lib loaded-libs))
             (let ((sld-file (%find-library-sld lib))
-                  (procedures-file (or (%find-library-object lib)
-                                       (%find-library-scm lib))))
+                  (lib-path (%find-library-path lib))
+                  (procedures-file (or (%find-library-default-object lib)
+                                       (%find-library-default-scm lib))))
               (set! loaded-libs (cons lib loaded-libs))
               (if sld-file
                   (begin (println "including: " sld-file)
-                         (expander:include-library-definition sld-file)))
-              (if procedures-file
-                  (begin (println "loading: " procedures-file)
-                         (load procedures-file)))))))))
+                         (for-each (lambda (f) (let ((file-path (string-append lib-path (cadr f))))
+                                            (println (string-append "loading: " file-path))
+                                            (load file-path)))
+                                   (%library-eval-syntax&find-includes sld-file)))
+                  ;; Default procedure file is only loaded if there is no *.sld
+                  (if procedures-file
+                      (begin (println "loading: " procedures-file)
+                             (load procedures-file))))))))))
