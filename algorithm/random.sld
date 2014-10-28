@@ -14,4 +14,8 @@
           (spheres/streams primitive)
           (spheres/streams derived))
   
-  (include "random.scm"))
+  (include "random/pick.scm")
+  (include "random/pick-unique.scm")
+  (include "random/extract.scm")
+  (include "random/sample.scm")
+  (include "random/sample-ordered.scm"))
