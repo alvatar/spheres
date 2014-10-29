@@ -1,13 +1,6 @@
 ;;!!! Base extensions for Scheme Spheres
 ;; .author Alvaro Castro-Castilla, 2012-2104. All rights reserved.
 
-(cond-expand
- (optimize
-  (declare (standard-bindings) (extended-bindings) (not safe) (block)))
- (debug
-  (declare (safe) (debug) (debug-location) (debug-source) (debug-environments)))
- (else (void)))
-
 ;;!! Return the type of the parameter
 ;; .parameter Any Scheme object
 (define (type object)

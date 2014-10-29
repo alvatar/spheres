@@ -49,13 +49,6 @@
 ;   ls   - loop step
 ;   etc  - more arguments of mixed type
 
-(cond-expand
- (optimize
-  (declare (standard-bindings) (extended-bindings) (not safe) (block)))
- (debug
-  (declare (safe) (debug) (debug-location) (debug-source) (debug-environments)))
- (else (void)))
-
 
 (define (dispatch-union d1 d2)
   (lambda (args)

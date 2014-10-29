@@ -84,14 +84,6 @@
 
 (cond-expand
  (optimize
-  (declare (standard-bindings) (extended-bindings) (not safe) (block)))
- (debug
-  (declare (safe) (debug) (debug-location) (debug-source) (debug-environments)))
- (else (void)))
-
-
-(cond-expand
- (optimize
   (define-syntax compare:checked
     (syntax-rules ()
       ((_ ?result ?compare . ?args) ?result))))

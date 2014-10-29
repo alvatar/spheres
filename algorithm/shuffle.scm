@@ -1,14 +1,6 @@
 ;;!!! Shuffle algorithms
 ;; .author Taylor Campbell
 
-(cond-expand
- (optimize
-  (declare (standard-bindings) (extended-bindings) (not safe) (block)))
- (debug
-  (declare (safe) (debug) (debug-location) (debug-source) (debug-environments)))
- (else (void)))
-
-
 (define (flip-coin)
   (zero? (random-integer 2)))
 

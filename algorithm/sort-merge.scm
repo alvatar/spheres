@@ -1,13 +1,6 @@
 ;; SRFI-95, Richard A. O'Keefe (based on Prolog code by D.H.D.Warren) (2006)
 ;; "sort.scm" Defines: sorted?, merge, merge!, sort, sort!
 
-(cond-expand
- (optimize
-  (declare (standard-bindings) (extended-bindings) (not safe) (block)))
- (debug
-  (declare (safe) (debug) (debug-location) (debug-source) (debug-environments)))
- (else (void)))
-
 
 (define (sorted? seq less? . opt-key)
   (define key (if (null? opt-key) (lambda (x) x) (car opt-key)))

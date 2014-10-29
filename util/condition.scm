@@ -1,12 +1,6 @@
 ;;!! SRFI-35 Conditions
 ;; Copyright (C) Richard Kelsey, Michael Sperber (2002). All Rights Reserved.
 
-(cond-expand
- (optimize
-  (declare (standard-bindings) (extended-bindings) (not safe) (block)))
- (debug
-  (declare (safe) (debug) (debug-location) (debug-source) (debug-environments)))
- (else (void)))
 
 (define-record-type :condition-type
   (really-make-condition-type name supertype fields all-fields)

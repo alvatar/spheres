@@ -222,3 +222,23 @@
         `(define ,(car pattern)
            (lambda* ,(cdr pattern) ,@body))
         `(define ,pattern ,@body))))
+
+
+
+;;-------------------------------------------------------------------------------
+;; Declarations
+
+(cond-expand
+ (optimize
+  (declare (standard-bindings)
+           (extended-bindings)
+           (not safe)
+           (block)))
+ (debug
+  (declare (safe)
+           (debug)
+           (debug-location)
+           (debug-source)
+           (debug-environments)))
+ (else
+  #!void))

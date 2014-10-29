@@ -2,13 +2,6 @@
 ;;; Copyright (c) 2012-2014, Alvaro Castro-Castilla. All rights reserved.
 ;;; Extra algorithms on streams, adds functionality to SRFI-41
 
-(cond-expand
- (optimize
-  (declare (standard-bindings) (extended-bindings) (not safe) (block)))
- (debug
-  (declare (safe) (debug) (debug-location) (debug-source) (debug-environments)))
- (else (void)))
-
 (define-stream (stream-intersperse yy x)
   (stream-match yy
                 (()

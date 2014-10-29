@@ -6,15 +6,6 @@
 
 
 (cond-expand
- (optimize
-  (declare (standard-bindings) (extended-bindings) (not safe) (block)))
- (debug
-  (declare (safe) (debug) (debug-location) (debug-source) (debug-environments)))
- (else (void)))
-
-;;!! Streams primitives
-
-(cond-expand
  (gambit
   (define-type stream-type
     constructor: make-stream

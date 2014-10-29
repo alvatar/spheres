@@ -1,17 +1,9 @@
 ;;; Copyright (c) 2012-2014, Alvaro Castro-Castilla. All rights reserved.
 ;;; Non-standard list procedures
 
-(cond-expand
- (optimize
-  (declare (standard-bindings) (extended-bindings) (not safe) (block)))
- (debug
-  (declare (safe) (debug) (debug-location) (debug-source) (debug-environments)))
- (else (void)))
 
-
-;-------------------------------------------------------------------------------
-; Basic
-;-------------------------------------------------------------------------------
+;;-------------------------------------------------------------------------------
+;;!! Basic
 
 ;;! atom?
 (define atom?
@@ -102,9 +94,9 @@
     (set-car! x b)
     (set-car! y a)))
 
-;-------------------------------------------------------------------------------
-; Map/fold variants
-;-------------------------------------------------------------------------------
+
+;;-------------------------------------------------------------------------------
+;;!! Map/fold variants
 
 ;;! Recursive map that applies function to leafs
 (define (map* f l)
@@ -304,9 +296,9 @@
 ;;! pair-fold-x specialization for x=2
 (define pair-fold-2 (lambda (kons knil lists) (pair-fold-x 2 kons knil lists)))
 
-;-------------------------------------------------------------------------------
-; Find, remove, substitute, insert
-;-------------------------------------------------------------------------------
+
+;;-------------------------------------------------------------------------------
+;;!! Find, remove, substitute, insert
 
 ;;! Insert given an index
 (define (insert-at new k lis)
@@ -496,9 +488,9 @@
 ;;! Recursive substitution with multiple insertion, down to atom-level
 (define substitute* (lambda (old new l) (x-subst* append old new l)))
 
-;-------------------------------------------------------------------------------
-; Skeleton/shape
-;-------------------------------------------------------------------------------
+
+;;-------------------------------------------------------------------------------
+;;!! Skeleton/shape
 
 ;;! Flatten a list (optimized)
 ;; http://schemecookbook.org/Cookbook/ListFlatten
@@ -605,9 +597,9 @@
                        (cons (next) (E (cdr s)))
                        (cons (next) (E (cons (- (car s) 1) (cdr s)))))))))) E) s))
 
-;-------------------------------------------------------------------------------
-; Sublist operations
-;-------------------------------------------------------------------------------
+
+;;-------------------------------------------------------------------------------
+;;!! Sublist operations
 
 ;;! Return a sublist from a start to an end positions
 (define (slice l start end)
@@ -674,9 +666,9 @@
 (define (case-classify key-generator)
   (error "Not implemented"))
 
-;-------------------------------------------------------------------------------
-; Grouping/ungrouping
-;-------------------------------------------------------------------------------
+
+;;-------------------------------------------------------------------------------
+;;!! Grouping/ungrouping
 
 ;;! Construct a new list containing each element repeated a number of times
 ;; '(a b c) 2 -> '(a a a b b b c c c)
@@ -699,9 +691,9 @@
 (define (group n/s l)
   (error "Not implemented"))
 
-;-------------------------------------------------------------------------------
-; Miscellaneous
-;-------------------------------------------------------------------------------
+
+;;-------------------------------------------------------------------------------
+;;!! Miscellaneous
 
 ;;! Creates a destructive function to read a list sequantially after each call
 (define (ticker! l)

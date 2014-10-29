@@ -1,13 +1,6 @@
 ;;!!! Reservoir sampling, random selection
 ;; .author Alvaro Castro-Castilla, 2012-2014
 
-(cond-expand
- (optimize
-  (declare (standard-bindings) (extended-bindings) (not safe) (block)))
- (debug
-  (declare (safe) (debug) (debug-location) (debug-source) (debug-environments)))
- (else (void)))
-
 ;;! Ordered Reservoir Sampling. Get the results in the original order
 (define random-sample-ordered
   (match-lambda*

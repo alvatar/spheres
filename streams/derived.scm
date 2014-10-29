@@ -1,14 +1,6 @@
 ;;;!!! SRFI-41 Streams (derived)
 ;;; 2008, Philip L. Bewig
 
-(cond-expand
- (optimize
-  (declare (standard-bindings) (extended-bindings) (not safe) (block)))
- (debug
-  (declare (safe) (debug) (debug-location) (debug-source) (debug-environments)))
- (else (void)))
-
-
 (define (list->stream objs)
   (define list->stream
     (stream-lambda (objs)
