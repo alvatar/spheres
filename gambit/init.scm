@@ -2,7 +2,7 @@
 ;; .author Álvaro Castro-Castilla, Copyright (c) 2012-2014 All rights reserved.
 
 
-(load ##syntax-case-file)
+(load %%syntax-case-file)
 
 ;;------------------------------------------------------------------------------
 ;;!! Macro utils
@@ -57,20 +57,35 @@
 ;;------------------------------------------------------------------------------
 ;;!! R7RS libraries
 
+(define^ %library-paths '())
+
+(define^ (%add-library-path! path)
+  (set! %library-paths
+        (append %library-paths
+                (list (string-append
+                       (path-strip-trailing-directory-separator path)
+                       "/")))))
+
 (define^ (%find-library lib)
   (if (not (%library? lib)) (%library-error lib))
   (let ((package (symbol->string (car lib)))
         (module (and (= (length lib) 2) (cadr lib))))
-    (let* ((option-here (string-append
-                         "../" package "/"
-                         (symbol->string module)))
+    (let* ((lib-relative (string-append package "/" (symbol->string module)))
+           (option-here (string-append "../" lib-relative))
            (option-system (string-append
                            (path-expand "~~lib/")
                            option-here)))
-      (let ((try-options (list (string-append option-here ".sld")
-                               (string-append option-here ".scm")
-                               (string-append option-system ".sld")
-                               (string-append option-system ".scm"))))
+      (let ((try-options `(,(string-append option-here ".sld")
+                           ,(string-append option-here ".scm")
+                           ,@(let recur ((paths %library-paths))
+                               (if (null? paths)
+                                   paths
+                                   (let ((lib-path (car paths)))
+                                     (cons (string-append lib-path lib-relative ".sld")
+                                           (cons (string-append lib-path lib-relative ".scm")
+                                                 (recur (cdr paths)))))))
+                           ,(string-append option-system ".sld")
+                           ,(string-append option-system ".scm"))))
         (let find ((l try-options))
           (cond ((null? l) (error "Library not found -" lib))
                 ((file-exists? (car l)) (car l))
@@ -287,9 +302,9 @@
                                        (%find-library-default-scm lib))))
               (set! loaded-libs (cons lib loaded-libs))
               (if sld-file
-                  (begin (println "including: " sld-file)
+                  (begin (println "including: " (path-expand sld-file))
                          (for-each (lambda (f) (let ((file-path (string-append lib-path (cadr f))))
-                                            (println (string-append "loading: " file-path))
+                                            (println (string-append "loading: " (path-expand file-path)))
                                             (load file-path)))
                                    (%library-eval-syntax&find-includes sld-file)))
                   ;; Default procedure file is only loaded if there is no *.sld
