@@ -114,6 +114,7 @@
           (loop (+ src-idx 1) (- target-idx 1))))
     r))
 
+;;! u8vector-invert!
 (define (u8vector-invert! v)
   (let loop ((i (u8vector-length v)))
       (if (not (zero? i))
@@ -156,3 +157,22 @@
             (loop (##fx+ at 1)))))
     new-u8v))
 
+;; TODO: Review
+;;; dump-u8vector-port-to-other-u8vector-port 
+;; (define (dump-u8vector-port-to-other-u8vector-port content-in
+;;                                                    #!optional
+;;                                                    (content-out '()))
+;;   (if (null? content-out)
+;;       (call-with-output-u8vector
+;;        '()
+;;        (lambda (port)
+;;          (dump-u8vector-port-to-other-u8vector-port content-in port)))
+
+;;       (let* ((tmp-bufsize (* 50 1024))
+;;              (tmp-buffer (make-u8vector tmp-bufsize)))
+;;         (let loop ()
+;;           (let ((n (read-subu8vector tmp-buffer 0 tmp-bufsize content-in)))
+;;             (if (> n 0)
+;;                 (begin
+;;                   (write-subu8vector tmp-buffer 0 n content-out)
+;;                   (loop))))))))
