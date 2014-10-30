@@ -17,4 +17,8 @@
           shuffle-string!)
   (import (spheres/algorithm list))
 
-  (include "shuffle.scm"))
+  (include "shuffle/binary.scm")
+  (include "shuffle/fisher-yates.scm")
+  (include "shuffle/insertion.scm")
+  (include "shuffle/merge.scm")
+  (include "shuffle/selection.scm"))
