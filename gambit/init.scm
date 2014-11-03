@@ -294,7 +294,7 @@
   (let ((loaded-libs '())
         (call-compilation-task
          (lambda (lib)
-           (error "library compilation not implemented") lib)))
+           (println "*** library compilation not implemented ***") lib)))
     (lambda (lib #!key (compile #f))
       (for-each %load-library (%library-imports lib))
       (if (not (member lib loaded-libs))
@@ -307,9 +307,10 @@
               (set! loaded-libs (cons lib loaded-libs))
               (if sld-file
                   (begin (println "including: " (path-expand sld-file))
-                         (for-each (lambda (f) (let ((file-path (string-append lib-path (cadr f))))
-                                            (println (string-append "loading: " (path-expand file-path)))
-                                            (load file-path)))
+                         (for-each (lambda (f)
+                                     (let ((file-path (path-strip-extension
+                                                       (string-append lib-path (cadr f)))))
+                                       (println (string-append "loading: " (load file-path)))))
                                    (%library-eval-syntax&find-includes sld-file)))
                   ;; Default procedure file is only loaded if there is no *.sld
                   (if procedures-file
