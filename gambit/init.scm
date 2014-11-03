@@ -289,18 +289,22 @@
                    (recur (cdr sexps))))))))
     (reverse found-includes)))
 
+;;! Call 
+(define^ %call-task
+  (lambda (task . arguments)
+    (println "Call task: " task)
+    (println "Arguments: " (object->string arguments))
+    (error "not implemented")))
+
 ;;! Include and load all library files and dependencies
 (define^ %load-library
-  (let ((loaded-libs '())
-        (call-compilation-task
-         (lambda (lib)
-           (println "*** library compilation not implemented ***") lib)))
+  (let ((loaded-libs '()))
     (lambda (lib #!key (compile #f))
       (let recur ((lib lib))
         (for-each recur (%library-imports lib))
         (if (not (member lib loaded-libs))
             (begin
-              (if compile (call-compilation-task lib))
+              (if compile (apply %call-task 'compile lib))
               (let ((sld-file (%find-library-sld lib))
                     (lib-path (%find-library-path lib))
                     (procedures-file (or (%find-library-default-object lib)
