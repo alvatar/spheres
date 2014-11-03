@@ -296,23 +296,24 @@
          (lambda (lib)
            (println "*** library compilation not implemented ***") lib)))
     (lambda (lib #!key (compile #f))
-      (for-each %load-library (%library-imports lib))
-      (if (not (member lib loaded-libs))
-          (begin
-            (if compile (call-compilation-task lib))
-            (let ((sld-file (%find-library-sld lib))
-                  (lib-path (%find-library-path lib))
-                  (procedures-file (or (%find-library-default-object lib)
-                                       (%find-library-default-scm lib))))
-              (set! loaded-libs (cons lib loaded-libs))
-              (if sld-file
-                  (begin (println "including: " (path-expand sld-file))
-                         (for-each (lambda (f)
-                                     (let ((file-path (path-strip-extension
-                                                       (string-append lib-path (cadr f)))))
-                                       (println (string-append "loading: " (load file-path)))))
-                                   (%library-eval-syntax&find-includes sld-file)))
-                  ;; Default procedure file is only loaded if there is no *.sld
-                  (if procedures-file
-                      (begin (println "loading: " procedures-file)
-                             (load procedures-file))))))))))
+      (let recur ((lib lib))
+        (for-each recur (%library-imports lib))
+        (if (not (member lib loaded-libs))
+            (begin
+              (if compile (call-compilation-task lib))
+              (let ((sld-file (%find-library-sld lib))
+                    (lib-path (%find-library-path lib))
+                    (procedures-file (or (%find-library-default-object lib)
+                                         (%find-library-default-scm lib))))
+                (set! loaded-libs (cons lib loaded-libs))
+                (if sld-file
+                    (begin (println "including: " (path-expand sld-file))
+                           (for-each (lambda (f)
+                                       (let ((file-path (path-strip-extension
+                                                         (string-append lib-path (cadr f)))))
+                                         (println (string-append "loading: " (load file-path)))))
+                                     (%library-eval-syntax&find-includes sld-file)))
+                    ;; Default procedure file is only loaded if there is no *.sld
+                    (if procedures-file
+                        (begin (println "loading: " procedures-file)
+                               (load procedures-file)))))))))))
