@@ -291,11 +291,15 @@
 
 ;;! Include and load all library files and dependencies
 (define^ %load-library
-  (let ((loaded-libs '()))
-    (lambda (lib)
-      (let recur ((lib lib))
-        (for-each recur (%library-imports lib))
-        (if (not (member lib loaded-libs))
+  (let ((loaded-libs '())
+        (call-compilation-task
+         (lambda (lib)
+           (error "library compilation not implemented") lib)))
+    (lambda (lib #!key (compile #f))
+      (for-each %load-library (%library-imports lib))
+      (if (not (member lib loaded-libs))
+          (begin
+            (if compile (call-compilation-task lib))
             (let ((sld-file (%find-library-sld lib))
                   (lib-path (%find-library-path lib))
                   (procedures-file (or (%find-library-default-object lib)
