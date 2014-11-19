@@ -1,0 +1,10 @@
+;; SchemeSpheres configuration file for Gambit
+
+;; Define syntax-case expander
+(define %%syntax-case-file "~/Dropbox/projects/spheres/spheres/gambit/syntax-case.o1")
+;; Include Gambit bootstrapping definitions
+(include "~/Dropbox/projects/spheres/spheres/gambit/init.scm")
+;; Add custom directory for library paths
+(%add-library-path! "/Users/Alvaro/Dropbox/projects/spheres/")
+;; Include Gambit prelude for SchemeSpheres
+(expander:include "~/Dropbox/projects/spheres/spheres/gambit/prelude.scm")
