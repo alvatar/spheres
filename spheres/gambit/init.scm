@@ -116,6 +116,22 @@
 (define^ (%find-library-path lib)
   (path-directory (%find-library lib)))
 
+(define^ (%find-library-path-root lib)
+  (let* ((path (%find-library-path lib))
+         (path-length (string-length path))
+         (rel-path (symbol->string (car lib)))
+         (rel-path-length (string-length rel-path)))
+    (string-shrink!
+     path
+     (let recur ((i 1))
+       (if (and (< i path-length)
+                (< i rel-path-length)
+                (char=? (string-ref path (- path-length i 1))
+                        (string-ref rel-path (- rel-path-length i))))
+           (recur (+ i 1))
+           (- path-length i 1))))
+    path))
+
 (define^ (%find-library-default-scm lib)
   (let ((f (string-append (path-strip-extension (%find-library lib)) ".scm")))
     (and (file-exists? f) f)))
@@ -291,10 +307,38 @@
 
 ;;! Call 
 (define^ %call-task
-  (lambda (task . arguments)
-    (println "Call task: " task)
-    (println "Arguments: " (object->string arguments))
-    (error "not implemented")))
+  (lambda (where task . arguments)
+    (define (escape str)
+      (list->string
+       (let recur ((lst (string->list str)))
+         (cond ((null? lst) '())
+               ((memv (car lst) '(#\( #\)))
+                (cons #\\
+                      (cons (car lst)
+                            (recur (cdr lst)))))
+               (else (cons (car lst)
+                           (recur (cdr lst))))))))
+    (let* ((inner-args-str
+            (let recur ((rest arguments))
+              (cond ((null? rest) "")
+                    ((null? (cdr rest))
+                     (string-append (object->string (car rest))
+                                    (recur (cdr rest))))
+                    (else
+                     (string-append (object->string (car rest)) ","
+                                    (recur (cdr rest)))))))
+           (args-str
+            (string-append (symbol->string task) "[" inner-args-str "]")))
+      (if #f ;; verbose
+          (begin (println "Call task: " task)
+                 (println "Arguments: " (object->string arguments))
+                 (println "In: " where)
+                 (println "Command line string: ssrun " args-str))
+          (println (string-append "Call task: ssrun " args-str)))
+      (process-status (open-process (list path: "ssrun"
+                                          arguments: (list (escape args-str))
+                                          directory: where
+                                          stdout-redirection: #f))))))
 
 ;;! Include and load all library files and dependencies
 (define^ %load-library
@@ -303,10 +347,10 @@
       (let recur ((lib lib))
         (for-each recur (%library-imports lib))
         (if (not (member lib loaded-libs))
-            (begin
-              (if compile (apply %call-task 'compile lib))
+            (let ((lib-path-root (%find-library-path-root lib))
+                  (lib-path (%find-library-path lib)))
+              (if compile (%call-task lib-path-root 'compile lib))
               (let ((sld-file (%find-library-sld lib))
-                    (lib-path (%find-library-path lib))
                     (procedures-file (or (%find-library-default-object lib)
                                          (%find-library-default-scm lib))))
                 (set! loaded-libs (cons lib loaded-libs))
