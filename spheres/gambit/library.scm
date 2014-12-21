@@ -341,7 +341,7 @@
 ;;! Include and load all library files and dependencies
 (define^ %load-library
   (let ((loaded-libs '()))
-    (lambda (lib #!key (compile #f))
+    (lambda (lib #!key compile only-syntax)
       (let recur ((lib lib))
         (for-each recur (%library-imports lib))
         (if (not (member lib loaded-libs))
@@ -351,14 +351,18 @@
               (let ((sld-file (%find-library-sld lib))
                     (procedures-file (or (%find-library-default-object lib)
                                          (%find-library-default-scm lib))))
-                (set! loaded-libs (cons lib loaded-libs))
+                (or only-syntax
+                    (set! loaded-libs (cons lib loaded-libs)))
                 (if sld-file
-                    (begin (println "including: " (path-expand sld-file))
-                           (for-each (lambda (f)
-                                       (let ((file-path (path-strip-extension
-                                                         (string-append lib-path (cadr f)))))
-                                         (println (string-append "loading: " (load file-path)))))
-                                     (%library-eval-syntax&find-includes sld-file)))
+                    (begin
+                      (println "including: " (path-expand sld-file))
+                      (let ((eval&get-includes (%library-eval-syntax&find-includes sld-file)))
+                        (if (not only-syntax)
+                            (for-each (lambda (f)
+                                        (let ((file-path (path-strip-extension
+                                                          (string-append lib-path (cadr f)))))
+                                          (println (string-append "loading: " (load file-path)))))
+                                      eval&get-includes))))
                     ;; Default procedure file is only loaded if there is no *.sld
                     (if procedures-file
                         (begin (println "loading: " procedures-file)
