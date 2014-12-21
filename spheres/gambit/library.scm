@@ -2,8 +2,6 @@
 ;; .author Álvaro Castro-Castilla, Copyright (c) 2012-2014 All rights reserved.
 
 
-(load %%syntax-case-file)
-
 ;;------------------------------------------------------------------------------
 ;;!! Macro utils
 
@@ -144,7 +142,7 @@
   (string-append (path-strip-extension (%find-library lib)) ".o1"))
 
 (define^ (%library-c-filename lib)
-  (string-append (path-strip-extension (%find-library lib)) ".c"))
+  (string-append (path-strip-extension (%find-library lib)) ".o1.c"))
 
 (define^ %library-declaration
   (let ((library-declarations (make-table)))
@@ -336,7 +334,7 @@
                  (println "Command line string: ssrun " args-str))
           (println (string-append "Call task: ssrun " args-str)))
       (process-status (open-process (list path: "ssrun"
-                                          arguments: (list (escape args-str))
+                                          arguments: (list args-str)
                                           directory: where
                                           stdout-redirection: #f))))))
 
