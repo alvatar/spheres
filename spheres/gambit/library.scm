@@ -159,18 +159,18 @@
         (or lib-decl
             (let* ((filesexps (with-input-from-file (%find-library lib) read-all))
                    (full-definition (assq 'define-library filesexps)))
-              (if (not full-definition) (error "Library declaration not found -" lib))
-              (let ((declaration (cons
-                                  (cadr full-definition) ;; add the library name
-                                  (filter
-                                   (lambda (expr) (or (eq? (car expr) 'import)
-                                                 (eq? (car expr) 'export)
-                                                 (eq? (car expr) 'rename)
-                                                 (eq? (car expr) 'cond-expand)))
-                                   (cdr full-definition)))))
-                (table-set! library-declarations lib
-                            declaration)
-                declaration)))))))
+              (and full-definition
+                   (let ((declaration (cons
+                                       (cadr full-definition) ;; add the library name
+                                       (filter
+                                        (lambda (expr) (or (eq? (car expr) 'import)
+                                                      (eq? (car expr) 'export)
+                                                      (eq? (car expr) 'rename)
+                                                      (eq? (car expr) 'cond-expand)))
+                                        (cdr full-definition)))))
+                     (table-set! library-declarations lib
+                                 declaration)
+                     declaration))))))))
 
 ;;! Expand a form, processing its cond-expand-features
 (define^ (%expand-cond-features form)
@@ -250,7 +250,8 @@
                     (recur (cdr deps)))
                    (else
                     (cons (car deps) (recur (cdr deps)))))))))
-    (let ((deps-pair (assq 'import (%library-declaration lib))))
+    (let* ((decl (%library-declaration lib))
+           (deps-pair (and decl (assq 'import decl))))
       (if deps-pair
           (remove-gambit-library
            (expand-wildcards
@@ -364,6 +365,7 @@
                                           (println (string-append "loading: " (load file-path)))))
                                       eval&get-includes))))
                     ;; Default procedure file is only loaded if there is no *.sld
-                    (if procedures-file
+                    (if (and procedures-file
+                             (not only-syntax))
                         (begin (println "loading: " procedures-file)
                                (load procedures-file)))))))))))
