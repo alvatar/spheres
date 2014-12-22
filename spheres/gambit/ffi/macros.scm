@@ -1,8 +1,8 @@
 ;;!!! FFI generation macros
-;; .author Álvaro Castro Castilla, 2013-2014. All Rights Reserved.
+;; .author Álvaro Castro Castilla, 2013-2015. All Rights Reserved.
 
 ;;------------------------------------------------------------------------------
-;;!! Old stuff to remember
+;;!! Old stuff to keep in mind
 
 ;; This nasty hack substitutes the '() for ()
 ;; It turns out that Gambit uses () for argument lists, which is not an acceptable
@@ -24,10 +24,23 @@
 ;;                                  f))
 ;;                       body)))
 
+
+;;------------------------------------------------------------------------------
+;;!! Prelude
+
+(define-macro (eval-in-macro-environment . exprs)
+  (eval (if (null? (cdr exprs)) (car exprs) (cons 'begin exprs))
+        (interaction-environment)))
+
+(define-macro (define^ . args)
+  `(eval-in-macro-environment
+    (define ,(car args) ,@(cdr args))))
+
+
 ;;------------------------------------------------------------------------------
 ;;!! Macro utils
 
-(define (%%get-key-arg args key default)
+(define^ (%%get-key-arg args key default)
   (if (null? args)
       default
       (let ((found (memq key args)))
@@ -37,7 +50,7 @@
             default))))
 
 ;; Build a string from list of elements (anything)
-(define (%%generic-string-append . ol)
+(define^ (%%generic-string-append . ol)
   (define (->string o)
     (cond ((string? o) o)
           ((symbol? o) (symbol->string o))
@@ -47,11 +60,11 @@
   (apply string-append (map ->string ol)))
 
 ;; Append anything into a symbol
-(define (%%generic-symbol-append . ol)
+(define^ (%%generic-symbol-append . ol)
   (string->symbol (apply %%generic-string-append ol)))
 
 ;; Turn a scheme-name into a c_name, simply changing the - to _
-(define (%%scheme-name->c-name name)
+(define^ (%%scheme-name->c-name name)
   (let* ((name-str (cond ((string? name) name)
                          ((symbol? name) (symbol->string name))
                          (else (object->string name))))
@@ -67,7 +80,7 @@
 
 ;;! Schemify a name: turn-it-into-a-scheme-name
 ;; .author Fred LeMaster
-(define (%%c-name->scheme-name symbol-or-string)
+(define^ (%%c-name->scheme-name symbol-or-string)
   ((lambda (str)
      (letrec
          ((str-length (string-length str))
@@ -105,7 +118,7 @@
          (else (error "%%c-name->scheme-name: expected symbol or string")))))
 
 ;; Generate a list of top-level forms
-(define (%%begin-top-level-forms #!rest define-blocks)
+(define^ (%%begin-top-level-forms #!rest define-blocks)
   (cons 'begin
         (let recur ((ds define-blocks))
           (cond ((null? ds) '())
@@ -287,7 +300,7 @@
       expansion)))
 
 ;; Helper for define-c-struct and define-c-union
-(define (%%c-define-struct-or-union struct-or-union type fields)
+(define^ (%%c-define-struct-or-union struct-or-union type fields)
   (let* ((type-str (symbol->string type))
          (struct-type-str (string-append
                            (case struct-or-union

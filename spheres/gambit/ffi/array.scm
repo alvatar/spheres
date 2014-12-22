@@ -1,5 +1,5 @@
 ;;!!! FFI arrays
-;; .author Álvaro Castro Castilla, 2013-2014. All Rights Reserved.
+;; .author Álvaro Castro Castilla, 2013-2015. All Rights Reserved.
 
 (cond-expand
  (optimize
@@ -10,9 +10,13 @@
 
 ;;------------------------------------------------------------------------------
 
+(include "macros.scm")
+(include "types.scm")
+
 ;;! C arrays
 
 (c-declare "#include <stdint.h>")
+(c-declare "#include <stdlib.h>")
 
 ;;! char
 (c-define-sizeof char)

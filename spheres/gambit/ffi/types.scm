@@ -1,5 +1,5 @@
 ;;!!! FFI Type definitions
-;; .author Alvaro Castro-Castill, 2013-2014. All rights reserved.
+;; .author Alvaro Castro-Castill, 2013-2015. All rights reserved.
 
 ;;! size-t
 (c-define-type size-t unsigned-int) ;; This should be more than enough, keep in mind
