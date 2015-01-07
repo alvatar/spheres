@@ -9,3 +9,6 @@
 (%add-library-path! "/Users/Alvaro/Dropbox/projects/spheres/")
 ;; Include Gambit prelude for SchemeSpheres
 (expander:include "~/Dropbox/projects/spheres/spheres/gambit/prelude.scm")
+;; Set environment
+(eval '(add-cond-expand-feature! debug))
+(expander:include "~/Dropbox/projects/spheres/spheres/gambit/environments.scm")
