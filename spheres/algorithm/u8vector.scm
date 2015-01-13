@@ -117,12 +117,12 @@
 ;;! u8vector-invert!
 (define (u8vector-invert! v)
   (let loop ((i (u8vector-length v)))
-      (if (not (zero? i))
-          (let ((i (- i 1)))
-            (u8vector-set! v i (##fixnum.bitwise-xor
-                                (u8vector-ref v i)
-                                255))
-            (loop i)))))
+    (if (not (zero? i))
+        (let ((i (- i 1)))
+          (u8vector-set! v i (##fixnum.bitwise-xor
+                              (u8vector-ref v i)
+                              255))
+          (loop i)))))
 
 ;; May return the originally passed |u8v| object reference.
 (define* (u8vector-pad-to-length u8v to-length (pad-byte 0))
