@@ -11,5 +11,6 @@
           sha-1
           sha-224
           sha-256)
+  (import (spheres/string u8))
 
   (include "digest.scm"))
