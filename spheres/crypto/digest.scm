@@ -75,23 +75,19 @@
 
 
 (cond-expand
- (optimize
-  (declare (standard-bindings) (extended-bindings)
-           ;; The logics code below is implemented in a way that already is
-           ;; maximally inlined, so no need put load on the compiler to
-           ;; check if it could inline additionally.
-           (not inline)
-           ;; (not safe) - we maintain typechecking on everywhere currently. Below we introduce
-           ;;   a selection of exclusions to this though. These exclusions include
-           ;;   pretty much all the digest computations anyhow, so anything more
-           ;;   than those should be superfluous. The exclusions also makes the module
-           ;;   sensitive to input data.
-           (block)
-           ;; All operations in this module regard fixnums.
-           ;; (This one was introduced by Marc.)
-           (fixnum)))
- (debug
-  (declare (safe) (debug) (debug-location) (debug-source) (debug-environments) (not inline)))
+ ((and gambit optimize)
+  (declare ;; The logics code below is implemented in a way that already is
+   ;; maximally inlined, so no need put load on the compiler to
+   ;; check if it could inline additionally.
+   (not inline)
+   ;; We maintain typechecking on everywhere currently. Below we introduce
+   ;; a selection of exclusions to this though. These exclusions include
+   ;; pretty much all the digest computations anyhow, so anything more
+   ;; than those should be superfluous. The exclusions also makes the module
+   ;; sensitive to input data.
+   (safe)
+   ;; All operations in this module regard fixnums.
+   (fixnum)))
  (else (void)))
 
 
