@@ -5,11 +5,16 @@
     (spheres/core match)
     (spheres/core meta)
     (spheres/core minimal)
+    (spheres/crypto aes)
+    (spheres/crypto digest)
+    (spheres/crypto hmac)
+    (spheres/crypto rsa)
     (spheres/gambit/ffi array)
     (spheres/gambit/ffi macros)
     (spheres/gambit/ffi memory)
     (spheres/gambit/ffi serialization)
-    (spheres/gambit/ffi types)))
+    (spheres/gambit/ffi types)
+    (spheres/math arithmetic)))
 
 (define features
   '(((spheres/core match) only-macros)
