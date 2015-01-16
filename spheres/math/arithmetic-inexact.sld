@@ -1,5 +1,6 @@
 (define-library (spheres/math arithmetic-inexact)
-  (export ~=
+  (export equal-accuracy
+          ~=
           ~zero?
           ~decimal-part
           ~average

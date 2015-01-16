@@ -4,14 +4,8 @@
 (declare (mostly-flonum))
 
 
-;-------------------------------------------------------------------------------
-;;!! Constants
-
+;;! Default accuracy for inexact comparisons
 (define equal-accuracy 0.000001)
-
-
-;-------------------------------------------------------------------------------
-;;!! Basic
 
 ;;! Is equal?
 (define* (~= a b (accuracy: equal-accuracy))
@@ -20,7 +14,7 @@
        (<= a (+ b equal-accuracy))))
 
 ;;! Is equal to zero?
-(define (~zero? a (accuracy: equal-accuracy))
+(define* (~zero? a (accuracy: equal-accuracy))
   (=~e a 0.0 accuracy))
 
 ;;! Decimal part
