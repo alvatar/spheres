@@ -11,7 +11,15 @@
   (inexact->exact
    (round (* 255 (normalize x low high)))))
 
-;;! Map intervals
+;;! Denormalize value from 0.0-1.0 to a range
+(define (denormalize x low high)
+  (+ low (* x (- high low))))
+
+;;! Denormalize value from 0-255 to a range
+(define (u8-denormalize x low high)
+  (+ low (* (/ x 255) (- high low))))
+
+;;! Map a value from an interval to another
 (define (map-interval x a-low a-high b-low b-high)
   (+ (* (normalize x a-low a-high)
         (- b-high b-low))
