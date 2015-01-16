@@ -42,13 +42,17 @@
        ((##complex? n) (error "complex->integer number conversion not supported"))
        (else (error "Generic ->integer conversion only implemented for numbers"))))))
 
-;;------------------------------------------------------------------------------
-;;!! Aritmethics
 
-;;! Computes the sum of all values
+;;------------------------------------------------------------------------------
+;;!! Aritmethic functions
+
+;;! Logarithm in base N
+(define logN (lambda (x N) (/ (log x) (log N))))
+
+;;! Sum of all values
 (define (sum l) (apply + l))
 
-;;! Computes the product of all values
+;;! Product of all values
 (define (product l) (apply * l))
 
 ;;! Inverse function
@@ -57,13 +61,45 @@
 ;;! Square
 (define (square x) (* x x))
 
-;;! Exact random
-(define (random-exact)
-  (inexact->exact (random-real)))
-
-;;! Exact random from -1 to +1
-(define (random-exact/-1/+1)
-  (inexact->exact (fl+ -1.0 (fl* (random-real) 2.0))))
+;;! Fast factorial algorithm
+;; ported from http://www.cs.berkeley.edu/~fateman/papers/factorial.pdf
+;; split recursive, based on P. Luschny's code
+(define (factorial n)
+  (let ((p 1)
+        (r 1)
+        (NN 1)
+        (log2n (inexact->exact (floor (logN n 2))))
+        (h 0)
+        (shift 0)
+        (high 1)
+        (len 0))
+    (letrec ((prod (lambda (n)
+                     (declare (fixnum n))
+                     (let ((m (arithmetic-shift n -1)))
+                       (cond ((= m 0)
+                              (set! NN (+ NN 2))
+                              NN)
+                             ((= n 2)
+                              (let ((NN1 (+ NN 2))
+                                    (NN2 (+ NN 4)))
+                                (set! NN NN2)
+                                (* NN1 NN2)))
+                             (else
+                              (* (prod (- n m)) (prod m))))))))
+      (let loop ()
+        (if (not (= h n))
+            (begin
+              (set! shift (+ shift h))
+              (set! h (arithmetic-shift n (- log2n)))
+              (set! log2n (- log2n 1))
+              (set! len high)
+              (set! high (if (odd? h) h (- h 1)))
+              (set! len (arithmetic-shift (- high len) -1))
+              (cond ((> len 0)
+                     (set! p (* p (prod len)))
+                     (set! r (* r p))))
+              (loop))))
+      (arithmetic-shift r shift))))
 
 ;;! Extended-gcd(a,b) = (x,y), such that a*x + b*y = gcd(a,b)
 ;; Test alternative:
@@ -124,10 +160,17 @@
           (modulo (* base (modulo-power base (- exp 1) n)) n)
           (modulo (square (modulo-power base (/ exp 2) n)) n))))
 
-;;; Factorial
-;;; long int fac(unsigned long int n) {
-;;;     return lround(exp(lgamma(n+1)));
-;;;     }
+
+;;------------------------------------------------------------------------------
+;;!! Basic random
+
+;;! Exact random
+(define (random-exact)
+  (inexact->exact (random-real)))
+
+;;! Exact random from -1 to +1
+(define (random-exact/-1/+1)
+  (inexact->exact (fl+ -1.0 (fl* (random-real) 2.0))))
 
 ;;! Generates a random prim in a range
 (define* (random-prime start end (show-trace #f))

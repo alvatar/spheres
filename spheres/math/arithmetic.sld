@@ -15,17 +15,19 @@
           sqrt1/2
           euler
           ->integer
+          logN
           sum
           product
           inverse
           square
-          random-exact
-          random-exact/-1/+1
+          factorial
           extended-gcd
           modulo-inverse
           expt-mod
           totient
           modulo-power
+          random-exact
+          random-exact/-1/+1
           random-prime)
 
   (include "arithmetic.scm"))
