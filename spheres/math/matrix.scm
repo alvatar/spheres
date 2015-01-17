@@ -53,14 +53,14 @@
         (nc1 (matrix-columns m1))
         (nr2 (matrix-rows m2))
         (nc2 (matrix-columns m2)))
-    (if (not (and (= nr1 nr2) (= nc1 nc2))
-             (error matrix:-matrix "matrices are not of the same dimension"
-                    nr1 nc1 nr2 nc2)))
-    (let ((r (make-matrix nr nc)))
+    (if (not (and (= nr1 nr2) (= nc1 nc2)))
+        (error matrix:-matrix "matrices are not of the same dimension"
+               nr1 nc1 nr2 nc2))
+    (let ((r (make-matrix nr1 nc1)))
       (do ((i 0 (+ i 1)))
-          ((= i nr) r)
+          ((= i nr1) r)
         (do ((j 0 (+ j 1)))
-            ((= j nc))
+            ((= j nc1))
           (matrix-set! r i j
                        (+ (matrix-ref m1 i j)
                           (matrix-ref m2 i j))))))))
@@ -92,14 +92,14 @@
         (nc1 (matrix-columns m1))
         (nr2 (matrix-rows m2))
         (nc2 (matrix-columns m2)))
-    (if (not (and (= nr1 nr2) (= nc1 nc2))
-             (error matrix:-matrix "matrices are not of the same dimension"
-                    nr1 nc1 nr2 nc2)))
-    (let ((r (make-matrix nr nc)))
+    (if (not (and (= nr1 nr2) (= nc1 nc2)))
+        (error matrix:-matrix "matrices are not of the same dimension"
+               nr1 nc1 nr2 nc2))
+    (let ((r (make-matrix nr1 nc1)))
       (do ((i 0 (+ i 1)))
-          ((= i nr) r)
+          ((= i nr1) r)
         (do ((j 0 (+ j 1)))
-            ((= j nc))
+            ((= j nc1))
           (matrix-set! r i j
                        (- (matrix-ref m1 i j)
                           (matrix-ref m2 i j))))))))
