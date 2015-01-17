@@ -44,7 +44,8 @@
           eq?+
           eqv?+
           equal?+
-          type)
+          type-of
+          coerce)
   (cond-expand
    (gambit
     (import (gambit)))
