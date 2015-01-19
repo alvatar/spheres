@@ -20,10 +20,6 @@
 ;; This ought to be a call-with-unwinding-continuation, if an
 ;; implementation supports such a thing.
 ;; (define call/cc call-with-current-continuation)
-(define-syntax call/cc
-  (syntax-rules ()
-    ((_ . ?rest)
-     (call-with-current-continuation . ?rest))))
 
 (define shift-reset:go #f)
 
