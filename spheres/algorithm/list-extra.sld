@@ -5,13 +5,6 @@
   (export atom?
           xor
           snoc
-          uncons
-          uncons-2
-          uncons-3
-          uncons-4
-          uncons-cons
-          unlist
-          unvector
           cars+cdrs
           cars
           cdrs

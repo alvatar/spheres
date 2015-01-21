@@ -3,12 +3,33 @@
 ;; .author Álvaro Castro Castilla, 2013-2014
 
 (define-library (spheres/core assert)
-  (export assert
+  (export check-arg
+          assert
           assure
           assertion-violation
           assertion-errors-display)
   (import (spheres/core meta))
 
+  (define-syntax check-arg
+    (syntax-rules ()
+      ((check-arg ?pred ?val ?caller)
+       (let ((val ?val))
+         (if (?pred val)
+             val
+             (begin
+               (println (string-append "Value: " (object->string val)))
+               (println (string-append "Predicate: " (object->string '?pred)))
+               (error "Failed argument check in" '?caller)))))
+      ((check-arg ?pred ?val ?caller ?reason)
+       (let ((val ?val))
+         (if (?pred val)
+             val
+             (begin
+               (println (string-append "Value: " (object->string val)))
+               (println (string-append "Predicate: " (object->string '?pred)))
+               (println (string-append "Reason: " ?reason))
+               (error "Failed argument check in" '?caller)))))))
+  
   (define-syntax assert
     (syntax-rules ()
       ((assert _expr . _others)

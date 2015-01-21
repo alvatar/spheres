@@ -35,7 +35,15 @@
           ->keyword
           string-append-anything
           symbol-append
-          check-arg
+          uncons
+          uncons-2
+          uncons-3
+          uncons-4
+          uncons-cons
+          unlist
+          unvector
+          list->values
+          vector->values
           values->list
           values->vector
           values->length
@@ -660,38 +668,22 @@
       ((_ . ol)
        (string->symbol (string-append-anything . ol)))))
 
-
-  ;;------------------------------------------------------------------------------
-  ;;!! Argument checking
-
-  ;; Utility macro for checking arguments
-  ;; Original (as function)
-  ;; (define (check-arg pred val caller)
-  ;;   (let lp ((val val))
-  ;;     (if (pred val) val (lp (error "Bad argument" val pred caller)))))
-  (cond-expand
-   (optimize
-    (define-syntax check-arg
-      (syntax-rules ()
-        ((_ ?pred ?val ?caller) (void)))))
-   (else
-    (define-syntax check-arg
-      (syntax-rules ()
-        ((_ ?pred ?val ?caller)
-         ;; This captures the variables for debugging
-         (let argument-check ((?val ?val))
-           (if (?pred ?val)
-               #t
-               (argument-check
-                (error (string-append (object->string '?pred) " check failed with value "
-                                      (object->string ?val)
-                                      " in: "
-                                      (object->string '?caller)))))))))))
-
-
-  ;;------------------------------------------------------------------------------
+  
+  ;;-----------------------------------------------------------------------------
   ;;!! Multiple values
 
+  ;; List to values (as syntax)
+  (define-syntax list->values
+    (syntax-rules ()
+      ((_ x)
+       (apply values x))))
+
+  ;; Vector to values (as syntax)
+  (define-syntax vector->values
+    (syntax-rules ()
+      ((_ x)
+       (apply values (vector->list x)))))
+    
   ;;! Values to list
   (define-syntax values->list
     (syntax-rules ()
@@ -703,7 +695,6 @@
     (syntax-rules ()
       ((_ x)
        (call-with-values (lambda () x) vector))))
-
 
   ;;! Number of values produced
   (define-syntax values-length
