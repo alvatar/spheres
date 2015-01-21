@@ -18,7 +18,9 @@
 (define load
   (let ((gambit-load load))
     (lambda (file)
-      (cond ((string=? ".scm" (path-extension file))
+      (cond ((not (string? file))
+             (%load-library file))
+            ((string=? ".scm" (path-extension file))
              (expander:include file))
             ((string=? ".sld" (path-extension file))
              (%load-library (cadar (with-input-from-file file read-all))))
