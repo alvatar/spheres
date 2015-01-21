@@ -2,6 +2,8 @@
 ;;; Non-standard list procedures
 
 
+(declare (fixnum))
+
 ;;-------------------------------------------------------------------------------
 ;;!! Basic
 
@@ -69,18 +71,53 @@
 (define (cdrs ls) (map cdr ls))
 
 ;;! pick an element starting from the end
-(define (list-ref-right k lis)
-  (error "Not implemented"))
+(define (list-ref-right k lst)
+  (let ((len (length lst)))
+    (list-ref lst (- len k 1))))
 
 ;;! Rotate the list by taking the head and placing it at the tail
 ;; '(a b c d e) 1 -> '(b c d e a)
-(define (rotate-left k lis)
-  (error "Not implemented"))
+(define (rotate-left k lst)
+  (if (zero? k)
+      lst
+      (let recur-cut ((l lst)
+                      (k1 k)
+                      (len 0))
+        (cond
+         ((null? l) ;; In case it wraps
+          (rotate-left (modulo k len) lst))
+         ((zero? k1)
+          (append l
+                  (let recur-append ((l lst)
+                                     (k2 k))
+                    (if (zero? k2)
+                        '()
+                        (cons (car l)
+                              (recur-append (cdr l)
+                                            (- k2 1)))))))
+         (else
+          (recur-cut (cdr l)
+                     (- k1 1)
+                     (+ len 1)))))))
 
 ;;! Rotate the list by taking the last element and placing it at the head
 ;; '(a b c d e) 1 -> '(e a b c d)
-(define (rotate-right k lis)
-  (error "Not implemented"))
+(define (rotate-right k lst)
+  (if (zero? k)
+      lst
+      (let* ((len (length lst))
+             (k (modulo k len)))
+        (receive (selected discarded)
+                 (let recur-discard ((l lst)
+                                     (k1 (- len k)))
+                   (if (zero? k1)
+                       (values '() l)
+                       (receive (tail discarded)
+                                (recur-discard (cdr l)
+                                               (- k1 1))
+                                (values (cons (car l) tail)
+                                        discarded))))
+                 (append discarded selected)))))
 
 ;;! Swap elements in a list destructively
 ;; (define li '(0 1 2 3 4 5))
