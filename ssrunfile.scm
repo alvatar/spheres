@@ -85,5 +85,10 @@
       (compile-library library)
       (for-each compile-library libraries)))
 
+(define-task (test file) ()
+  (if file
+      (ssrun#run-file (string-append "test/" file))
+      (ssrun#run-all-files "test/")))
+
 (define-task clean ()
   (ssrun#clean-libraries libraries))
