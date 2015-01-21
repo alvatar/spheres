@@ -1,5 +1,13 @@
 ;;;! Environments
 
+(define-syntax check-arg
+    (syntax-rules ()
+      ((_ . ?ignore) #!void)))
+
+(define-syntax assert
+  (syntax-rules ()
+    ((_ . ?ignore) #!void)))
+
 (cond-expand
  ;; Optimize Environment
  (optimize
@@ -7,11 +15,7 @@
            (extended-bindings)
            (not safe)
            (block))
-  (define-syntax check-arg
-    (syntax-rules ()
-      ((check-arg . ?any)
-       #!void)))
-  (println "-- optimize environment --"))
+  (println "-- environment: optimize --"))
  ;; Debug Environment
  (debug
   (declare (safe)
@@ -19,29 +23,7 @@
            (debug-location)
            (debug-source)
            (debug-environments))
-  (define-syntax check-arg
-    (syntax-rules ()
-      ((check-arg ?pred ?val ?caller)
-       (let ((val ?val))
-         (if (?pred val)
-             val
-             (begin
-               (println (string-append "Value: " (object->string val)))
-               (println (string-append "Predicate: " (object->string '?pred)))
-               (error "Failed argument check in" '?caller)))))
-      ((check-arg ?pred ?val ?caller ?reason)
-       (let ((val ?val))
-         (if (?pred val)
-             val
-             (begin
-               (println (string-append "Value: " (object->string val)))
-               (println (string-append "Predicate: " (object->string '?pred)))
-               (println (string-append "Reason: " ?reason))
-               (error "Failed argument check in" '?caller)))))))
-  (println "-- debug environment --"))
+  (println "-- environment: debug --")
+  (%load-library '(spheres/core assert)))
  ;; Null Environment
- (else
-  (define-syntax check-arg
-    (syntax-rules ()
-      ((check-arg . ?any)
-       #!void)))))
+ (else #!void))
