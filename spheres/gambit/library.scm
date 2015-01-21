@@ -1,5 +1,5 @@
 ;;!!! Spheres configuration and installation prelude
-;; .author Álvaro Castro-Castilla, Copyright (c) 2012-2014 All rights reserved.
+;; .author Álvaro Castro-Castilla, 2012-2015. See LICENSE file.
 
 
 ;;------------------------------------------------------------------------------
@@ -266,9 +266,6 @@
       (or (member lib import-seq)
           (set! import-seq (cons lib import-seq)))
       (cdr import-seq))))
-
-(define^ (expander:include file)
-  (for-each eval (with-input-from-file file read-all)))
 
 ;; Expand cond-expand-features and eval syntax definitions
 (define^ (%library-eval-syntax&find-includes file)

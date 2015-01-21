@@ -1,5 +1,32 @@
 ;;!!! SchemeSpheres prelude for Gambit
-;; .author Alvaro Castro-Castilla, 2014. All rights reserved
+;; .author Alvaro Castro-Castilla, 2014-2015. See LICENSE file.
+
+
+;;------------------------------------------------------------------------------
+;; Overriding INCLUDE
+
+(define^ (expander:include file)
+  (for-each eval (with-input-from-file file read-all)))
+
+(eval '(define-syntax include
+         (syntax-rules ()
+           ((_ ?file)
+            (for-each eval (with-input-from-file ?file read-all))))))
+
+(define load-procedures load)
+
+(define load
+  (let ((gambit-load load))
+    (lambda (file)
+      (cond ((string=? ".scm" (path-extension file))
+             (expander:include file))
+            ((string=? ".sld" (path-extension file))
+             (%load-library (cadar (with-input-from-file file read-all))))
+            (else
+             (gambit-load file))))))
+
+;;------------------------------------------------------------------------------
+;; Low-level macros
 
 ;;! DEFINE-MACRO in terms of syntax-case
 (define-syntax (define-macro x)
