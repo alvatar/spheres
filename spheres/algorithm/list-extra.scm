@@ -286,7 +286,7 @@
                               (cons mapv (recur lt foldv))))))))
 
 ;;! Like pair-fold, but stops folding when the cdr is of a given length
-(define (pair-fold-x x kons knil lists) ; TODO: implement without pair-fold
+(define (pair-fold-x x kons knil lists)
   (pair-fold
    (lambda args
      (let ((rev-args (reverse args)))
@@ -294,7 +294,6 @@
            (last args)
            (receive (cars cdrs)
                     (cars+cdrs (reverse (cdr rev-args)))
-                                        ; TODO: append: figure out something better than the hack in SRFI-1
                     (apply kons (append (map (lambda (a b) (cons a b)) cars cdrs)
                                         (list (car rev-args))))))))
    knil
@@ -335,35 +334,120 @@
 ;;!! Find, remove, substitute, insert
 
 ;;! Insert given an index
-(define (insert-at new k lis)
-  (error "Not implemented"))
+(define (insert-at new k lst)
+  (let recur ((lst lst) (k k))
+    (cond ((zero? k)
+           (cons new lst))
+          ((null? lst) '())
+          (else
+           (cons (car lst)
+                 (recur (cdr lst)
+                        (- k 1)))))))
 
-;;! Insert at the left side of an element
-(define (insert-left new e lis)
-  (error "Not implemented"))
+;;! Insert at the left side of the first element that satisfies the predicate
+(define (insert-left-first new pred lst)
+  (let recur ((lst lst))
+    (if (null? lst)
+        '()
+        (let ((head (car lst)))
+          (if (pred head)
+              (cons new
+                    (cons head
+                          (cdr lst)))
+              (cons head
+                    (recur (cdr lst))))))))
 
-;;! Insert at the left side of an element (recursively)
-(define (insert-left* new e lis)
-  (error "Not implemented"))
+;;! Insert at the left side of each element that satisfies the predicate
+(define (insert-left new pred lst)
+  (let recur ((lst lst))
+    (if (null? lst)
+        '()
+        (let ((head (car lst)))
+          (if (pred head)
+              (cons new
+                    (cons head
+                          (recur (cdr lst))))
+              (cons head
+                    (recur (cdr lst))))))))
 
-;;! Insert at the right side of an element
-(define (insert-right new e lis)
-  (error "Not implemented"))
+;;! Insert at the left side of each element that satisfies the predicate
+;; (recursively)
+(define (insert-left* new pred lst)
+  (let recur ((lst lst))
+    (if (null? lst)
+        '()
+        (let ((head (car lst)))
+          (if (pair? head)
+              (cons (recur head)
+                    (recur (cdr lst)))
+              (if (pred head)
+                  (cons new
+                        (cons head
+                              (recur (cdr lst))))
+                  (cons head
+                        (recur (cdr lst)))))))))
 
-;;! Insert at the right side of an element (recursively)
-(define (insert-right* new e lis)
-  (error "Not implemented"))
+;;! Insert at the right side of the first element that satisfies the predicate
+(define (insert-right-first new pred lst)
+  (let recur ((lst lst))
+    (if (null? lst)
+        '()
+        (let ((head (car lst)))
+          (if (pred head)
+              (cons head
+                    (cons new
+                          (cdr lst)))
+              (cons head
+                    (recur (cdr lst))))))))
 
-;;! Insert after each element
-(define (intersperse lis sep)
+;;! Insert at the right side of an element that satisfies the predicate
+(define (insert-right new pred lst)
+  (let recur ((lst lst))
+    (if (null? lst)
+        '()
+        (let ((head (car lst)))
+          (if (pred head)
+              (cons head
+                    (cons new
+                          (recur (cdr lst))))
+              (cons head
+                    (recur (cdr lst))))))))
+
+;;! Insert at the right side of each element that satisfies the predicate
+;; (recursively)
+(define (insert-right* new pred lst)
+  (let recur ((lst lst))
+    (if (null? lst)
+        '()
+        (let ((head (car lst)))
+          (if (pair? head)
+              (cons (recur head)
+                    (recur (cdr lst)))
+              (if (pred head)
+                  (cons head
+                        (cons new
+                              (recur (cdr lst))))
+                  (cons head
+                        (recur (cdr lst)))))))))
+
+;;! Insert between each element
+(define (intersperse lst sep)
   (cond
-   ((null? lis) '())
-   ((null? (cdr lis)) lis)
-   (else (cons (car lis) (cons sep (intersperse (cdr lis) sep))))))
+   ((null? lst) '())
+   ((null? (cdr lst)) lst)
+   (else (cons (car lst)
+               (cons sep
+                     (intersperse (cdr lst) sep))))))
 
-;;! Remove given an index
-(define (remove-at k lis)
-  (error "Not implemented"))
+;;! Remove element given an index
+(define (remove-at k lst)
+  (let recur ((lst lst) (k k))
+    (cond ((null? lst) '())
+          ((zero? k) (cdr lst))
+          (else
+           (cons (car lst)
+                 (recur (cdr lst)
+                        (- k 1)))))))
 
 ;;! Remove first instance
 (define (remove-first pred l)
@@ -431,7 +515,7 @@
   (reduce (lambda (a b) (if (pred b a) b a)) #f lis))
 
 ;;! Most, but return also the list with that element removed
-;; TODO: Benchmark!!!!!
+;; TODO: Benchmark and pick best version
 ;; (define (most+remove pred lis)
 ;;   (let ((res (most pred lis)))
 ;;     (values res

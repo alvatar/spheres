@@ -25,8 +25,10 @@
           andmap
           ormap
           insert-at
+          insert-left-first
           insert-left
           insert-left*
+          insert-right-first
           insert-right
           insert-right*
           intersperse
