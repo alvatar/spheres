@@ -1,7 +1,7 @@
 ;;!! SRFI-34 Exception Handling for Programs
 ;; Copyright (C) Richard Kelsey, Michael Sperber (2002). All Rights Reserved.
 
-(define-library (spheres/util condition)
+(define-library (spheres/core condition)
   (export guard
           define-condition-type
           condition

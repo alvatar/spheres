@@ -39,7 +39,7 @@
           test-match-any
           test-skip
           test-expect-fail)
-  (import (spheres/util condition))
+  (import (spheres/core condition))
   
   ;; internal
   (define-syntax %test-evaluate-with-catch

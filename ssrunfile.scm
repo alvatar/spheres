@@ -23,6 +23,7 @@
     (spheres/codec bignum)
     (spheres/core assert)
     (spheres/core base)
+    (spheres/core condition)
     (spheres/core functional)
     (spheres/core match)
     (spheres/core meta)
@@ -59,7 +60,6 @@
     (spheres/structure/multi-dimensional-array mbda)
     (spheres/structure/multi-dimensional-array tter)
     (spheres/util check)
-    (spheres/util condition)
     (spheres/util test)))
 
 (define features
