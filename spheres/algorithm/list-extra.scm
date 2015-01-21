@@ -296,6 +296,31 @@
 ;;! pair-fold-x specialization for x=2
 (define pair-fold-2 (lambda (kons knil lists) (pair-fold-x 2 kons knil lists)))
 
+;;! AND applied over all elements of the resulting list
+(define andmap
+  (lambda (f first . rest)
+    (or (null? first)
+        (if (null? rest)
+            (let andmap ((first first))
+              (let ((x (car first)) (first (cdr first)))
+                (if (null? first)
+                    (f x)
+                    (and (f x) (andmap first)))))
+            (let andmap ((first first) (rest rest))
+              (let ((x (car first))
+                    (xr (map car rest))
+                    (first (cdr first))
+                    (rest (map cdr rest)))
+                (if (null? first)
+                    (apply f (cons x xr))
+                    (and (apply f (cons x xr)) (andmap first rest)))))))))
+
+;;! OR applied over all elements of the resulting list
+(define ormap
+  (lambda (proc list1)
+    (and (not (null? list1))
+         (or (proc (car list1)) (ormap proc (cdr list1))))))
+
 
 ;;-------------------------------------------------------------------------------
 ;;!! Find, remove, substitute, insert

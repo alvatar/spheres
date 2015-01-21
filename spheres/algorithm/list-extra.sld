@@ -29,6 +29,8 @@
           map-fold
           pair-fold-x
           pair-fold-2
+          andmap
+          ormap
           insert-at
           insert-left
           insert-left*
