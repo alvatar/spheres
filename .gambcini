@@ -3,12 +3,15 @@
 ;; Define and load syntax-case expander
 (define %%syntax-case-file "~/Dropbox/projects/spheres/spheres/gambit/syntax-case.o1")
 (load %%syntax-case-file)
+
+;; Include Gambit prelude for SchemeSpheres
+(for-each eval (with-input-from-file "~/Dropbox/projects/spheres/spheres/gambit/prelude.scm" read-all))
+
 ;; Gambit lightweight library support (partial)
 (include "~/Dropbox/projects/spheres/spheres/gambit/library.scm")
 ;; Add custom directory for library paths
 (%add-library-path! "/Users/Alvaro/Dropbox/projects/spheres/")
-;; Include Gambit prelude for SchemeSpheres
-(expander:include "~/Dropbox/projects/spheres/spheres/gambit/prelude.scm")
+
 ;; Set environment
 (eval '(add-cond-expand-feature! debug))
 (expander:include "~/Dropbox/projects/spheres/spheres/gambit/environments.scm")
