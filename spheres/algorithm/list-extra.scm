@@ -717,7 +717,7 @@
 
 
 ;;-------------------------------------------------------------------------------
-;;!! Sublist operations
+;;!! Fragmentation
 
 ;;! Return a sublist from a start to an end positions
 (define (slice l start end)
@@ -762,27 +762,28 @@
 
 ;;! partition a list depending on predicate satisfaction, effectively extending
 ;; the SRFI-1 |partition| procedure
-;; (classify (lambda (x) (car x))
-;;           ((lambda (x) (equal? x 'a)) (lambda (x) (equal? x 'b)))
-;;           '((a) (b 0) (a 1) (b 1 2)))
-;; => ((a) (a 1))
-;;    ((b 0) (b 1 2))
-(define (classify)
-  ;; (fold/values (lambda (x a b c)
-  ;;                (case 'first
-  ;;                  ((first) (values (cons x a) b c))
-  ;;                  ((second) (values a (cons x b) c))
-  ;;                  ((splitted) (values a b (cons x c)))))
-  ;;              '(() () ())
-  ;;              (wall-windows wall))
-  (error "Not implemented"))
+;; Returns a list of lists
+;; (classify '(0 1 0 4 2 3 6) zero? odd? (lambda (x) (= x 4)))
+;;   => ((0 0) (3 1) (4) (6))
+(define (classify lst . predicates)
+  (fold (lambda args
+          (let ((e (car args)))
+            (let recur ((p predicates)
+                        (visited-classes '())
+                        (unvisited-classes (cadr args)))
+              (if (or (null? p)
+                      ((car p) e))
+                  (append visited-classes
+                          (list (cons e (car unvisited-classes)))
+                          (cdr unvisited-classes))
+                  (recur (cdr p)
+                         (append visited-classes (list (car unvisited-classes)))
+                         (cdr unvisited-classes))))))
+        (make-list (+ (length predicates) 1) '())
+        lst))
 
-;;! partition a list depending using a |case| form for testing
-;; (case-classify (lambda (x) (car x)) (a b) '((a) (b 0) (a 1) (b 1 2)))
-;; => ((a) (a 1))
-;;    ((b 0) (b 1 2))
-(define (case-classify key-generator)
-  (error "Not implemented"))
+(define (classify-ordered lst . predicates)
+  (map reverse (apply classify lst predicates)))
 
 
 ;;-------------------------------------------------------------------------------
@@ -790,8 +791,17 @@
 
 ;;! Construct a new list containing each element repeated a number of times
 ;; '(a b c) 2 -> '(a a a b b b c c c)
-(define (replicate n l)
-  (error "Not implemented"))
+(define (replicate n lst)
+  (let recur ((lst lst))
+    (if (null? lst)
+        '()
+        (let ((head (car lst)))
+          (cons head
+                (let repeat ((k n))
+                  (if (zero? k)
+                      (recur (cdr lst))
+                      (cons head
+                            (repeat (- k 1))))))))))
 
 ;;! Makes groups of equal elements
 ;; '(a a a a b b b b c c d d d) -> '((a a a a) (b b b b) (c c) (d d d))

@@ -2,7 +2,7 @@
 
 (%load-library '(spheres/algorithm list-extra))
 
-(test-begin "list-extra" 12)
+(test-begin "list-extra" 38)
 
 (define letters '(a b c d e f g h i))
 
@@ -139,5 +139,25 @@
 (test-equal "remove-at 2"
             (remove-at 8 letters)
             '(a b c d e f g h))
+
+(test-equal "classify 1"
+            (classify '(0 1 0 4 2 3 6) zero? odd? (lambda (x) (= x 4)))
+            '((0 0) (3 1) (4) (6 2)))
+
+(test-equal "classify 2"
+            (classify '(0 1 0 4 2 3 6) zero? odd?)
+            '((0 0) (3 1) (6 2 4)))
+
+(test-equal "classify-ordered 1"
+            (classify-ordered '(0 1 0 4 2 3 6) zero? odd? (lambda (x) (= x 4)))
+            '((0 0) (1 3) (4) (2 6)))
+
+(test-equal "classify-ordered 2"
+            (classify-ordered '(0 1 0 4 2 3 6) zero? odd?)
+            '((0 0) (1 3) (4 2 6)))
+
+(test-equal "replicate"
+            (replicate 2 '(a b c))
+            '(a a a b b b c c c))
 
 (test-end)

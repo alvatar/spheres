@@ -61,7 +61,7 @@
           split-in-halves
           split-in-halves!
           classify
-          case-classify
+          classify-ordered
           replicate
           pack
           n-groups
