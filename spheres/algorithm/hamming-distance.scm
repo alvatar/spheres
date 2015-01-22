@@ -1,55 +1,44 @@
-;;; Copyright (c) 2012 by Álvaro Castro-Castilla, All Rights Reserved.
-;;; Licensed under the GPLv3 license, see LICENSE file for full description.
+;;!!! Hamming distance
+;; .author Álvaro Castro-Castilla, 2012-2015. See LICENSE file.
 
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;;; List encodings
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
-;-------------------------------------------------------------------------------
-; Distances
-;-------------------------------------------------------------------------------
+(declare (mostly-fixnum))
 
-;;; Calculates the hamming distance (number of different positions) of two lists
-;;; of equal length
-
+;;! Calculates the hamming distance (number of different positions) of two lists
+;; of equal length
 (define (hamming-distance la lb)
-  ((letrec ((H (lambda (a b d)
+  ((letrec ((H (lambda (a b distance)
                  (cond
                   ((and (null? a) (null? b))
-                   d)
-                  ((xor (null? a) (null? b))
+                   distance)
+                  ((or (null? a) (null? b))
                    (error "lists have different length"))
                   ((equal? (car a) (car b))
-                   (H (cdr a) (cdr b) d))
+                   (H (cdr a) (cdr b) distance))
                   (else
-                   (H (cdr a) (cdr b) (+ d 1))))))) H) la lb 0))
+                   (H (cdr a) (cdr b) (+ distance 1))))))) H) la lb 0))
 
-;;; Calculates the minimum hamming distance between a list and the permutations
-;;; of the second
-
-(define (min-hamming-distance la lb)
+;;! Calculates the minimum hamming distance between a list and the permutations
+;; of the second
+(define (hamming-distance-all-permutations la lb)
+  (define (find-remove pred lis)
+    (call/cc
+     (lambda (failed)
+       ((letrec ((R (lambda (l)
+                      (if (null? l)
+                          (failed #f)
+                          (receive (h t) (car+cdr l)
+                                   (if (pred h)
+                                       t
+                                       (cons h (R t)))))))) R) lis))))
   ((letrec ((H (lambda (a b d)
-                 (if (null? a)          ; a always decreases
-                     (if (= d (length b)) ; the length must be equal to the times it wasn't cdr'd
+                 ;; a always decreases
+                 (if (null? a)          
+                     ;; the length must be equal to the times it wasn't cdr'd
+                     (if (= d (length b))
                          d
                          (error "lists have different length"))
-                     (let ((newb (find-rember (curry eq? (car a)) b))) ; Removes the first instance if found
+                     (let ((newb (find-remove (lambda (x) (eq? x (car a))) b)))
                        (if newb
                            (H (cdr a) newb d)
                            (H (cdr a) b (+ d 1)))))))) H) la lb 0))
-
-;-------------------------------------------------------------------------------
-; Encodings
-;-------------------------------------------------------------------------------
-
-(define (run-length-encode l)
-  (error "Not implemented"))
-
-(define (run-length-decode l)
-  (error "Not implemented"))
-
-(define (lzw-encode l)
-  (error "Not implemented"))
-
-(define (lzw-decode l)
-  (error "Not implemented"))
