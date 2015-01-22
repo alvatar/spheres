@@ -1,5 +1,6 @@
-;;!!! Additional list procedures
-;; Alvaro Castro-Castilla, 2012-2014, All rights reserved.
+;;!!! Extra list procedures and macros
+;; .author Álvaro Castro-Castilla, 2012-2015. See LICENSE file.
+
 
 (define-library (spheres/algorithm list-extra)
   (export atom?

@@ -1,5 +1,5 @@
-;;; Copyright (c) 2012-2014, Alvaro Castro-Castilla. All rights reserved.
-;;; Non-standard list procedures
+;;!!! Extra list procedures and macros
+;; .author Álvaro Castro-Castilla, 2012-2015. See LICENSE file.
 
 
 (declare (fixnum))
