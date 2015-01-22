@@ -803,21 +803,80 @@
                       (cons head
                             (repeat (- k 1))))))))))
 
-;;! Makes groups of equal elements
+;;! Makes groups of equal elements (disordered)
 ;; '(a a a a b b b b c c d d d) -> '((a a a a) (b b b b) (c c) (d d d))
-(define (pack l)
-  (error "Not implemented"))
+(define (pack lst)
+  (let ((bags (make-table)))
+    (let recur ((lst lst))
+      (if (not (null? lst))
+          (let* ((head (car lst))
+                 (tref (table-ref bags head #f)))
+            (if tref
+                (table-set! bags head (cons head tref))
+                (table-set! bags head (list head)))
+            (recur (cdr lst)))))
+    (cdrs (table->list bags))))  
 
 ;;! Make n groups from a list. If not divisible, the last is smaller.
-(define (n-groups n l)
-  (error "Not implemented"))
+(define (n-groups n lst)
+  (define (make-group num-els lst)
+    (let recur-group ((lst lst)
+                      (k num-els))
+      (if (or (zero? k) (null? lst))
+          (values '() lst)
+          (receive (g tail)
+                   (recur-group (cdr lst)
+                                (- k 1))
+                   (values (cons (car lst) g)
+                           tail)))))
+  (let* ((len (length lst))
+         (els-per-group (ceiling (/ len n))))
+    (let recur ((tail lst)
+                (k (- n 1)))
+      (receive (group rest)
+               (make-group els-per-group tail)
+               (if (zero? k)
+                   (cons group '())
+                   (cons group
+                         (recur rest
+                                (- k 1))))))))
   
 ;;! Makes a number of groups with size n from a list. If not divisible, the last
 ;; is smaller. If a distribution is given as a list of integers, groups are made
 ;; with those numbers of elements per group. If not an exact distribution is
 ;; given, the last group is bigger or smaller than the distribution indicates
-(define (group n/s l)
-  (error "Not implemented"))
+(define (group n/s lst)
+  (define (make-group num-els lst)
+    (let recur-group ((lst lst)
+                      (k num-els))
+      (if (or (zero? k) (null? lst))
+          (values '() lst)
+          (receive (g tail)
+                   (recur-group (cdr lst)
+                                (- k 1))
+                   (values (cons (car lst) g)
+                           tail)))))
+  (if (integer? n/s)
+      (let recur ((tail lst))
+        (receive (group rest)
+                 (make-group n/s tail)
+                 (if (null? tail)
+                     group
+                     (cons group
+                           (recur rest)))))
+      ;; non-integer case (assumed a list of natural numbers given)
+      (let recur ((tail lst)
+                  (size-list n/s))
+        (receive (group rest)
+                 (make-group (car size-list) tail)
+                 (if (null? tail)
+                     group
+                     (cons group
+                           (recur rest
+                                  (let ((size-list-tail (cdr size-list)))
+                                    (if (null? size-list-tail)
+                                        (list +inf.0)
+                                        size-list-tail)))))))))
 
 
 ;;-------------------------------------------------------------------------------
@@ -825,6 +884,6 @@
 
 ;;! Creates a destructive function to read a list sequantially after each call
 (define (ticker! l)
-  (lambda ()
-    (begin0 (car l)
-            (set! l (cdr l)))))
+(lambda ()
+  (begin0 (car l)
+          (set! l (cdr l)))))
