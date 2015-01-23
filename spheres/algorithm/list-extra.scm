@@ -45,6 +45,44 @@
   (let ((len (length lst)))
     (list-ref lst (- len k 1))))
 
+
+;;-------------------------------------------------------------------------------
+;;!! Destructive
+
+;;! Swap elements in a list destructively
+;; (define li '(0 1 2 3 4 5))
+;; (list-swap! li 2 4)
+;; li -> '(0 1 4 3 2 5)
+(define (list-swap! v i j)
+  (let* ((x (list-tail v i))
+         (y (list-tail v j))
+         (a (car x))
+         (b (car y)))
+    (set-car! x b)
+    (set-car! y a)))
+
+;;! Remove the header destructively
+(define (shift! ls #!optional default)
+  (if (null? ls)
+      (list default)
+      (begin
+        (let ((x (car ls))
+              (d (cdr ls)))
+          (check-pair 'shift! d)
+          (set-car! ls (car d))
+          (set-cdr! ls (cdr d))
+          x))))
+
+;;! Cons a new header destructively
+(define (unshift! x ls)
+  (set-car! ls x)
+  (set-cdr! ls (cons (car ls) (cdr ls)))
+  ls)
+
+
+;;-------------------------------------------------------------------------------
+;;!! Rotation
+
 ;;! Rotate the list by taking the head and placing it at the tail
 ;; '(a b c d e) 1 -> '(b c d e a)
 (define (rotate-left k lst)
@@ -88,18 +126,6 @@
                                 (values (cons (car l) tail)
                                         discarded))))
                  (append discarded selected)))))
-
-;;! Swap elements in a list destructively
-;; (define li '(0 1 2 3 4 5))
-;; (list-swap! li 2 4)
-;; li -> '(0 1 4 3 2 5)
-(define (list-swap! v i j)
-  (let* ((x (list-tail v i))
-         (y (list-tail v j))
-         (a (car x))
-         (b (car y)))
-    (set-car! x b)
-    (set-car! y a)))
 
 
 ;;-------------------------------------------------------------------------------
@@ -305,33 +331,40 @@
     (pair-fold-x 2 kons knil lists)))
 
 ;;! AND applied over all elements of the resulting list
-(define andmap
-  (lambda (f first . rest)
-    (or (null? first)
-        (if (null? rest)
-            (let andmap ((first first))
-              (let ((x (car first)) (first (cdr first)))
-                (if (null? first)
-                    (f x)
-                    (and (f x) (andmap first)))))
-            (let andmap ((first first) (rest rest))
-              (let ((x (car first))
-                    (xr (map car rest))
-                    (first (cdr first))
-                    (rest (map cdr rest)))
-                (if (null? first)
-                    (apply f (cons x xr))
-                    (and (apply f (cons x xr)) (andmap first rest)))))))))
+(define (andmap func ls0 . rest)
+  (cond
+   ((null? rest)
+    (let mapf ((ls ls0))
+      (or (null? ls)
+          (and (func (car ls))
+               (mapf (cdr ls)))) ) )
+   ((null? (cdr rest))
+    (let mapf ((ls1 ls0) (ls2 (car rest)))
+      (or (null? ls1)
+          (and (func (car ls1) (car ls2))
+               (mapf (cdr ls1) (cdr ls2)))) ) )
+   (else
+    (let mapf ((ls0 ls0) (rest rest))
+      (or (null? ls0)
+          (and (apply func (car ls0) (map car rest))
+               (mapf (cdr ls0) (map cdr rest)))) ) ) ) )
 
 ;;! OR applied over all elements of the resulting list
 (define ormap
-  (lambda (proc list1)
-    (and (not (null? list1))
-         (or (proc (car list1)) (ormap proc (cdr list1))))))
-
+  (lambda (proc list1 . rest)
+    (if (null? rest)
+        ;; fast path
+        (let ormap ((proc proc) (list1 list1))
+          (and (not (null? list1))
+               (or (proc (car list1)) (ormap proc (cdr list1)))))
+        ;; multiple lists
+        (and (pair? list1)
+             (let ((rest (cons list1 rest)))
+               (or (apply proc (map car rest))
+                   (apply ormap proc (map cdr rest))))))))
 
 ;;-------------------------------------------------------------------------------
-;;!! Find, remove, substitute, insert
+;;!! Insertion/removal
 
 ;;! Insert given an index
 (define (insert-at new k lst)
@@ -470,6 +503,52 @@
             (every (lambda (e) (every-pred e x)) every-lis))
           lis))
 
+;;! Substitution in a list (only first element)
+(define (x-substitute maker pred? new l)
+  ((letrec ((X (lambda (l)
+                 (if (null? l)
+                     '()
+                     (receive (lcar lcdr) (car+cdr l)
+                              (if (pred? lcar)
+                                  (maker new (X lcdr))
+                                  (cons lcar (X lcdr)))))))) X) l))
+
+;;! substitute-first
+(define substitute-first (lambda (pred? new l) (x-substitute cons pred? new l)))
+
+;;! Substitution in a list (all elements)
+(define substitute (lambda (pred? new l) (x-substitute append pred? new l)))
+
+;;! Recursive substitution in a list, down to atom-level
+(define (x-subst* maker old new l)
+  ((letrec ((X (lambda (l)
+                 (if (null? l)
+                     '()
+                     (receive (lcar lcdr) (car+cdr l)
+                              (cond
+                               ((atom? lcar) ; Atoms level
+                                (cond
+                                 ((eq? lcar old)
+                                  (maker new
+                                         (X lcdr)))
+                                 (else
+                                  (cons lcar
+                                        (X lcdr)))))
+                               ((equal? lcar old) ; Sublist level
+                                (maker new (X lcdr)))
+                               (else
+                                (cons
+                                 (X lcar)
+                                 (X lcdr))))))))) X) l))
+(define substitute-first* (lambda (old new l) (x-subst* cons old new l)))
+
+;;! Recursive substitution with multiple insertion, down to atom-level
+(define substitute* (lambda (old new l) (x-subst* append old new l)))
+
+
+;;-------------------------------------------------------------------------------
+;;!! Searching
+
 ;;! Try to find an element and remove it, yields #f if not found
 (define (find-remove pred lis)
   (let/cc
@@ -564,51 +643,9 @@
 (define (min/generator generator lis)
   (most/generator generator < lis))
 
-;;! Substitution in a list (only first element)
-(define (x-substitute maker pred? new l)
-  ((letrec ((X (lambda (l)
-                 (if (null? l)
-                     '()
-                     (receive (lcar lcdr) (car+cdr l)
-                              (if (pred? lcar)
-                                  (maker new (X lcdr))
-                                  (cons lcar (X lcdr)))))))) X) l))
-
-;;! substitute-first
-(define substitute-first (lambda (pred? new l) (x-substitute cons pred? new l)))
-
-;;! Substitution in a list (all elements)
-(define substitute (lambda (pred? new l) (x-substitute append pred? new l)))
-
-;;! Recursive substitution in a list, down to atom-level
-(define (x-subst* maker old new l)
-  ((letrec ((X (lambda (l)
-                 (if (null? l)
-                     '()
-                     (receive (lcar lcdr) (car+cdr l)
-                              (cond
-                               ((atom? lcar) ; Atoms level
-                                (cond
-                                 ((eq? lcar old)
-                                  (maker new
-                                         (X lcdr)))
-                                 (else
-                                  (cons lcar
-                                        (X lcdr)))))
-                               ((equal? lcar old) ; Sublist level
-                                (maker new (X lcdr)))
-                               (else
-                                (cons
-                                 (X lcar)
-                                 (X lcdr))))))))) X) l))
-(define substitute-first* (lambda (old new l) (x-subst* cons old new l)))
-
-;;! Recursive substitution with multiple insertion, down to atom-level
-(define substitute* (lambda (old new l) (x-subst* append old new l)))
-
 
 ;;-------------------------------------------------------------------------------
-;;!! Skeleton/shape
+;;!! Shape
 
 ;;! Flatten a list (optimized)
 ;; http://schemecookbook.org/Cookbook/ListFlatten
@@ -717,7 +754,7 @@
 
 
 ;;-------------------------------------------------------------------------------
-;;!! Fragmentation
+;;!! Fragmentation/grouping
 
 ;;! Return a sublist from a start to an end positions
 (define (slice l start end)
@@ -728,97 +765,8 @@
   (take! (drop l start)
          (- end start)))
 
-;;! Return two lists of lengths differing with at most one
-;; TODO: currently reverses first list
-(define (split-in-halves l)
-  (let loop ((front '())
-             (slow  l)
-             (fast  l))
-    (cond
-     ((null? fast)
-      (values front
-              slow))
-     ((null? (cdr fast))
-      (values (cons (car slow) front)
-              (cdr slow)))
-     (else
-      (loop (cons (car slow) front)
-            (cdr slow)
-            (cddr fast))))))
-
-;;! split-in-halves!
-(define (split-in-halves! l)
-  (let loop ((slow (cons 'foo l))
-             (fast (cons 'bar l)))
-    (cond
-     ((or (null? fast)
-          (null? (cdr fast)))
-      (let ((back (cdr slow)))
-        (set-cdr! slow '())
-        (values l back)))
-     (else
-      (loop (cdr slow)
-            (cddr fast))))))
-
-;;! partition a list depending on predicate satisfaction, effectively extending
-;; the SRFI-1 |partition| procedure
-;; Returns a list of lists
-;; (classify '(0 1 0 4 2 3 6) zero? odd? (lambda (x) (= x 4)))
-;;   => ((0 0) (3 1) (4) (6))
-(define (classify lst . predicates)
-  (fold (lambda args
-          (let ((e (car args)))
-            (let recur ((p predicates)
-                        (visited-classes '())
-                        (unvisited-classes (cadr args)))
-              (if (or (null? p)
-                      ((car p) e))
-                  (append visited-classes
-                          (list (cons e (car unvisited-classes)))
-                          (cdr unvisited-classes))
-                  (recur (cdr p)
-                         (append visited-classes (list (car unvisited-classes)))
-                         (cdr unvisited-classes))))))
-        (make-list (+ (length predicates) 1) '())
-        lst))
-
-(define (classify-ordered lst . predicates)
-  (map reverse (apply classify lst predicates)))
-
-
-;;-------------------------------------------------------------------------------
-;;!! Grouping/ungrouping
-
-;;! Construct a new list containing each element repeated a number of times
-;; '(a b c) 2 -> '(a a a b b b c c c)
-(define (replicate n lst)
-  (let recur ((lst lst))
-    (if (null? lst)
-        '()
-        (let ((head (car lst)))
-          (cons head
-                (let repeat ((k n))
-                  (if (zero? k)
-                      (recur (cdr lst))
-                      (cons head
-                            (repeat (- k 1))))))))))
-
-;;! Makes groups of equal elements (disordered)
-;; '(a a a a b b b b c c d d d) -> '((a a a a) (b b b b) (c c) (d d d))
-(define (pack lst)
-  (let ((bags (make-table)))
-    (let recur ((lst lst))
-      (if (not (null? lst))
-          (let* ((head (car lst))
-                 (tref (table-ref bags head #f)))
-            (if tref
-                (table-set! bags head (cons head tref))
-                (table-set! bags head (list head)))
-            (recur (cdr lst)))))
-    (cdrs (table->list bags))))  
-
 ;;! Make n groups from a list. If not divisible, the last is smaller.
-(define (n-groups n lst)
+(define (split-n n lst)
   (define (make-group num-els lst)
     (let recur-group ((lst lst)
                       (k num-els))
@@ -840,7 +788,38 @@
                    (cons group
                          (recur rest
                                 (- k 1))))))))
-  
+
+;;! Returns two halves, the first one reversed.
+(define (split-middle l)
+  (let loop ((front '())
+             (slow  l)
+             (fast  l))
+    (cond
+     ((null? fast)
+      (values front
+              slow))
+     ((null? (cdr fast))
+      (values (cons (car slow) front)
+              (cdr slow)))
+     (else
+      (loop (cons (car slow) front)
+            (cdr slow)
+            (cddr fast))))))
+
+;;! Destructive version of split-middle!
+(define (split-middle! l)
+  (let loop ((slow (cons 'foo l))
+             (fast (cons 'bar l)))
+    (cond
+     ((or (null? fast)
+          (null? (cdr fast)))
+      (let ((back (cdr slow)))
+        (set-cdr! slow '())
+        (values l back)))
+     (else
+      (loop (cdr slow)
+            (cddr fast))))))
+
 ;;! Makes a number of groups with size n from a list. If not divisible, the last
 ;; is smaller. If a distribution is given as a list of integers, groups are made
 ;; with those numbers of elements per group. If not an exact distribution is
@@ -878,9 +857,62 @@
                                         (list +inf.0)
                                         size-list-tail)))))))))
 
+;;! Makes groups of equal elements (disordered)
+;; '(a a a a b b b b c c d d d) -> '((a a a a) (b b b b) (c c) (d d d))
+(define (pack lst)
+  (let ((bags (make-table)))
+    (let recur ((lst lst))
+      (if (not (null? lst))
+          (let* ((head (car lst))
+                 (tref (table-ref bags head #f)))
+            (if tref
+                (table-set! bags head (cons head tref))
+                (table-set! bags head (list head)))
+            (recur (cdr lst)))))
+    (cdrs (table->list bags))))  
+
+;;! partition a list depending on predicate satisfaction, effectively extending
+;; the SRFI-1 |partition| procedure
+;; Returns a list of lists
+;; (classify '(0 1 0 4 2 3 6) zero? odd? (lambda (x) (= x 4)))
+;;   => ((0 0) (3 1) (4) (6))
+(define (classify lst . predicates)
+  (fold (lambda args
+          (let ((e (car args)))
+            (let recur ((p predicates)
+                        (visited-classes '())
+                        (unvisited-classes (cadr args)))
+              (if (or (null? p)
+                      ((car p) e))
+                  (append visited-classes
+                          (list (cons e (car unvisited-classes)))
+                          (cdr unvisited-classes))
+                  (recur (cdr p)
+                         (append visited-classes (list (car unvisited-classes)))
+                         (cdr unvisited-classes))))))
+        (make-list (+ (length predicates) 1) '())
+        lst))
+
+(define (classify-ordered lst . predicates)
+  (map reverse (apply classify lst predicates)))
+
 
 ;;-------------------------------------------------------------------------------
 ;;!! Miscellaneous
+
+;;! Construct a new list containing each element repeated a number of times
+;; '(a b c) 2 -> '(a a a b b b c c c)
+(define (replicate n lst)
+  (let recur ((lst lst))
+    (if (null? lst)
+        '()
+        (let ((head (car lst)))
+          (cons head
+                (let repeat ((k n))
+                  (if (zero? k)
+                      (recur (cdr lst))
+                      (cons head
+                            (repeat (- k 1))))))))))
 
 ;;! Creates a destructive function to read a list sequantially after each call
 (define (ticker! l)

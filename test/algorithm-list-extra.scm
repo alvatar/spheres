@@ -2,7 +2,7 @@
 
 (%load-library '(spheres/algorithm list-extra))
 
-(test-begin "list-extra" 45)
+(test-begin "list-extra" 46)
 
 (define letters '(a b c d e f g h i))
 
@@ -140,6 +140,44 @@
             (remove-at 8 letters)
             '(a b c d e f g h))
 
+(test-equal "split-n"
+            (split-n 3 '(a b c d e f g h i j k l m n o p q))
+            '((a b c d e f) (g h i j k l) (m n o p q)))
+
+(test-assert "split-middle"
+             (equal?+ (split-middle '(a b c d e f g h i j k l m n o p))
+                      (values (reverse '(a b c d e f g h)) '(i j k l m n o p))))
+
+(test-equal "group 1"
+            (group 3 '(a b c d e f g h i j k l m n o p q))
+            '((a b c) (d e f) (g h i) (j k l) (m n o) (p q)))
+
+(test-equal "group 2"
+            (group '(2 1 4) '(a b c d e f g h i j k l m n o p q))
+            '((a b) (c) (d e f g) (h i j k l m n o p q)))
+
+(test-equal "group 3"
+            (group '(2 1 4 10 20) '(a b c d e f g h i j k l m n o p q))
+            '((a b) (c) (d e f g) (h i j k l m n o p q)))
+
+(test-equal "group 4"
+            (group '(2 1 4 5 10 20) '(a b c d e f g h i j k l m n o p q))
+            '((a b) (c) (d e f g) (h i j k l) (m n o p q)))
+
+(test-assert "pack 1"
+             (let ((g (pack '(a a a a b b b c c c))))
+               (and (member '(a a a a) g)
+                    (member '(b b b) g)
+                    (member '(c c c) g))))
+
+(test-assert "pack 2"
+             (let ((g (pack '(a e a a e a b d b b c c c c))))
+               (and (member '(a a a a) g)
+                    (member '(b b b) g)
+                    (member '(c c c c) g)
+                    (member '(e e) g)
+                    (member '(d) g))))
+
 (test-equal "classify 1"
             (classify '(0 1 0 4 2 3 6) zero? odd? (lambda (x) (= x 4)))
             '((0 0) (3 1) (4) (6 2)))
@@ -159,39 +197,5 @@
 (test-equal "replicate"
             (replicate 2 '(a b c))
             '(a a a b b b c c c))
-
-(test-assert "pack 1"
-             (let ((g (pack '(a a a a b b b c c c))))
-               (and (member '(a a a a) g)
-                    (member '(b b b) g)
-                    (member '(c c c) g))))
-
-(test-assert "pack 2"
-             (let ((g (pack '(a e a a e a b d b b c c c c))))
-               (and (member '(a a a a) g)
-                    (member '(b b b) g)
-                    (member '(c c c c) g)
-                    (member '(e e) g)
-                    (member '(d) g))))
-
-(test-equal "n-groups"
-            (n-groups 3 '(a b c d e f g h i j k l m n o p q))
-            '((a b c d e f) (g h i j k l) (m n o p q)))
-
-(test-equal "group 1"
-            (group 3 '(a b c d e f g h i j k l m n o p q))
-            '((a b c) (d e f) (g h i) (j k l) (m n o) (p q)))
-
-(test-equal "group 2"
-            (group '(2 1 4) '(a b c d e f g h i j k l m n o p q))
-            '((a b) (c) (d e f g) (h i j k l m n o p q)))
-
-(test-equal "group 3"
-            (group '(2 1 4 10 20) '(a b c d e f g h i j k l m n o p q))
-            '((a b) (c) (d e f g) (h i j k l m n o p q)))
-
-(test-equal "group 4"
-            (group '(2 1 4 5 10 20) '(a b c d e f g h i j k l m n o p q))
-            '((a b) (c) (d e f g) (h i j k l) (m n o p q)))
 
 (test-end)

@@ -10,9 +10,13 @@
           cars
           cdrs
           list-ref-right
+          list-swap!
+          shift!
+          unshift!
+          ;; Rotation
           rotate-left
           rotate-right
-          list-swap!
+          ;; Map/fold variants
           map*
           map**
           map/values
@@ -25,6 +29,7 @@
           pair-fold-2
           andmap
           ormap
+          ;; Insertion/Removal
           insert-at
           insert-left-first
           insert-left
@@ -37,6 +42,13 @@
           remove-first
           remove-any
           remove-every
+          x-substitute
+          substitute-first
+          substitute
+          x-subst*
+          substitute-first*
+          substitute*
+          ;; Searching
           find-remove
           find+remove
           find-rotate
@@ -45,28 +57,25 @@
           most/generator
           max/generator
           min/generator
-          x-substitute
-          substitute-first
-          substitute
-          x-subst*
-          substitute-first*
-          substitute*
+          ;; Shape
           flatten
           flatten-unordered
           flatten-tag
           list->skeleton
           expand-skeleton
           apply-skeleton
+          ;; Fragmentation/grouping
           slice
           slice!
-          split-in-halves
-          split-in-halves!
+          split-n
+          split-middle
+          split-middle!
+          group
+          pack
           classify
           classify-ordered
+          ;; Misc
           replicate
-          pack
-          n-groups
-          group
           ticker!)
   (import (spheres/core base)
           (spheres/algorithm list))
