@@ -65,3 +65,47 @@
                      rest)
                 rest))))
 
+;;! All subsets of a given size
+;; .author Oleg Kiselyov
+(define (subsets l n)
+  ;; The initialization function. Check the boundary conditions
+  (define (loop l ln n accum)
+    (cond
+     ((<= n 0) (cons '() accum))
+     ((< ln n) accum)
+     ((= ln n) (cons l accum))
+     ((= n 1)
+      (let fold ((l l) (accum accum))
+	(if (null? l) accum
+	    (fold (cdr l) (cons (cons (car l) '()) accum)))))
+     (else
+      (split l ln n accum))))
+  ;; split l in two parts a and b so that (length b) is n
+  ;; Invariant: (equal? (append a b) l)
+  ;; ln is the length of l
+  (define (split l ln n accum)
+    (let loop  ((a '()) (b l) (lna 0) (lnb ln))
+      (if (= lnb n) (cont a lna b lnb n accum)
+	  (loop (cons (car b) a) (cdr b) (+ 1 lna) (- lnb 1)))))
+  ;; The main body of the algorithm
+  (define (cont a lna b lnb n accum)
+    (let* ((accum
+	    (loop a lna n accum))
+	   (accum              ; this is actually (loop b lnb n accum)
+	    (cons b accum))
+	   )
+      (let inner ((k 1) (accum accum))
+	(if (> k (min lna (- n 1))) ; don't loop past meaningful boundaries
+	    accum
+	    (let ((as (loop a lna k '()))
+		  (bs (loop b lnb (- n k) '())))
+	      (inner (+ 1 k)
+                                        ; compute the cross-product of as and bs
+                                        ; and append it to accum
+		     (let fold ((bs bs) (accum accum))
+		       (if (null? bs) accum
+			   (fold (cdr bs)
+				 (append 
+				  (map (lambda (lst) (append lst (car bs))) as)
+				  accum))))))))))
+  (loop l (length l) n '()))

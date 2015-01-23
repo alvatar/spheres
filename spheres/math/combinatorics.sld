@@ -3,7 +3,8 @@
           permutations
           combinations
           non-continuous-sequences
-          power-set)
+          power-set
+          subsets)
   (import (spheres/math arithmetic))
 
   (include "combinatorics.scm"))
