@@ -1,3 +1,6 @@
+;;!!! Arithmetic
+;; .author Álvaro Castro-Castilla, 2012-2015. See LICENSE file.
+
 (define-library (spheres/math arithmetic)
   (export pi
           pi2
@@ -14,20 +17,12 @@
           sqrt2
           sqrt1/2
           euler
-          ->integer
+          ;; Arithmetic functions
           logN
           sum
           product
           inverse
           square
-          factorial
-          extended-gcd
-          modulo-inverse
-          expt-mod
-          totient
-          modulo-power
-          random-exact
-          random-exact/-1/+1
-          random-prime)
+          factorial)
 
   (include "arithmetic.scm"))
