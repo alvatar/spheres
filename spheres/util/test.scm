@@ -125,9 +125,7 @@
 (define (test-runner-get)
   (let ((r (test-runner-current)))
     (if (not r)
-	(cond-expand
-	 (srfi-23 (error "test-runner not initialized - test-begin missing?"))
-	 (else #t)))
+	(error "test-runner not initialized - test-begin missing?"))
     r))
 
 (define (%test-specificier-matches spec runner)
@@ -193,9 +191,7 @@
 		    (if (string? test-log-to-file) test-log-to-file
 			(string-append suite-name ".log")))
 		   (log-file
-		    (cond-expand (mzscheme
-				  (open-output-file log-file-name 'truncate/replace))
-				 (else (open-output-file log-file-name)))))
+		    (open-output-file log-file-name)))
 	      (display "%%%% Starting test " log-file)
 	      (display suite-name log-file)
 	      (newline log-file)
@@ -243,9 +239,7 @@
 (define (test-on-bad-end-name-simple runner begin-name end-name)
   (let ((msg (string-append (%test-format-line runner) "test-end " begin-name
 			    " does not match test-begin " end-name)))
-    (cond-expand
-     (srfi-23 (error msg))
-     (else (display msg) (newline)))))
+    (error msg)))
   
 (define (%test-final-report1 value label port)
   (if (> value 0)
@@ -448,10 +442,16 @@
 (define (test-runner-test-name runner)
   (test-result-ref runner 'test-name ""))
 
-(define (%test-approximimate= error)
+(define (%test-approximate= error)
   (lambda (value expected)
-    (and (>= value (- expected error))
-         (<= value (+ expected error)))))
+    (let ((rval (real-part value))
+          (ival (imag-part value))
+          (rexp (real-part expected))
+          (iexp (imag-part expected)))
+      (and (>= rval (- rexp error))
+           (>= ival (- iexp error))
+           (<= rval (+ rexp error))
+           (<= ival (+ iexp error))))))
 
 ;;!! Predicates
 
@@ -526,6 +526,4 @@
 	 (form (read port)))
     (if (eof-object? (read-char port))
 	(eval form)
-	(cond-expand
-	 (srfi-23 (error "(not at eof)"))
-	 (else "error")))))
+	(error "(not at eof)"))))
