@@ -18,7 +18,6 @@
           (spheres/codec bignum)
           (spheres/codec base64)
           (spheres/crypto digest)
-          (spheres/math arithmetic)
           (spheres/string u8))
   
   (include "rsa.scm"))
