@@ -53,7 +53,8 @@
           eqv?+
           equal?+
           type-of
-          coerce)
+          coerce
+          ->integer)
   (cond-expand
    (gambit
     (import (gambit)))
