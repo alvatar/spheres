@@ -2,7 +2,7 @@
 ;; .author Alvaro Castro-Castilla, 2012-2014
 
 ;;! Reservoir Sampling. Get a number of random elements from a list or stream
-(define random-sample 
+(define random-sample
   (match-lambda*
    ((size (? list? input))
     (random-sample size (list->stream input)))

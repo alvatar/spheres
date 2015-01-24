@@ -9,6 +9,7 @@
     (spheres/algorithm/random pick-unique)
     (spheres/algorithm/random pick)
     (spheres/algorithm/random sample-ordered)
+    (spheres/algorithm/random sample-tree)
     (spheres/algorithm/random sample)
     (spheres/algorithm shuffle)
     (spheres/algorithm/shuffle binary)

@@ -6,7 +6,9 @@
           random-pick-unique
           random-extract
           random-sample
-          random-sample-ordered)
+          random-sample-ordered
+          random-node
+          random-node/leaves)
   (import (spheres/core base)
           (spheres/core match)
           (spheres/algorithm list)
@@ -18,4 +20,5 @@
   (include "random/pick-unique.scm")
   (include "random/extract.scm")
   (include "random/sample.scm")
-  (include "random/sample-ordered.scm"))
+  (include "random/sample-ordered.scm")
+  (include "random/sample-tree.scm"))
