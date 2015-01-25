@@ -343,10 +343,10 @@
 ;;! Include and load all library files and dependencies
 (define^ %load-library
   (let ((loaded-libs '()))
-    (lambda (lib #!key compile only-syntax)
+    (lambda (lib #!key compile only-syntax force)
       (let recur ((lib lib))
         (for-each recur (%library-imports lib))
-        (if (not (member lib loaded-libs))
+        (if (or force (not (member lib loaded-libs)))
             (let ((lib-path-root (%find-library-path-root lib))
                   (lib-path (%find-library-path lib)))
               (if compile (%call-task lib-path-root 'compile lib))
