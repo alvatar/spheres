@@ -71,6 +71,7 @@
           split-middle
           split-middle!
           group
+          group-by
           pack
           classify
           classify-ordered

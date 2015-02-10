@@ -857,6 +857,20 @@
                                         (list +inf.0)
                                         size-list-tail)))))))))
 
+;; Group a list of elements by some key attribute.
+;; The list must be in sorted order with respect to the key.
+;; .author Kon Lovett
+;;
+;; examples:
+;; (group/key identity '(1 2 3 3 4 4 4)) --> ((1) (2) (3 3) (4 4 4))
+(define (group-by proc #!optional (equals equal?))
+  (lambda (ls)
+    (let loop ((ls ls) (acc '()))
+      (if (null? ls) acc #;(reverse! acc)
+          (let ((key (proc (car ls))))
+            (receive (grouped rest) (span (lambda (item) (equals key (proc item))) ls)
+                     (loop rest (cons grouped acc))))))))
+
 ;;! Makes groups of equal elements (disordered)
 ;; '(a a a a b b b b c c d d d) -> '((a a a a) (b b b b) (c c) (d d d))
 (define (pack lst)
