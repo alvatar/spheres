@@ -7,6 +7,7 @@
           base64-string->u8vector
           subu8vector->base64-string
           u8vector->base64-string)
+  (import (spheres/structure fifo))
   (import (spheres/algorithm u8vector))
 
   (include "base64.scm"))
