@@ -1,6 +1,6 @@
-;;; Copyright (c) 2005-2007 by Marc Feeley, All Rights Reserved.
-;;; Modifications:
-;;; Copyright (c) 2014 by Álvaro Castor-Castilla, All Rights Reserved.
+;;!!! Base64 encoding
+;; .author Marc Feeley. Copyright (c) 2005-2007 by Marc Feeley, All Rights Reserved.
+;; .author Álvaro Castor-Castilla, 2014-2015. Minor modifications and compatibility.
 
 ;; TODO: change the interface so that a base64 encoder and decoder is
 ;; really a generic port.  This way the I/O procedures can be used to
