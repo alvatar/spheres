@@ -1,3 +1,3 @@
-(##spheres-load core: testing)
+(%load-library '(spheres/util test))
 
-(##spheres-load record)
+(%load-library '(spheres/object record))
