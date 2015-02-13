@@ -1,10 +1,9 @@
-(##spheres-load energy: testing)
+(%load-library '(spheres/util test))
 
-(##spheres-include core: base-macros)
-(##spheres-include core: match-macros)
-(##spheres-include type-class-macros)
-
-(##spheres-load fabric: algorithm/list)
+(%load-library '(spheres/object type-class))
+(%load-library '(spheres/core base))
+(%load-library '(spheres/core match))
+(%load-library '(spheres/algorithm list))
 
 (test-begin "Type-classes")
 

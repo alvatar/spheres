@@ -57,6 +57,8 @@
     (spheres/math prime)
     (spheres/math vect2)
     (spheres/object prototype)
+    (spheres/object record)
+    (spheres/object type-class)
     (spheres/os arguments)
     (spheres/os date-time)
     (spheres/os functional-arguments)
@@ -91,7 +93,8 @@
     ((spheres/gambit/ffi macros) gambit only-macros)
     ((spheres/gambit/ffi memory) gambit)
     ((spheres/gambit/ffi serialization) gambit)
-    ((spheres/gambit/ffi types) gambit only-macros)))
+    ((spheres/gambit/ffi types) gambit only-macros)
+    ((spheres/object type-class) only-macros)))
 
 (define-task (compile library) ()
   (define (compile-library lib)
