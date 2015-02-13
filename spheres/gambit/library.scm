@@ -363,7 +363,8 @@
                             (for-each (lambda (f)
                                         (let ((file-path (path-strip-extension
                                                           (string-append lib-path (cadr f)))))
-                                          (if verbose (println (string-append "loading: " (load file-path))))))
+                                          (let ((load-result (load file-path)))
+                                            (if verbose (println (string-append "loading: " load-result))))))
                                       eval&get-includes))))
                     ;; Default procedure file is only loaded if there is no *.sld
                     (if (and procedures-file
