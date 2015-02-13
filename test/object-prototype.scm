@@ -1,15 +1,9 @@
-(##spheres-load energy: testing)
+(%load-library '(spheres/util test))
 
-(##spheres-load prototype)
-(##spheres-load strings: format)
+(%load-library '(spheres/object prototype))
 
 (test-begin "Prototype-based object system")
 
-
-
-
-
-  
 ;; Helpers
 (define (->integer n)
   ;; return integer closest to n
