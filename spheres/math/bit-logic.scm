@@ -8,8 +8,13 @@
 (define logior bitwise-ior)
 (define logxor bitwise-xor)
 (define lognot bitwise-not)
-(define bitwise-if bitwise-merge)
 (define logtest any-bits-set?)
+
+;;! bitwise-if and bitwise-merge are defined with complementary mask
+;; i.e. switch parameters
+(define (bitwise-merge mask a b)
+  (##bitwise-merge mask b a))
+(define bitwise-if bitwise-merge)
 
 ;;!! Integer properties
 (define logcount bit-count)
