@@ -45,6 +45,7 @@
     (spheres/gambit/ffi memory)
     (spheres/gambit/ffi serialization)
     (spheres/gambit/ffi types)
+    (spheres/io filesystem)
     (spheres/math arithmetic)
     (spheres/math arithmetic-inexact)
     (spheres/math arithmetic-modular)
