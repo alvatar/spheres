@@ -344,6 +344,10 @@
 (define^ %load-library
   (let ((loaded-libs '()))
     (lambda (lib #!key compile only-syntax force (verbose #t))
+      (define (load* file)
+        (let ((load-result (load file)))
+          (if verbose
+              (println (string-append "loading: " load-result)))))
       (let recur ((lib lib))
         (for-each recur (%library-imports lib))
         (if (or force (not (member lib loaded-libs)))
@@ -359,12 +363,12 @@
                       (if verbose (println "including: " (path-expand sld-file)))
                       (let ((eval&get-includes (%library-eval-syntax&find-includes sld-file)))
                         (if (not only-syntax)
-                            (for-each (lambda (f)
-                                        (let ((file-path (path-strip-extension
-                                                          (string-append lib-path (cadr f)))))
-                                          (let ((load-result (load file-path)))
-                                            (if verbose (println (string-append "loading: " load-result))))))
-                                      eval&get-includes))))
+                            (if procedures-file
+                                (load* procedures-file)
+                                (for-each (lambda (f)
+                                            (load* (path-strip-extension
+                                                    (string-append lib-path (cadr f)))))
+                                          eval&get-includes)))))
                     ;; Default procedure file is only loaded if there is no *.sld
                     (if (and procedures-file
                              (not only-syntax))
