@@ -353,8 +353,7 @@
               (let ((sld-file (%find-library-sld lib))
                     (procedures-file (or (%find-library-default-object lib)
                                          (%find-library-default-scm lib))))
-                (or only-syntax
-                    (set! loaded-libs (cons lib loaded-libs)))
+                (set! loaded-libs (cons lib loaded-libs))
                 (if sld-file
                     (begin
                       (if verbose (println "including: " (path-expand sld-file)))
