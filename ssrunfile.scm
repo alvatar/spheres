@@ -47,6 +47,7 @@
     (spheres/gambit/ffi types)
     (spheres/io filesystem)
     (spheres/markup html)
+    (spheres/markup html-escape)
     (spheres/markup ssax)
     (spheres/markup sxml-tree-transform)
     (spheres/math arithmetic)
