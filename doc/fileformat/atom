@@ -1,0 +1,947 @@
+== atom
+
+Read and write Atom 1.0 feeds.
+
+=== Overview
+
+[[atom]] provides the means to read
+[[http://tools.ietf.org/html/rfc4287|RFC 4287]] conforming Atom 1.0
+documents, which are either feeds or single entries.  Procedures are
+provided to access child elements of feeds and entries, such as the
+feed author, and also to access the child elements and contents of
+these children, such as author name and email.
+
+Elements themselves are returned as plain SXML documents, which are
+for the most part verbatim copies of the XML input elements.  This is
+true even for the Atom document itself, which is the SXML
+representation of the original XML document.  This means that if
+desired, you can access elements or the entire document using standard
+list deconstructors or [[sxpath]] rather than the provided accessors.
+
+For example, accessing the feed author returns an {{atom:author}} child:
+
+ > (feed-author feed)
+   ;=> (atom:author (atom:name "A. Hacker")
+                    (atom:uri "http://www.hacker.dim")
+                    (atom:email "buzz+off@hacker.dim"))
+
+and you can either use the accessors, or deconstruct the result manually:
+
+ > (author-name (feed-author feed))
+   ;=> "A. Hacker"
+ > (cadr (assq 'atom:name (cdr (feed-author G))))
+   ;=> "A. Hacker"
+
+Or for a list of all people (authors, contributors, etc.) mentioned in
+{{atom:name}} elements anywhere in the feed:
+
+ > (delete-duplicates ((sxpath '(// atom:name *text*)) feed))
+   ;=> ("A. Hacker" "A. Contributor" "A. Groupie")
+
+Element contents and element attributes are generally returned as text
+strings.  This includes HTML contents, which will be unescaped for
+you.  It also includes RFC3339 datetime strings, which can be
+deconstructed using the [[rfc3339]] egg, and URIs, which can be
+manipulated with [[uri-common]].  Certain elements may contain XHTML
+or XML documents; special accessors for these elements are provided,
+which return their contents as SXML.
+
+The same rules apply when creating a document; elements may be
+generated using their constructors or created directly in SXML
+if you understand the format.  For example, these two excerpts
+are equivalent:
+
+ > (make-feed authors: (list (make-author name: "Jim" 
+                                          email: "himmy@pimmy.dim"))
+              ...)
+ > (make-feed authors: (list '(atom:author (atom:name "Jim")
+                                           (atom:email "himmy@pimmy.dim")))
+              ...)
+
+except that {{make-author}} checks its input, ensuring the required {{name}}
+element is present and that all arguments are strings.  Other constructors
+may do more complicated constraint checking or simplify element creation.
+
+=== Read interface
+
+==== Atom document
+
+<procedure>(read-atom-doc port)</procedure>
+
+Reads an Atom Feed Document or Atom Entry Document from PORT and
+returns an SXML document representing the entire XML document,
+including any processing instructions.  If the document is not
+readable as XML or does not contain a single {{atom:feed}} or {{atom:entry}}
+root element, an error is thrown.
+
+<procedure>(atom-doc-root doc)</procedure>
+
+Return the root element of the document, which will be an {{atom:feed}}
+or {{atom:entry}} node.
+
+<procedure>(atom-doc-encoding doc)</procedure>
+
+Return XML document encoding as provided in the document; defaults to "utf-8".
+
+<procedure>(read-atom-feed port)</procedure>
+
+Convenience function which reads an Atom Feed Document and returns the
+root {{atom:feed}} element.  If this fails, an error is thrown.
+
+<procedure>(read-atom-entry port)</procedure>
+
+Convenience function which reads an Atom Entry Document and returns the
+root {{atom:entry}} element.  If this fails, an error is thrown.
+
+==== Feeds
+
+<record>atom:feed</record>
+
+An {{atom:feed}} element, which represents an Atom feed.  Records such
+as {{atom:feed}} are just SXML documents (list structures) like
+
+ (atom:feed (atom:author ...) (atom:title ...) ...)
+
+and can be queried either via the provided
+accessors, or directly via list destructuring if desired.
+
+<procedure>(feed? F)</procedure>
+
+Returns true if F is an {{atom:feed}} element.
+
+<procedure>(feed-authors F)</procedure>
+<procedure>(feed-author F)</procedure>
+
+{{feed-authors}} returns a list of feed authors; that is,
+{{atom:author}} children of the feed.  A null list designates no
+authors.
+
+{{feed-author}} returns the first feed author, or {{#f}} if none.
+
+Feeds must contain at least one author element unless every
+feed entry contains one, as the default authorship for entries
+is that of the feed.
+
+<procedure>(feed-categories F)</procedure>
+
+Returns a list of feed categories ({{atom:category}} children), or null.
+
+<procedure>(feed-contributors F)</procedure>
+
+Returns a list of feed contributors ({{atom:contributor}} children), or null.
+
+<procedure>(feed-generator F)</procedure>
+
+Returns the feed generator (the {{atom:generator}} child), or {{#f}} if none.
+
+<procedure>(feed-icon F)</procedure>
+
+Returns the feed icon (the {{atom:icon}} child), or {{#f}} if none.
+
+<procedure>(feed-id F)</procedure>
+
+Returns the feed ID as a string (the text contents of the {{atom:id}}
+child), or the empty string if no ID.  The ID is required in an Atom
+feed.
+
+<procedure>(feed-links F)</procedure>
+
+Returns a list of feed links ({{atom:link}} children), or null.
+
+<procedure>(feed-logo F)</procedure>
+
+Returns the feed logo ({{atom:logo}} child), or {{#f}} if none.
+
+<procedure>(feed-rights F)</procedure>
+
+Returns the feed rights ({{atom:rights}} child), or {{#f}} if none.
+
+<procedure>(feed-subtitle F)</procedure>
+
+Returns the feed subtitle ({{atom:subtitle}} child), or {{#f}} if none.
+
+<procedure>(feed-title F)</procedure>
+
+Returns the feed title ({{atom:title}} child), or {{#f}} if none.
+The Atom spec requires a feed title.
+
+<procedure>(feed-updated F)</procedure>
+
+Returns an [[rfc3339]] string representing the last time the feed was updated.
+The Atom spec requires this field to be present.
+
+<procedure>(feed-entries F)</procedure>
+
+Return a list of feed entries ({{atom:entry}} children), or null.
+
+==== Entries
+
+<record>atom:entry</record>
+
+An {{atom:entry}} element, which represents an Atom entry.  Records such
+as {{atom:entry}} are just SXML documents (list structures) like
+
+ (atom:entry (atom:author ...) (atom:id ...) ...)
+
+and can be queried either via the provided accessors, or directly if
+desired.
+
+<procedure>(entry? E)</procedure>
+
+Returns true if E is an {{atom:entry}}.
+
+<procedure>(entry=? E1 E2)</procedure>
+
+Returns true if E1 and E2 represent the same {{atom:entry}}.  This
+tests the entry IDs for equivalence.
+
+<procedure>(entry-authors E)</procedure>
+<procedure>(entry-author E)</procedure>
+
+{{entry-authors}} returns a list of entry authors; that is,
+{{atom:author}} children of the entry.  A null list designates no
+authors.
+
+{{entry-author}} returns the first entry author, or {{#f}} if none.
+
+Each entry must have at least one author.  If not present as a child
+of the entry, it must be present in the entry's source feed element
+(for aggregated content), or in the feed element itself.
+
+Currently, you must handle this manually.  One possibility is:
+
+ (or (entry-author E)
+     (feed-author F))
+
+<procedure>(entry-categories E)</procedure>
+
+Returns a list of entry categories ({{atom:category}} children), or null.
+
+<procedure>(entry-contributors E)</procedure>
+
+Returns a list of entry contributors ({{atom:contributor}} children), or null.
+
+<procedure>(entry-content E)</procedure>
+
+Returns the entry content (the {{atom:content}} child), or {{#f}} if none.
+Entries need not contain a content element, but if not, they must contain
+an {{atom:link}} with a {{link-relation}} of "alternate".
+
+<procedure>(entry-id E)</procedure>
+
+Returns the entry ID as a string (the text contents of the {{atom:id}}
+child), or the empty string if no ID.  Atom entries must contain
+exactly one {{atom:id}} element.
+
+<procedure>(entry-links E)</procedure>
+
+Returns a list of entry links ({{atom:link}} children), or null.
+
+<procedure>(entry-published E)</procedure>
+
+Returns an [[rfc3339]] datetime string, typically representing
+the entry's initial creation time or first availability.
+
+<procedure>(entry-rights E)</procedure>
+
+Returns the entry rights ({{atom:rights}} child), or {{#f}} if none.
+
+If no entry rights are present, the feed's rights are considered
+to apply.  Currently, you must do this manually:
+
+ (or (entry-rights E)
+     (feed-rights F))
+
+<procedure>(entry-source E)</procedure>
+
+Returns the entry's source feed information ({{atom:source}} child), or {{#f}} if none.
+
+The entry's source feed is used by Atom content aggregators to record
+information on where the entry came from.
+
+<procedure>(entry-summary E)</procedure>
+
+Returns the entry summary ({{atom:summary}} child), or {{#f}} if none.
+The summary must be present if the entry's content is of kind
+{{'external}} or {{'binary}}.
+
+<procedure>(entry-title E)</procedure>
+
+Returns the entry title ({{atom:title}} child), or {{#f}} if none.
+Atom entries must contain exactly one {{atom:title}} element.
+
+<procedure>(entry-updated E)</procedure>
+
+Returns an [[rfc3339]] string representing the last time the entry was updated.
+Atom entries must contain exactly one {{atom:updated}} element.
+
+==== Persons
+
+<record>atom:author</record>
+<procedure>(author? A)</procedure>
+<procedure>(author-name A)</procedure>
+<procedure>(author-uri A)</procedure>
+<procedure>(author-email A)</procedure>
+
+Predicate and accessors for {{atom:author}} elements, representing
+the authors of the feed or entry.
+
+; name : (''required by spec'') the author's name, a string
+; uri : a URI associated with the author, a string
+; email : the author's email address, a string conforming to RFC2822
+
+Accessors return the empty string if the field is not present.
+
+<record>atom:contributor</record>
+<procedure>(contributor? A)</procedure>
+<procedure>(contributor-name A)</procedure>
+<procedure>(contributor-uri A)</procedure>
+<procedure>(contributor-email A)</procedure>
+
+Predicate and accessors for {{atom:contributor}} elements, representing
+contributors to the feed or entry.
+
+; name : (''required by spec'') the contributor's name, a string
+; uri : a URI associated with the contributor, a string
+; email : the contributor's email address, a string conforming to RFC2822
+
+Accessors return the empty string if the field is not present.
+
+==== Rights, Summary, Title, Subtitle
+
+<record>atom:rights</record>
+<procedure>(rights? A)</procedure>
+<procedure>(rights-type A)</procedure>
+<procedure>(rights-text A)</procedure>
+<procedure>(rights-xhtml A)</procedure>
+
+Predicate and accessors for {{atom:rights}} elements, which represent
+human-readable rights information for the feed.  This element is an
+''atomtextConstruct'', so it may contain either text (here meaning
+either plain text or HTML), or XHTML content.
+
+{{rights-type}} will return the type of content as a symbol:
+
+; 'text : text content
+; 'html : html content (considered to be text)
+; 'xhtml : XHTML content
+
+{{rights-text}} returns the contents of the element as a string, and is
+what you should use for 'text or 'html types.  HTML will be unescaped for
+you, but is still returned as a string.  It returns the empty string if
+no text is present.
+
+{{rights-xhtml}} returns the XHTML contents of the element as an SXML
+document.  The root element inside the contents ''must'' be an XHTML div
+({{xhtml:div}}).  If such an element is not found, it returns
+{{#f}}.  Note that we return the div as the root of the SXML document,
+but the Atom spec says you must not consider the div itself
+part of the content.
+
+<record>atom:summary</record>
+<procedure>(summary? A)</procedure>
+<procedure>(summary-type A)</procedure>
+<procedure>(summary-text A)</procedure>
+<procedure>(summary-xhtml A)</procedure>
+
+Predicate and accessors for {{atom:summary}} elements, representing
+an excerpt or abstract for an entry.  For meaning,
+see {{atom:rights}}.
+
+<record>atom:subtitle</record>
+<procedure>(subtitle? A)</procedure>
+<procedure>(subtitle-type A)</procedure>
+<procedure>(subtitle-text A)</procedure>
+<procedure>(subtitle-xhtml A)</procedure>
+
+Predicate and accessors for {{atom:subtitle}} elements, representing
+a subtitle for the feed.  For meaning, see {{atom:rights}}.
+
+<record>atom:title</record>
+<procedure>(title? A)</procedure>
+<procedure>(title-type A)</procedure>
+<procedure>(title-text A)</procedure>
+<procedure>(title-xhtml A)</procedure>
+
+Predicate and accessors for {{atom:title}} elements, representing
+a title for the feed or entry.  For meaning, see {{atom:rights}}.
+
+==== Generators
+
+<record>atom:generator</record>
+<procedure>(generator? G)</procedure>
+<procedure>(generator-agent G)</procedure>
+<procedure>(generator-uri G)</procedure>
+<procedure>(generator-version G)</procedure>
+
+Predicate and accessors for {{atom:generator}} elements, which
+represent the (machine) agent that generated the feed.
+
+; agent: a human-readable, plain-text name for the generating agent, as a string
+; uri: URI relevant to the agent, as a string
+; version: version of the generating agent, as a string
+
+==== Icons & Logos
+
+<record>atom:icon</record>
+<procedure>(icon? I)</procedure>
+<procedure>(icon-uri I)</procedure>
+
+Predicate and accessors for {{atom:icon}} elements, which represent
+iconic visual identification for the feed.  {{icon-uri}} returns a URI string
+which points to the icon image.
+
+<record>atom:logo</record>
+<procedure>(logo? I)</procedure>
+<procedure>(logo-uri I)</procedure>
+
+Predicate and accessors for {{atom:logo}} elements, which represent
+visual identification for the feed.  {{logo-uri}} returns a URI string
+which points to the logo image.
+
+==== Categories
+
+<record>atom:category</record>
+<procedure>(category? I)</procedure>
+<procedure>(category-term I)</procedure>
+<procedure>(category-scheme I)</procedure>
+<procedure>(category-label I)</procedure>
+<procedure>(category-contents C)</procedure>
+
+Predicate and accessors for {{atom:category}} elements, which
+represent the categorization of the feed or entry.
+
+; term : (''required by spec'') category name, as a string
+; scheme : URI that identifies a categorization scheme, as a string
+; label : human-readable plain-text label for the category, as a string
+; contents : Contents of the category element as an SXML document; undefined by the specification, but it might be useful.
+
+{{term}}, {{scheme}} and {{label}} accessors return {{#f}} for missing
+information instead of the empty string as {{atom:author}} and
+{{atom:rights}} accessors do.  This inconsistency is probably a bug.
+
+==== Links
+
+<record>atom:link</record>
+<procedure>(link? L)</procedure>
+<procedure>(link-uri L)</procedure>
+<procedure>(link-relation L)</procedure>
+<procedure>(link-type L)</procedure>
+<procedure>(link-uri-language L)</procedure>
+<procedure>(link-title L)</procedure>
+<procedure>(link-length L)</procedure>
+<procedure>(link-contents L)</procedure>
+
+Predicate and accessors for {{atom:link}} elements, which represent a
+reference from an entry or feed to a Web resource.
+
+; uri : (''required by spec'') the URI (@href) of the link, as a string
+; relation : the link relation type (@rel) as a string (defaults to "alternate" if not present)
+; title : human-readable, plain-text title for the link, as a string
+; type : advisory MIME media type for the referenced resource, as a string
+; length : advisory length in octets for the referenced resource, as an exact integer
+; uri-language : an [[http://tools.ietf.org/html/rfc3066|RFC3066]] language tag (@hreflang) for the referenced resource, as a string
+; contents : Contents of the atom:link element as an SXML document; undefined by the specification, and unlikely to be present
+
+Accessors return {{#f}} if the associate attribute is not present in the document,
+except for {{link-relation}}, which returns "alternate".
+
+==== Source feeds
+
+<record>(source? S)</record>
+<procedure>(source-authors S)</procedure>
+<procedure>(source-author S)</procedure>
+<procedure>(source-categories S)</procedure>
+<procedure>(source-contributors S)</procedure>
+<procedure>(source-generator S)</procedure>
+<procedure>(source-icon S)</procedure>
+<procedure>(source-id S)</procedure>
+<procedure>(source-links S)</procedure>
+<procedure>(source-logo S)</procedure>
+<procedure>(source-rights S)</procedure>
+<procedure>(source-subtitle S)</procedure>
+<procedure>(source-title S)</procedure>
+<procedure>(source-updated S)</procedure>
+
+Predicate and accessors for {{atom:source}} elements, which represent
+metadata about the source feed from which the containing entry was
+taken, and are used for feed aggregators.
+
+Accessors have the same meaning as the corresponding accessors [[#Feeds|for
+feeds]].
+
+==== Content
+
+<record>atom:content</record>
+<procedure>content?</procedure>
+<procedure>(content-kind C)</procedure>
+<procedure>(content-type C)</procedure>
+<procedure>(content-source C)</procedure>
+<procedure>(content-text C)</procedure>
+<procedure>(content-xhtml C)</procedure>
+<procedure>(content-xml C)</procedure>
+<procedure>(content-contents C)</procedure>
+
+Predicate and accessors for {{atom:content}} elements, which represent
+feed or entry content.
+
+Atom content types may be one of "text", "html", "xhtml", or any valid
+MIME type; further, the structure and meaning of the content itself
+depends on the MIME type.  To simplify this, we normalize the MIME type
+and we categorize it by kind:
+
+; type : The indicated MIME media type of the contents.  If the type in the source document is {{text}}, {{html}}, or {{xhtml}}, we normalize this to {{text/plain}}, {{text/html}}, or {{application/xhtml+xml}} respectively. If no type is explicitly indicated, it defaults to {{text/plain}}.
+; kind : The computed "kind" of the contents, as a symbol.  This determines how you should handle the content.
+
+{{kind}} may be one of the following symbols, which represent
+
+; text : plain text ({{text/plain}}), the default
+; html : HTML text ({{text/html}})
+; xhtml : an XHTML div element ({{application/xhtml+xml}})
+; xml : XML; any MIME type string ending with {{/xml}} or {{+xml}}, or one of the [[http://tools.ietf.org/html/rfc3023|RFC3023]] XML media types
+; textual : text data; any other MIME type starting with {{text/}}
+; binary : base64-encoded binary data; any other MIME type other than those mentioned above
+; external : external data pointed to by a URI
+
+To obtain the content, you should use the proper accessor based on the kind:
+
+; text : {{content-text}}, returning a string (or empty string, if no content)
+; html : {{content-text}}, returning an unescaped HTML string (or empty string)
+; xhtml : {{content-xhtml}}, returning the XHTML div element as SXML, or {{#f}}
+; xml : {{content-xml}}, returning the root element (whatever it is) as SXML, or {{#f}} [*]
+; textual : {{content-text}}, returning a string (or empty string)
+; binary : {{content-text}}, returning a base64-encoded string; use [[base64]] to decode it
+; external : {{content-source}}, returning the external URI as a string, or {{#f}}
+
+[*] XML contents conventionally consist of a single root element with no siblings, which is returned directly as {{(node ...)}}.  If more than one such element is found, they are all returned wrapped in a {{*TOP*}} node, like {{(*TOP* (node1 ...) (node2 ...) ...)}}.
+
+For {{xml}}, {{textual}}, {{binary}} and {{external}} kinds, you will
+then need to refer to the content media {{type}} to actually process it.
+
+And finally the raw content accessor, just in case:
+
+; contents : Contents of the {{atom:contents}} element as a raw list of nodes.  Does not try to process the content.
+
+==== IDs
+
+<record>atom:id</record>
+<procedure>(id=? id1 id2)</procedure>
+
+Atom IDs are represented by plain strings in this egg, rather than
+{{atom:id}} elements.  ID equality should be tested using {{id=?}},
+which is aliased to {{string=?}}.
+
+=== Write interface
+
+==== Producing an Atom document
+
+<procedure>(write-atom-doc doc #!optional (port (current-output-port)))</procedure>
+
+Write the Atom Feed or Atom Entry Document DOC, an SXML document typically created
+by {{make-atom-doc}}, to PORT.
+
+<procedure>(make-atom-doc root #!key (declare-xml? #t) (encoding "utf-8") (headers '()))</procedure>
+
+Create an Atom Feed Document or Atom Entry Document.  ROOT is the
+{{atom:feed}} or {{atom:entry}} SXML root node, usually created
+by {{make-feed}} or {{make-entry}}.  Returns a SXML document representing
+the entire Atom document, which can be written out using {{write-atom-doc}}.
+
+; declare-xml? : Whether to add an XML declaration to the document, as a boolean value.
+; encoding: The encoding to declare in the (optional) XML declaration, as a string.
+; headers: A list of headers to include in the output document; see below.
+
+Arbitrary headers may be added to the output document.  These headers
+should, generally, be XML processing instructions or comments, since the document
+must consist of only one root node.  For example, you can prepend some stylesheet
+instructions:
+
+ (write-atom-doc
+  (make-atom-doc feed
+   headers: '((*PI* xml-stylesheet
+               "type=\"text/xsl\" href=\"http://3e8.org/styles/atom.xsl\"")
+              (*PI* xml-stylesheet
+               "type=\"text/css\" href=\"http://3e8.org/styles/atom.css\"")))
+ 
+ <?xml version="1.0" encoding="utf-8"?>
+ <?xml-stylesheet type="text/xsl" href="http://3e8.org/styles/atom.xsl"?>
+ <?xml-stylesheet type="text/css" href="http://3e8.org/styles/atom.css"?>
+ <atom:feed xmlns:atom="http://www.w3.org/2005/Atom">
+  ...
+
+Since this procedure just returns a complete SXML document beginning with
+a *TOP* node, you could instead modify the returned document and add any
+processing instructions yourself.  {{headers}} is just a convenient way
+of doing so.
+
+==== Feed constructor
+
+<procedure>(make-feed #!key KEYS)</procedure>
+
+Make a new {{atom:feed}} element, with KEYS corresponding to child elements.
+Raises an error if any required elements are missing.
+
+Required elements:
+
+; authors : a list of atom:author elements, the authors of the feed
+; id : an atom:id string, a permanent, unique absolute IRI identifier
+; title : an atom:title element, a human-readable title for the feed
+; updated : an atom:updated element, an RFC3339 timestamp indicating last update time
+
+Optional elements:
+
+; categories: a list of atom:category elements, the feed categories
+; contributors : a list of atom:contributor elements, the contributors to the feed
+; generator : an atom:generator element, the feed generator
+; icon : an atom:icon element, the feed icon
+; links : a list of atom:link elements, the feed links
+; logo : an atom:logo element, the feed logo
+; rights : an atom:rights element, a human-readable description of rights held over the feed
+; subtitle : an atom:subtitle element, a human-readable subtitle for the feed
+; entries : a list of atom:entry elements, the feed entries
+
+Notes:
+
+* It's a good idea to provide an "alternate" link for your feed and for each entry, pointing to
+the source document.  See [[#Link constructor|make-link]].
+
+* {{authors}} may be omitted if all entries contain authorship information
+(meaning, {{atom:author}} elements as direct children).  {{make-feed}} will detect
+this case.
+
+* If you omit {{generator}}, it defaults to describing this egg.  To completely
+omit the generator element, which would make me sad, pass {{#f}}.
+
+==== Entry constructor
+
+<procedure>(make-entry #!key KEYS)</procedure>
+
+Make a new {{atom:entry}} element, with KEYS corresponding to child elements.
+Raises an error if any required elements are missing.
+
+Required elements:
+
+; id : an atom:id string, a permanent, unique absolute IRI identifier for the entry
+; title : an atom:title element, a human-readable title for the entry
+; updated : an atom:updated element, an RFC3339 timestamp indicating last update time
+
+Optional elements:
+
+; authors : a list of atom:author elements, the authors of the entry
+; categories: a list of atom:category elements, the entry categories
+; contributors : a list of atom:contributor elements, the contributors to the entry
+; content: an atom:content element, the entry content
+; links : a list of atom:link elements, the entry links
+; published : an atom:published element, an RFC3339 timestamp indicating initial creation time
+; rights : an atom:rights element, a human-readable description of rights held over the entry
+; source : an atom:source element, information about the feed source for content aggregators
+; summary : an atom:summary element, a human-readable summary, abstract or excerpt of the entry
+
+Additional notes:
+
+Entry author elements are optional as long as the containing feed
+contains authorship information.  If the feed does not, the entry must
+contain least one author element.  This will be checked in
+{{make-feed}}.
+
+Entry elements without a {{atom:content}} element must contain an {{atom:link}}
+with link-relation "alternate".  This is checked in {{make-entry}}.
+
+Entry summary elements are optional unless an atom:content element is present and
+its content kind is {{'external}} or {{'binary}}.  This is checked in {{make-entry}}.
+
+It is illegal for entries to contain more than one atom:link element
+with a link-relation of "alternate" and the same type and uri-language values.
+This is ''not'' checked in {{make-entry}}.
+
+==== Person constructors
+
+<procedure>(make-author #!key name uri email)</procedure>
+
+Create an atom:author element.
+
+; name : (''required'') the author's name, a string
+; uri : a URI associated with the author, a string
+; email : the author's email address, a string conforming to RFC2822
+
+<procedure>(make-contributor #!key name uri email)</procedure>
+
+Create an atom:contributor element.
+
+; name : (''required'') the contributor's name, a string
+; uri : a URI associated with the contributor, a string
+; email : the contributor's email address, a string conforming to RFC2822
+
+==== Text constructors
+
+<procedure>(make-rights contents #!key (type 'text))</procedure>
+<procedure>(make-subtitle contents #!key (type 'text))</procedure>
+<procedure>(make-summary contents #!key (type 'text))</procedure>
+<procedure>(make-title contents #!key (type 'text))</procedure>
+
+Create a new {{atom:rights}}, {{atom:subtitle}}, {{atom:summary}},
+or {{atom:title}} element with CONTENTS of type TYPE.
+The accepted value for CONTENT varies according to TYPE:
+
+; 'text : (''default'') a plain text string
+; 'html : an HTML string (it will be escaped for you when written to XML)
+; 'xhtml : an XHTML div element as SXML
+
+ > (make-title "Mesoamerican Deities and You")
+   ; => (atom:title (@ (type "text")) "Mesoamerican Deities and You")
+ > (make-rights '(xhtml:div "Copyright (c) 2012 the feathered serpent, "
+                            (xhtml:b "Quetzlcoatl"))
+                type: 'xhtml)
+   ; => (atom:rights (@ (type "xhtml"))
+         (xhtml:div "Copyright (c) 2012 the feathered serpent, "
+                    (xhtml:b "Quetzlcoatl")))
+ > (make-summary
+    "<p>Coping strategies for when your best friend is a 
+    <a href='http://en.wikipedia.org/wiki/Quetzalcoatl'>mythical god</a>
+    and just <i>won't move out</i> of your cramped apartment</p>"
+    type: 'html)
+   ; => (atom:summary (@ (type "html"))
+         "<p>Coping strategies for when your best friend is a
+          <a href='http://en.wikipedia.org/wiki/Quetzalcoatl'>mythical god</a>
+          and just <i>won't move out</i> of your cramped apartment</p>")
+
+==== Generator constructor
+
+<procedure>(make-generator agent #!key uri version)</procedure>
+
+Create an atom:generator element representing the feed generator.
+
+; agent: a human-readable, plain-text name for the generating agent, as a string
+; uri: URI relevant to the agent, as a string
+; version: version of the generating agent, as a string
+
+==== Icon & Logo constructors
+
+<procedure>(make-icon uri)</procedure>
+
+Create an atom:icon element, which represents iconic visual identification for the feed.
+URI should be a URI string pointing to the icon image.
+
+<procedure>(make-logo uri)</procedure>
+
+Create an atom:logo element, which represents visual identification for the feed.
+URI should be a URI string pointing to the logo image.  Compare to {{make-icon}}.
+
+==== ID constructor
+
+IDs are plain strings, and will be automatically converted to
+{{atom:id}} elements when passed to {{make-feed}} or {{make-entry}}.
+No constructors are currently provided.
+
+Each unique entry and feed must contain a unique {{atom:id}}, which
+must be an absolute URI.  One option is to use the permalink of your entry
+or feed in this field.  Another is to use a [[http://www.faqs.org/rfcs/rfc4151.html|tag URI]],
+which is generally considered more robust.  An example tag URI for an entry might look like:
+
+ tag:domain.org,2012-12-21:/blog/the-mayans-are-coming
+
+Also see [[http://tools.ietf.org/html/rfc4287#section-4.2.6|The
+"atom:id" Element]] in RFC 4287 for details on {{atom:id}} and e.g.
+[[http://diveintomark.org/archives/2004/05/28/howto-atom-id|these]]
+[[http://starling.us/atom/#GUS-3|tutorials]] for ideas on ID creation.
+Note that tag URIs have some important restrictions on which characters are valid.
+
+==== Category constructor
+
+<procedure>(make-category #!key term scheme label)</procedure>
+
+Create an atom:category element representing the feed or entry category.
+
+; term : (''required'') category name, as a string
+; scheme : URI that identifies a categorization scheme, as a string
+; label : human-readable plain-text label for the category, as a string
+
+==== Link constructor
+
+<procedure>(make-link #!key uri relation title ...)</procedure>
+
+Create an atom:link element representing a reference from an entry or feed
+to a Web resource.
+
+; uri : (''required'') the URI (@href) of the link
+; relation : (default "alternate") the link relation type (@rel) as a string; see below
+; title : human-readable, plain-text title for the link, as a string
+; type : advisory MIME media type for the referenced resource, as a string or MIME-type symbol
+; length : advisory length in octets for the referenced resource, as an exact integer
+; uri-language : an [[http://tools.ietf.org/html/rfc3066|RFC3066]] language tag (@hreflang) for the referenced resource, as a string
+
+The five common link relations are:
+
+; "alternate" : an alternate version of this resource.  For a feed, it might be a link to your webpage; for an entry, it might be a permalink to your blog entry, with {{type: 'html}}.  Feed readers work better when you include such a link.
+; "self" : a link to this Atom document, usually the URI to your Atom feed with {{type: 'atom}}.
+; "related" : a related link
+; "enclosure" : identifies a "potentially large" external resource; you should provide {{length:}}
+; "via" : a link to the source of the information
+
+For {{type:}}, the currently known MIME-type symbol shortcuts are 'text,
+'html, 'xhtml, and 'atom.  Otherwise, use the full type name as a string.
+
+==== Source constructor
+
+<procedure>(make-source #!key authors categories contributors ...)</procedure>
+
+Create an atom:source element representing the source feed from which
+the containing entry was taken.  This is used by content aggregators
+to preserve metadata about their source feeds.  
+
+See the feed constructor [[#Feed constructor|make-feed]] for the meaning of
+these elements, and then see [[http://tools.ietf.org/html/rfc4287|RFC
+4287]] for what metadata you would typically preserve.
+
+==== Content constructor
+
+<procedure>(make-content content #!key (type 'text) source)</procedure>
+
+Create an atom:content element representing the content of an entry.
+Acceptable values for CONTENT vary according to the value of TYPE.
+
+; type: (default {{'text}}) the MIME media type of the content as a string, or one of the shorthand symbols 'text, 'html or 'xhtml.  See below.
+; source: a source URI the client must dereference to obtain the content, as a string.  In this case, CONTENT is ignored and the element content will be empty.  Use a dummy value for content such as {{#f}} or the empty string.
+
+The content type may be:
+
+; 'text or "text/plain" : a human-readable, plain text string
+; 'html or "text/html" : a string containing HTML markup (which will be escaped for you)
+; 'xhtml or "application/xhtml+xml" : an {{xhtml:div}} element
+; an XML MIME type : an SXML document consisting of a single root node.  An XML MIME type is any MIME type string ending with "/xml" or "+xml", or one of the [[http://tools.ietf.org/html/rfc3023|RFC3023]] XML media types
+; a textual MIME type : a text string; a textual MIME type is any MIME type string starting with "text/"
+; any other MIME type : the content is considered binary, and the user must pass a [[base64]] encoded string as the content.
+
+=== Miscellany
+
+<parameter>(atom-ns-prefixes)</parameter>
+
+An alist of XML namespace prefixes used when reading or writing feeds.
+Most known namespaces relevant to Atom are included, so it is normally
+not necessary to touch this unless you come across an unusual namespace.
+
+A symptom of a missing namespace is that on read, some feed elements
+are qualified with a full URI instead of a prefix abbreviation, and on
+write that some are qualified with namespace 'prfx1:' or the like.
+
+=== Examples
+
+Creating the "extensive" example feed from RFC4287:
+
+<enscript language="scheme">
+(use atom rfc3339)
+(write-atom-doc
+ (make-atom-doc
+  (make-feed
+   title: (make-title "dive into mark")
+   subtitle: (make-subtitle "A <em>lot</em> of effort went into making this effortless"
+			    type: 'html)
+   updated: "2005-07-31T12:29:29Z"
+   id: "tag:example.org,2003:3"
+   links: (list (make-link type: 'html
+			   uri-language: "en"
+			   uri: "http://example.org")
+		(make-link relation: "self"
+			   type: "application/atom+xml"
+			   uri: "http://example.org/feed.atom"))
+   rights: (make-rights "Copyright (c) 2003, Mark Pilgrim")
+   generator: (make-generator "Example Toolkit"
+			      uri: "http://www.example.com"
+			      version: "1.0")
+   entries: (list
+	     (make-entry
+	      title: (make-title "Atom draft-07 snapshot")
+	      links: (list (make-link type: 'html
+				      uri: "http://example.org/2005/04/02/atom")
+			   (make-link relation: "enclosure"
+				      type: "audio/mpeg"
+				      length: 1337
+				      uri: "http://example.org/audio/ph34r_my_podcast.mp3"))
+	      id: "tag:example.org,2003:3.2397"
+	      updated: (rfc3339->string (make-rfc3339 2005 07 31 12 29 29 0 0))
+	      published: (rfc3339->string (make-rfc3339 2003 12 13 08 29 29 0 (* 3600 4)))
+	      authors: (list (make-author name: "Mark Pilgrim"
+					  uri: "http://example.org"
+					  email: "f8dy@example.com"))
+	      contributors: (list (make-contributor
+				   name: "Sam Ruby")
+				  (make-contributor
+				   name: "Joe Gregorio"))
+	      ;; xml:base, xml:lang cannot be handled yet
+	      content: (make-content
+			'(xhtml:div
+			  (xhtml:p (xhtml:i "[Update: The Atom draft is finished.]")))
+			type: 'xhtml))))))
+</enscript>
+
+<enscript>
+<?xml version="1.0" encoding="utf-8"?>
+<atom:feed xmlns:atom="http://www.w3.org/2005/Atom">
+  <atom:generator uri="http://www.example.com" version="1.0">Example Toolkit</atom:generator>
+  <atom:id>tag:example.org,2003:3</atom:id>
+  <atom:link href="http://example.org" rel="alternate" type="text/html" hreflang="en" />
+  <atom:link href="http://example.org/feed.atom" rel="self" type="application/atom+xml" />
+  <atom:rights type="text">Copyright (c) 2003, Mark Pilgrim</atom:rights>
+  <atom:subtitle type="html">
+    A &lt;em&gt;lot&lt;/em&gt; of effort went
+    into making this effortless</atom:subtitle>
+  <atom:title type="text">dive into mark</atom:title>
+  <atom:updated>2005-07-31T12:29:29Z</atom:updated>
+  <atom:entry>
+    <atom:author>
+      <atom:name>Mark Pilgrim</atom:name>
+      <atom:uri>http://example.org</atom:uri>
+      <atom:email>f8dy@example.com</atom:email>
+    </atom:author>
+    <atom:contributor>
+      <atom:name>Sam Ruby</atom:name>
+    </atom:contributor>
+    <atom:contributor>
+      <atom:name>Joe Gregorio</atom:name>
+    </atom:contributor>
+    <atom:content type="xhtml">
+      <xhtml:div xmlns:xhtml="http://www.w3.org/1999/xhtml">
+        <xhtml:p>
+          <xhtml:i>[Update: The Atom draft is finished.]</xhtml:i>
+        </xhtml:p>
+      </xhtml:div>
+    </atom:content>
+    <atom:id>tag:example.org,2003:3.2397</atom:id>
+    <atom:published>2003-12-13T08:29:29-04:00</atom:published>
+    <atom:title type="text">Atom draft-07 snapshot</atom:title>
+    <atom:updated>2005-07-31T12:29:29Z</atom:updated>
+    <atom:link href="http://example.org/2005/04/02/atom" rel="alternate" type="text/html" />
+    <atom:link href="http://example.org/audio/ph34r_my_podcast.mp3"
+               rel="enclosure" type="audio/mpeg" length="1337" />
+  </atom:entry>
+</atom:feed>
+</enscript>
+=== Known Issues
+
+* {{xml:base}} and {{xml:lang}} are not supported, either on reading or writing.
+  You can add these attributes manually to the output document for writing, but
+  for reading the parser will not understand them and relative URLs will not
+  be resolved.
+* Due to a limitation in the XML output serializer, all {{atom:}} elements in the feed will be
+  qualified with the {{atom:}} prefix.  This may break some non-conformant clients,
+  such as Internet Explorer 7 and Firefox 2.0.
+* Elements outside the {{atom:}} namespace, such as {{feedburner:}}, will repeatedly declare their
+  prefix mapping in the element itself instead of in the root element, leading to
+  a large amount of redundant verbosity.
+* Dealing with extension elements and attributes is a bit painful as you must manipulate the SXML directly.
+
+=== About this egg
+
+==== Author
+
+[[http://3e8.org|Jim Ursetto]]
+
+==== Version history
+
+; 0.1: Initial release
+
+Experimental code may be available via `git clone git://3e8.org/atom.git`.
+
+==== License
+
+BSD.
