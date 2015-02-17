@@ -146,9 +146,9 @@
   (string-append (path-strip-extension (%find-library lib)) ".o1"))
 
 (define^ (%library-merged-scm-path lib)
-  (string-append (%find-library-path lib) "merged-%-"
+  (string-append (%find-library-path lib)
                  (%find-library-filename-no-extension lib)
-                 ".scm"))
+                 "-%-merged.scm"))
 
 (define^ (%find-library-scm lib)
   (let ((f (%library-scm-path lib)))
