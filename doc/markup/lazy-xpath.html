@@ -1,0 +1,3460 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN""http://www.w3.org/TR/html401/loose.dtd"><html><head><meta name="GENERATOR" content="Mole: The Scheme Source Code Digger"><title>Module: lazy-xpath</title><meta name='keywords' content=''></head><body bgcolor='#ffffff' text='#384412'  link='#11af05' vlink='#728b09'>
+<center><h1>Module: lazy-xpath</h1></center>
+
+<pre> This module implements lazy SXPath evaluation over lazy SXML documents
+
+ This software is in Public Domain.
+ IT IS PROVIDED &quot;AS IS&quot;, WITHOUT WARRANTY OF ANY KIND.
+
+ Please send bug reports and comments to:
+   lizorkin@hotbox.ru    Dmitry Lizorkin
+
+ In a lazy SXML document, each node may be a promise. If forced, the promise
+ results into an SXML node or a nodeset. For a nodeset, its members are SXML
+ nodes and promises in turn.
+ With every promise forced, a lazy SXML document must conform to SXML
+ Specification. In particular, an attribute node must occur before any child
+ nodes, attribute value must be atomic, etc.
+
+ SXPath evaluation is lazy in that it results to a nodeset whose last member
+ may be a promise. Such a nodeset with a promise as its last member denotes
+ the first portion of the result. If the promise is forced, it is evaluated
+ into another nodeset, which corresponds to the next portion of the result.
+ SXPath evaluator returns the result in portions when some branch in the
+ document is to be forced in order to obtain the next part of the result.
+ However, a portion that is not the last one, must contain at least one result
+ node. To fulfill this requirement, branches of the document may be forced
+ until at least a result node for a portion is obtained.
+</pre><p><br>
+<!-- Table of content -->
+<p><dl>
+
+f:  <a name='tocfunc19091' href='#docfunc19091' style='text-decoration:none'>lazy:or</a><br>
+<p><dt><a name='tocchapt52919' href='#chapt52919'><b>Misc helpers for working with a lazy nodeset</b></a><dd>
+
+a:  <a name='tocapp6205' href='#docapp6205' style='text-decoration:none'>cond-expand</a><br>
+
+f:  <a name='tocfunc35251' href='#docfunc35251' style='text-decoration:none'>lazy:promise?</a><br>
+
+<dl><dt><a name='tocsect6852' href='#sect6852'><b>Lazy analogues for common list operations</b></a><dd>
+
+f:  <a name='tocfunc62722' href='#docfunc62722' style='text-decoration:none'>lazy:null?</a><br>
+
+f:  <a name='tocfunc47234' href='#docfunc47234' style='text-decoration:none'>lazy:map</a><br>
+
+f:  <a name='tocfunc4977' href='#docfunc4977' style='text-decoration:none'>lazy:filter</a><br>
+
+f:  <a name='tocfunc45186' href='#docfunc45186' style='text-decoration:none'>lazy:car</a><br>
+
+f:  <a name='tocfunc45189' href='#docfunc45189' style='text-decoration:none'>lazy:cdr</a><br>
+
+f:  <a name='tocfunc10838' href='#docfunc10838' style='text-decoration:none'>lazy:length</a><br>
+</dl>
+
+<dl><dt><a name='tocsect0' href='#sect0'><b></b></a><dd>
+
+f:  <a name='tocfunc14988' href='#docfunc14988' style='text-decoration:none'>lazy:result->list</a><br>
+
+f:  <a name='tocfunc48152' href='#docfunc48152' style='text-decoration:none'>lazy:node->sxml</a><br>
+
+f:  <a name='tocfunc63738' href='#docfunc63738' style='text-decoration:none'>lazy:reach-root</a><br>
+
+f:  <a name='tocfunc54237' href='#docfunc54237' style='text-decoration:none'>lazy:contextset->nodeset</a><br>
+
+f:  <a name='tocfunc43724' href='#docfunc43724' style='text-decoration:none'>lazy:recover-contextset</a><br>
+
+f:  <a name='tocfunc56765' href='#docfunc56765' style='text-decoration:none'>lazy:find-proper-context</a><br>
+</dl>
+<p><dt><a name='tocchapt60326' href='#chapt60326'><b>Axes</b></a><dd>
+
+f:  <a name='tocfunc6434' href='#docfunc6434' style='text-decoration:none'>lazy:output-siblings</a><br>
+
+f:  <a name='tocfunc24486' href='#docfunc24486' style='text-decoration:none'>lazy:find-foll-siblings</a><br>
+
+f:  <a name='tocfunc22953' href='#docfunc22953' style='text-decoration:none'>lazy:find-prec-siblings</a><br>
+
+<dl><dt><a name='tocsect6012' href='#sect6012'><b>Axis functions</b></a><dd>
+
+f:  <a name='tocfunc33499' href='#docfunc33499' style='text-decoration:none'>lazy:ancestor</a><br>
+
+f:  <a name='tocfunc580' href='#docfunc580' style='text-decoration:none'>lazy:ancestor-or-self</a><br>
+
+f:  <a name='tocfunc62686' href='#docfunc62686' style='text-decoration:none'>lazy:attribute</a><br>
+
+f:  <a name='tocfunc3062' href='#docfunc3062' style='text-decoration:none'>lazy:child</a><br>
+
+f:  <a name='tocfunc60205' href='#docfunc60205' style='text-decoration:none'>lazy:descendant</a><br>
+
+f:  <a name='tocfunc27286' href='#docfunc27286' style='text-decoration:none'>lazy:descendant-or-self</a><br>
+
+f:  <a name='tocfunc60898' href='#docfunc60898' style='text-decoration:none'>lazy:following</a><br>
+
+f:  <a name='tocfunc37972' href='#docfunc37972' style='text-decoration:none'>lazy:following-sibling</a><br>
+
+f:  <a name='tocfunc61627' href='#docfunc61627' style='text-decoration:none'>lazy:namespace</a><br>
+
+f:  <a name='tocfunc11356' href='#docfunc11356' style='text-decoration:none'>lazy:parent</a><br>
+
+f:  <a name='tocfunc59081' href='#docfunc59081' style='text-decoration:none'>lazy:preceding</a><br>
+
+f:  <a name='tocfunc36155' href='#docfunc36155' style='text-decoration:none'>lazy:preceding-sibling</a><br>
+
+f:  <a name='tocfunc47852' href='#docfunc47852' style='text-decoration:none'>lazy:self</a><br>
+</dl>
+
+<dl><dt><a name='tocsect11524' href='#sect11524'><b>Making every axis consume a nodeset</b></a><dd>
+
+f:  <a name='tocfunc35699' href='#docfunc35699' style='text-decoration:none'>lazy:axis-consume-nodeset</a><br>
+</dl>
+<p><dt><a name='tocchapt60656' href='#chapt60656'><b>Lazy analogues for "sxpath-ext.scm"</b></a><dd>
+
+<dl><dt><a name='tocsect31633' href='#sect31633'><b>SXML counterparts to W3C XPath Core Functions Library</b></a><dd>
+
+f:  <a name='tocfunc12134' href='#docfunc12134' style='text-decoration:none'>lazy:string</a><br>
+
+f:  <a name='tocfunc32862' href='#docfunc32862' style='text-decoration:none'>lazy:boolean</a><br>
+
+f:  <a name='tocfunc7275' href='#docfunc7275' style='text-decoration:none'>lazy:number</a><br>
+
+f:  <a name='tocfunc13230' href='#docfunc13230' style='text-decoration:none'>lazy:string-value</a><br>
+</dl>
+
+<dl><dt><a name='tocsect11009' href='#sect11009'><b>Comparators for XPath objects </b></a><dd>
+
+f:  <a name='tocfunc12714' href='#docfunc12714' style='text-decoration:none'>lazy:equality-cmp</a><br>
+
+f:  <a name='tocfunc8755' href='#docfunc8755' style='text-decoration:none'>lazy:equal?</a><br>
+
+f:  <a name='tocfunc1232' href='#docfunc1232' style='text-decoration:none'>lazy:not-equal?</a><br>
+
+f:  <a name='tocfunc39423' href='#docfunc39423' style='text-decoration:none'>lazy:relational-cmp</a><br>
+</dl>
+<p><dt><a name='tocchapt49457' href='#chapt49457'><b>XPath Core Function Library</b></a><dd>
+
+<dl><dt><a name='tocsect63086' href='#sect63086'><b>4.1 Node Set Functions</b></a><dd>
+
+f:  <a name='tocfunc46037' href='#docfunc46037' style='text-decoration:none'>lazy:core-last</a><br>
+
+f:  <a name='tocfunc36541' href='#docfunc36541' style='text-decoration:none'>lazy:core-position</a><br>
+
+f:  <a name='tocfunc48194' href='#docfunc48194' style='text-decoration:none'>lazy:core-count</a><br>
+
+f:  <a name='tocfunc16991' href='#docfunc16991' style='text-decoration:none'>lazy:core-id</a><br>
+
+f:  <a name='tocfunc41741' href='#docfunc41741' style='text-decoration:none'>lazy:core-local-name</a><br>
+
+f:  <a name='tocfunc6378' href='#docfunc6378' style='text-decoration:none'>lazy:core-namespace-uri</a><br>
+
+f:  <a name='tocfunc42193' href='#docfunc42193' style='text-decoration:none'>lazy:core-name</a><br>
+</dl>
+
+<dl><dt><a name='tocsect40811' href='#sect40811'><b>4.2 String Functions</b></a><dd>
+
+f:  <a name='tocfunc9034' href='#docfunc9034' style='text-decoration:none'>lazy:core-string</a><br>
+
+f:  <a name='tocfunc9513' href='#docfunc9513' style='text-decoration:none'>lazy:core-concat</a><br>
+
+f:  <a name='tocfunc9278' href='#docfunc9278' style='text-decoration:none'>lazy:core-starts-with</a><br>
+
+f:  <a name='tocfunc40599' href='#docfunc40599' style='text-decoration:none'>lazy:core-contains</a><br>
+
+f:  <a name='tocfunc3916' href='#docfunc3916' style='text-decoration:none'>lazy:core-substring-before</a><br>
+
+f:  <a name='tocfunc41304' href='#docfunc41304' style='text-decoration:none'>lazy:core-substring-after</a><br>
+
+f:  <a name='tocfunc43024' href='#docfunc43024' style='text-decoration:none'>lazy:core-substring</a><br>
+
+f:  <a name='tocfunc29356' href='#docfunc29356' style='text-decoration:none'>lazy:core-string-length</a><br>
+
+f:  <a name='tocfunc41792' href='#docfunc41792' style='text-decoration:none'>lazy:core-normalize-space</a><br>
+
+f:  <a name='tocfunc40965' href='#docfunc40965' style='text-decoration:none'>lazy:core-translate</a><br>
+</dl>
+
+<dl><dt><a name='tocsect23800' href='#sect23800'><b>4.3 Boolean Functions</b></a><dd>
+
+f:  <a name='tocfunc7067' href='#docfunc7067' style='text-decoration:none'>lazy:core-boolean</a><br>
+
+f:  <a name='tocfunc19928' href='#docfunc19928' style='text-decoration:none'>lazy:core-not</a><br>
+
+f:  <a name='tocfunc46559' href='#docfunc46559' style='text-decoration:none'>lazy:core-true</a><br>
+
+f:  <a name='tocfunc45869' href='#docfunc45869' style='text-decoration:none'>lazy:core-false</a><br>
+
+f:  <a name='tocfunc42704' href='#docfunc42704' style='text-decoration:none'>lazy:core-lang</a><br>
+</dl>
+
+<dl><dt><a name='tocsect42074' href='#sect42074'><b>4.4 Number Functions</b></a><dd>
+
+f:  <a name='tocfunc10295' href='#docfunc10295' style='text-decoration:none'>lazy:core-number</a><br>
+
+f:  <a name='tocfunc21462' href='#docfunc21462' style='text-decoration:none'>lazy:core-sum</a><br>
+
+f:  <a name='tocfunc47677' href='#docfunc47677' style='text-decoration:none'>lazy:core-floor</a><br>
+
+f:  <a name='tocfunc7827' href='#docfunc7827' style='text-decoration:none'>lazy:core-ceiling</a><br>
+
+f:  <a name='tocfunc48193' href='#docfunc48193' style='text-decoration:none'>lazy:core-round</a><br>
+</dl>
+<p><dt><a name='tocchapt29406' href='#chapt29406'><b>XPath AST processing</b></a><dd>
+
+f:  <a name='tocfunc18635' href='#docfunc18635' style='text-decoration:none'>lazy:ast-axis-specifier</a><br>
+
+<dl><dt><a name='tocsect28150' href='#sect28150'><b>In this section, each function accepts 2 arguments</b></a><dd>
+
+f:  <a name='tocfunc23375' href='#docfunc23375' style='text-decoration:none'>lazy:ast-location-path</a><br>
+
+f:  <a name='tocfunc8473' href='#docfunc8473' style='text-decoration:none'>lazy:ast-absolute-location-path</a><br>
+
+f:  <a name='tocfunc13570' href='#docfunc13570' style='text-decoration:none'>lazy:ast-relative-location-path</a><br>
+
+f:  <a name='tocfunc35238' href='#docfunc35238' style='text-decoration:none'>lazy:ast-step</a><br>
+
+f:  <a name='tocfunc38022' href='#docfunc38022' style='text-decoration:none'>lazy:ast-step-list</a><br>
+
+f:  <a name='tocfunc46704' href='#docfunc46704' style='text-decoration:none'>lazy:ast-predicate</a><br>
+
+f:  <a name='tocfunc38523' href='#docfunc38523' style='text-decoration:none'>lazy:ast-predicate-list</a><br>
+
+f:  <a name='tocfunc34476' href='#docfunc34476' style='text-decoration:none'>lazy:ast-expr</a><br>
+
+f:  <a name='tocfunc14346' href='#docfunc14346' style='text-decoration:none'>lazy:ast-or-expr</a><br>
+
+f:  <a name='tocfunc19528' href='#docfunc19528' style='text-decoration:none'>lazy:ast-and-expr</a><br>
+
+f:  <a name='tocfunc33869' href='#docfunc33869' style='text-decoration:none'>lazy:ast-equality-expr</a><br>
+
+f:  <a name='tocfunc60578' href='#docfunc60578' style='text-decoration:none'>lazy:ast-relational-expr</a><br>
+
+f:  <a name='tocfunc31028' href='#docfunc31028' style='text-decoration:none'>lazy:ast-additive-expr</a><br>
+
+f:  <a name='tocfunc50827' href='#docfunc50827' style='text-decoration:none'>lazy:ast-multiplicative-expr</a><br>
+
+f:  <a name='tocfunc54199' href='#docfunc54199' style='text-decoration:none'>lazy:ast-union-expr</a><br>
+
+f:  <a name='tocfunc44385' href='#docfunc44385' style='text-decoration:none'>lazy:ast-path-expr</a><br>
+
+f:  <a name='tocfunc232' href='#docfunc232' style='text-decoration:none'>lazy:ast-filter-expr</a><br>
+
+f:  <a name='tocfunc10355' href='#docfunc10355' style='text-decoration:none'>lazy:ast-variable-reference</a><br>
+
+f:  <a name='tocfunc28658' href='#docfunc28658' style='text-decoration:none'>lazy:ast-literal</a><br>
+
+f:  <a name='tocfunc61963' href='#docfunc61963' style='text-decoration:none'>lazy:ast-number</a><br>
+
+f:  <a name='tocfunc25666' href='#docfunc25666' style='text-decoration:none'>lazy:ast-function-call</a><br>
+
+f:  <a name='tocfunc22666' href='#docfunc22666' style='text-decoration:none'>lazy:ast-function-arguments</a><br>
+</dl>
+<p><dt><a name='tocchapt29326' href='#chapt29326'><b>Highest level API functions</b></a><dd>
+
+f:  <a name='tocfunc57350' href='#docfunc57350' style='text-decoration:none'>lazy:api-helper</a><br>
+
+f:  <a name='tocfunc13411' href='#docfunc13411' style='text-decoration:none'>lazy:txpath</a><br>
+
+f:  <a name='tocfunc62237' href='#docfunc62237' style='text-decoration:none'>lazy:xpath-expr</a><br>
+
+f:  <a name='tocfunc13155' href='#docfunc13155' style='text-decoration:none'>lazy:sxpath</a><br>
+</dl>
+
+<h4><a name='docfunc19091' href='#tocfunc19091'>lazy:or</a></h4>
+(define (lazy:or . args)<i><br> ... <a href='#codefunc19091'>Full Code</a> ... )</i>
+<pre> Implement 'or' as a function, so that we could 'apply' it
+</pre><p><br>
+<hr height='5'><center><h3><a name='chapt52919' href='#tocchapt52919'>Misc helpers for working with a lazy nodeset</a></h3></center>
+
+<pre></pre>
+<h4><a name='docapp6205' href='#tocapp6205'>cond-expand</a></h4>
+<i>... <a href='#codeapp6205'>Source Code</a> ... </i>
+<pre> Escaping the ## for some Scheme implementations
+</pre><p><br>
+
+<h4><a name='docfunc35251' href='#tocfunc35251'>lazy:promise?</a></h4>
+(define lazy:promise? <i><br> ... <a href='#codefunc35251'>Full Code</a> ... )</i>
+<pre> Predicate for detecting a promise
+ There is no such a predicate in R5RS, so different Scheme implementations
+ use different names for this functionality
+</pre><p><br>
+
+<hr width='40%' align='center'><center><h3><a name='sect6852' href='#tocsect6852'>Lazy analogues for common list operations</a></h3></center>
+
+<pre></pre>
+<h4><a name='docfunc62722' href='#tocfunc62722'>lazy:null?</a></h4>
+(define (lazy:null? nodeset)<i><br> ... <a href='#codefunc62722'>Full Code</a> ... )</i>
+<pre> Checks whether the nodeset is empty
+ Note that a promise can evaluate to an empty list, and thus a nodeset
+ consisting of promises only may potentially be empty
+</pre><p><br>
+
+<h4><a name='docfunc47234' href='#tocfunc47234'>lazy:map</a></h4>
+(define (lazy:map func nodeset)<i><br> ... <a href='#codefunc47234'>Full Code</a> ... )</i>
+<pre> Like conventional map, but applicable to a lazy nodeset
+</pre><p><br>
+
+<h4><a name='docfunc4977' href='#tocfunc4977'>lazy:filter</a></h4>
+(define (lazy:filter func nodeset)<i><br> ... <a href='#codefunc4977'>Full Code</a> ... )</i>
+<pre> Lazy analogue for filter
+</pre><p><br>
+
+<h4><a name='docfunc45186' href='#tocfunc45186'>lazy:car</a></h4>
+(define (lazy:car nodeset)<i><br> ... <a href='#codefunc45186'>Full Code</a> ... )</i>
+<pre> Like conventional car, but for a lazy nodeset
+</pre><p><br>
+
+<h4><a name='docfunc45189' href='#tocfunc45189'>lazy:cdr</a></h4>
+(define (lazy:cdr nodeset)<i><br> ... <a href='#codefunc45189'>Full Code</a> ... )</i>
+<pre> Like conventional cdr
+</pre><p><br>
+
+<h4><a name='docfunc10838' href='#tocfunc10838'>lazy:length</a></h4>
+(define (lazy:length nodeset)<i><br> ... <a href='#codefunc10838'>Full Code</a> ... )</i>
+<pre> Like conventional length, but for a lazy nodeset
+ ATTENTION: it has to force all the nodeset members in order to determine
+ the length properly
+</pre><p><br>
+
+<hr width='40%' align='center'><center><h3><a name='sect0' href='#tocsect0'></a></h3></center>
+
+<pre> Converts the lazy result into a list, by forcing all the promises one by one
+</pre>
+<h4><a name='docfunc14988' href='#tocfunc14988'>lazy:result->list</a></h4>
+(define (lazy:result-&gt;list nodeset)<i><br> ... <a href='#codefunc14988'>Full Code</a> ... )</i><p><br>
+
+<h4><a name='docfunc48152' href='#tocfunc48152'>lazy:node->sxml</a></h4>
+(define (lazy:node-&gt;sxml node)<i><br> ... <a href='#codefunc48152'>Full Code</a> ... )</i>
+<pre> Converts the lazy node to SXML, by forcing all of its descendants
+ The node itself is not a promise
+</pre><p><br>
+
+<h4><a name='docfunc63738' href='#tocfunc63738'>lazy:reach-root</a></h4>
+(define (lazy:reach-root contextset)<i><br> ... <a href='#codefunc63738'>Full Code</a> ... )</i>
+<pre> Reaches the root of the root of the contextset
+ Result: singleton nodeset
+</pre><p><br>
+
+<h4><a name='docfunc54237' href='#tocfunc54237'>lazy:contextset->nodeset</a></h4>
+(define (lazy:contextset-&gt;nodeset obj)<i><br> ... <a href='#codefunc54237'>Full Code</a> ... )</i>
+<pre> Analogue for draft:contextset-&gt;nodeset for the lazy case
+</pre><p><br>
+
+<h4><a name='docfunc43724' href='#tocfunc43724'>lazy:recover-contextset</a></h4>
+(define (lazy:recover-contextset nodeset root-node num-anc)<i><br> ... <a href='#codefunc43724'>Full Code</a> ... )</i>
+<pre> Lazy analogue for draft:recover-contextset
+</pre><p><br>
+
+<h4><a name='docfunc56765' href='#tocfunc56765'>lazy:find-proper-context</a></h4>
+(define (lazy:find-proper-context nodeset context-set num-anc)<i><br> ... <a href='#codefunc56765'>Full Code</a> ... )</i>
+<pre> Makes a context-set from a nodeset supplied, with the num-anc required
+ Members of the nodeset are known to be descendants-or-selves of
+ (map sxml:context-&gt;node context-set)
+</pre><p><br>
+<hr height='5'><center><h3><a name='chapt60326' href='#tocchapt60326'>Axes</a></h3></center>
+
+<pre></pre>
+<h4><a name='docfunc6434' href='#tocfunc6434'>lazy:output-siblings</a></h4>
+(define (lazy:output-siblings test-pred? siblings ancestors)<i><br> ... <a href='#codefunc6434'>Full Code</a> ... )</i>
+<pre> A helper that tests sibling nodes with respect to the test-pred? and returns
+ them in the lazy manner. Each of the siblings may be a promise.
+ This function is applied by axes: child, attribute, namespace,
+ following-sibling, preceding-sibling
+</pre><p><br>
+
+<h4><a name='docfunc24486' href='#tocfunc24486'>lazy:find-foll-siblings</a></h4>
+(define (lazy:find-foll-siblings node nodeset)<i><br> ... <a href='#codefunc24486'>Full Code</a> ... )</i>
+<pre> Returns nodeset membert that are following siblings of the given node
+ Nodeset members may be promises
+</pre><p><br>
+
+<h4><a name='docfunc22953' href='#tocfunc22953'>lazy:find-prec-siblings</a></h4>
+(define (lazy:find-prec-siblings node nodeset)<i><br> ... <a href='#codefunc22953'>Full Code</a> ... )</i>
+<pre> Returns nodeset members that are preceding siblings of the given node
+ Nodeset members may be promises
+</pre><p><br>
+
+<hr width='40%' align='center'><center><h3><a name='sect6012' href='#tocsect6012'>Axis functions</a></h3></center>
+
+<pre> They have the signature of:
+  test-pred? [num-ancestors] -&gt; Node -&gt; Nodeset
+ Note that each axis function produces the function to be applied to a single
+ _node_, not to a nodeset
+</pre>
+<h4><a name='docfunc33499' href='#tocfunc33499'>lazy:ancestor</a></h4>
+(define (lazy:ancestor test-pred? . num-ancestors)<i><br> ... <a href='#codefunc33499'>Full Code</a> ... )</i>
+<pre> Ancestor axis
+ It should be noted that ancestors of the context node are already forced
+</pre><p><br>
+
+<h4><a name='docfunc580' href='#tocfunc580'>lazy:ancestor-or-self</a></h4>
+(define (lazy:ancestor-or-self test-pred? . num-ancestors)<i><br> ... <a href='#codefunc580'>Full Code</a> ... )</i>
+<pre> Ancestor-or-self axis
+ It should be noted that ancestors of the context node are already forced
+</pre><p><br>
+
+<h4><a name='docfunc62686' href='#tocfunc62686'>lazy:attribute</a></h4>
+(define (lazy:attribute test-pred? . num-ancestors)<i><br> ... <a href='#codefunc62686'>Full Code</a> ... )</i>
+<pre> Attribute axis
+</pre><p><br>
+
+<h4><a name='docfunc3062' href='#tocfunc3062'>lazy:child</a></h4>
+(define (lazy:child test-pred? . num-ancestors)<i><br> ... <a href='#codefunc3062'>Full Code</a> ... )</i>
+<pre> Child axis
+</pre><p><br>
+
+<h4><a name='docfunc60205' href='#tocfunc60205'>lazy:descendant</a></h4>
+(define (lazy:descendant test-pred? . num-ancestors)<i><br> ... <a href='#codefunc60205'>Full Code</a> ... )</i>
+<pre> Descendant axis
+</pre><p><br>
+
+<h4><a name='docfunc27286' href='#tocfunc27286'>lazy:descendant-or-self</a></h4>
+(define (lazy:descendant-or-self test-pred? . num-ancestors)<i><br> ... <a href='#codefunc27286'>Full Code</a> ... )</i>
+<pre> Descendant-or-self axis
+</pre><p><br>
+
+<h4><a name='docfunc60898' href='#tocfunc60898'>lazy:following</a></h4>
+(define (lazy:following test-pred? . num-ancestors)<i><br> ... <a href='#codefunc60898'>Full Code</a> ... )</i>
+<pre> Following axis
+</pre><p><br>
+
+<h4><a name='docfunc37972' href='#tocfunc37972'>lazy:following-sibling</a></h4>
+(define (lazy:following-sibling test-pred? . num-ancestors)<i><br> ... <a href='#codefunc37972'>Full Code</a> ... )</i>
+<pre> Following-sibling axis
+</pre><p><br>
+
+<h4><a name='docfunc61627' href='#tocfunc61627'>lazy:namespace</a></h4>
+(define (lazy:namespace test-pred? . num-ancestors)<i><br> ... <a href='#codefunc61627'>Full Code</a> ... )</i>
+<pre> Namespace axis
+ Since a namespace axis somewhat redundant for SXML, we'll provide a
+ not-very-effective implementation for it
+</pre><p><br>
+
+<h4><a name='docfunc11356' href='#tocfunc11356'>lazy:parent</a></h4>
+(define (lazy:parent test-pred? . num-ancestors)<i><br> ... <a href='#codefunc11356'>Full Code</a> ... )</i>
+<pre> Parent axis
+ It should be noted that the parent of the context node is already forced
+</pre><p><br>
+
+<h4><a name='docfunc59081' href='#tocfunc59081'>lazy:preceding</a></h4>
+(define (lazy:preceding test-pred? . num-ancestors)<i><br> ... <a href='#codefunc59081'>Full Code</a> ... )</i>
+<pre> Preceding axis
+</pre><p><br>
+
+<h4><a name='docfunc36155' href='#tocfunc36155'>lazy:preceding-sibling</a></h4>
+(define (lazy:preceding-sibling test-pred? . num-ancestors)<i><br> ... <a href='#codefunc36155'>Full Code</a> ... )</i>
+<pre> Preceding-sibling axis
+</pre><p><br>
+
+<h4><a name='docfunc47852' href='#tocfunc47852'>lazy:self</a></h4>
+(define (lazy:self test-pred? . num-ancestors)<i><br> ... <a href='#codefunc47852'>Full Code</a> ... )</i>
+<pre> Self axis
+ Shortens the context if it contains more nodes than specified by num-ancestor
+ In most cases, this work can be considered redundant; however, it eliminates
+ some classes of error that are hard to detect
+</pre><p><br>
+
+<hr width='40%' align='center'><center><h3><a name='sect11524' href='#tocsect11524'>Making every axis consume a nodeset</a></h3></center>
+
+<pre></pre>
+<h4><a name='docfunc35699' href='#tocfunc35699'>lazy:axis-consume-nodeset</a></h4>
+(define (lazy:axis-consume-nodeset axis)<i><br> ... <a href='#codefunc35699'>Full Code</a> ... )</i>
+<pre> Given the axis of the form
+  Node -&gt; Nodeset
+ produces the axis of the form
+  Node|Nodeset -&gt; Nodeset
+</pre><p><br>
+<hr height='5'><center><h3><a name='chapt60656' href='#tocchapt60656'>Lazy analogues for "sxpath-ext.scm"</a></h3></center>
+
+<pre></pre>
+<hr width='40%' align='center'><center><h3><a name='sect31633' href='#tocsect31633'>SXML counterparts to W3C XPath Core Functions Library</a></h3></center>
+
+<pre></pre>
+<h4><a name='docfunc12134' href='#tocfunc12134'>lazy:string</a></h4>
+(define (lazy:string object)<i><br> ... <a href='#codefunc12134'>Full Code</a> ... )</i>
+<pre> The counterpart to XPath 'string' function (section 4.2 XPath Rec.)
+ Converts a given object to a string
+</pre><p><br>
+
+<h4><a name='docfunc32862' href='#tocfunc32862'>lazy:boolean</a></h4>
+(define (lazy:boolean object)<i><br> ... <a href='#codefunc32862'>Full Code</a> ... )</i>
+<pre> The counterpart to XPath 'boolean' function (section 4.3 XPath Rec.)
+ Converts its argument to a boolean
+</pre><p><br>
+
+<h4><a name='docfunc7275' href='#tocfunc7275'>lazy:number</a></h4>
+(define (lazy:number obj)<i><br> ... <a href='#codefunc7275'>Full Code</a> ... )</i>
+<pre> The counterpart to XPath 'number' function (section 4.4 XPath Rec.)
+ Converts its argument to a number
+ NOTE: 
+  1. The argument is not optional (yet?)
+  2. string-&gt;number conversion is not IEEE 754 round-to-nearest
+  3. NaN is represented as 0
+</pre><p><br>
+
+<h4><a name='docfunc13230' href='#tocfunc13230'>lazy:string-value</a></h4>
+(define (lazy:string-value node)<i><br> ... <a href='#codefunc13230'>Full Code</a> ... )</i>
+<pre> Returns a string value for a given node in accordance to
+ XPath Rec. 5.1 - 5.7
+ Undocumented functionality - can be applied for a node that is a promise
+</pre><p><br>
+
+<hr width='40%' align='center'><center><h3><a name='sect11009' href='#tocsect11009'>Comparators for XPath objects </a></h3></center>
+
+<pre></pre>
+<h4><a name='docfunc12714' href='#tocfunc12714'>lazy:equality-cmp</a></h4>
+(define (lazy:equality-cmp bool-op number-op string-op)<i><br> ... <a href='#codefunc12714'>Full Code</a> ... )</i>
+<pre> A helper for XPath equality operations: = , !=
+  'bool-op', 'number-op' and 'string-op' are comparison operations for 
+ a pair of booleans,  numbers and strings respectively
+</pre><p><br>
+
+<h4><a name='docfunc8755' href='#tocfunc8755'>lazy:equal?</a></h4>
+(define lazy:equal? <i><br> ... <a href='#codefunc8755'>Full Code</a> ... )</i><p><br>
+
+<h4><a name='docfunc1232' href='#tocfunc1232'>lazy:not-equal?</a></h4>
+(define lazy:not-equal? <i><br> ... <a href='#codefunc1232'>Full Code</a> ... )</i><p><br>
+
+<h4><a name='docfunc39423' href='#tocfunc39423'>lazy:relational-cmp</a></h4>
+(define (lazy:relational-cmp op)<i><br> ... <a href='#codefunc39423'>Full Code</a> ... )</i>
+<pre> Relational operation ( &lt; , &gt; , &lt;= , &gt;= ) for two XPath objects
+  op is comparison procedure: &lt; , &gt; , &lt;= or &gt;=
+</pre><p><br>
+<hr height='5'><center><h3><a name='chapt49457' href='#tocchapt49457'>XPath Core Function Library</a></h3></center>
+
+<pre></pre>
+<hr width='40%' align='center'><center><h3><a name='sect63086' href='#tocsect63086'>4.1 Node Set Functions</a></h3></center>
+
+<pre></pre>
+<h4><a name='docfunc46037' href='#tocfunc46037'>lazy:core-last</a></h4>
+(define (lazy:core-last num-anc)<i><br> ... <a href='#codefunc46037'>Full Code</a> ... )</i>
+<pre> last()
+</pre><p><br>
+
+<h4><a name='docfunc36541' href='#tocfunc36541'>lazy:core-position</a></h4>
+(define (lazy:core-position num-anc)<i><br> ... <a href='#codefunc36541'>Full Code</a> ... )</i>
+<pre> position()
+</pre><p><br>
+
+<h4><a name='docfunc48194' href='#tocfunc48194'>lazy:core-count</a></h4>
+(define (lazy:core-count num-anc arg-func)<i><br> ... <a href='#codefunc48194'>Full Code</a> ... )</i>
+<pre> count(node-set)
+</pre><p><br>
+
+<h4><a name='docfunc16991' href='#tocfunc16991'>lazy:core-id</a></h4>
+(define (lazy:core-id num-anc arg-func)<i><br> ... <a href='#codefunc16991'>Full Code</a> ... )</i>
+<pre> id(object)
+</pre><p><br>
+
+<h4><a name='docfunc41741' href='#tocfunc41741'>lazy:core-local-name</a></h4>
+(define (lazy:core-local-name num-anc . arg-func)<i><br> ... <a href='#codefunc41741'>Full Code</a> ... )</i>
+<pre> local-name(node-set?)
+</pre><p><br>
+
+<h4><a name='docfunc6378' href='#tocfunc6378'>lazy:core-namespace-uri</a></h4>
+(define (lazy:core-namespace-uri num-anc . arg-func)<i><br> ... <a href='#codefunc6378'>Full Code</a> ... )</i>
+<pre> namespace-uri(node-set?)
+</pre><p><br>
+
+<h4><a name='docfunc42193' href='#tocfunc42193'>lazy:core-name</a></h4>
+(define (lazy:core-name num-anc . arg-func)<i><br> ... <a href='#codefunc42193'>Full Code</a> ... )</i>
+<pre> name(node-set?)
+</pre><p><br>
+
+<hr width='40%' align='center'><center><h3><a name='sect40811' href='#tocsect40811'>4.2 String Functions</a></h3></center>
+
+<pre></pre>
+<h4><a name='docfunc9034' href='#tocfunc9034'>lazy:core-string</a></h4>
+(define (lazy:core-string num-anc . arg-func)<i><br> ... <a href='#codefunc9034'>Full Code</a> ... )</i>
+<pre> string(object?)
+</pre><p><br>
+
+<h4><a name='docfunc9513' href='#tocfunc9513'>lazy:core-concat</a></h4>
+(define (lazy:core-concat num-anc . arg-func-lst)<i><br> ... <a href='#codefunc9513'>Full Code</a> ... )</i>
+<pre> concat(string, string, string*)
+</pre><p><br>
+
+<h4><a name='docfunc9278' href='#tocfunc9278'>lazy:core-starts-with</a></h4>
+(define (lazy:core-starts-with num-anc arg-func1 arg-func2)<i><br> ... <a href='#codefunc9278'>Full Code</a> ... )</i>
+<pre> starts-with(string, string)
+</pre><p><br>
+
+<h4><a name='docfunc40599' href='#tocfunc40599'>lazy:core-contains</a></h4>
+(define (lazy:core-contains num-anc arg-func1 arg-func2)<i><br> ... <a href='#codefunc40599'>Full Code</a> ... )</i>
+<pre> contains(string, string)
+</pre><p><br>
+
+<h4><a name='docfunc3916' href='#tocfunc3916'>lazy:core-substring-before</a></h4>
+(define (lazy:core-substring-before num-anc arg-func1 arg-func2)<i><br> ... <a href='#codefunc3916'>Full Code</a> ... )</i>
+<pre> substring-before(string, string)
+</pre><p><br>
+
+<h4><a name='docfunc41304' href='#tocfunc41304'>lazy:core-substring-after</a></h4>
+(define (lazy:core-substring-after num-anc arg-func1 arg-func2)<i><br> ... <a href='#codefunc41304'>Full Code</a> ... )</i>
+<pre> substring-after(string, string)
+</pre><p><br>
+
+<h4><a name='docfunc43024' href='#tocfunc43024'>lazy:core-substring</a></h4>
+(define (lazy:core-substring num-anc arg-func1 arg-func2 . arg-func3)<i><br> ... <a href='#codefunc43024'>Full Code</a> ... )</i>
+<pre> substring(string, number, number?)
+</pre><p><br>
+
+<h4><a name='docfunc29356' href='#tocfunc29356'>lazy:core-string-length</a></h4>
+(define (lazy:core-string-length num-anc . arg-func)<i><br> ... <a href='#codefunc29356'>Full Code</a> ... )</i>
+<pre> string-length(string?)
+</pre><p><br>
+
+<h4><a name='docfunc41792' href='#tocfunc41792'>lazy:core-normalize-space</a></h4>
+(define (lazy:core-normalize-space num-anc . arg-func)<i><br> ... <a href='#codefunc41792'>Full Code</a> ... )</i>
+<pre> normalize-space(string?)
+</pre><p><br>
+
+<h4><a name='docfunc40965' href='#tocfunc40965'>lazy:core-translate</a></h4>
+(define (lazy:core-translate num-anc arg-func1 arg-func2 arg-func3)<i><br> ... <a href='#codefunc40965'>Full Code</a> ... )</i>
+<pre> translate(string, string, string)
+</pre><p><br>
+
+<hr width='40%' align='center'><center><h3><a name='sect23800' href='#tocsect23800'>4.3 Boolean Functions</a></h3></center>
+
+<pre></pre>
+<h4><a name='docfunc7067' href='#tocfunc7067'>lazy:core-boolean</a></h4>
+(define (lazy:core-boolean num-anc arg-func)<i><br> ... <a href='#codefunc7067'>Full Code</a> ... )</i>
+<pre> boolean(object)
+</pre><p><br>
+
+<h4><a name='docfunc19928' href='#tocfunc19928'>lazy:core-not</a></h4>
+(define (lazy:core-not num-anc arg-func)<i><br> ... <a href='#codefunc19928'>Full Code</a> ... )</i>
+<pre> not(boolean)
+</pre><p><br>
+
+<h4><a name='docfunc46559' href='#tocfunc46559'>lazy:core-true</a></h4>
+(define (lazy:core-true num-anc)<i><br> ... <a href='#codefunc46559'>Full Code</a> ... )</i>
+<pre> true()
+</pre><p><br>
+
+<h4><a name='docfunc45869' href='#tocfunc45869'>lazy:core-false</a></h4>
+(define (lazy:core-false num-anc)<i><br> ... <a href='#codefunc45869'>Full Code</a> ... )</i>
+<pre> false()
+</pre><p><br>
+
+<h4><a name='docfunc42704' href='#tocfunc42704'>lazy:core-lang</a></h4>
+(define (lazy:core-lang num-anc arg-func)<i><br> ... <a href='#codefunc42704'>Full Code</a> ... )</i>
+<pre> lang(string)
+</pre><p><br>
+
+<hr width='40%' align='center'><center><h3><a name='sect42074' href='#tocsect42074'>4.4 Number Functions</a></h3></center>
+
+<pre></pre>
+<h4><a name='docfunc10295' href='#tocfunc10295'>lazy:core-number</a></h4>
+(define (lazy:core-number num-anc . arg-func)<i><br> ... <a href='#codefunc10295'>Full Code</a> ... )</i>
+<pre> number(object?)
+</pre><p><br>
+
+<h4><a name='docfunc21462' href='#tocfunc21462'>lazy:core-sum</a></h4>
+(define (lazy:core-sum num-anc arg-func)<i><br> ... <a href='#codefunc21462'>Full Code</a> ... )</i>
+<pre> sum(node-set)
+</pre><p><br>
+
+<h4><a name='docfunc47677' href='#tocfunc47677'>lazy:core-floor</a></h4>
+(define (lazy:core-floor num-anc arg-func)<i><br> ... <a href='#codefunc47677'>Full Code</a> ... )</i>
+<pre> floor(number)
+</pre><p><br>
+
+<h4><a name='docfunc7827' href='#tocfunc7827'>lazy:core-ceiling</a></h4>
+(define (lazy:core-ceiling num-anc arg-func)<i><br> ... <a href='#codefunc7827'>Full Code</a> ... )</i>
+<pre> ceiling(number)
+</pre><p><br>
+
+<h4><a name='docfunc48193' href='#tocfunc48193'>lazy:core-round</a></h4>
+(define (lazy:core-round num-anc arg-func)<i><br> ... <a href='#codefunc48193'>Full Code</a> ... )</i>
+<pre> round(number)
+</pre><p><br>
+<hr height='5'><center><h3><a name='chapt29406' href='#tocchapt29406'>XPath AST processing</a></h3></center>
+
+<pre> AST is considered to be properly formed
+</pre>
+<h4><a name='docfunc18635' href='#tocfunc18635'>lazy:ast-axis-specifier</a></h4>
+(define (lazy:ast-axis-specifier op num-anc)<i><br> ... <a href='#codefunc18635'>Full Code</a> ... )</i>
+<pre> {5} &lt;AxisSpecifier&gt; ::= (axis-specifier  &lt;AxisName&gt; )
+ {6} &lt;AxisName&gt; ::= (ancestor)
+                    | (ancestor-or-self)
+                    | (attribute)
+                    | (child)
+                    | (descendant)
+                    | (descendant-or-self)
+                    | (following)
+                    | (following-sibling)
+                    | (namespace)
+                    | (parent)
+                    | (preceding)
+                    | (preceding-sibling)
+                    | (self)
+                    | (arc)  ; the following 3 are added by SXLink
+                    | (traverse)
+                    | (traverse-arc)
+ Returns:  (cons lambda num-ancestors)
+</pre><p><br>
+
+<hr width='40%' align='center'><center><h3><a name='sect28150' href='#tocsect28150'>In this section, each function accepts 2 arguments</a></h3></center>
+
+<pre>  op - S-expression which represents the operation
+  num-anc - how many ancestors are required in the context after that
+            operation
+ and returns either #f, which signals of a semantic error, or
+  (list (lambda (nodeset position+size var-binding) ...)
+        num-anc-it-requires
+        requires-size? )
+  position+size - the same to what was called 'context' in TXPath-1
+  requires-size? - context size in required for evaluating the operation
+</pre>
+<h4><a name='docfunc23375' href='#tocfunc23375'>lazy:ast-location-path</a></h4>
+(define (lazy:ast-location-path op num-anc)<i><br> ... <a href='#codefunc23375'>Full Code</a> ... )</i>
+<pre> {1} &lt;LocationPath&gt; ::= &lt;RelativeLocationPath&gt;
+                        | &lt;AbsoluteLocationPath&gt;
+</pre><p><br>
+
+<h4><a name='docfunc8473' href='#tocfunc8473'>lazy:ast-absolute-location-path</a></h4>
+(define (lazy:ast-absolute-location-path op num-anc)<i><br> ... <a href='#codefunc8473'>Full Code</a> ... )</i>
+<pre> {2} &lt;AbsoluteLocationPath&gt; ::= (absolute-location-path  &lt;Step&gt;* )
+</pre><p><br>
+
+<h4><a name='docfunc13570' href='#tocfunc13570'>lazy:ast-relative-location-path</a></h4>
+(define (lazy:ast-relative-location-path op num-anc)<i><br> ... <a href='#codefunc13570'>Full Code</a> ... )</i>
+<pre> {3} &lt;RelativeLocationPath&gt; ::= (relative-location-path  &lt;Step&gt;+ )
+</pre><p><br>
+
+<h4><a name='docfunc35238' href='#tocfunc35238'>lazy:ast-step</a></h4>
+(define (lazy:ast-step op num-anc)<i><br> ... <a href='#codefunc35238'>Full Code</a> ... )</i>
+<pre> {4} &lt;Step&gt; ::= (step  &lt;AxisSpecifier&gt; &lt;NodeTest&gt; &lt;Predicate&gt;* )
+                | (range-to  (expr &lt;Expr&gt;)  &lt;Predicate&gt;* )
+</pre><p><br>
+
+<h4><a name='docfunc38022' href='#tocfunc38022'>lazy:ast-step-list</a></h4>
+(define (lazy:ast-step-list step-lst num-anc)<i><br> ... <a href='#codefunc38022'>Full Code</a> ... )</i>
+<pre> {4a} ( &lt;Step&gt;+ )
+ Returns (list (listof step-impl) num-anc) or #f
+ NOTE: requires-size? is not needed here, since it is always #f
+</pre><p><br>
+
+<h4><a name='docfunc46704' href='#tocfunc46704'>lazy:ast-predicate</a></h4>
+(define (lazy:ast-predicate op num-anc)<i><br> ... <a href='#codefunc46704'>Full Code</a> ... )</i>
+<pre> {8} &lt;Predicate&gt; ::= (predicate  &lt;Expr&gt; )
+ NOTE: num-anc is dummy here, since it is always 0 for Predicates
+</pre><p><br>
+
+<h4><a name='docfunc38523' href='#tocfunc38523'>lazy:ast-predicate-list</a></h4>
+(define (lazy:ast-predicate-list op-lst num-anc)<i><br> ... <a href='#codefunc38523'>Full Code</a> ... )</i>
+<pre> {8a} ( &lt;Predicate&gt;+ )
+ Returns (list (listof pred-impl) num-anc) or #f
+ NOTE: num-anc is dummy here, since it is always 0 for Predicates
+</pre><p><br>
+
+<h4><a name='docfunc34476' href='#tocfunc34476'>lazy:ast-expr</a></h4>
+(define (lazy:ast-expr op num-anc)<i><br> ... <a href='#codefunc34476'>Full Code</a> ... )</i>
+<pre> {9} &lt;Expr&gt; ::= &lt;OrExpr&gt;
+                | &lt;AndExpr&gt;
+                | &lt;EqualityExpr&gt;
+                | &lt;RelationalExpr&gt;
+                | &lt;AdditiveExpr&gt;
+                | &lt;MultiplicativeExpr&gt;
+                | &lt;UnionExpr&gt;
+                | &lt;PathExpr&gt;
+                | &lt;FilterExpr&gt;
+                | &lt;VariableReference&gt;
+                | &lt;Literal&gt;
+                | &lt;Number&gt;
+                | &lt;FunctionCall&gt;
+                | &lt;LocationPath&gt;
+</pre><p><br>
+
+<h4><a name='docfunc14346' href='#tocfunc14346'>lazy:ast-or-expr</a></h4>
+(define (lazy:ast-or-expr op num-anc)<i><br> ... <a href='#codefunc14346'>Full Code</a> ... )</i>
+<pre> {10} &lt;OrExpr&gt; ::= (or &lt;Expr&gt; &lt;Expr&gt;+ )
+ NOTE: num-anc is dummy here, since it is always 0 for OrExpr
+</pre><p><br>
+
+<h4><a name='docfunc19528' href='#tocfunc19528'>lazy:ast-and-expr</a></h4>
+(define (lazy:ast-and-expr op num-anc)<i><br> ... <a href='#codefunc19528'>Full Code</a> ... )</i>
+<pre> {11} &lt;AndExpr&gt; ::= (and &lt;Expr&gt; &lt;Expr&gt;+ )
+ NOTE: num-anc is dummy here, since it is always 0 for AndExpr
+</pre><p><br>
+
+<h4><a name='docfunc33869' href='#tocfunc33869'>lazy:ast-equality-expr</a></h4>
+(define (lazy:ast-equality-expr op num-anc)<i><br> ... <a href='#codefunc33869'>Full Code</a> ... )</i>
+<pre> {12} &lt;EqualityExpr&gt; ::= (=  &lt;Expr&gt; &lt;Expr&gt; )
+                         | (!=  &lt;Expr&gt; &lt;Expr&gt; )
+ NOTE: num-anc is dummy here, since it is always 0 for EqualityExpr
+</pre><p><br>
+
+<h4><a name='docfunc60578' href='#tocfunc60578'>lazy:ast-relational-expr</a></h4>
+(define (lazy:ast-relational-expr op num-anc)<i><br> ... <a href='#codefunc60578'>Full Code</a> ... )</i>
+<pre> {13} &lt;RelationalExpr&gt; ::= (&lt;  &lt;Expr&gt; &lt;Expr&gt; )
+                           | (&gt;  &lt;Expr&gt; &lt;Expr&gt; )
+                           | (&lt;=  &lt;Expr&gt; &lt;Expr&gt; )
+                           | (&gt;=  &lt;Expr&gt; &lt;Expr&gt; )
+ NOTE: num-anc is dummy here, since it is always 0 for RelationalExpr
+</pre><p><br>
+
+<h4><a name='docfunc31028' href='#tocfunc31028'>lazy:ast-additive-expr</a></h4>
+(define (lazy:ast-additive-expr op num-anc)<i><br> ... <a href='#codefunc31028'>Full Code</a> ... )</i>
+<pre> {14} &lt;AdditiveExpr&gt; ::= (+  &lt;Expr&gt; &lt;Expr&gt; )
+                         | (-  &lt;Expr&gt; &lt;Expr&gt;? )
+ NOTE: num-anc is dummy here, since it is always 0 for AdditiveExpr
+</pre><p><br>
+
+<h4><a name='docfunc50827' href='#tocfunc50827'>lazy:ast-multiplicative-expr</a></h4>
+(define (lazy:ast-multiplicative-expr op num-anc)<i><br> ... <a href='#codefunc50827'>Full Code</a> ... )</i>
+<pre> {15} &lt;MultiplicativeExpr&gt; ::= (*  &lt;Expr&gt; &lt;Expr&gt; )
+                               | (div  &lt;Expr&gt; &lt;Expr&gt; )
+                               | (mod  &lt;Expr&gt; &lt;Expr&gt; )
+ NOTE: num-anc is dummy here, since it is always 0 for MultiplicativeExpr
+</pre><p><br>
+
+<h4><a name='docfunc54199' href='#tocfunc54199'>lazy:ast-union-expr</a></h4>
+(define (lazy:ast-union-expr op num-anc)<i><br> ... <a href='#codefunc54199'>Full Code</a> ... )</i>
+<pre> {16} &lt;UnionExpr&gt; ::= (union-expr  &lt;Expr&gt; &lt;Expr&gt;+ )
+</pre><p><br>
+
+<h4><a name='docfunc44385' href='#tocfunc44385'>lazy:ast-path-expr</a></h4>
+(define (lazy:ast-path-expr op num-anc)<i><br> ... <a href='#codefunc44385'>Full Code</a> ... )</i>
+<pre> {17} &lt;PathExpr&gt; ::= (path-expr  &lt;FilterExpr&gt; &lt;Step&gt;+ )
+</pre><p><br>
+
+<h4><a name='docfunc232' href='#tocfunc232'>lazy:ast-filter-expr</a></h4>
+(define (lazy:ast-filter-expr op num-anc)<i><br> ... <a href='#codefunc232'>Full Code</a> ... )</i>
+<pre> {18} &lt;FilterExpr&gt; ::= (filter-expr (primary-expr  &lt;Expr&gt; )
+                                    &lt;Predicate&gt;* )
+</pre><p><br>
+
+<h4><a name='docfunc10355' href='#tocfunc10355'>lazy:ast-variable-reference</a></h4>
+(define (lazy:ast-variable-reference op num-anc)<i><br> ... <a href='#codefunc10355'>Full Code</a> ... )</i>
+<pre> {19} &lt;VariableReference&gt; ::= (variable-reference  &lt;String&gt; )
+</pre><p><br>
+
+<h4><a name='docfunc28658' href='#tocfunc28658'>lazy:ast-literal</a></h4>
+(define (lazy:ast-literal op num-anc)<i><br> ... <a href='#codefunc28658'>Full Code</a> ... )</i>
+<pre> {20} &lt;Literal&gt; ::= (literal  &lt;String&gt; )
+</pre><p><br>
+
+<h4><a name='docfunc61963' href='#tocfunc61963'>lazy:ast-number</a></h4>
+(define (lazy:ast-number op num-anc)<i><br> ... <a href='#codefunc61963'>Full Code</a> ... )</i>
+<pre> {21} &lt;Number&gt; :: (number  &lt;Number&gt; )
+</pre><p><br>
+
+<h4><a name='docfunc25666' href='#tocfunc25666'>lazy:ast-function-call</a></h4>
+(define (lazy:ast-function-call op num-anc)<i><br> ... <a href='#codefunc25666'>Full Code</a> ... )</i>
+<pre> {22} &lt;FunctionCall&gt; ::= (function-call (function-name  &lt;String&gt; )
+                                        (argument  &lt;Expr&gt; )* )
+</pre><p><br>
+
+<h4><a name='docfunc22666' href='#tocfunc22666'>lazy:ast-function-arguments</a></h4>
+(define (lazy:ast-function-arguments op-lst)<i><br> ... <a href='#codefunc22666'>Full Code</a> ... )</i>
+<pre> {22a} ( (argument  &lt;Expr&gt; )* )
+ Returns: (listof expr-impl) or #f
+</pre><p><br>
+<hr height='5'><center><h3><a name='chapt29326' href='#tocchapt29326'>Highest level API functions</a></h3></center>
+
+<pre> The API is identical to the API of a context-based SXPath (here we even use
+ API helpers from &quot;xpath-context.scm&quot;). For convenience, below we repeat
+ comments for the API (borrowed from &quot;xpath-context.scm&quot;)
+
+ xpath-string - an XPath location path (a string)
+ ns+na - can contain 'ns-binding' and/or 'num-ancestors' and/or none of them
+ ns-binding - declared namespace prefixes (an optional argument)
+  ns-binding ::= (listof (prefix . uri))
+  prefix - a symbol
+  uri - a string
+ num-ancestors - number of ancestors required for resulting nodeset. Can
+  generally be omitted and is than defaulted to 0, which denotes a _usual_
+  nodeset. If a negative number, this signals that all ancestors should be
+  remembered in the context
+
+ Returns: (lambda (nodeset position+size var-binding) ...)
+ position+size - the same to what was called 'context' in TXPath-1
+ var-binding - XPath variable bindings (an optional argument)
+  var-binding = (listof (var-name . value))
+  var-name - (a symbol) a name of a variable
+  value - its value. The value can have the following type: boolean, number,
+  string, nodeset. NOTE: a node must be represented as a singleton nodeset
+</pre>
+<h4><a name='docfunc57350' href='#tocfunc57350'>lazy:api-helper</a></h4>
+(define (lazy:api-helper grammar-parser ast-parser)<i><br> ... <a href='#codefunc57350'>Full Code</a> ... )</i>
+<pre> Helper for constructing several highest-level API functions
+</pre><p><br>
+
+<h4><a name='docfunc13411' href='#tocfunc13411'>lazy:txpath</a></h4>
+(define lazy:txpath <i><br> ... <a href='#codefunc13411'>Full Code</a> ... )</i><p><br>
+
+<h4><a name='docfunc62237' href='#tocfunc62237'>lazy:xpath-expr</a></h4>
+(define lazy:xpath-expr <i><br> ... <a href='#codefunc62237'>Full Code</a> ... )</i><p><br>
+
+<h4><a name='docfunc13155' href='#tocfunc13155'>lazy:sxpath</a></h4>
+(define lazy:sxpath <i><br> ... <a href='#codefunc13155'>Full Code</a> ... )</i>
+<pre> Support for native sxpath syntax
+</pre><p><br>
+<center><h1>Code</h1></center>
+
+<h4><a name='codefunc19091' href='#docfunc19091'>lazy:or</a></h4>
+<i><a href='#tocfunc19091'>Index</a></i><br>
+
+<pre> Implement 'or' as a function, so that we could 'apply' it
+</pre>
+<pre>(define (<a href="lazy-xpath.html#codefunc19091">lazy:or</a> . args)
+  (if (null? args) #f (or (car args) (apply <a href="lazy-xpath.html#codefunc19091">lazy:or</a> (cdr args)))))
+</pre>
+<h5><a name='codeapp6205' href='#docapp6205'>cond-expand</a></h5>
+<i><a href='#tocapp6205'>Index</a></i><br>
+
+<pre> Escaping the ## for some Scheme implementations
+</pre>
+<pre>(cond-expand
+ (gambit
+  ; The following macro constructs Gambit-specific ids on the fly
+  ; Borrowed from &quot;http.scm&quot;
+  (define-macro (_gid id)
+    (string-&gt;symbol (string-append &quot;##&quot; (symbol-&gt;string id))))
+  )
+ (chicken
+  ; The following macro encapsulates the function ##sys#structure?
+  ; Thanks to Thomas Chust and Felix Winkelmann for the explanation of
+  ; qualified symbols in Chicken
+  (define-macro (chk:sys-structure?)
+    (string-&gt;symbol
+     (string-append (string (integer-&gt;char 3)) &quot;sys&quot; &quot;structure?&quot;)))
+  )
+ (else
+  #t))
+</pre>
+<h4><a name='codefunc35251' href='#docfunc35251'>lazy:promise?</a></h4>
+<i><a href='#tocfunc35251'>Index</a></i><br>
+
+<pre> Predicate for detecting a promise
+ There is no such a predicate in R5RS, so different Scheme implementations
+ use different names for this functionality
+</pre>
+<pre>(define <a href="lazy-xpath.html#codefunc35251">lazy:promise?</a>
+  (<a href="myenv.html#codemacro6205">cond-expand</a>
+   (plt promise?)
+   (bigloo
+    procedure?   ; ATTENTION: returns #t in more general situations
+    )
+   (chicken
+    ; Thanks to Zbigniew Szadkowski &lt;zbigniewsz@gmail.com&gt;
+    ; for the insight of this function
+    (lambda (p) ((chk:sys-structure?) p 'promise))
+    )
+   (gambit
+    (_gid promise?)
+    )
+   (else
+    (lambda (obj) #f)   ; ATTENTION: just makes the approach applicable for
+                        ; conventional SXML documents
+   )))
+</pre>
+<h4><a name='codefunc6434' href='#docfunc6434'>lazy:output-siblings</a></h4>
+<i><a href='#tocfunc6434'>Index</a></i><br>
+
+<pre> A helper that tests sibling nodes with respect to the test-pred? and returns
+ them in the lazy manner. Each of the siblings may be a promise.
+ This function is applied by axes: child, attribute, namespace,
+ following-sibling, preceding-sibling
+</pre>
+<pre>(define (<a href="lazy-xpath.html#codefunc6434">lazy:output-siblings</a> test-pred? siblings ancestors)
+  (letrec
+      ((iterate-siblings
+        (lambda (src)
+          (let loop ((src src) (res '()))
+            (cond
+              ((null? src)  ; iteration is over
+               (reverse res))
+              ((<a href="lazy-xpath.html#codefunc35251">lazy:promise?</a> (car src))               
+                (reverse  ; otherwise - return the result with a promise
+                 (cons
+                  (delay
+                    (iterate-siblings
+                     (append (<a href="sxpathlib.html#codefunc11721">as-nodeset</a> (force (car src))) (cdr src))))
+                  res)))
+              (else  ; the first src is a node
+               (loop (cdr src)
+                     (if (test-pred? (car src))
+                         (cons
+                          (if (null? ancestors)  ; don't construct context
+                              (car src)
+                              (<a href="xpath-context.html#codefunc34204">draft:make-context</a> (car src) ancestors))
+                          res)
+                         res))))))))
+    (iterate-siblings siblings)))
+</pre>
+<h4><a name='codefunc24486' href='#docfunc24486'>lazy:find-foll-siblings</a></h4>
+<i><a href='#tocfunc24486'>Index</a></i><br>
+
+<pre> Returns nodeset membert that are following siblings of the given node
+ Nodeset members may be promises
+</pre>
+<pre>(define (<a href="lazy-xpath.html#codefunc24486">lazy:find-foll-siblings</a> node nodeset)
+  (cond
+    ((null? nodeset)  ; not found
+     '())
+    ((<a href="lazy-xpath.html#codefunc35251">lazy:promise?</a> (car nodeset))
+     (<a href="lazy-xpath.html#codefunc24486">lazy:find-foll-siblings</a>
+      node
+      (append (<a href="sxpathlib.html#codefunc11721">as-nodeset</a> (force (car nodeset)))
+              (cdr nodeset))))
+    ; (car nodeset) an ordinary node
+    ((eq? node (car nodeset))
+     (cdr nodeset))
+    (else
+     (<a href="lazy-xpath.html#codefunc24486">lazy:find-foll-siblings</a> node (cdr nodeset)))))
+</pre>
+<h4><a name='codefunc22953' href='#docfunc22953'>lazy:find-prec-siblings</a></h4>
+<i><a href='#tocfunc22953'>Index</a></i><br>
+
+<pre> Returns nodeset members that are preceding siblings of the given node
+ Nodeset members may be promises
+</pre>
+<pre>(define (<a href="lazy-xpath.html#codefunc22953">lazy:find-prec-siblings</a> node nodeset)
+  (let loop ((nodeset nodeset)
+             (res '()))
+    (cond
+      ((null? nodeset)  ; not found
+       '())
+      ((<a href="lazy-xpath.html#codefunc35251">lazy:promise?</a> (car nodeset))
+       (loop
+        (append (<a href="sxpathlib.html#codefunc11721">as-nodeset</a> (force (car nodeset)))
+                (cdr nodeset))
+        res))
+      ; the first member in a nodeset an ordinary node
+      ((eq? node (car nodeset))
+       res)
+      (else
+       (loop (cdr nodeset)
+             (cons (car nodeset) res))))))
+</pre>
+<h4><a name='codefunc18635' href='#docfunc18635'>lazy:ast-axis-specifier</a></h4>
+<i><a href='#tocfunc18635'>Index</a></i><br>
+
+<pre> {5} &lt;AxisSpecifier&gt; ::= (axis-specifier  &lt;AxisName&gt; )
+ {6} &lt;AxisName&gt; ::= (ancestor)
+                    | (ancestor-or-self)
+                    | (attribute)
+                    | (child)
+                    | (descendant)
+                    | (descendant-or-self)
+                    | (following)
+                    | (following-sibling)
+                    | (namespace)
+                    | (parent)
+                    | (preceding)
+                    | (preceding-sibling)
+                    | (self)
+                    | (arc)  ; the following 3 are added by SXLink
+                    | (traverse)
+                    | (traverse-arc)
+ Returns:  (cons lambda num-ancestors)
+</pre>
+<pre>(define (<a href="lazy-xpath.html#codefunc18635">lazy:ast-axis-specifier</a> op num-anc)
+  (if
+   (not (eq? (car op) 'axis-specifier))
+   (<a href="xpath-context.html#codefunc8076">draft:signal-semantic-error</a> &quot;not an AxisSpecifier - &quot; op)
+   (case (caadr op)  ; AxisName
+     ((ancestor)
+      (cons <a href="lazy-xpath.html#codefunc33499">lazy:ancestor</a> #f))
+     ((ancestor-or-self)
+      (cons <a href="lazy-xpath.html#codefunc580">lazy:ancestor-or-self</a> #f))
+     ((attribute)
+      (cons <a href="lazy-xpath.html#codefunc62686">lazy:attribute</a> (<a href="xpath-context.html#codefunc38839">draft:na-minus-nneg</a> num-anc 1)))
+     ((child)
+      (cons <a href="lazy-xpath.html#codefunc3062">lazy:child</a> (<a href="xpath-context.html#codefunc38839">draft:na-minus-nneg</a> num-anc 1)))
+     ((descendant)
+      (cons <a href="lazy-xpath.html#codefunc60205">lazy:descendant</a> (<a href="xpath-context.html#codefunc38839">draft:na-minus-nneg</a> num-anc 1)))
+     ((descendant-or-self)
+      (cons <a href="lazy-xpath.html#codefunc27286">lazy:descendant-or-self</a> num-anc))
+     ((following)
+      (cons <a href="lazy-xpath.html#codefunc60898">lazy:following</a> #f))
+     ((following-sibling)
+      (cons <a href="lazy-xpath.html#codefunc37972">lazy:following-sibling</a> (<a href="xpath-context.html#codefunc23095">draft:na-max</a> num-anc 1)))
+     ((namespace)
+      (cons <a href="lazy-xpath.html#codefunc61627">lazy:namespace</a> (<a href="xpath-context.html#codefunc38839">draft:na-minus-nneg</a> num-anc 1)))
+     ((parent)
+      (cons <a href="lazy-xpath.html#codefunc11356">lazy:parent</a> (<a href="xpath-context.html#codefunc29907">draft:na+</a> num-anc 1)))
+     ((preceding)
+      (cons <a href="lazy-xpath.html#codefunc59081">lazy:preceding</a> #f))
+     ((preceding-sibling)
+      (cons <a href="lazy-xpath.html#codefunc36155">lazy:preceding-sibling</a> (<a href="xpath-context.html#codefunc23095">draft:na-max</a> num-anc 1)))
+     ((<a href="libmisc.html#codefunc52191">self</a>)
+      (cons <a href="lazy-xpath.html#codefunc47852">lazy:self</a> num-anc))     
+     (else
+      (<a href="xpath-context.html#codefunc8076">draft:signal-semantic-error</a> &quot;unknown AxisName - &quot; op)))))
+</pre>
+<h4><a name='codefunc57350' href='#docfunc57350'>lazy:api-helper</a></h4>
+<i><a href='#tocfunc57350'>Index</a></i><br>
+
+<pre> Helper for constructing several highest-level API functions
+</pre>
+<pre>(define (<a href="lazy-xpath.html#codefunc57350">lazy:api-helper</a> grammar-parser ast-parser)
+  (lambda (xpath-string . ns+na)
+    (call-with-values
+     (lambda () (<a href="xpath-context.html#codefunc36352">draft:arglist-&gt;ns+na</a> ns+na))
+     (lambda (ns-binding num-anc)
+       (and-let*
+        ((ast (grammar-parser xpath-string ns-binding))
+         (impl-lst (ast-parser ast num-anc)))
+        (let ((query-impl (car impl-lst)))
+          (lambda (node . var-binding)
+            (let ((query-res
+                   (query-impl
+                    (<a href="sxpathlib.html#codefunc11721">as-nodeset</a> node) (cons 1 1)
+                    (if (null? var-binding) var-binding (car var-binding)))))
+              (if
+               (and num-anc (zero? num-anc) (<a href="sxpathlib.html#codefunc31162">nodeset?</a> query-res))
+               (<a href="lazy-xpath.html#codefunc47234">lazy:map</a> <a href="xpath-context.html#codefunc41847">sxml:context-&gt;node</a> query-res)
+               query-res)))))))))
+</pre>
+<h4><a name='codefunc13411' href='#docfunc13411'>lazy:txpath</a></h4>
+<i><a href='#tocfunc13411'>Index</a></i><br>
+
+<pre>(define <a href="lazy-xpath.html#codefunc13411">lazy:txpath</a> (<a href="lazy-xpath.html#codefunc57350">lazy:api-helper</a> <a href="xpath-ast.html#codefunc39640">txp:xpath-&gt;ast</a> <a href="lazy-xpath.html#codefunc23375">lazy:ast-location-path</a>))
+</pre>
+<h4><a name='codefunc62237' href='#docfunc62237'>lazy:xpath-expr</a></h4>
+<i><a href='#tocfunc62237'>Index</a></i><br>
+
+<pre>(define <a href="lazy-xpath.html#codefunc62237">lazy:xpath-expr</a> (<a href="lazy-xpath.html#codefunc57350">lazy:api-helper</a> <a href="xpath-ast.html#codefunc20413">txp:expr-&gt;ast</a> <a href="lazy-xpath.html#codefunc34476">lazy:ast-expr</a>))
+</pre>
+<h4><a name='codefunc13155' href='#docfunc13155'>lazy:sxpath</a></h4>
+<i><a href='#tocfunc13155'>Index</a></i><br>
+
+<pre> Support for native sxpath syntax
+</pre>
+<pre>(define <a href="lazy-xpath.html#codefunc13155">lazy:sxpath</a> (<a href="lazy-xpath.html#codefunc57350">lazy:api-helper</a> <a href="xpath-ast.html#codefunc42815">txp:sxpath-&gt;ast</a> <a href="lazy-xpath.html#codefunc34476">lazy:ast-expr</a>))
+</pre>
+<h4><a name='codefunc62722' href='#docfunc62722'>lazy:null?</a></h4>
+<i><a href='#tocfunc62722'>Index</a></i><br>
+
+<pre> Checks whether the nodeset is empty
+ Note that a promise can evaluate to an empty list, and thus a nodeset
+ consisting of promises only may potentially be empty
+</pre>
+<pre>(define (<a href="lazy-xpath.html#codefunc62722">lazy:null?</a> nodeset)
+  (cond
+    ((null? nodeset) #t)
+    ((not (null? (<a href="common.html#codefunc20536">filter</a>   ; contains at least one non-promise
+                  (lambda (node) (not (<a href="lazy-xpath.html#codefunc35251">lazy:promise?</a> node)))
+                  nodeset)))
+     #f)
+    (else  ; all nodeset members are promises
+     (let iter-promises ((nset nodeset))
+       (cond
+         ((null? nset) #t)
+         ((<a href="lazy-xpath.html#codefunc62722">lazy:null?</a> (<a href="sxpathlib.html#codefunc11721">as-nodeset</a> (force (car nset))))
+          (iter-promises (cdr nset)))
+         (else #f))))))
+</pre>
+<h4><a name='codefunc47234' href='#docfunc47234'>lazy:map</a></h4>
+<i><a href='#tocfunc47234'>Index</a></i><br>
+
+<pre> Like conventional map, but applicable to a lazy nodeset
+</pre>
+<pre>(define (<a href="lazy-xpath.html#codefunc47234">lazy:map</a> func nodeset)
+  (cond
+    ((null? nodeset)  ; iteration is over
+     nodeset)
+    ((<a href="lazy-xpath.html#codefunc35251">lazy:promise?</a> (car nodeset))
+     (list
+      (delay
+        (<a href="lazy-xpath.html#codefunc47234">lazy:map</a> func
+                  (append (<a href="sxpathlib.html#codefunc11721">as-nodeset</a> (force (car nodeset)))
+                          (cdr nodeset))))))
+    (else  ; the first member is a node
+     (cons (func (car nodeset))
+           (<a href="lazy-xpath.html#codefunc47234">lazy:map</a> func (cdr nodeset))))))
+</pre>
+<h4><a name='codefunc4977' href='#docfunc4977'>lazy:filter</a></h4>
+<i><a href='#tocfunc4977'>Index</a></i><br>
+
+<pre> Lazy analogue for filter
+</pre>
+<pre>(define (<a href="lazy-xpath.html#codefunc4977">lazy:filter</a> func nodeset)
+  (cond
+    ((null? nodeset)  ; iteration is over
+     nodeset)
+    ((<a href="lazy-xpath.html#codefunc35251">lazy:promise?</a> (car nodeset))
+     (list
+      (delay
+        (<a href="lazy-xpath.html#codefunc4977">lazy:filter</a> func
+                  (append (<a href="sxpathlib.html#codefunc11721">as-nodeset</a> (force (car nodeset)))
+                          (cdr nodeset))))))
+    ; the first member is a node
+    ((func (car nodeset))
+     (cons (car nodeset)
+           (<a href="lazy-xpath.html#codefunc4977">lazy:filter</a> func (cdr nodeset))))
+    (else  ; the first member doesn't satisfy the predicate
+     (<a href="lazy-xpath.html#codefunc4977">lazy:filter</a> func (cdr nodeset)))))
+</pre>
+<h4><a name='codefunc45186' href='#docfunc45186'>lazy:car</a></h4>
+<i><a href='#tocfunc45186'>Index</a></i><br>
+
+<pre> Like conventional car, but for a lazy nodeset
+</pre>
+<pre>(define (<a href="lazy-xpath.html#codefunc45186">lazy:car</a> nodeset)
+  (cond
+    ; Checking for a safe variant
+    ;((null? nodeset)  ; failed
+    ; #f)
+    ((<a href="lazy-xpath.html#codefunc35251">lazy:promise?</a> (car nodeset))
+     (let ((nset-car (force (car nodeset))))
+       (<a href="lazy-xpath.html#codefunc45186">lazy:car</a>
+        ((if (<a href="sxpathlib.html#codefunc31162">nodeset?</a> nset-car) append cons)
+         nset-car (cdr nodeset)))))
+    (else
+     (car nodeset))))
+</pre>
+<h4><a name='codefunc45189' href='#docfunc45189'>lazy:cdr</a></h4>
+<i><a href='#tocfunc45189'>Index</a></i><br>
+
+<pre> Like conventional cdr
+</pre>
+<pre>(define (<a href="lazy-xpath.html#codefunc45189">lazy:cdr</a> nodeset)
+  (if
+   (<a href="lazy-xpath.html#codefunc35251">lazy:promise?</a> (car nodeset))
+   (let ((nset-car (force (car nodeset))))
+     (<a href="lazy-xpath.html#codefunc45189">lazy:cdr</a>
+      ((if (<a href="sxpathlib.html#codefunc31162">nodeset?</a> nset-car) append cons)
+       nset-car (cdr nodeset)))))
+  (cdr nodeset))
+</pre>
+<h4><a name='codefunc10838' href='#docfunc10838'>lazy:length</a></h4>
+<i><a href='#tocfunc10838'>Index</a></i><br>
+
+<pre> Like conventional length, but for a lazy nodeset
+ ATTENTION: it has to force all the nodeset members in order to determine
+ the length properly
+</pre>
+<pre>(define (<a href="lazy-xpath.html#codefunc10838">lazy:length</a> nodeset)
+  (cond
+    ((null? nodeset) 0)
+    ((<a href="lazy-xpath.html#codefunc35251">lazy:promise?</a> (car nodeset))
+     (let ((nset-car (force (car nodeset))))
+       (<a href="lazy-xpath.html#codefunc10838">lazy:length</a>
+        ((if (<a href="sxpathlib.html#codefunc31162">nodeset?</a> nset-car) append cons)
+         nset-car (cdr nodeset)))))
+    (else
+     (+ 1 (<a href="lazy-xpath.html#codefunc10838">lazy:length</a> (cdr nodeset))))))
+</pre>
+<h4><a name='codefunc14988' href='#docfunc14988'>lazy:result->list</a></h4>
+<i><a href='#tocfunc14988'>Index</a></i><br>
+
+<pre>(define (<a href="lazy-xpath.html#codefunc14988">lazy:result-&gt;list</a> nodeset)
+  (let iter-nset ((nset nodeset)
+                  (res '()))
+    (cond
+      ((null? nset)  ; finished scanning
+       (reverse res))
+      ((<a href="lazy-xpath.html#codefunc35251">lazy:promise?</a> (car nset))
+       (iter-nset (append (<a href="sxpathlib.html#codefunc11721">as-nodeset</a> (force (car nset))) (cdr nset))
+                  res))
+      (else  ; the first member is a node
+       (iter-nset (cdr nset)
+                  (cons (car nset) res))))))
+</pre>
+<h4><a name='codefunc48152' href='#docfunc48152'>lazy:node->sxml</a></h4>
+<i><a href='#tocfunc48152'>Index</a></i><br>
+
+<pre> Converts the lazy node to SXML, by forcing all of its descendants
+ The node itself is not a promise
+</pre>
+<pre>(define (<a href="lazy-xpath.html#codefunc48152">lazy:node-&gt;sxml</a> node)
+  (letrec
+      ((force-nodeset
+        (lambda (nodeset)
+          (cond
+            ((null? nodeset) nodeset)
+            ((<a href="lazy-xpath.html#codefunc35251">lazy:promise?</a> (car nodeset))
+             (let ((nset-car (force (car nodeset))))               
+               (force-nodeset
+                ((if (<a href="sxpathlib.html#codefunc31162">nodeset?</a> nset-car) append cons)
+                 nset-car (cdr nodeset)))))
+            (else
+             (cons (<a href="lazy-xpath.html#codefunc48152">lazy:node-&gt;sxml</a> (car nodeset))
+                   (force-nodeset (cdr nodeset))))))))
+    (if
+     (or (not (pair? node))
+         (null? ((<a href="sxpath-ext.html#codefunc62759">sxml:descendant</a> <a href="lazy-xpath.html#codefunc35251">lazy:promise?</a>) node)))
+     node     ; will not make a copy of the node
+     (cons (car node) (force-nodeset (cdr node))))))
+</pre>
+<h4><a name='codefunc63738' href='#docfunc63738'>lazy:reach-root</a></h4>
+<i><a href='#tocfunc63738'>Index</a></i><br>
+
+<pre> Reaches the root of the root of the contextset
+ Result: singleton nodeset
+</pre>
+<pre>(define (<a href="lazy-xpath.html#codefunc63738">lazy:reach-root</a> contextset)
+  (letrec
+      ((find-root
+        (lambda (src prev-result)
+          (let loop ((src src)
+                     (res '())
+                     (prev-result prev-result))
+            (cond
+              ((null? src)  ; nothing more to do
+               (reverse res))
+              ((<a href="lazy-xpath.html#codefunc35251">lazy:promise?</a> (car src))
+               (if
+                (null? res)  ; need to force this
+                (loop (append (<a href="sxpathlib.html#codefunc11721">as-nodeset</a> (force (car src)))
+                              (cdr src))
+                      res prev-result)
+                (reverse
+                 (cons (delay (find-root src prev-result))
+                       res))))
+              (else  ; (car src) is the ordinary node
+               (let ((rt (if (<a href="xpath-context.html#codefunc37046">sxml:context?</a> (car src))
+                             (<a href="xpath-context.html#codefunc53532">draft:list-last</a>
+                              (<a href="xpath-context.html#codefunc46900">sxml:context-&gt;ancestors-u</a> (car src)))
+                             (car src))))
+                 (loop (cdr src)
+                       (if
+                        (memq rt prev-result)  ; already returned
+                        res (cons rt res))
+                       (cons rt prev-result)))))))))
+    (find-root contextset '())))
+</pre>
+<h4><a name='codefunc54237' href='#docfunc54237'>lazy:contextset->nodeset</a></h4>
+<i><a href='#tocfunc54237'>Index</a></i><br>
+
+<pre> Analogue for draft:contextset-&gt;nodeset for the lazy case
+</pre>
+<pre>(define (<a href="lazy-xpath.html#codefunc54237">lazy:contextset-&gt;nodeset</a> obj)
+  (letrec
+      ((iter-nset
+        (lambda (nset)
+          (cond
+            ((null? nset) nset)
+            ((<a href="lazy-xpath.html#codefunc35251">lazy:promise?</a> (car nset))
+             (list
+              (delay (iter-nset (append (<a href="sxpathlib.html#codefunc11721">as-nodeset</a> (force (car nset)))
+                                        (cdr nset))))))
+            (else  ; (car nset) is a node
+             (cons
+              (<a href="xpath-context.html#codefunc41847">sxml:context-&gt;node</a> (car nset))
+              (iter-nset (cdr nset))))))))
+  (if
+   (<a href="sxpathlib.html#codefunc31162">nodeset?</a> obj)
+   (iter-nset obj)
+   obj)))
+</pre>
+<h4><a name='codefunc43724' href='#docfunc43724'>lazy:recover-contextset</a></h4>
+<i><a href='#tocfunc43724'>Index</a></i><br>
+
+<pre> Lazy analogue for draft:recover-contextset
+</pre>
+<pre>(define (<a href="lazy-xpath.html#codefunc43724">lazy:recover-contextset</a> nodeset root-node num-anc)
+  (cond
+    ((null? nodeset)  ; nothing more to do
+     '())
+    ((<a href="lazy-xpath.html#codefunc35251">lazy:promise?</a> (car nodeset))
+     (delay (<a href="lazy-xpath.html#codefunc43724">lazy:recover-contextset</a>
+             (append (<a href="sxpathlib.html#codefunc11721">as-nodeset</a> (force (car nodeset)))
+                     (cdr nodeset))
+             root-node num-anc)))
+    (else  ; (car nodeset) is a common node
+     (cons
+      (<a href="xpath-context.html#codefunc37605">draft:smart-make-context</a>
+       (car nodeset)
+       (((<a href="sxpath-ext.html#codefunc36053">sxml:ancestor</a> (lambda (x) #t)) root-node) (car nodeset))
+       num-anc)
+      (<a href="lazy-xpath.html#codefunc43724">lazy:recover-contextset</a> (cdr nodeset) root-node num-anc)))))
+</pre>
+<h4><a name='codefunc56765' href='#docfunc56765'>lazy:find-proper-context</a></h4>
+<i><a href='#tocfunc56765'>Index</a></i><br>
+
+<pre> Makes a context-set from a nodeset supplied, with the num-anc required
+ Members of the nodeset are known to be descendants-or-selves of
+ (map sxml:context-&gt;node context-set)
+</pre>
+<pre>(define (<a href="lazy-xpath.html#codefunc56765">lazy:find-proper-context</a> nodeset context-set num-anc)
+  (let* ((descend (<a href="lazy-xpath.html#codefunc27286">lazy:descendant-or-self</a> <a href="sxpathlib.html#codefunc63215">sxml:node?</a> num-anc))
+         (possible-ancestors
+          (map
+           cdr  ; ignore starting '*CONTEXT* for a faster search
+           (<a href="sxpathlib.html#codefunc27946">map-union</a>
+            (lambda (node)
+              ; Has to be evaluated in the active manner, since all of the
+              ; candidates generally have to be scanned
+              (<a href="lazy-xpath.html#codefunc14988">lazy:result-&gt;list</a> (descend node)))
+            ;(<a href="lazy-xpath.html#codefunc14988">lazy:result-&gt;list</a> ancestors-set)
+            (<a href="sxpathlib.html#codefunc27946">map-union</a>
+             <a href="xpath-context.html#codefunc35263">sxml:context-&gt;ancestors</a>
+             (<a href="lazy-xpath.html#codefunc14988">lazy:result-&gt;list</a> context-set))))))
+    (let iter-nset ((nodeset nodeset)
+                    (res '()))   ; DL: was: res
+      (cond
+        ((null? nodeset)  ; scanning is over
+         (reverse res))
+        ((<a href="lazy-xpath.html#codefunc35251">lazy:promise?</a> (car nodeset))
+         (if (null? res)  ; result is still null =&gt; have to force
+             (iter-nset (append (<a href="sxpathlib.html#codefunc11721">as-nodeset</a> (force (car nodeset)))
+                                (cdr nodeset))
+                        res)
+             (reverse
+              (cons
+               (delay (iter-nset (append (<a href="sxpathlib.html#codefunc11721">as-nodeset</a> (force (car nodeset)))
+                                         (cdr nodeset))
+                                 '()))
+               res))))
+        ((<a href="xpath-context.html#codefunc37046">sxml:context?</a> (car nodeset))  ; already a context
+         (iter-nset (cdr nodeset)
+                    (cons (car nodeset) res)))
+        ((assq (car nodeset) possible-ancestors)
+         =&gt; (lambda (ancestors)
+              (iter-nset (cdr nodeset)
+                         (cons
+                          (<a href="xpath-context.html#codefunc34204">draft:make-context</a>
+                           (car ancestors)  ; = (car nodeset)
+                           (cdr ancestors))
+                          res))))
+        (else  ; this is a newly constructed node
+         ; Keep it as is
+         (iter-nset (cdr nodeset)
+                    (cons (car nodeset) res)))))))
+</pre>
+<h4><a name='codefunc33499' href='#docfunc33499'>lazy:ancestor</a></h4>
+<i><a href='#tocfunc33499'>Index</a></i><br>
+
+<pre> Ancestor axis
+ It should be noted that ancestors of the context node are already forced
+</pre>
+<pre>(define (<a href="lazy-xpath.html#codefunc33499">lazy:ancestor</a> test-pred? . num-ancestors)
+  (let* ((num-anc (if (null? num-ancestors) 0 (car num-ancestors))))
+    (lambda (node)  ; not a nodeset
+      (if
+       (<a href="xpath-context.html#codefunc37046">sxml:context?</a> node)
+       (let loop ((ancs-to-view (<a href="xpath-context.html#codefunc46900">sxml:context-&gt;ancestors-u</a> node))
+                  (res '()))
+         (cond
+           ((null? ancs-to-view)  ; processed everyone
+            (reverse res)  ; reverse document order required
+            )
+           ((test-pred? (car ancs-to-view))  ; can add it to result
+            (loop
+             (cdr ancs-to-view)
+             (cons
+              (<a href="xpath-context.html#codefunc37605">draft:smart-make-context</a>
+               (car ancs-to-view) (cdr ancs-to-view) num-anc)
+              res)))
+           (else  ; current node doesn't satisfy the predicate
+            (loop (cdr ancs-to-view) res))))
+       '()  ; no ancestors
+       ))))
+</pre>
+<h4><a name='codefunc580' href='#docfunc580'>lazy:ancestor-or-self</a></h4>
+<i><a href='#tocfunc580'>Index</a></i><br>
+
+<pre> Ancestor-or-self axis
+ It should be noted that ancestors of the context node are already forced
+</pre>
+<pre>(define (<a href="lazy-xpath.html#codefunc580">lazy:ancestor-or-self</a> test-pred? . num-ancestors)
+  (let ((num-anc (if (null? num-ancestors) 0 (car num-ancestors))))
+    (lambda (node)  ; not a nodeset
+      (cond
+        ((<a href="xpath-context.html#codefunc37046">sxml:context?</a> node)
+         (let loop ((ancs-to-view (<a href="xpath-context.html#codefunc20165">sxml:context-&gt;content-u</a> node))
+                    (res '()))
+           (cond
+             ((null? ancs-to-view)  ; processed everyone
+              (reverse res)  ; reverse document order required
+              )
+             ((test-pred? (car ancs-to-view))  ; can add it to result
+              (loop
+               (cdr ancs-to-view)
+               (cons
+                (<a href="xpath-context.html#codefunc37605">draft:smart-make-context</a>
+                 (car ancs-to-view) (cdr ancs-to-view) num-anc)
+                res)))
+             (else  ; current node doesn't satisfy the predicate
+              (loop (cdr ancs-to-view) res)))))
+        ; ordinary SXML node
+        ((test-pred? node)  ; satisfies the predicate
+         (list node))
+        (else
+         '())))))
+</pre>
+<h4><a name='codefunc62686' href='#docfunc62686'>lazy:attribute</a></h4>
+<i><a href='#tocfunc62686'>Index</a></i><br>
+
+<pre> Attribute axis
+</pre>
+<pre>(define (<a href="lazy-xpath.html#codefunc62686">lazy:attribute</a> test-pred? . num-ancestors)
+  (let ((num-anc (if (null? num-ancestors) 0 (car num-ancestors))))
+    (letrec
+        ((find-attr-node
+          ; Either returns an attribute node, or #f
+          ; Nodeset members may be promises
+          (lambda (nodeset)
+            (cond
+              ((null? nodeset)  ; failed
+               #f)
+              ((<a href="lazy-xpath.html#codefunc35251">lazy:promise?</a> (car nodeset))
+               (find-attr-node
+                (append (<a href="sxpathlib.html#codefunc11721">as-nodeset</a> (force (car nodeset)))
+                        (cdr nodeset))))
+              ; (car nodeset) an ordinary node
+              (((<a href="sxpathlib.html#codefunc9356">ntype??</a> '@) (car nodeset))
+               (car nodeset))
+              (else #f)))))
+      (lambda (node)  ; not a nodeset
+        (cond
+          ((not (pair? node)) '())   ; no attributes
+          ; (car node) is always a symbol
+          ((<a href="xpath-context.html#codefunc1508">sxml:context-u?</a> node)  ; a context node
+           (let ((attr-node (find-attr-node (<a href="xpath-context.html#codefunc6309">sxml:context-&gt;node-u</a> node))))
+             (if (not attr-node)  ; not found
+                 '()
+                 ((<a href="lazy-xpath.html#codefunc3062">lazy:child</a> test-pred? num-anc)
+                  (if (and num-anc (zero? num-anc))
+                      attr-node
+                      (<a href="xpath-context.html#codefunc34204">draft:make-context</a>
+                       attr-node (<a href="xpath-context.html#codefunc20165">sxml:context-&gt;content-u</a> node)))))))
+          (else  ; an ordinary node, and is a pair
+           (let ((attr-node (find-attr-node node)))
+             (if (not attr-node)  ; not found
+                 '()
+                 ((<a href="lazy-xpath.html#codefunc3062">lazy:child</a> test-pred? num-anc)
+                  (if (and num-anc (zero? num-anc))
+                      attr-node                      
+                      (<a href="xpath-context.html#codefunc34204">draft:make-context</a> attr-node (list node))))))))))))           
+</pre>
+<h4><a name='codefunc3062' href='#docfunc3062'>lazy:child</a></h4>
+<i><a href='#tocfunc3062'>Index</a></i><br>
+
+<pre> Child axis
+</pre>
+<pre>(define (<a href="lazy-xpath.html#codefunc3062">lazy:child</a> test-pred? . num-ancestors)
+  (let ((num-anc (if (null? num-ancestors) 0 (car num-ancestors))))    
+    (lambda (node)  ; not a nodeset
+      (cond
+        ((not (pair? node))  ; no children
+         '())
+        ; (car node) is always a symbol
+        ((<a href="xpath-context.html#codefunc1508">sxml:context-u?</a> node)  ; a context node
+         (let ((this (<a href="xpath-context.html#codefunc6309">sxml:context-&gt;node-u</a> node)))
+           (if
+            (or (not (pair? this))
+                (memq (car this) '(*PI* *COMMENT* *ENTITY*)))
+            '()  ; no children
+            (<a href="lazy-xpath.html#codefunc6434">lazy:output-siblings</a>
+             test-pred?
+             (cdr this)  ; gives its children
+             (<a href="xpath-context.html#codefunc47888">draft:list-head</a> (<a href="xpath-context.html#codefunc20165">sxml:context-&gt;content-u</a> node) num-anc)))))
+        ; an ordinary node, and is a pair
+        ((memq (car node) '(*PI* *COMMENT* *ENTITY*))
+         '())
+        (else
+         (<a href="lazy-xpath.html#codefunc6434">lazy:output-siblings</a>
+          test-pred?
+          (cdr node)  ; gives its children
+          (if (and num-anc (zero? num-anc))
+              '() (list node))))))))
+</pre>
+<h4><a name='codefunc60205' href='#docfunc60205'>lazy:descendant</a></h4>
+<i><a href='#tocfunc60205'>Index</a></i><br>
+
+<pre> Descendant axis
+</pre>
+<pre>(define (<a href="lazy-xpath.html#codefunc60205">lazy:descendant</a> test-pred? . num-ancestors)
+  (let* ((num-anc (if (null? num-ancestors) 0 (car num-ancestors)))
+         (child (<a href="lazy-xpath.html#codefunc3062">lazy:child</a> <a href="sxpathlib.html#codefunc63215">sxml:node?</a> num-anc)))
+    (lambda (node)  ; not a nodeset
+      (let rpt ((res '())
+                (more (child node)))        
+        (cond
+          ((null? more)  ; no more candidates         
+           (reverse res))
+          ((<a href="lazy-xpath.html#codefunc35251">lazy:promise?</a> (car more))  ; need to force it
+           (reverse
+            (cons
+             (delay (rpt '()
+                         (append (<a href="sxpathlib.html#codefunc11721">as-nodeset</a> (force (car more)))
+                                 (cdr more))))
+             res)))
+          (else  ; first in more is a node
+           (rpt (if (test-pred? (<a href="xpath-context.html#codefunc41847">sxml:context-&gt;node</a> (car more)))
+                    (cons (car more) res)
+                    res)
+                (append (child (car more)) (cdr more)))))))))
+</pre>
+<h4><a name='codefunc27286' href='#docfunc27286'>lazy:descendant-or-self</a></h4>
+<i><a href='#tocfunc27286'>Index</a></i><br>
+
+<pre> Descendant-or-self axis
+</pre>
+<pre>(define (<a href="lazy-xpath.html#codefunc27286">lazy:descendant-or-self</a> test-pred? . num-ancestors)
+  (let* ((num-anc (if (null? num-ancestors) 0 (car num-ancestors)))
+         (child (<a href="lazy-xpath.html#codefunc3062">lazy:child</a> <a href="sxpathlib.html#codefunc63215">sxml:node?</a> num-anc)))
+    (lambda (node)  ; not a nodeset
+      (let rpt ((res '())
+                (more (list node)))
+        (cond
+          ((null? more)  ; no more candidates         
+           (reverse res))
+          ((<a href="lazy-xpath.html#codefunc35251">lazy:promise?</a> (car more))  ; need to force it
+           (reverse
+            (cons
+             (delay (rpt '()
+                         (append (<a href="sxpathlib.html#codefunc11721">as-nodeset</a> (force (car more)))
+                                 (cdr more))))
+             res)))
+          (else  ; first in more is a node
+           (rpt (if (test-pred? (<a href="xpath-context.html#codefunc41847">sxml:context-&gt;node</a> (car more)))
+                    (cons (car more) res)
+                    res)
+                (append (child (car more)) (cdr more)))))))))
+</pre>
+<h4><a name='codefunc60898' href='#docfunc60898'>lazy:following</a></h4>
+<i><a href='#tocfunc60898'>Index</a></i><br>
+
+<pre> Following axis
+</pre>
+<pre>(define (<a href="lazy-xpath.html#codefunc60898">lazy:following</a> test-pred? . num-ancestors)
+  (let* ((num-anc (if (null? num-ancestors) 0 (car num-ancestors)))
+         (descend (<a href="lazy-xpath.html#codefunc27286">lazy:descendant-or-self</a> test-pred? num-anc)))
+    (lambda (node)  ; not a nodeset
+      (if
+       (<a href="xpath-context.html#codefunc37046">sxml:context?</a> node)
+       (let loop ((curr-node (<a href="xpath-context.html#codefunc6309">sxml:context-&gt;node-u</a> node))
+                  (ancs-to-view (<a href="xpath-context.html#codefunc46900">sxml:context-&gt;ancestors-u</a> node))
+                  (foll-siblings '())
+                  (descendants '())
+                  (res '()))
+         (cond
+           ((null? descendants)  ; candidates for result
+            (cond
+              ((null? foll-siblings)  ; no more siblings of the curr-node
+               (if
+                (null? ancs-to-view)  ; processed everyone                 
+                (reverse res)
+                (loop (car ancs-to-view)
+                      (cdr ancs-to-view)
+                      (<a href="lazy-xpath.html#codefunc24486">lazy:find-foll-siblings</a>
+                       curr-node
+                       (cdr  ; parent is an element =&gt; cdr gives its children
+                        (car ancs-to-view)))
+                      '()
+                      res)))
+              ((<a href="lazy-xpath.html#codefunc35251">lazy:promise?</a> (car foll-siblings))
+               (reverse
+                (cons
+                 (delay
+                   (loop curr-node ancs-to-view
+                         (append (<a href="sxpathlib.html#codefunc11721">as-nodeset</a> (force (car foll-siblings)))
+                                 (cdr foll-siblings))
+                         '() '()))
+                 res)))
+              (else  ; (car foll-siblings) is a node
+               (loop curr-node ancs-to-view
+                     (cdr foll-siblings)
+                     (descend  ; descendants are currently null
+                      (<a href="xpath-context.html#codefunc37605">draft:smart-make-context</a>
+                       (car foll-siblings)
+                       ancs-to-view num-anc))
+                     res))))
+           ((<a href="lazy-xpath.html#codefunc35251">lazy:promise?</a> (car descendants))  ; need to force descendant axis
+            (reverse
+             (cons
+              (delay
+                (loop curr-node ancs-to-view foll-siblings
+                      (append (<a href="sxpathlib.html#codefunc11721">as-nodeset</a> (force (car descendants)))
+                              (cdr descendants))
+                      '()))
+              res)))
+           (else  ; the first in descendants is a node
+            (loop curr-node ancs-to-view foll-siblings
+                  (cdr descendants) (cons (car descendants) res)))))
+       '()  ; no following members       
+       ))))
+</pre>
+<h4><a name='codefunc37972' href='#docfunc37972'>lazy:following-sibling</a></h4>
+<i><a href='#tocfunc37972'>Index</a></i><br>
+
+<pre> Following-sibling axis
+</pre>
+<pre>(define (<a href="lazy-xpath.html#codefunc37972">lazy:following-sibling</a> test-pred? . num-ancestors)
+  (let ((num-anc (if (null? num-ancestors) 0 (car num-ancestors))))
+    (lambda (node)  ; not a nodeset
+      (if
+       (and (<a href="xpath-context.html#codefunc37046">sxml:context?</a> node)
+            (not (null? (<a href="xpath-context.html#codefunc46900">sxml:context-&gt;ancestors-u</a> node))))
+       (<a href="lazy-xpath.html#codefunc6434">lazy:output-siblings</a>
+        test-pred?
+        (<a href="lazy-xpath.html#codefunc24486">lazy:find-foll-siblings</a>
+         (<a href="xpath-context.html#codefunc6309">sxml:context-&gt;node-u</a> node)
+         (cdr  ; parent is an element =&gt; cdr gives its children
+          (car (<a href="xpath-context.html#codefunc46900">sxml:context-&gt;ancestors-u</a> node))))
+        (<a href="xpath-context.html#codefunc47888">draft:list-head</a>
+         (<a href="xpath-context.html#codefunc46900">sxml:context-&gt;ancestors-u</a> node) num-anc))
+       '()  ; no parent =&gt; no siblings
+       ))))
+</pre>
+<h4><a name='codefunc61627' href='#docfunc61627'>lazy:namespace</a></h4>
+<i><a href='#tocfunc61627'>Index</a></i><br>
+
+<pre> Namespace axis
+ Since a namespace axis somewhat redundant for SXML, we'll provide a
+ not-very-effective implementation for it
+</pre>
+<pre>(define (<a href="lazy-xpath.html#codefunc61627">lazy:namespace</a> test-pred? . num-ancestors)
+  (let ((num-anc (if (null? num-ancestors) 0 (car num-ancestors))))    
+    (lambda (node)  ; not a nodeset
+      (<a href="lazy-xpath.html#codefunc4977">lazy:filter</a>
+       (lambda (context)
+         (test-pred? (<a href="xpath-context.html#codefunc41847">sxml:context-&gt;node</a> context)))
+       ((<a href="lazy-xpath.html#codefunc13155">lazy:sxpath</a> '(@@ *NAMESPACES* *) num-anc) node)))))
+</pre>
+<h4><a name='codefunc11356' href='#docfunc11356'>lazy:parent</a></h4>
+<i><a href='#tocfunc11356'>Index</a></i><br>
+
+<pre> Parent axis
+ It should be noted that the parent of the context node is already forced
+</pre>
+<pre>(define (<a href="lazy-xpath.html#codefunc11356">lazy:parent</a> test-pred? . num-ancestors)
+  (let ((num-anc (if (null? num-ancestors) 0 (car num-ancestors))))
+    (lambda (node)  ; not a nodeset
+      (if
+       (and (<a href="xpath-context.html#codefunc37046">sxml:context?</a> node)
+            (not (null? (<a href="xpath-context.html#codefunc46900">sxml:context-&gt;ancestors-u</a> node)))
+            (test-pred? (car (<a href="xpath-context.html#codefunc46900">sxml:context-&gt;ancestors-u</a> node))))
+       (<a href="xpath-context.html#codefunc37605">draft:smart-make-context</a>
+        (car (<a href="xpath-context.html#codefunc46900">sxml:context-&gt;ancestors-u</a> node))
+        (cdr (<a href="xpath-context.html#codefunc46900">sxml:context-&gt;ancestors-u</a> node))
+        num-anc)
+       '()  ; no parent
+       ))))
+</pre>
+<h4><a name='codefunc59081' href='#docfunc59081'>lazy:preceding</a></h4>
+<i><a href='#tocfunc59081'>Index</a></i><br>
+
+<pre> Preceding axis
+</pre>
+<pre>(define (<a href="lazy-xpath.html#codefunc59081">lazy:preceding</a> test-pred? . num-ancestors)
+  (let* ((num-anc (if (null? num-ancestors) 0 (car num-ancestors)))
+         (descend (<a href="lazy-xpath.html#codefunc27286">lazy:descendant-or-self</a> test-pred? num-anc)))
+    (lambda (node)  ; not a nodeset
+      (if
+       (<a href="xpath-context.html#codefunc37046">sxml:context?</a> node)
+       (let loop ((curr-node (<a href="xpath-context.html#codefunc6309">sxml:context-&gt;node-u</a> node))
+                  (ancs-to-view (<a href="xpath-context.html#codefunc46900">sxml:context-&gt;ancestors-u</a> node))
+                  (prec-siblings '())
+                  (descendants '())
+                  (res '()))
+         (cond
+           ((null? descendants)  ; candidates for result
+            (cond
+              ((null? prec-siblings)  ; no more siblings of the curr-node
+               (if
+                (null? ancs-to-view)  ; processed everyone                 
+                (reverse res)
+                (loop (car ancs-to-view)
+                      (cdr ancs-to-view)
+                      (<a href="lazy-xpath.html#codefunc22953">lazy:find-prec-siblings</a>
+                       curr-node
+                       (cdr  ; parent is an element =&gt; cdr gives its children
+                        (car ancs-to-view)))
+                      descendants  ; is null
+                      res)))
+              ((<a href="lazy-xpath.html#codefunc35251">lazy:promise?</a> (car prec-siblings))
+               (reverse
+                (cons
+                 (delay
+                   (loop curr-node ancs-to-view
+                         (append (<a href="sxpathlib.html#codefunc11721">as-nodeset</a> (force (car prec-siblings)))
+                                 (cdr prec-siblings))
+                         descendants  ; is null
+                         '()))
+                 res)))
+              (else  ; (car prec-siblings) is a node
+               (loop curr-node ancs-to-view
+                     (cdr prec-siblings)
+                     (reverse
+                      (descend  ; descendants are currently null
+                       (<a href="xpath-context.html#codefunc37605">draft:smart-make-context</a>
+                        (car prec-siblings)
+                        ancs-to-view num-anc)))
+                     res))))
+           ((<a href="lazy-xpath.html#codefunc35251">lazy:promise?</a> (car descendants))  ; need to force descendant axis
+            (reverse
+             (cons
+              (delay
+                (loop curr-node ancs-to-view prec-siblings
+                      (append (reverse (<a href="sxpathlib.html#codefunc11721">as-nodeset</a> (force (car descendants))))
+                              (cdr descendants))
+                      '()))
+              res)))
+           (else  ; the first in descendants is a node
+            (loop curr-node ancs-to-view prec-siblings
+                  (cdr descendants) (cons (car descendants) res)))))
+       '()  ; no preceding members       
+       ))))    
+</pre>
+<h4><a name='codefunc36155' href='#docfunc36155'>lazy:preceding-sibling</a></h4>
+<i><a href='#tocfunc36155'>Index</a></i><br>
+
+<pre> Preceding-sibling axis
+</pre>
+<pre>(define (<a href="lazy-xpath.html#codefunc36155">lazy:preceding-sibling</a> test-pred? . num-ancestors)
+  (let ((num-anc (if (null? num-ancestors) 0 (car num-ancestors))))
+    (lambda (node)  ; not a nodeset
+      (if
+       (and (<a href="xpath-context.html#codefunc37046">sxml:context?</a> node)                  
+            (not (null? (<a href="xpath-context.html#codefunc46900">sxml:context-&gt;ancestors-u</a> node))))
+       (<a href="xpath-context.html#codefunc63648">draft:siblings-&gt;context-set</a>
+        ((<a href="sxpathlib.html#codefunc7531">sxml:filter</a> test-pred?)
+         (<a href="lazy-xpath.html#codefunc22953">lazy:find-prec-siblings</a>
+          (<a href="xpath-context.html#codefunc6309">sxml:context-&gt;node-u</a> node)
+          (cdr  ; parent is an element =&gt; cdr gives its children
+           (car (<a href="xpath-context.html#codefunc46900">sxml:context-&gt;ancestors-u</a> node)))))
+        (<a href="xpath-context.html#codefunc47888">draft:list-head</a>
+         (<a href="xpath-context.html#codefunc46900">sxml:context-&gt;ancestors-u</a> node) num-anc))
+       '()  ; no parent =&gt; no siblings
+       ))))
+</pre>
+<h4><a name='codefunc47852' href='#docfunc47852'>lazy:self</a></h4>
+<i><a href='#tocfunc47852'>Index</a></i><br>
+
+<pre> Self axis
+ Shortens the context if it contains more nodes than specified by num-ancestor
+ In most cases, this work can be considered redundant; however, it eliminates
+ some classes of error that are hard to detect
+</pre>
+<pre>(define (<a href="lazy-xpath.html#codefunc47852">lazy:self</a> test-pred? . num-ancestors)
+  (let ((num-anc (if (null? num-ancestors) 0 (car num-ancestors))))
+    (lambda (node)  ; not a nodeset
+      (if (<a href="xpath-context.html#codefunc37046">sxml:context?</a> node)
+          (if (test-pred? (<a href="xpath-context.html#codefunc6309">sxml:context-&gt;node-u</a> node))
+              (list (<a href="xpath-context.html#codefunc37605">draft:smart-make-context</a>
+                     (<a href="xpath-context.html#codefunc6309">sxml:context-&gt;node-u</a> node)
+                     (<a href="xpath-context.html#codefunc46900">sxml:context-&gt;ancestors-u</a> node)
+                     num-anc))
+              '())
+          (if (test-pred? node) (list node) '())))))
+</pre>
+<h4><a name='codefunc35699' href='#docfunc35699'>lazy:axis-consume-nodeset</a></h4>
+<i><a href='#tocfunc35699'>Index</a></i><br>
+
+<pre> Given the axis of the form
+  Node -&gt; Nodeset
+ produces the axis of the form
+  Node|Nodeset -&gt; Nodeset
+</pre>
+<pre>(define (<a href="lazy-xpath.html#codefunc35699">lazy:axis-consume-nodeset</a> axis)
+  (letrec
+      ((iterate-nodeset
+        ; candidates - candidate nodes for a result
+        (lambda (src candidates)
+          (let loop ((src src)
+                     (candidates candidates)
+                     (res '()))
+            (cond
+              ((null? candidates)  ; consume the following node from src
+               (cond
+                 ((null? src)  ; iteration is over
+                  (reverse res))
+                 ((<a href="lazy-xpath.html#codefunc35251">lazy:promise?</a> (car src))
+                  (if
+                   (null? res)  ; result is still empty, need to force src
+                   (let ((src-car (<a href="sxpathlib.html#codefunc11721">as-nodeset</a> (force (car src)))))
+                     (cond
+                       ((null? src-car)  ; a rare practical situation
+                        (loop (cdr src) candidates res))
+                       ((<a href="lazy-xpath.html#codefunc35251">lazy:promise?</a> (car src-car))  ; this shouldn't happen
+                        (loop (append src-car (cdr src))
+                              candidates
+                              res))
+                       (else  ; we can finally apply the axis
+                        (loop (append (cdr src-car) (cdr src))
+                              (axis (car src-car))  ; candidates are null
+                              res))))
+                   (reverse  ; otherwise - return the result with a promise
+                    (cons
+                     (delay (iterate-nodeset src candidates))
+                     res))))
+                 (else  ; (car src) is a node
+                  (loop (cdr src)
+                        (axis (car src))  ; candidates are null
+                        res))))
+              ((<a href="lazy-xpath.html#codefunc35251">lazy:promise?</a> (car candidates))               
+               ; First candidate is a promise
+               (if
+                (null? res)  ; result is still empty, need to force candidate
+                (let ((cand-car (<a href="sxpathlib.html#codefunc11721">as-nodeset</a> (force (car candidates)))))
+                  (cond
+                    ((null? cand-car)  ; generally, (cdr candidates)=null
+                     (loop src (cdr candidates) res))
+                    ((<a href="lazy-xpath.html#codefunc35251">lazy:promise?</a> (car cand-car))  ; this shouldn't happen
+                     (loop src
+                           (append cand-car (cdr candidates))
+                           res))
+                    (else  ; add candidate to result
+                     (loop src
+                           (append (cdr cand-car) (cdr candidates))
+                           (list (car cand-car))   ; res is null
+                           ))))
+                (reverse  ; otherwise - return the result with a promise
+                 (cons
+                  (delay (iterate-nodeset src candidates))
+                  res))))
+              (else   ; the first candidate is a node
+               (loop src (cdr candidates)
+                     (cons (car candidates) res))))))))
+    (lambda (nodeset)  ; node or nodeset
+      (cond
+        ((null? nodeset)  ; nothing to do
+         '())
+        ((and (pair? nodeset) (symbol? (car nodeset)))  ; node
+         (axis nodeset))
+        (else  ; the general case
+         (iterate-nodeset nodeset '()))))))
+</pre>
+<h4><a name='codefunc12134' href='#docfunc12134'>lazy:string</a></h4>
+<i><a href='#tocfunc12134'>Index</a></i><br>
+
+<pre> The counterpart to XPath 'string' function (section 4.2 XPath Rec.)
+ Converts a given object to a string
+</pre>
+<pre>(define (<a href="lazy-xpath.html#codefunc12134">lazy:string</a> object)
+  (cond
+    ((string? object) object)
+    ((<a href="sxpathlib.html#codefunc31162">nodeset?</a> object) (if (<a href="lazy-xpath.html#codefunc62722">lazy:null?</a> object)
+                           &quot;&quot;
+                           (<a href="lazy-xpath.html#codefunc13230">lazy:string-value</a> (<a href="lazy-xpath.html#codefunc45186">lazy:car</a> object))))
+    ((number? object)
+     (if (and (rational? object) (not (integer? object)))  ; like 1/2
+         (number-&gt;string (exact-&gt;inexact object))
+         (number-&gt;string object)))
+    ((boolean? object) (if object &quot;true&quot; &quot;false&quot;))
+    (else   ; Unknown type -&gt; empty string.   
+     &quot;&quot;)))
+</pre>
+<h4><a name='codefunc32862' href='#docfunc32862'>lazy:boolean</a></h4>
+<i><a href='#tocfunc32862'>Index</a></i><br>
+
+<pre> The counterpart to XPath 'boolean' function (section 4.3 XPath Rec.)
+ Converts its argument to a boolean
+</pre>
+<pre>(define (<a href="lazy-xpath.html#codefunc32862">lazy:boolean</a> object)
+  (cond
+    ((boolean? object) object)
+    ((number? object) (not (= object 0)))
+    ((string? object) (&gt; (string-length object) 0))
+    ((<a href="sxpathlib.html#codefunc31162">nodeset?</a> object) (not (<a href="lazy-xpath.html#codefunc62722">lazy:null?</a> object)))
+    (else  ; Not specified in XPath Rec.
+     #f)))
+</pre>
+<h4><a name='codefunc7275' href='#docfunc7275'>lazy:number</a></h4>
+<i><a href='#tocfunc7275'>Index</a></i><br>
+
+<pre> The counterpart to XPath 'number' function (section 4.4 XPath Rec.)
+ Converts its argument to a number
+ NOTE: 
+  1. The argument is not optional (yet?)
+  2. string-&gt;number conversion is not IEEE 754 round-to-nearest
+  3. NaN is represented as 0
+</pre>
+<pre>(define (<a href="lazy-xpath.html#codefunc7275">lazy:number</a> obj)
+  (cond
+    ((number? obj) obj)
+    ((string? obj)
+     (let ((nmb (<a href="myenv.html#codefunc15729">call-with-input-string</a> obj read)))
+       (if (number? nmb)
+	 nmb
+	 0))) ; NaN
+    ((boolean? obj) (if obj 1 0))
+    ((<a href="sxpathlib.html#codefunc31162">nodeset?</a> obj) (<a href="lazy-xpath.html#codefunc7275">lazy:number</a> (<a href="lazy-xpath.html#codefunc12134">lazy:string</a> obj)))
+    (else 0))) ; unknown datatype
+</pre>
+<h4><a name='codefunc13230' href='#docfunc13230'>lazy:string-value</a></h4>
+<i><a href='#tocfunc13230'>Index</a></i><br>
+
+<pre> Returns a string value for a given node in accordance to
+ XPath Rec. 5.1 - 5.7
+ Undocumented functionality - can be applied for a node that is a promise
+</pre>
+<pre>(define (<a href="lazy-xpath.html#codefunc13230">lazy:string-value</a> node)
+  (cond
+    ((<a href="lazy-xpath.html#codefunc35251">lazy:promise?</a> node)
+     (let ((value (force node)))
+       (if (<a href="sxpathlib.html#codefunc31162">nodeset?</a> value)
+           (apply string-append
+                  (map <a href="lazy-xpath.html#codefunc13230">lazy:string-value</a> value))
+           (<a href="lazy-xpath.html#codefunc13230">lazy:string-value</a> value))))
+    ((not (pair? node))  ; a text node?
+     (if (string? node)
+         node &quot;&quot;))
+    ((<a href="lazy-xpath.html#codefunc62722">lazy:null?</a> (cdr node))  ; null content
+     &quot;&quot;)
+    (else
+     (apply
+      string-append
+      (cons &quot;&quot;
+            (map
+             <a href="lazy-xpath.html#codefunc13230">lazy:string-value</a>
+             (let ((frst (<a href="lazy-xpath.html#codefunc45186">lazy:car</a> (cdr node))))
+               (if
+                (and (pair? frst) (eq? '@ (car frst)))  ; attribute node
+                (<a href="lazy-xpath.html#codefunc45189">lazy:cdr</a> (cdr node))
+                (cdr node)))))))))
+</pre>
+<h4><a name='codefunc12714' href='#docfunc12714'>lazy:equality-cmp</a></h4>
+<i><a href='#tocfunc12714'>Index</a></i><br>
+
+<pre> A helper for XPath equality operations: = , !=
+  'bool-op', 'number-op' and 'string-op' are comparison operations for 
+ a pair of booleans,  numbers and strings respectively
+</pre>
+<pre>(define (<a href="lazy-xpath.html#codefunc12714">lazy:equality-cmp</a> bool-op number-op string-op)
+  (lambda (obj1 obj2)
+    (cond
+      ((and (not (<a href="sxpathlib.html#codefunc31162">nodeset?</a> obj1)) (not (<a href="sxpathlib.html#codefunc31162">nodeset?</a> obj2)))  
+       ; neither object is a nodeset
+       (cond
+         ((boolean? obj1) (bool-op obj1 (<a href="sxpath-ext.html#codefunc35416">sxml:boolean</a> obj2)))
+         ((boolean? obj2) (bool-op (<a href="sxpath-ext.html#codefunc35416">sxml:boolean</a> obj1) obj2))
+         ((number? obj1) (number-op obj1 (<a href="sxpath-ext.html#codefunc9829">sxml:number</a> obj2)))
+         ((number? obj2) (number-op (<a href="sxpath-ext.html#codefunc9829">sxml:number</a> obj1) obj2))
+         (else  ; both objects are strings
+          (string-op obj1 obj2))))
+      ((and (<a href="sxpathlib.html#codefunc31162">nodeset?</a> obj1) (<a href="sxpathlib.html#codefunc31162">nodeset?</a> obj2))  ; both objects are nodesets
+       (let first ((str-set1 (<a href="lazy-xpath.html#codefunc47234">lazy:map</a> <a href="lazy-xpath.html#codefunc13230">lazy:string-value</a> obj1))
+                   (str-set2 (<a href="lazy-xpath.html#codefunc47234">lazy:map</a> <a href="lazy-xpath.html#codefunc13230">lazy:string-value</a> obj2)))
+         (cond
+           ((null? str-set1) #f)
+           ((<a href="lazy-xpath.html#codefunc35251">lazy:promise?</a> (car str-set1))   ; time to get the next portion
+            (first (append (<a href="sxpathlib.html#codefunc11721">as-nodeset</a> (force (car str-set1)))
+                           (cdr str-set1))
+                   str-set2))
+           ((let second ((elem (car str-set1))
+                         (set2 str-set2))
+              (cond
+                ((null? set2) #f)
+                ((<a href="lazy-xpath.html#codefunc35251">lazy:promise?</a> (car set2))   ; time to get the next portion
+                 (second elem
+                         (append (<a href="sxpathlib.html#codefunc11721">as-nodeset</a> (force (car set2)))
+                                 (cdr set2))))
+                ((string-op elem (car set2)) #t)
+                (else (second elem (cdr set2))))) #t)
+           (else
+            (first (cdr str-set1) str-set2)))))
+      (else  ; one of the objects is a nodeset, the other is not
+       (call-with-values
+        (lambda ()
+          (if (<a href="sxpathlib.html#codefunc31162">nodeset?</a> obj1) (values obj1 obj2) (values obj2 obj1)))
+        (lambda (nset elem)
+          (cond
+            ((boolean? elem) (bool-op elem (<a href="lazy-xpath.html#codefunc32862">lazy:boolean</a> nset)))
+            ((number? elem)
+             (let loop ((nset
+                         (<a href="lazy-xpath.html#codefunc47234">lazy:map</a>
+                          (lambda (node) (<a href="lazy-xpath.html#codefunc7275">lazy:number</a> (<a href="lazy-xpath.html#codefunc13230">lazy:string-value</a> node)))
+                          nset)))
+               (cond
+                 ((null? nset) #f)
+                 ((<a href="lazy-xpath.html#codefunc35251">lazy:promise?</a> (car nset))  ; time to get the next portion
+                  (loop (append (<a href="sxpathlib.html#codefunc11721">as-nodeset</a> (force (car nset)))
+                                (cdr nset))))
+                 ((number-op elem (car nset)) #t)
+                 (else (loop (cdr nset))))))
+            ((string? elem)
+             (let loop ((nset (<a href="lazy-xpath.html#codefunc47234">lazy:map</a> <a href="lazy-xpath.html#codefunc13230">lazy:string-value</a> nset)))
+               (cond
+                 ((null? nset) #f)
+                 ((<a href="lazy-xpath.html#codefunc35251">lazy:promise?</a> (car nset))  ; time to get the next portion
+                  (loop (append (<a href="sxpathlib.html#codefunc11721">as-nodeset</a> (force (car nset)))
+                                (cdr nset))))
+                 ((string-op elem (car nset)) #t)
+                 (else (loop (cdr nset))))))
+            (else  ; unknown datatype
+             (<a href="myenv.html#codefunc55253">cerr</a> &quot;Unknown datatype: &quot; elem <a href="myenv.html#codefunc27758">nl</a>)
+             #f))))))))
+</pre>
+<h4><a name='codefunc8755' href='#docfunc8755'>lazy:equal?</a></h4>
+<i><a href='#tocfunc8755'>Index</a></i><br>
+
+<pre>(define <a href="lazy-xpath.html#codefunc8755">lazy:equal?</a> (<a href="lazy-xpath.html#codefunc12714">lazy:equality-cmp</a> eq? = string=?))
+</pre>
+<h4><a name='codefunc1232' href='#docfunc1232'>lazy:not-equal?</a></h4>
+<i><a href='#tocfunc1232'>Index</a></i><br>
+
+<pre>(define <a href="lazy-xpath.html#codefunc1232">lazy:not-equal?</a>
+  (<a href="lazy-xpath.html#codefunc12714">lazy:equality-cmp</a>
+   (lambda (bool1 bool2) (not (eq? bool1 bool2)))
+   (lambda (num1 num2) (not (= num1 num2)))
+   (lambda (str1 str2) (not (string=? str1 str2)))))
+</pre>
+<h4><a name='codefunc39423' href='#docfunc39423'>lazy:relational-cmp</a></h4>
+<i><a href='#tocfunc39423'>Index</a></i><br>
+
+<pre> Relational operation ( &lt; , &gt; , &lt;= , &gt;= ) for two XPath objects
+  op is comparison procedure: &lt; , &gt; , &lt;= or &gt;=
+</pre>
+<pre>(define (<a href="lazy-xpath.html#codefunc39423">lazy:relational-cmp</a> op)
+  (lambda (obj1 obj2)
+    (cond
+      ((not (or (<a href="sxpathlib.html#codefunc31162">nodeset?</a> obj1) (<a href="sxpathlib.html#codefunc31162">nodeset?</a> obj2)))  ; neither obj is a nodeset
+       (op (<a href="lazy-xpath.html#codefunc7275">lazy:number</a> obj1) (<a href="lazy-xpath.html#codefunc7275">lazy:number</a> obj2)))
+      ((boolean? obj1)  ; 'obj1' is a boolean, 'obj2' is a nodeset
+       (op (<a href="lazy-xpath.html#codefunc7275">lazy:number</a> obj1) (<a href="lazy-xpath.html#codefunc7275">lazy:number</a> (<a href="lazy-xpath.html#codefunc32862">lazy:boolean</a> obj2))))
+      ((boolean? obj2)  ; 'obj1' is a nodeset, 'obj2' is a boolean
+       (op (<a href="lazy-xpath.html#codefunc7275">lazy:number</a> (<a href="lazy-xpath.html#codefunc32862">lazy:boolean</a> obj1)) (<a href="lazy-xpath.html#codefunc7275">lazy:number</a> obj2)))
+      ((or (null? obj1) (null? obj2)) ; one of the objects is an empty nodeset
+       #f)
+      (else  ; at least one object is a nodeset
+       (op
+        (cond
+          ((<a href="sxpathlib.html#codefunc31162">nodeset?</a> obj1)  ; 'obj1' is a (non-empty) nodeset
+           (let ((nset1 (<a href="lazy-xpath.html#codefunc47234">lazy:map</a>
+                         (lambda (node) (<a href="lazy-xpath.html#codefunc7275">lazy:number</a> (<a href="lazy-xpath.html#codefunc13230">lazy:string-value</a> node)))
+                         obj1)))
+             (let first ((num1 (car nset1))
+                         (nset1 (cdr nset1)))
+               (cond
+                 ((null? nset1) num1)
+                 ((<a href="lazy-xpath.html#codefunc35251">lazy:promise?</a> (car nset1))  ; time to obtain the next portion
+                  (first num1
+                         (apply (<a href="sxpathlib.html#codefunc11721">as-nodeset</a> (force (car nset1)))
+                                (cdr nset1))))
+                 ((op num1 (car nset1)) (first num1 (cdr nset1)))
+                 (else (first (car nset1) (cdr nset1)))))))
+          ((string? obj1) (<a href="sxpath-ext.html#codefunc9829">sxml:number</a> obj1))
+          (else  ; 'obj1' is a number
+           obj1))
+        (cond
+          ((<a href="sxpathlib.html#codefunc31162">nodeset?</a> obj2)  ; 'obj2' is a (non-empty) nodeset
+           (let ((nset2 (<a href="lazy-xpath.html#codefunc47234">lazy:map</a>
+                         (lambda (node) (<a href="lazy-xpath.html#codefunc7275">lazy:number</a> (<a href="lazy-xpath.html#codefunc13230">lazy:string-value</a> node)))
+                         obj2)))
+             (let second ((num2 (car nset2))
+                          (nset2 (cdr nset2)))
+               (cond
+                 ((null? nset2) num2)
+                 ((<a href="lazy-xpath.html#codefunc35251">lazy:promise?</a> (car nset2))  ; time to obtain the next portion
+                  (second num2
+                          (apply (<a href="sxpathlib.html#codefunc11721">as-nodeset</a> (force (car nset2)))
+                                 (cdr nset2))))
+                 ((op num2 (car nset2)) (second (car nset2) (cdr nset2)))
+                 (else (second num2 (cdr nset2)))))))
+          ((string? obj2) (<a href="sxpath-ext.html#codefunc9829">sxml:number</a> obj2))
+          (else  ; 'obj2' is a number
+           obj2)))))))
+</pre>
+<h4><a name='codefunc46037' href='#docfunc46037'>lazy:core-last</a></h4>
+<i><a href='#tocfunc46037'>Index</a></i><br>
+
+<pre> last()
+</pre>
+<pre>(define (<a href="lazy-xpath.html#codefunc46037">lazy:core-last</a> num-anc)
+  (lambda (nodeset position+size var-binding)
+    (cdr position+size)))
+</pre>
+<h4><a name='codefunc36541' href='#docfunc36541'>lazy:core-position</a></h4>
+<i><a href='#tocfunc36541'>Index</a></i><br>
+
+<pre> position()
+</pre>
+<pre>(define (<a href="lazy-xpath.html#codefunc36541">lazy:core-position</a> num-anc)
+  (lambda (nodeset position+size var-binding)
+    (car position+size)))
+</pre>
+<h4><a name='codefunc48194' href='#docfunc48194'>lazy:core-count</a></h4>
+<i><a href='#tocfunc48194'>Index</a></i><br>
+
+<pre> count(node-set)
+</pre>
+<pre>(define (<a href="lazy-xpath.html#codefunc48194">lazy:core-count</a> num-anc arg-func)
+  (lambda (nodeset position+size var-binding)
+    (let ((res (arg-func nodeset position+size var-binding)))
+      (cond
+        ((<a href="sxpathlib.html#codefunc31162">nodeset?</a> res) (<a href="lazy-xpath.html#codefunc10838">lazy:length</a> res))
+        (else
+         (<a href="txpath.html#codefunc13525">sxml:xpointer-runtime-error</a>
+          &quot;count() function - an argument is not a nodeset&quot;)
+         0)))))
+</pre>
+<h4><a name='codefunc16991' href='#docfunc16991'>lazy:core-id</a></h4>
+<i><a href='#tocfunc16991'>Index</a></i><br>
+
+<pre> id(object)
+</pre>
+<pre>(define (<a href="lazy-xpath.html#codefunc16991">lazy:core-id</a> num-anc arg-func) 
+  (lambda (nodeset position+size var-binding)    
+    (let* ((root-node (list (<a href="lazy-xpath.html#codefunc45186">lazy:car</a>
+                             (<a href="lazy-xpath.html#codefunc63738">lazy:reach-root</a> nodeset))))
+           (id-nset ((<a href="sxpathlib.html#codefunc5616">sxml:child</a> (<a href="sxpathlib.html#codefunc9356">ntype??</a> 'id-index))
+                     ((<a href="sxpathlib.html#codefunc5616">sxml:child</a> (<a href="sxpathlib.html#codefunc9356">ntype??</a> '@@)) root-node))))
+      (if
+       (null? id-nset)  ; no id-index
+       '()  ; ID function returns an empty nodeset
+       (let ((res ((<a href="sxpath-ext.html#codefunc20095">sxml:id</a> (cdar id-nset))  ; implemented in &quot;sxpath-ext.scm&quot;
+                   (<a href="lazy-xpath.html#codefunc14988">lazy:result-&gt;list</a>
+                    (<a href="lazy-xpath.html#codefunc54237">lazy:contextset-&gt;nodeset</a>
+                     (arg-func nodeset position+size var-binding))))))
+         (if (and num-anc (zero? num-anc))  ; no ancestors required
+             res
+             (<a href="lazy-xpath.html#codefunc43724">lazy:recover-contextset</a> res root-node num-anc)))))))
+</pre>
+<h4><a name='codefunc41741' href='#docfunc41741'>lazy:core-local-name</a></h4>
+<i><a href='#tocfunc41741'>Index</a></i><br>
+
+<pre> local-name(node-set?)
+</pre>
+<pre>(define (<a href="lazy-xpath.html#codefunc41741">lazy:core-local-name</a> num-anc . arg-func)  ; optional argument 
+  (if (null? arg-func)  ; no argument supplied
+      (lambda (nodeset position+size var-binding)
+        (let ((nodeset (<a href="lazy-xpath.html#codefunc54237">lazy:contextset-&gt;nodeset</a> nodeset)))
+          (cond
+            ((<a href="lazy-xpath.html#codefunc62722">lazy:null?</a> nodeset) &quot;&quot;)
+            ((not (pair? (<a href="lazy-xpath.html#codefunc45186">lazy:car</a> nodeset))) &quot;&quot;)  ; no name
+            (else
+             (let ((name (symbol-&gt;string (car (<a href="lazy-xpath.html#codefunc45186">lazy:car</a> nodeset)))))
+               (cond
+                 ((<a href="util.html#codefunc35783">string-rindex</a> name #\:)
+                  =&gt; (lambda (pos)
+                       (substring name (+ pos 1) (string-length name))))
+                 (else  ; a NCName
+                  name)))))))
+      (let ((func (car arg-func)))
+        (lambda (nodeset position+size var-binding)          
+          (let ((obj
+                 (<a href="lazy-xpath.html#codefunc54237">lazy:contextset-&gt;nodeset</a>
+                  (func nodeset position+size var-binding))))
+            (cond
+              ((null? obj) &quot;&quot;)  ; an empty nodeset
+              ((not (<a href="sxpathlib.html#codefunc31162">nodeset?</a> obj))
+               (<a href="txpath.html#codefunc13525">sxml:xpointer-runtime-error</a>
+                &quot;NAME function - an argument is not a nodeset&quot;)              
+               &quot;&quot;)
+              ((not (pair? (<a href="lazy-xpath.html#codefunc45186">lazy:car</a> obj))) &quot;&quot;)  ; no name
+              (else
+               (let ((name (symbol-&gt;string (car (<a href="lazy-xpath.html#codefunc45186">lazy:car</a> obj)))))
+                 (cond
+                   ((<a href="util.html#codefunc35783">string-rindex</a> name #\:)
+                    =&gt; (lambda (pos)
+                         (substring
+                          name (+ pos 1) (string-length name))))
+                   (else  ; a NCName
+                    name))))))))))
+</pre>
+<h4><a name='codefunc6378' href='#docfunc6378'>lazy:core-namespace-uri</a></h4>
+<i><a href='#tocfunc6378'>Index</a></i><br>
+
+<pre> namespace-uri(node-set?)
+</pre>
+<pre>(define (<a href="lazy-xpath.html#codefunc6378">lazy:core-namespace-uri</a> num-anc . arg-func)  ; optional argument
+  (if (null? arg-func)  ; no argument supplied
+      (lambda (nodeset position+size var-binding)
+        (let ((nodeset (<a href="lazy-xpath.html#codefunc54237">lazy:contextset-&gt;nodeset</a> nodeset)))
+          (cond
+            ((<a href="lazy-xpath.html#codefunc62722">lazy:null?</a> nodeset) &quot;&quot;)
+            ((not (pair? (<a href="lazy-xpath.html#codefunc45186">lazy:car</a> nodeset))) &quot;&quot;)  ; no name
+            (else
+             (let ((name (symbol-&gt;string (car (<a href="lazy-xpath.html#codefunc45186">lazy:car</a> nodeset)))))
+               (cond
+                 ((<a href="util.html#codefunc35783">string-rindex</a> name #\:)
+                  =&gt; (lambda (pos)
+                       (substring name 0 pos)))
+                 (else  ; a NCName
+                  &quot;&quot;)))))))
+      (let ((func (car arg-func)))
+        (lambda (nodeset position+size var-binding)          
+          (let ((obj
+                 (<a href="lazy-xpath.html#codefunc54237">lazy:contextset-&gt;nodeset</a>
+                  (func nodeset position+size var-binding))))           
+            (cond
+              ((<a href="lazy-xpath.html#codefunc62722">lazy:null?</a> obj) &quot;&quot;)  ; an empty nodeset
+              ((not (<a href="sxpathlib.html#codefunc31162">nodeset?</a> obj))
+               (<a href="txpath.html#codefunc13525">sxml:xpointer-runtime-error</a>
+                &quot;NAME function - an argument is not a nodeset&quot;)
+               &quot;&quot;)
+              ((not (pair? (<a href="lazy-xpath.html#codefunc45186">lazy:car</a> obj))) &quot;&quot;)  ; no name
+              (else
+               (let ((name (symbol-&gt;string (car (<a href="lazy-xpath.html#codefunc45186">lazy:car</a> obj)))))
+                 (cond
+                   ((<a href="util.html#codefunc35783">string-rindex</a> name #\:)
+                    =&gt; (lambda (pos)
+                         (substring name 0 pos)))
+                   (else &quot;&quot;))))))))))
+</pre>
+<h4><a name='codefunc42193' href='#docfunc42193'>lazy:core-name</a></h4>
+<i><a href='#tocfunc42193'>Index</a></i><br>
+
+<pre> name(node-set?)
+</pre>
+<pre>(define (<a href="lazy-xpath.html#codefunc42193">lazy:core-name</a> num-anc . arg-func)  ; optional argument
+  (if (null? arg-func)  ; no argument supplied
+      (lambda (nodeset position+size var-binding)
+        (let ((nodeset (<a href="lazy-xpath.html#codefunc54237">lazy:contextset-&gt;nodeset</a> nodeset)))
+          (cond
+            ((<a href="lazy-xpath.html#codefunc62722">lazy:null?</a> nodeset) &quot;&quot;)
+            ((not (pair? (<a href="lazy-xpath.html#codefunc45186">lazy:car</a> nodeset))) &quot;&quot;)  ; no name
+            (else
+             (symbol-&gt;string (car (<a href="lazy-xpath.html#codefunc45186">lazy:car</a> nodeset)))))))
+      (let ((func (car arg-func)))
+        (lambda (nodeset position+size var-binding)
+          (let ((obj
+                 (<a href="lazy-xpath.html#codefunc54237">lazy:contextset-&gt;nodeset</a>
+                  (func nodeset position+size var-binding))))        
+            (cond
+              ((<a href="lazy-xpath.html#codefunc62722">lazy:null?</a> obj) &quot;&quot;)  ; an empty nodeset
+              ((not (<a href="sxpathlib.html#codefunc31162">nodeset?</a> obj))
+               (<a href="txpath.html#codefunc13525">sxml:xpointer-runtime-error</a>
+                &quot;NAME function - an argument is not a nodeset&quot;)
+               &quot;&quot;)
+              ((not (pair? (<a href="lazy-xpath.html#codefunc45186">lazy:car</a> obj))) &quot;&quot;)  ; no name
+              (else
+               (symbol-&gt;string (car (<a href="lazy-xpath.html#codefunc45186">lazy:car</a> obj))))))))))
+</pre>
+<h4><a name='codefunc9034' href='#docfunc9034'>lazy:core-string</a></h4>
+<i><a href='#tocfunc9034'>Index</a></i><br>
+
+<pre> string(object?)
+</pre>
+<pre>(define (<a href="lazy-xpath.html#codefunc9034">lazy:core-string</a> num-anc . arg-func)  ; optional argument
+  (if (null? arg-func)  ; no argument supplied
+      (lambda (nodeset position+size var-binding)
+        (<a href="lazy-xpath.html#codefunc12134">lazy:string</a>
+         (<a href="lazy-xpath.html#codefunc54237">lazy:contextset-&gt;nodeset</a> nodeset)))
+      (let ((func (car arg-func)))
+        (lambda (nodeset position+size var-binding)
+          (<a href="lazy-xpath.html#codefunc12134">lazy:string</a>
+           (<a href="lazy-xpath.html#codefunc54237">lazy:contextset-&gt;nodeset</a>
+            (func nodeset position+size var-binding)))))))
+</pre>
+<h4><a name='codefunc9513' href='#docfunc9513'>lazy:core-concat</a></h4>
+<i><a href='#tocfunc9513'>Index</a></i><br>
+
+<pre> concat(string, string, string*)
+</pre>
+<pre>(define (<a href="lazy-xpath.html#codefunc9513">lazy:core-concat</a> num-anc . arg-func-lst)
+  (lambda (nodeset position+size var-binding)
+    (apply
+     string-append
+     (map
+      (lambda (f)
+        (<a href="lazy-xpath.html#codefunc12134">lazy:string</a>
+         (<a href="lazy-xpath.html#codefunc54237">lazy:contextset-&gt;nodeset</a>
+          (f nodeset position+size var-binding))))
+      arg-func-lst))))
+</pre>
+<h4><a name='codefunc9278' href='#docfunc9278'>lazy:core-starts-with</a></h4>
+<i><a href='#tocfunc9278'>Index</a></i><br>
+
+<pre> starts-with(string, string)
+</pre>
+<pre>(define (<a href="lazy-xpath.html#codefunc9278">lazy:core-starts-with</a> num-anc arg-func1 arg-func2)
+  (lambda (nodeset position+size var-binding)
+    (let ((str1 (<a href="lazy-xpath.html#codefunc12134">lazy:string</a>
+                 (<a href="lazy-xpath.html#codefunc54237">lazy:contextset-&gt;nodeset</a>
+                  (arg-func1 nodeset position+size var-binding))))
+          (str2 (<a href="lazy-xpath.html#codefunc12134">lazy:string</a>
+                 (<a href="lazy-xpath.html#codefunc54237">lazy:contextset-&gt;nodeset</a>
+                  (arg-func2 nodeset position+size var-binding)))))
+      (string-prefix? str2 str1))))
+</pre>
+<h4><a name='codefunc40599' href='#docfunc40599'>lazy:core-contains</a></h4>
+<i><a href='#tocfunc40599'>Index</a></i><br>
+
+<pre> contains(string, string)
+</pre>
+<pre>(define (<a href="lazy-xpath.html#codefunc40599">lazy:core-contains</a> num-anc arg-func1 arg-func2)
+  (lambda (nodeset position+size var-binding)
+    (let ((str1 (<a href="lazy-xpath.html#codefunc12134">lazy:string</a>
+                 (<a href="lazy-xpath.html#codefunc54237">lazy:contextset-&gt;nodeset</a>
+                  (arg-func1 nodeset position+size var-binding))))
+          (str2 (<a href="lazy-xpath.html#codefunc12134">lazy:string</a>
+                 (<a href="lazy-xpath.html#codefunc54237">lazy:contextset-&gt;nodeset</a>
+                  (arg-func2 nodeset position+size var-binding)))))
+      (if (<a href="util.html#codefunc2331">substring?</a> str2 str1) #t #f)  ; must return a boolean
+      )))
+</pre>
+<h4><a name='codefunc3916' href='#docfunc3916'>lazy:core-substring-before</a></h4>
+<i><a href='#tocfunc3916'>Index</a></i><br>
+
+<pre> substring-before(string, string)
+</pre>
+<pre>(define (<a href="lazy-xpath.html#codefunc3916">lazy:core-substring-before</a> num-anc arg-func1 arg-func2)
+  (lambda (nodeset position+size var-binding)
+    (let* ((str1 (<a href="lazy-xpath.html#codefunc12134">lazy:string</a>
+                  (<a href="lazy-xpath.html#codefunc54237">lazy:contextset-&gt;nodeset</a>
+                   (arg-func1 nodeset position+size var-binding))))
+           (str2 (<a href="lazy-xpath.html#codefunc12134">lazy:string</a>
+                  (<a href="lazy-xpath.html#codefunc54237">lazy:contextset-&gt;nodeset</a>
+                   (arg-func2 nodeset position+size var-binding))))
+           (pos (<a href="util.html#codefunc2331">substring?</a> str2 str1)))
+      (if (not pos)  ; STR1 doesn't contain STR2
+          &quot;&quot;
+          (substring str1 0 pos)))))
+</pre>
+<h4><a name='codefunc41304' href='#docfunc41304'>lazy:core-substring-after</a></h4>
+<i><a href='#tocfunc41304'>Index</a></i><br>
+
+<pre> substring-after(string, string)
+</pre>
+<pre>(define (<a href="lazy-xpath.html#codefunc41304">lazy:core-substring-after</a> num-anc arg-func1 arg-func2)
+  (lambda (nodeset position+size var-binding)
+    (let* ((str1 (<a href="lazy-xpath.html#codefunc12134">lazy:string</a>
+                  (<a href="lazy-xpath.html#codefunc54237">lazy:contextset-&gt;nodeset</a>
+                   (arg-func1 nodeset position+size var-binding))))
+           (str2 (<a href="lazy-xpath.html#codefunc12134">lazy:string</a>
+                  (<a href="lazy-xpath.html#codefunc54237">lazy:contextset-&gt;nodeset</a>
+                   (arg-func2 nodeset position+size var-binding))))
+           (pos (<a href="util.html#codefunc2331">substring?</a> str2 str1)))
+      (if
+       (not pos)  ; STR1 doesn't contain STR2
+       &quot;&quot;
+       (substring
+        str1 (+ pos (string-length str2)) (string-length str1))))))
+</pre>
+<h4><a name='codefunc43024' href='#docfunc43024'>lazy:core-substring</a></h4>
+<i><a href='#tocfunc43024'>Index</a></i><br>
+
+<pre> substring(string, number, number?)
+</pre>
+<pre>(define (<a href="lazy-xpath.html#codefunc43024">lazy:core-substring</a> num-anc arg-func1 arg-func2 . arg-func3)
+  (if (null? arg-func3)  ; no third argument supplied
+      (lambda (nodeset position+size var-binding)
+        (let ((str (<a href="lazy-xpath.html#codefunc12134">lazy:string</a>
+                    (<a href="lazy-xpath.html#codefunc54237">lazy:contextset-&gt;nodeset</a>
+                     (arg-func1 nodeset position+size var-binding))))
+              (num1 (<a href="lazy-xpath.html#codefunc7275">lazy:number</a>
+                     (<a href="lazy-xpath.html#codefunc54237">lazy:contextset-&gt;nodeset</a>
+                      (arg-func2 nodeset position+size var-binding)))))
+          (let ((len (string-length str))
+                (start (- (inexact-&gt;exact (round num1)) 1)))
+            (if (&gt; start len)
+                &quot;&quot;
+                (substring str (if (&lt; start 0) 0 start) len)))))
+      (let ((arg-func3 (car arg-func3)))
+        (lambda (nodeset position+size var-binding)
+          (let ((str (<a href="lazy-xpath.html#codefunc12134">lazy:string</a>
+                      (<a href="lazy-xpath.html#codefunc54237">lazy:contextset-&gt;nodeset</a>
+                       (arg-func1 nodeset position+size var-binding))))
+                (num1 (<a href="lazy-xpath.html#codefunc7275">lazy:number</a>
+                       (<a href="lazy-xpath.html#codefunc54237">lazy:contextset-&gt;nodeset</a>
+                        (arg-func2 nodeset position+size var-binding))))
+                (num2 (<a href="lazy-xpath.html#codefunc7275">lazy:number</a>
+                       (<a href="lazy-xpath.html#codefunc54237">lazy:contextset-&gt;nodeset</a>
+                        (arg-func3 nodeset position+size var-binding)))))
+            (let* ((len (string-length str))
+                   (start (- (inexact-&gt;exact (round num1)) 1))
+                   (fin (+ start (inexact-&gt;exact (round num2)))))
+              (if (or (&gt; start len) (&lt; fin 0) (&lt; fin start))
+                  &quot;&quot;
+                  (substring str
+                             (if (&lt; start 0) 0 start)
+                             (if (&gt; fin len) len fin)))))))))
+</pre>
+<h4><a name='codefunc29356' href='#docfunc29356'>lazy:core-string-length</a></h4>
+<i><a href='#tocfunc29356'>Index</a></i><br>
+
+<pre> string-length(string?)
+</pre>
+<pre>(define (<a href="lazy-xpath.html#codefunc29356">lazy:core-string-length</a> num-anc . arg-func)  ; optional argument
+  (if (null? arg-func)  ; no argument supplied
+      (lambda (nodeset position+size var-binding)
+        (string-length
+         (<a href="lazy-xpath.html#codefunc12134">lazy:string</a> (<a href="lazy-xpath.html#codefunc54237">lazy:contextset-&gt;nodeset</a> nodeset))))
+      (let ((func (car arg-func)))
+        (lambda (nodeset position+size var-binding)
+          (string-length
+           (<a href="lazy-xpath.html#codefunc12134">lazy:string</a>
+            (<a href="lazy-xpath.html#codefunc54237">lazy:contextset-&gt;nodeset</a>
+             (func nodeset position+size var-binding))))))))
+</pre>
+<h4><a name='codefunc41792' href='#docfunc41792'>lazy:core-normalize-space</a></h4>
+<i><a href='#tocfunc41792'>Index</a></i><br>
+
+<pre> normalize-space(string?)
+</pre>
+<pre>(define (<a href="lazy-xpath.html#codefunc41792">lazy:core-normalize-space</a> num-anc . arg-func)  ; optional argument
+  (if (null? arg-func)  ; no argument supplied
+      (lambda (nodeset position+size var-binding)
+        (let rpt ((src (<a href="util.html#codefunc39259">string-split</a>
+                        (<a href="lazy-xpath.html#codefunc12134">lazy:string</a> (<a href="lazy-xpath.html#codefunc54237">lazy:contextset-&gt;nodeset</a> nodeset))
+                        <a href="xpath-parser.html#codefunc65329">sxml:whitespace</a>))
+                  (res '()))
+          (cond
+            ((null? src)
+             (apply string-append (reverse res)))
+            ((= (string-length (car src)) 0)  ; empty string
+             (rpt (cdr src) res))
+            ((null? res)
+             (rpt (cdr src) (cons (car src) res)))
+            (else
+             (rpt (cdr src) (cons (car src) (cons &quot; &quot; res)))))))
+      (let ((func (car arg-func)))
+        (lambda (nodeset position+size var-binding)
+          (let rpt ((src (<a href="util.html#codefunc39259">string-split</a>
+                          (<a href="lazy-xpath.html#codefunc12134">lazy:string</a>
+                           (<a href="lazy-xpath.html#codefunc54237">lazy:contextset-&gt;nodeset</a>
+                            (func nodeset position+size var-binding)))
+                          <a href="xpath-parser.html#codefunc65329">sxml:whitespace</a>))
+                    (res '()))
+            (cond
+              ((null? src)
+               (apply string-append (reverse res)))
+              ((= (string-length (car src)) 0)  ; empty string
+               (rpt (cdr src) res))
+              ((null? res)
+               (rpt (cdr src) (cons (car src) res)))
+              (else
+               (rpt (cdr src) (cons (car src) (cons &quot; &quot; res))))))))))
+</pre>
+<h4><a name='codefunc40965' href='#docfunc40965'>lazy:core-translate</a></h4>
+<i><a href='#tocfunc40965'>Index</a></i><br>
+
+<pre> translate(string, string, string)
+</pre>
+<pre>(define (<a href="lazy-xpath.html#codefunc40965">lazy:core-translate</a> num-anc arg-func1 arg-func2 arg-func3)
+  (lambda (nodeset position+size var-binding)    
+    (let ((str1 (<a href="lazy-xpath.html#codefunc12134">lazy:string</a>
+                 (<a href="lazy-xpath.html#codefunc54237">lazy:contextset-&gt;nodeset</a>
+                  (arg-func1 nodeset position+size var-binding))))
+          (str2 (<a href="lazy-xpath.html#codefunc12134">lazy:string</a>
+                 (<a href="lazy-xpath.html#codefunc54237">lazy:contextset-&gt;nodeset</a>
+                  (arg-func2 nodeset position+size var-binding))))
+          (str3 (<a href="lazy-xpath.html#codefunc12134">lazy:string</a>
+                 (<a href="lazy-xpath.html#codefunc54237">lazy:contextset-&gt;nodeset</a>
+                  (arg-func3 nodeset position+size var-binding)))))
+      (let ((alist
+             (let while ((lst2 (string-&gt;list str2))
+                         (lst3 (string-&gt;list str3))
+                         (alist '()))
+               (cond
+                 ((null? lst2) (reverse alist))
+                 ((null? lst3)
+                  (append
+                   (reverse alist)
+                   (map
+                    (lambda (ch) (cons ch #f))
+                    lst2)))
+                 (else
+                  (while
+                   (cdr lst2)
+                   (cdr lst3)
+                   (cons (cons (car lst2) (car lst3)) alist)))))))
+        (let rpt ((lst1 (string-&gt;list str1))
+                  (res '()))
+          (cond
+            ((null? lst1) (list-&gt;string (reverse res)))
+            ((assoc (car lst1) alist)
+             =&gt; (lambda (pair)
+                  (if (cdr pair)
+                      (rpt (cdr lst1) (cons (cdr pair) res))
+                      (rpt (cdr lst1) res))))
+            (else
+             (rpt (cdr lst1) (cons (car lst1) res)))))))))
+</pre>
+<h4><a name='codefunc7067' href='#docfunc7067'>lazy:core-boolean</a></h4>
+<i><a href='#tocfunc7067'>Index</a></i><br>
+
+<pre> boolean(object)
+</pre>
+<pre>(define (<a href="lazy-xpath.html#codefunc7067">lazy:core-boolean</a> num-anc arg-func)
+  (lambda (nodeset position+size var-binding)
+    (<a href="lazy-xpath.html#codefunc32862">lazy:boolean</a>
+     (arg-func nodeset position+size var-binding))))
+</pre>
+<h4><a name='codefunc19928' href='#docfunc19928'>lazy:core-not</a></h4>
+<i><a href='#tocfunc19928'>Index</a></i><br>
+
+<pre> not(boolean)
+</pre>
+<pre>(define (<a href="lazy-xpath.html#codefunc19928">lazy:core-not</a> num-anc arg-func)
+  (lambda (nodeset position+size var-binding)
+    (not (<a href="lazy-xpath.html#codefunc32862">lazy:boolean</a> 
+          (arg-func nodeset position+size var-binding)))))
+</pre>
+<h4><a name='codefunc46559' href='#docfunc46559'>lazy:core-true</a></h4>
+<i><a href='#tocfunc46559'>Index</a></i><br>
+
+<pre> true()
+</pre>
+<pre>(define (<a href="lazy-xpath.html#codefunc46559">lazy:core-true</a> num-anc)
+  (lambda (nodeset position+size var-binding) #t))
+</pre>
+<h4><a name='codefunc45869' href='#docfunc45869'>lazy:core-false</a></h4>
+<i><a href='#tocfunc45869'>Index</a></i><br>
+
+<pre> false()
+</pre>
+<pre>(define (<a href="lazy-xpath.html#codefunc45869">lazy:core-false</a> num-anc)
+  (lambda (nodeset position+size var-binding) #f))
+</pre>
+<h4><a name='codefunc42704' href='#docfunc42704'>lazy:core-lang</a></h4>
+<i><a href='#tocfunc42704'>Index</a></i><br>
+
+<pre> lang(string)
+</pre>
+<pre>(define (<a href="lazy-xpath.html#codefunc42704">lazy:core-lang</a> num-anc arg-func)
+  (lambda (nodeset position+size var-binding)    
+    (let ((arg (<a href="lazy-xpath.html#codefunc12134">lazy:string</a>
+                (<a href="lazy-xpath.html#codefunc54237">lazy:contextset-&gt;nodeset</a>
+                 (arg-func nodeset position+size var-binding))))
+          (lng
+           ((<a href="lazy-xpath.html#codefunc3062">lazy:child</a> (<a href="sxpathlib.html#codefunc9356">ntype??</a> '*text*))
+            ((<a href="lazy-xpath.html#codefunc62686">lazy:attribute</a> (<a href="sxpathlib.html#codefunc9356">ntype??</a> 'xml:lang))
+             ((<a href="lazy-xpath.html#codefunc580">lazy:ancestor-or-self</a> (lambda (x) #t))
+              (<a href="lazy-xpath.html#codefunc45186">lazy:car</a> nodeset)  ; context-node = (car nodeset)
+              )))))
+      (and (not (null? lng))
+           (or (string-ci=? arg (<a href="lazy-xpath.html#codefunc45186">lazy:car</a> lng))
+               (string-prefix-ci? (string-append arg &quot;-&quot;) (<a href="lazy-xpath.html#codefunc45186">lazy:car</a> lng)))))))
+</pre>
+<h4><a name='codefunc10295' href='#docfunc10295'>lazy:core-number</a></h4>
+<i><a href='#tocfunc10295'>Index</a></i><br>
+
+<pre> number(object?)
+</pre>
+<pre>(define (<a href="lazy-xpath.html#codefunc10295">lazy:core-number</a> num-anc . arg-func)  ; optional argument
+  (if (null? arg-func)  ; no argument supplied
+      (lambda (nodeset position+size var-binding)
+        (<a href="lazy-xpath.html#codefunc7275">lazy:number</a> (<a href="lazy-xpath.html#codefunc54237">lazy:contextset-&gt;nodeset</a> nodeset)))
+      (let ((func (car arg-func)))
+        (lambda (nodeset position+size var-binding)
+          (<a href="lazy-xpath.html#codefunc7275">lazy:number</a>
+           (<a href="lazy-xpath.html#codefunc54237">lazy:contextset-&gt;nodeset</a>
+            (func nodeset position+size var-binding)))))))
+</pre>
+<h4><a name='codefunc21462' href='#docfunc21462'>lazy:core-sum</a></h4>
+<i><a href='#tocfunc21462'>Index</a></i><br>
+
+<pre> sum(node-set)
+</pre>
+<pre>(define (<a href="lazy-xpath.html#codefunc21462">lazy:core-sum</a> num-anc arg-func)
+  (lambda (nodeset position+size var-binding)
+    (let ((res (arg-func nodeset position+size var-binding)))
+      (cond
+        ((<a href="sxpathlib.html#codefunc31162">nodeset?</a> res)
+         (apply +
+                (map
+                 (lambda (node)
+                   (<a href="lazy-xpath.html#codefunc7275">lazy:number</a>
+                    (<a href="lazy-xpath.html#codefunc13230">lazy:string-value</a> (<a href="xpath-context.html#codefunc41847">sxml:context-&gt;node</a> node))))
+                 (<a href="lazy-xpath.html#codefunc14988">lazy:result-&gt;list</a> res))))
+        (else
+         (<a href="txpath.html#codefunc13525">sxml:xpointer-runtime-error</a>
+          &quot;SUM function - an argument is not a nodeset&quot;)
+         0)))))
+</pre>
+<h4><a name='codefunc47677' href='#docfunc47677'>lazy:core-floor</a></h4>
+<i><a href='#tocfunc47677'>Index</a></i><br>
+
+<pre> floor(number)
+</pre>
+<pre>(define (<a href="lazy-xpath.html#codefunc47677">lazy:core-floor</a> num-anc arg-func)
+  (lambda (nodeset position+size var-binding)
+    (inexact-&gt;exact
+     (floor (<a href="lazy-xpath.html#codefunc7275">lazy:number</a>
+             (<a href="lazy-xpath.html#codefunc54237">lazy:contextset-&gt;nodeset</a>
+              (arg-func nodeset position+size var-binding)))))))
+</pre>
+<h4><a name='codefunc7827' href='#docfunc7827'>lazy:core-ceiling</a></h4>
+<i><a href='#tocfunc7827'>Index</a></i><br>
+
+<pre> ceiling(number)
+</pre>
+<pre>(define (<a href="lazy-xpath.html#codefunc7827">lazy:core-ceiling</a> num-anc arg-func)
+  (lambda (nodeset position+size var-binding)
+    (inexact-&gt;exact
+     (ceiling (<a href="lazy-xpath.html#codefunc7275">lazy:number</a>
+               (<a href="lazy-xpath.html#codefunc54237">lazy:contextset-&gt;nodeset</a>
+                (arg-func nodeset position+size var-binding)))))))
+</pre>
+<h4><a name='codefunc48193' href='#docfunc48193'>lazy:core-round</a></h4>
+<i><a href='#tocfunc48193'>Index</a></i><br>
+
+<pre> round(number)
+</pre>
+<pre>(define (<a href="lazy-xpath.html#codefunc48193">lazy:core-round</a> num-anc arg-func)
+  (lambda (nodeset position+size var-binding)
+    (inexact-&gt;exact
+     (round (<a href="lazy-xpath.html#codefunc7275">lazy:number</a>
+             (<a href="lazy-xpath.html#codefunc54237">lazy:contextset-&gt;nodeset</a>
+              (arg-func nodeset position+size var-binding)))))))
+</pre>
+<h4><a name='codefunc23375' href='#docfunc23375'>lazy:ast-location-path</a></h4>
+<i><a href='#tocfunc23375'>Index</a></i><br>
+
+<pre> {1} &lt;LocationPath&gt; ::= &lt;RelativeLocationPath&gt;
+                        | &lt;AbsoluteLocationPath&gt;
+</pre>
+<pre>(define (<a href="lazy-xpath.html#codefunc23375">lazy:ast-location-path</a> op num-anc)
+  (case (car op)
+    ((absolute-location-path)
+     (<a href="lazy-xpath.html#codefunc8473">lazy:ast-absolute-location-path</a> op num-anc))
+    ((relative-location-path)
+     (<a href="lazy-xpath.html#codefunc13570">lazy:ast-relative-location-path</a> op num-anc))
+    (else
+     (<a href="xpath-context.html#codefunc8076">draft:signal-semantic-error</a> &quot;improper LocationPath - &quot; op))))
+</pre>
+<h4><a name='codefunc8473' href='#docfunc8473'>lazy:ast-absolute-location-path</a></h4>
+<i><a href='#tocfunc8473'>Index</a></i><br>
+
+<pre> {2} &lt;AbsoluteLocationPath&gt; ::= (absolute-location-path  &lt;Step&gt;* )
+</pre>
+<pre>(define (<a href="lazy-xpath.html#codefunc8473">lazy:ast-absolute-location-path</a> op num-anc)
+  (cond
+    ((not (eq? (car op) 'absolute-location-path))
+     (<a href="xpath-context.html#codefunc8076">draft:signal-semantic-error</a> &quot;not an AbsoluteLocationPath - &quot; op))
+    ((null? (cdr op))  ; no Steps
+     (list
+      (lambda (nodeset position+size var-binding)
+        (<a href="lazy-xpath.html#codefunc63738">lazy:reach-root</a> nodeset))
+      #f  ; num-ancestors
+      #f  ; requires-size?
+      ))
+    (else
+     (and-let*
+      ((steps-res (<a href="lazy-xpath.html#codefunc38022">lazy:ast-step-list</a> (cdr op) num-anc)))
+      (list
+       (if
+        (null? (cdar steps-res))  ; only a single step
+        (let ((step-impl (caar steps-res)))
+          (lambda (nodeset position+size var-binding)
+            (step-impl
+             (<a href="lazy-xpath.html#codefunc63738">lazy:reach-root</a> nodeset) position+size var-binding)))
+        (let ((converters (car steps-res)))
+          (lambda (nodeset position+size var-binding)
+            (let rpt ((nset (<a href="lazy-xpath.html#codefunc63738">lazy:reach-root</a> nodeset))
+                      (fs converters))
+              (if (null? fs)
+                  nset
+                  (rpt ((car fs) nset position+size var-binding)
+                       (cdr fs)))))))
+       #f  ; num-ancestors
+       #f  ; requires-size?
+       )))))
+</pre>
+<h4><a name='codefunc13570' href='#docfunc13570'>lazy:ast-relative-location-path</a></h4>
+<i><a href='#tocfunc13570'>Index</a></i><br>
+
+<pre> {3} &lt;RelativeLocationPath&gt; ::= (relative-location-path  &lt;Step&gt;+ )
+</pre>
+<pre>(define (<a href="lazy-xpath.html#codefunc13570">lazy:ast-relative-location-path</a> op num-anc)
+  (if
+   (not (eq? (car op) 'relative-location-path))
+   (<a href="xpath-context.html#codefunc8076">draft:signal-semantic-error</a> &quot;not a RelativeLocationPath - &quot; op)
+   (and-let*
+    ((steps-res (<a href="lazy-xpath.html#codefunc38022">lazy:ast-step-list</a> (cdr op) num-anc)))
+    (list
+     (if
+      (null? (cdar steps-res))  ; only a single step
+      (caar steps-res)
+      (let ((converters (car steps-res)))
+        (lambda (nodeset position+size var-binding)
+          (let rpt ((nset nodeset)
+                    (fs converters))
+            (if (null? fs)
+                nset
+                (rpt ((car fs) nset position+size var-binding)
+                     (cdr fs)))))))
+     (cadr steps-res)  ; num-ancestors
+     #f  ; requires-size?
+     ))))
+</pre>
+<h4><a name='codefunc35238' href='#docfunc35238'>lazy:ast-step</a></h4>
+<i><a href='#tocfunc35238'>Index</a></i><br>
+
+<pre> {4} &lt;Step&gt; ::= (step  &lt;AxisSpecifier&gt; &lt;NodeTest&gt; &lt;Predicate&gt;* )
+                | (range-to  (expr &lt;Expr&gt;)  &lt;Predicate&gt;* )
+</pre>
+<pre>(define (<a href="lazy-xpath.html#codefunc35238">lazy:ast-step</a> op num-anc)
+  (cond
+    ((eq? (car op) 'range-to)
+     (<a href="xpath-context.html#codefunc8076">draft:signal-semantic-error</a> &quot;range-to function not implemented&quot;))
+    ((eq? (car op) 'filter-expr)
+     (<a href="lazy-xpath.html#codefunc232">lazy:ast-filter-expr</a> op num-anc))
+    ((eq? (car op) 'lambda-step)  ; created by <a href="sxpath.html#codefunc16984">sxpath</a>
+     (let ((proc (cadr op)))
+       (list
+        (if
+         (and num-anc (zero? num-anc))  ; no ancestors required
+         (lambda (nodeset position+size var-binding)
+           (proc (<a href="lazy-xpath.html#codefunc54237">lazy:contextset-&gt;nodeset</a> (<a href="sxpathlib.html#codefunc11721">as-nodeset</a> nodeset))
+                 var-binding))
+         (lambda (nodeset position+size var-binding)
+           (<a href="lazy-xpath.html#codefunc56765">lazy:find-proper-context</a>
+            (proc (<a href="lazy-xpath.html#codefunc54237">lazy:contextset-&gt;nodeset</a> (<a href="sxpathlib.html#codefunc11721">as-nodeset</a> nodeset))
+                  var-binding)
+            (<a href="sxpathlib.html#codefunc11721">as-nodeset</a> nodeset)
+            num-anc)))
+        num-anc  ; num-ancestors
+        #f  ; requires-last?
+        )))
+    ((eq? (car op) 'step)
+     (if
+      (null? (cdddr op))  ; no Predicates
+      (and-let*
+       ((axis-lst (<a href="lazy-xpath.html#codefunc18635">lazy:ast-axis-specifier</a> (cadr op) num-anc))
+        (ntest (<a href="xpath-context.html#codefunc28905">draft:ast-node-test</a> (caddr op))))
+       (let ((axis
+              (<a href="lazy-xpath.html#codefunc35699">lazy:axis-consume-nodeset</a>
+               ((car axis-lst) ntest num-anc))))
+         (list
+          (lambda (nodeset position+size var-binding)
+            (axis nodeset))
+          (cdr axis-lst)  ; num-ancestors
+          #f  ; requires-size?
+          )))
+      (and-let*
+       ((preds-res (<a href="lazy-xpath.html#codefunc38523">lazy:ast-predicate-list</a> (cdddr op) 0))
+        (axis-lst (<a href="lazy-xpath.html#codefunc18635">lazy:ast-axis-specifier</a>
+                   (cadr op) (<a href="xpath-context.html#codefunc23095">draft:na-max</a> num-anc (cadr preds-res))))
+        (ntest (<a href="xpath-context.html#codefunc28905">draft:ast-node-test</a> (caddr op))))
+       (let ((axis ((car axis-lst)
+                    ntest (<a href="xpath-context.html#codefunc23095">draft:na-max</a> num-anc (cadr preds-res))))
+             (pred-impl-lst (car preds-res)))
+         (list
+          (lambda (nodeset position+size var-binding)
+            (let iter-src ((src nodeset)
+                           (candidates '())
+                           (res '()))
+              (cond
+                ((null? candidates)  ; consume the following node from src
+                 (cond
+                   ((null? src)  ; iteration is over
+                    (reverse res))
+                   ((<a href="lazy-xpath.html#codefunc35251">lazy:promise?</a> (car src))
+                    (if
+                     (null? res)  ; result is still empty, need to force src
+                     (iter-src (append (<a href="sxpathlib.html#codefunc11721">as-nodeset</a> (force (car src)))
+                                       (cdr src))
+                               candidates
+                               res)
+                     (reverse  ; otherwise - return the result with a promise
+                      (cons
+                       (delay (iter-src src candidates '()))
+                       res))))
+                   (else  ; (car src) is a node
+                    (iter-src
+                     (cdr src)
+                     (let iter-preds ((nset (axis (car src)))
+                                      (preds pred-impl-lst))
+                       (if
+                        (null? preds)
+                        nset
+                        (iter-preds
+                         ((car preds) nset position+size var-binding)
+                         (cdr preds))))
+                     res))))
+                ((<a href="lazy-xpath.html#codefunc35251">lazy:promise?</a> (car candidates))
+                 ; First candidate is a promise
+                 (if
+                  (null? res)  ; result is still empty, need to force candidate
+                  (iter-src src
+                            (append (<a href="sxpathlib.html#codefunc11721">as-nodeset</a> (force (car candidates)))
+                                    (cdr candidates))
+                            res)
+                  (reverse  ; otherwise - return the result with a promise
+                   (cons
+                    (delay (iter-src src candidates '()))
+                    res))))
+                (else   ; the first candidate is a node
+                 (iter-src src (cdr candidates)
+                           (cons (car candidates) res))))))
+          (cdr axis-lst)  ; num-ancestors
+          #f  ; requires-last?
+         )))))
+    (else
+     (<a href="xpath-context.html#codefunc8076">draft:signal-semantic-error</a> &quot;not a Step - &quot; op))))
+</pre>
+<h4><a name='codefunc38022' href='#docfunc38022'>lazy:ast-step-list</a></h4>
+<i><a href='#tocfunc38022'>Index</a></i><br>
+
+<pre> {4a} ( &lt;Step&gt;+ )
+ Returns (list (listof step-impl) num-anc) or #f
+ NOTE: requires-size? is not needed here, since it is always #f
+</pre>
+<pre>(define (<a href="lazy-xpath.html#codefunc38022">lazy:ast-step-list</a> step-lst num-anc)
+  (let loop ((steps-to-view (reverse step-lst))
+             (res-lst '())
+             (num-anc num-anc))
+    (if
+     (null? steps-to-view)  ; everyone processed
+     (list res-lst num-anc)
+     (and-let*
+      ((step-res (<a href="lazy-xpath.html#codefunc35238">lazy:ast-step</a> (car steps-to-view) num-anc)))
+      (loop
+       (cdr steps-to-view)
+       (cons (car step-res) res-lst)
+       (cadr step-res))))))
+</pre>
+<h4><a name='codefunc46704' href='#docfunc46704'>lazy:ast-predicate</a></h4>
+<i><a href='#tocfunc46704'>Index</a></i><br>
+
+<pre> {8} &lt;Predicate&gt; ::= (predicate  &lt;Expr&gt; )
+ NOTE: num-anc is dummy here, since it is always 0 for Predicates
+</pre>
+<pre>(define (<a href="lazy-xpath.html#codefunc46704">lazy:ast-predicate</a> op num-anc)
+  (if
+   (not (eq? (car op) 'predicate))
+   (<a href="xpath-context.html#codefunc8076">draft:signal-semantic-error</a> &quot;not an Predicate - &quot; op)
+   (and-let*
+    ((expr-res (<a href="lazy-xpath.html#codefunc34476">lazy:ast-expr</a> (cadr op) 0)))
+    (let ((pred (car expr-res)))
+      (list
+       (if
+        (caddr expr-res)  ; requires-last?
+        (lambda (nodeset position+size var-binding)
+          (if
+           (null? nodeset)  ; already empty
+           nodeset  ; nothing to <a href="common.html#codefunc20536">filter</a>
+           (let ((size (<a href="lazy-xpath.html#codefunc10838">lazy:length</a> nodeset)))
+             (let loop ((nset nodeset)
+                        (res '())
+                        (pos 1))
+               (cond
+                 ((null? nset)
+                  (reverse res))
+                 ((<a href="lazy-xpath.html#codefunc35251">lazy:promise?</a> (car nset))
+                  ; This promise was already forced when evaluating <a href="lazy-xpath.html#codefunc10838">lazy:length</a>
+                  (loop (append (<a href="sxpathlib.html#codefunc11721">as-nodeset</a> (force (car nset)))
+                                (cdr nset))
+                        res pos))
+                 (else  ; (car nset) is a node
+                  (let ((value (pred (list (car nset))
+                                     (cons pos size)
+                                     var-binding)))
+                    (loop (cdr nset)
+                          (if (if (number? value)
+                                  (= value pos)
+                                  (<a href="lazy-xpath.html#codefunc32862">lazy:boolean</a> value))
+                              (cons (car nset) res)
+                              res)
+                          (+ pos 1)))))))))
+        (lambda (nodeset position+size var-binding)
+          (if
+           (null? nodeset)  ; already empty
+           nodeset  ; nothing to <a href="common.html#codefunc20536">filter</a>
+           (let loop ((nset nodeset)
+                      (res '())
+                      (pos 1))
+             (cond
+               ((null? nset)
+                (reverse res))
+               ((<a href="lazy-xpath.html#codefunc35251">lazy:promise?</a> (car nset))
+                (reverse
+                 (cons
+                  (delay (loop
+                          (append (<a href="sxpathlib.html#codefunc11721">as-nodeset</a> (force (car nset)))
+                                  (cdr nset))
+                          '()  ; turns res to empty
+                          pos))
+                  res)))
+               (else  ; (car nset) is a node
+                (let ((value (pred (list (car nset))
+                                   (cons pos 1)  ; context size is dummy
+                                   var-binding)))
+                  (loop (cdr nset)
+                        (if (if (number? value)
+                                (= value pos)
+                                (<a href="lazy-xpath.html#codefunc32862">lazy:boolean</a> value))
+                            (cons (car nset) res)
+                            res)
+                        (+ pos 1)))))))))
+       (cadr expr-res)  ; num-ancestors
+       (caddr expr-res)  ; requires-last?
+       )))))
+</pre>
+<h4><a name='codefunc38523' href='#docfunc38523'>lazy:ast-predicate-list</a></h4>
+<i><a href='#tocfunc38523'>Index</a></i><br>
+
+<pre> {8a} ( &lt;Predicate&gt;+ )
+ Returns (list (listof pred-impl) num-anc) or #f
+ NOTE: num-anc is dummy here, since it is always 0 for Predicates
+</pre>
+<pre>(define (<a href="lazy-xpath.html#codefunc38523">lazy:ast-predicate-list</a> op-lst num-anc)
+  (let ((pred-res-lst
+         (map
+          (lambda (op) (<a href="lazy-xpath.html#codefunc46704">lazy:ast-predicate</a> op 0))
+          op-lst)))
+    (if
+     (member #f pred-res-lst)  ; error detected
+     #f
+     (list
+      (map car pred-res-lst)
+      (apply <a href="xpath-context.html#codefunc23095">draft:na-max</a> (map cadr pred-res-lst))))))
+</pre>
+<h4><a name='codefunc34476' href='#docfunc34476'>lazy:ast-expr</a></h4>
+<i><a href='#tocfunc34476'>Index</a></i><br>
+
+<pre> {9} &lt;Expr&gt; ::= &lt;OrExpr&gt;
+                | &lt;AndExpr&gt;
+                | &lt;EqualityExpr&gt;
+                | &lt;RelationalExpr&gt;
+                | &lt;AdditiveExpr&gt;
+                | &lt;MultiplicativeExpr&gt;
+                | &lt;UnionExpr&gt;
+                | &lt;PathExpr&gt;
+                | &lt;FilterExpr&gt;
+                | &lt;VariableReference&gt;
+                | &lt;Literal&gt;
+                | &lt;Number&gt;
+                | &lt;FunctionCall&gt;
+                | &lt;LocationPath&gt;
+</pre>
+<pre>(define (<a href="lazy-xpath.html#codefunc34476">lazy:ast-expr</a> op num-anc)
+  (case (car op)
+    ((or)
+     (<a href="lazy-xpath.html#codefunc14346">lazy:ast-or-expr</a> op num-anc))
+    ((and)
+     (<a href="lazy-xpath.html#codefunc19528">lazy:ast-and-expr</a> op num-anc))
+    ((= !=)
+     (<a href="lazy-xpath.html#codefunc33869">lazy:ast-equality-expr</a> op num-anc))
+    ((&lt; &gt; &lt;= &gt;=)
+     (<a href="lazy-xpath.html#codefunc60578">lazy:ast-relational-expr</a> op num-anc))
+    ((+ -)
+     (<a href="lazy-xpath.html#codefunc31028">lazy:ast-additive-expr</a> op num-anc))
+    ((* div mod)
+     (<a href="lazy-xpath.html#codefunc50827">lazy:ast-multiplicative-expr</a> op num-anc))
+    ((union-expr)
+     (<a href="lazy-xpath.html#codefunc54199">lazy:ast-union-expr</a> op num-anc))
+    ((path-expr)
+     (<a href="lazy-xpath.html#codefunc44385">lazy:ast-path-expr</a> op num-anc))
+    ((filter-expr)
+     (<a href="lazy-xpath.html#codefunc232">lazy:ast-filter-expr</a> op num-anc))
+    ((variable-reference)
+     (<a href="lazy-xpath.html#codefunc10355">lazy:ast-variable-reference</a> op num-anc))
+    ((literal)
+     (<a href="lazy-xpath.html#codefunc28658">lazy:ast-literal</a> op num-anc))
+    ((number)
+     (<a href="lazy-xpath.html#codefunc61963">lazy:ast-number</a> op num-anc))
+    ((function-call)
+     (<a href="lazy-xpath.html#codefunc25666">lazy:ast-function-call</a> op num-anc))
+    ((absolute-location-path)
+     (<a href="lazy-xpath.html#codefunc8473">lazy:ast-absolute-location-path</a> op num-anc))
+    ((relative-location-path)
+     (<a href="lazy-xpath.html#codefunc13570">lazy:ast-relative-location-path</a> op num-anc))
+    (else
+     (<a href="xpath-context.html#codefunc8076">draft:signal-semantic-error</a> &quot;unknown Expr - &quot; op))))
+</pre>
+<h4><a name='codefunc14346' href='#docfunc14346'>lazy:ast-or-expr</a></h4>
+<i><a href='#tocfunc14346'>Index</a></i><br>
+
+<pre> {10} &lt;OrExpr&gt; ::= (or &lt;Expr&gt; &lt;Expr&gt;+ )
+ NOTE: num-anc is dummy here, since it is always 0 for OrExpr
+</pre>
+<pre>(define (<a href="lazy-xpath.html#codefunc14346">lazy:ast-or-expr</a> op num-anc)
+  (let ((expr-res-lst
+         (map
+          (lambda (expr) (<a href="lazy-xpath.html#codefunc34476">lazy:ast-expr</a> expr 0))
+          (cdr op))))
+    (if
+     (member #f expr-res-lst)  ; error detected
+     #f
+     (let ((expr-impls (map car expr-res-lst)))
+     (list
+      (lambda (nodeset position+size var-binding)
+        (let rpt ((fs expr-impls))
+          (cond
+            ((null? fs) #f)
+            ((<a href="lazy-xpath.html#codefunc32862">lazy:boolean</a> ((car fs) nodeset position+size var-binding)) #t)
+            (else (rpt (cdr fs))))))
+      (apply <a href="xpath-context.html#codefunc23095">draft:na-max</a> (map cadr expr-res-lst))  ; num-ancestors
+      (apply <a href="lazy-xpath.html#codefunc19091">lazy:or</a> (map caddr expr-res-lst))  ; requires-last?
+      )))))
+</pre>
+<h4><a name='codefunc19528' href='#docfunc19528'>lazy:ast-and-expr</a></h4>
+<i><a href='#tocfunc19528'>Index</a></i><br>
+
+<pre> {11} &lt;AndExpr&gt; ::= (and &lt;Expr&gt; &lt;Expr&gt;+ )
+ NOTE: num-anc is dummy here, since it is always 0 for AndExpr
+</pre>
+<pre>(define (<a href="lazy-xpath.html#codefunc19528">lazy:ast-and-expr</a> op num-anc)
+  (let ((expr-res-lst
+         (map
+          (lambda (expr) (<a href="lazy-xpath.html#codefunc34476">lazy:ast-expr</a> expr 0))
+          (cdr op))))
+    (if
+     (member #f expr-res-lst)  ; error detected
+     #f
+     (let ((expr-impls (map car expr-res-lst)))
+     (list
+      (lambda (nodeset position+size var-binding)
+        (let rpt ((fs expr-impls))
+          (cond
+            ((null? fs) #t)
+            ((not
+              (<a href="lazy-xpath.html#codefunc32862">lazy:boolean</a> ((car fs) nodeset position+size var-binding)))
+             #f)
+            (else (rpt (cdr fs))))))
+      (apply <a href="xpath-context.html#codefunc23095">draft:na-max</a> (map cadr expr-res-lst))  ; num-ancestors
+      (apply <a href="lazy-xpath.html#codefunc19091">lazy:or</a> (map caddr expr-res-lst))  ; requires-last?
+      )))))
+</pre>
+<h4><a name='codefunc33869' href='#docfunc33869'>lazy:ast-equality-expr</a></h4>
+<i><a href='#tocfunc33869'>Index</a></i><br>
+
+<pre> {12} &lt;EqualityExpr&gt; ::= (=  &lt;Expr&gt; &lt;Expr&gt; )
+                         | (!=  &lt;Expr&gt; &lt;Expr&gt; )
+ NOTE: num-anc is dummy here, since it is always 0 for EqualityExpr
+</pre>
+<pre>(define (<a href="lazy-xpath.html#codefunc33869">lazy:ast-equality-expr</a> op num-anc)
+  (and-let*
+   ((left-lst (<a href="lazy-xpath.html#codefunc34476">lazy:ast-expr</a> (cadr op) 0))
+    (right-lst (<a href="lazy-xpath.html#codefunc34476">lazy:ast-expr</a> (caddr op) 0)))
+   (let ((cmp-op (cadr (assq (car op) `((= ,lazy:equal?)
+                                        (!= ,lazy:not-equal?)))))
+         (left (car left-lst))
+         (right (car right-lst)))
+     (list
+      (lambda (nodeset position+size var-binding)
+        (cmp-op
+         (<a href="lazy-xpath.html#codefunc54237">lazy:contextset-&gt;nodeset</a>
+          (left nodeset position+size var-binding))
+         (<a href="lazy-xpath.html#codefunc54237">lazy:contextset-&gt;nodeset</a>
+          (right nodeset position+size var-binding))))
+      (<a href="xpath-context.html#codefunc23095">draft:na-max</a> (cadr left-lst) (cadr right-lst))  ; num-ancestors
+      (or (caddr left-lst) (caddr right-lst))  ; requires-last?
+      ))))
+</pre>
+<h4><a name='codefunc60578' href='#docfunc60578'>lazy:ast-relational-expr</a></h4>
+<i><a href='#tocfunc60578'>Index</a></i><br>
+
+<pre> {13} &lt;RelationalExpr&gt; ::= (&lt;  &lt;Expr&gt; &lt;Expr&gt; )
+                           | (&gt;  &lt;Expr&gt; &lt;Expr&gt; )
+                           | (&lt;=  &lt;Expr&gt; &lt;Expr&gt; )
+                           | (&gt;=  &lt;Expr&gt; &lt;Expr&gt; )
+ NOTE: num-anc is dummy here, since it is always 0 for RelationalExpr
+</pre>
+<pre>(define (<a href="lazy-xpath.html#codefunc60578">lazy:ast-relational-expr</a> op num-anc)
+  (and-let*
+   ((left-lst (<a href="lazy-xpath.html#codefunc34476">lazy:ast-expr</a> (cadr op) 0))
+    (right-lst (<a href="lazy-xpath.html#codefunc34476">lazy:ast-expr</a> (caddr op) 0)))
+   (let ((cmp-op
+          (<a href="lazy-xpath.html#codefunc39423">lazy:relational-cmp</a>
+           (cadr (assq (car op) `((&lt; ,&lt;) (&gt; ,&gt;) (&lt;= ,&lt;=) (&gt;= ,&gt;=))))))
+         (left (car left-lst))
+         (right (car right-lst)))
+     (list
+      (lambda (nodeset position+size var-binding)
+        (cmp-op
+         (<a href="lazy-xpath.html#codefunc54237">lazy:contextset-&gt;nodeset</a>
+          (left nodeset position+size var-binding))
+         (<a href="lazy-xpath.html#codefunc54237">lazy:contextset-&gt;nodeset</a>
+          (right nodeset position+size var-binding))))
+      (<a href="xpath-context.html#codefunc23095">draft:na-max</a> (cadr left-lst) (cadr right-lst))  ; num-ancestors
+      (or (caddr left-lst) (caddr right-lst))  ; requires-last?
+      ))))
+</pre>
+<h4><a name='codefunc31028' href='#docfunc31028'>lazy:ast-additive-expr</a></h4>
+<i><a href='#tocfunc31028'>Index</a></i><br>
+
+<pre> {14} &lt;AdditiveExpr&gt; ::= (+  &lt;Expr&gt; &lt;Expr&gt; )
+                         | (-  &lt;Expr&gt; &lt;Expr&gt;? )
+ NOTE: num-anc is dummy here, since it is always 0 for AdditiveExpr
+</pre>
+<pre>(define (<a href="lazy-xpath.html#codefunc31028">lazy:ast-additive-expr</a> op num-anc)
+  (let ((expr-res-lst
+         (map
+          (lambda (expr) (<a href="lazy-xpath.html#codefunc34476">lazy:ast-expr</a> expr 0))
+          (cdr op))))
+    (if
+     (member #f expr-res-lst)  ; error detected
+     #f
+     (let ((add-op (cadr (assq (car op) `((+ ,+) (- ,-)))))
+           (expr-impls (map car expr-res-lst)))
+     (list
+      (lambda (nodeset position+size var-binding)
+        (apply
+         add-op
+         (map
+          (lambda (expr)
+            (<a href="lazy-xpath.html#codefunc7275">lazy:number</a>
+             (<a href="lazy-xpath.html#codefunc54237">lazy:contextset-&gt;nodeset</a>
+              (expr nodeset position+size var-binding))))
+          expr-impls)))
+      (apply <a href="xpath-context.html#codefunc23095">draft:na-max</a> (map cadr expr-res-lst))  ; num-ancestors
+      (apply <a href="lazy-xpath.html#codefunc19091">lazy:or</a> (map caddr expr-res-lst))  ; requires-last?
+      )))))
+</pre>
+<h4><a name='codefunc50827' href='#docfunc50827'>lazy:ast-multiplicative-expr</a></h4>
+<i><a href='#tocfunc50827'>Index</a></i><br>
+
+<pre> {15} &lt;MultiplicativeExpr&gt; ::= (*  &lt;Expr&gt; &lt;Expr&gt; )
+                               | (div  &lt;Expr&gt; &lt;Expr&gt; )
+                               | (mod  &lt;Expr&gt; &lt;Expr&gt; )
+ NOTE: num-anc is dummy here, since it is always 0 for MultiplicativeExpr
+</pre>
+<pre>(define (<a href="lazy-xpath.html#codefunc50827">lazy:ast-multiplicative-expr</a> op num-anc)
+  (and-let*
+   ((left-lst (<a href="lazy-xpath.html#codefunc34476">lazy:ast-expr</a> (cadr op) 0))
+    (right-lst (<a href="lazy-xpath.html#codefunc34476">lazy:ast-expr</a> (caddr op) 0)))
+   (let ((mul-op
+          (cadr (assq (car op) `((* ,*) (div ,/) (mod ,remainder)))))
+         (left (car left-lst))
+         (right (car right-lst)))
+     (list
+      (lambda (nodeset position+size var-binding)
+        (mul-op
+         (<a href="lazy-xpath.html#codefunc7275">lazy:number</a>
+          (<a href="lazy-xpath.html#codefunc54237">lazy:contextset-&gt;nodeset</a>
+           (left nodeset position+size var-binding)))
+         (<a href="lazy-xpath.html#codefunc7275">lazy:number</a>
+          (<a href="lazy-xpath.html#codefunc54237">lazy:contextset-&gt;nodeset</a>
+           (right nodeset position+size var-binding)))))
+      (<a href="xpath-context.html#codefunc23095">draft:na-max</a> (cadr left-lst) (cadr right-lst))  ; num-ancestors
+      (or (caddr left-lst) (caddr right-lst))  ; requires-last?
+      ))))
+</pre>
+<h4><a name='codefunc54199' href='#docfunc54199'>lazy:ast-union-expr</a></h4>
+<i><a href='#tocfunc54199'>Index</a></i><br>
+
+<pre> {16} &lt;UnionExpr&gt; ::= (union-expr  &lt;Expr&gt; &lt;Expr&gt;+ )
+</pre>
+<pre>(define (<a href="lazy-xpath.html#codefunc54199">lazy:ast-union-expr</a> op num-anc)
+  (let ((expr-res-lst
+         (map
+          (lambda (expr) (<a href="lazy-xpath.html#codefunc34476">lazy:ast-expr</a> expr 0))
+          (cdr op))))
+    (if
+     (member #f expr-res-lst)  ; error detected
+     #f
+     (let ((expr-impls (map car expr-res-lst)))
+       (list
+        (lambda (nodeset position+size var-binding)
+          (let iter-operands ((fs expr-impls)
+                              (candidates '())
+                              (res '()))
+            (cond
+              ((null? candidates)
+               (if
+                (null? fs)  ; no more operands to be unioned
+                (reverse res)                
+                (iter-operands
+                 (cdr fs)
+                 (let ((nset ((car fs) nodeset position+size var-binding)))
+                   (cond
+                     ((not (<a href="sxpathlib.html#codefunc31162">nodeset?</a> nset))
+                      (<a href="txpath.html#codefunc13525">sxml:xpointer-runtime-error</a> 
+                       &quot;expected - nodeset instead of &quot; nset)
+                      '())
+                   (else nset)))
+                 res)))
+              ((<a href="lazy-xpath.html#codefunc35251">lazy:promise?</a> (car candidates))
+               (if
+                (null? res)  ; res is still null, need to force candidate
+                (iter-operands
+                 fs
+                 (append (<a href="sxpathlib.html#codefunc11721">as-nodeset</a> (force (car candidates)))
+                         (cdr candidates))
+                 res)
+                (reverse
+                 (cons
+                  (delay (iter-operands
+                          fs
+                          (append (<a href="sxpathlib.html#codefunc11721">as-nodeset</a> (force (car candidates)))
+                                  (cdr candidates))
+                          '()))
+                  res))))
+              (else  ; first candidate is a node
+               (iter-operands
+                fs (cdr candidates) (cons (car candidates) res))))))
+        (apply <a href="xpath-context.html#codefunc23095">draft:na-max</a> (map cadr expr-res-lst))
+        (apply <a href="lazy-xpath.html#codefunc19091">lazy:or</a> (map caddr expr-res-lst))  ; requires-last?
+        )))))
+</pre>
+<h4><a name='codefunc44385' href='#docfunc44385'>lazy:ast-path-expr</a></h4>
+<i><a href='#tocfunc44385'>Index</a></i><br>
+
+<pre> {17} &lt;PathExpr&gt; ::= (path-expr  &lt;FilterExpr&gt; &lt;Step&gt;+ )
+</pre>
+<pre>(define (<a href="lazy-xpath.html#codefunc44385">lazy:ast-path-expr</a> op num-anc)
+  (and-let*
+    ((steps-res (<a href="lazy-xpath.html#codefunc38022">lazy:ast-step-list</a> (cddr op) num-anc))
+     (filter-lst (<a href="lazy-xpath.html#codefunc232">lazy:ast-filter-expr</a> (cadr op) (cadr steps-res))))
+    (let ((init-impl (car filter-lst))
+          (converters (car steps-res)))
+      (list
+        (lambda (nodeset position+size var-binding)
+          (let ((nset
+                 (init-impl nodeset position+size var-binding)))
+            (let rpt ((nset 
+                       (cond
+                         ((<a href="sxpathlib.html#codefunc31162">nodeset?</a> nset) nset)
+                         (else
+                          (<a href="txpath.html#codefunc13525">sxml:xpointer-runtime-error</a> 
+                           &quot;expected - nodeset instead of &quot; nset)
+                          '())))
+                      (fs converters))
+              (if (null? fs)
+                  nset
+                  (rpt ((car fs) nset position+size var-binding)
+                       (cdr fs))))))
+        (cadr filter-lst)  ; num-ancestors
+        (caddr filter-lst)  ; requires-last?
+        ))))
+</pre>
+<h4><a name='codefunc232' href='#docfunc232'>lazy:ast-filter-expr</a></h4>
+<i><a href='#tocfunc232'>Index</a></i><br>
+
+<pre> {18} &lt;FilterExpr&gt; ::= (filter-expr (primary-expr  &lt;Expr&gt; )
+                                    &lt;Predicate&gt;* )
+</pre>
+<pre>(define (<a href="lazy-xpath.html#codefunc232">lazy:ast-filter-expr</a> op num-anc)
+  (cond
+    ((not (eq? (car op) 'filter-expr))
+     (<a href="xpath-context.html#codefunc8076">draft:signal-semantic-error</a> &quot;not an FilterExpr - &quot; op))
+    ((not (eq? (caadr op) 'primary-expr))
+     (<a href="xpath-context.html#codefunc8076">draft:signal-semantic-error</a> &quot;not an PrimaryExpr - &quot; (cadr op)))
+    ((null? (cddr op))  ; no Predicates
+     (<a href="lazy-xpath.html#codefunc34476">lazy:ast-expr</a> (cadadr op) num-anc))
+    (else  ; there are predicates
+     (and-let*
+       ((preds-res (<a href="lazy-xpath.html#codefunc38523">lazy:ast-predicate-list</a> (cddr op) 0))
+        (expr-lst (<a href="lazy-xpath.html#codefunc34476">lazy:ast-expr</a>
+                   (cadadr op) (<a href="xpath-context.html#codefunc23095">draft:na-max</a> num-anc (cadr preds-res)))))
+       (let ((expr-impl (car expr-lst))
+             (pred-impl-lst (car preds-res)))
+         (list
+          (lambda (nodeset position+size var-binding)
+            (let ((prim-res (expr-impl nodeset position+size var-binding)))
+              (let iter-preds ((nset
+                                (if
+                                 (<a href="sxpathlib.html#codefunc31162">nodeset?</a> prim-res)
+                                 prim-res
+                                 (begin 
+                                   (<a href="txpath.html#codefunc13525">sxml:xpointer-runtime-error</a> 
+                                    &quot;expected - nodeset instead of &quot; prim-res)
+                                   '())))
+                               (preds pred-impl-lst))
+                (if
+                 (null? preds)
+                 nset
+                 (iter-preds
+                  ((car preds) nset position+size var-binding)
+                  (cdr preds))))))
+          (cadr expr-lst)  ; num-ancestors
+          #f  ; requires-last?
+         ))))))
+</pre>
+<h4><a name='codefunc10355' href='#docfunc10355'>lazy:ast-variable-reference</a></h4>
+<i><a href='#tocfunc10355'>Index</a></i><br>
+
+<pre> {19} &lt;VariableReference&gt; ::= (variable-reference  &lt;String&gt; )
+</pre>
+<pre>(define (<a href="lazy-xpath.html#codefunc10355">lazy:ast-variable-reference</a> op num-anc)
+  (let ((name (string-&gt;symbol (cadr op))))
+    (list
+     (lambda (nodeset position+size var-binding)
+       (cond
+         ((assoc name var-binding)
+          =&gt; cdr)
+         (else
+          (<a href="txpath.html#codefunc13525">sxml:xpointer-runtime-error</a> &quot;unbound variable - &quot; name)
+          '())))
+     0  ; num-ancestors
+     #f  ; requires-last?
+     )))
+</pre>
+<h4><a name='codefunc28658' href='#docfunc28658'>lazy:ast-literal</a></h4>
+<i><a href='#tocfunc28658'>Index</a></i><br>
+
+<pre> {20} &lt;Literal&gt; ::= (literal  &lt;String&gt; )
+</pre>
+<pre>(define (<a href="lazy-xpath.html#codefunc28658">lazy:ast-literal</a> op num-anc)
+  (let ((literal (cadr op)))
+    (list
+     (lambda (nodeset position+size var-binding) literal)
+     0 #f)))
+</pre>
+<h4><a name='codefunc61963' href='#docfunc61963'>lazy:ast-number</a></h4>
+<i><a href='#tocfunc61963'>Index</a></i><br>
+
+<pre> {21} &lt;Number&gt; :: (number  &lt;Number&gt; )
+</pre>
+<pre>(define (<a href="lazy-xpath.html#codefunc61963">lazy:ast-number</a> op num-anc)
+  (let ((number (cadr op)))
+    (list
+     (lambda (nodeset position+size var-binding) number)
+     0 #f)))
+</pre>
+<h4><a name='codefunc25666' href='#docfunc25666'>lazy:ast-function-call</a></h4>
+<i><a href='#tocfunc25666'>Index</a></i><br>
+
+<pre> {22} &lt;FunctionCall&gt; ::= (function-call (function-name  &lt;String&gt; )
+                                        (argument  &lt;Expr&gt; )* )
+</pre>
+<pre>(define (<a href="lazy-xpath.html#codefunc25666">lazy:ast-function-call</a> op num-anc)
+  (let ((core-alist
+         ; (list fun-name min-num-args max-num-args na4res impl requires-last?)
+         `((last 0 0 0 ,lazy:core-last #t)
+           (position 0 0 0 ,lazy:core-position #f)
+           (count 1 1 0 ,lazy:core-count #f)
+           (id 1 1 #f ,lazy:core-id #f)
+           (local-name 0 1 0 ,lazy:core-local-name #f)
+           (namespace-uri 0 1 0 ,lazy:core-namespace-uri #f)
+           (name 0 1 0 ,lazy:core-name #f)
+           (string 0 1 0 ,lazy:core-string #f)
+           (concat 2 -1 0 ,lazy:core-concat #f)
+           (starts-with 2 2 0 ,lazy:core-starts-with #f)
+           (contains 2 2 0 ,lazy:core-contains #f)
+           (substring-before 2 2 0 ,lazy:core-substring-before #f)
+           (substring-after 2 2 0 ,lazy:core-substring-after #f)
+           (substring 2 3 0 ,lazy:core-substring #f)
+           (string-length 0 1 0 ,lazy:core-string-length #f)
+           (normalize-space 0 1 0 ,lazy:core-normalize-space #f)
+           (translate 3 3 0 ,lazy:core-translate #f)
+           (boolean 1 1 0 ,lazy:core-boolean #f)
+           (not 1 1 0 ,lazy:core-not #f)
+           (true 0 0 0 ,lazy:core-true #f)
+           (false 0 0 0 ,lazy:core-false #f)
+           (lang 1 1 #f ,lazy:core-lang #f)
+           (number 0 1 0 ,lazy:core-number #f)
+           (sum 1 1 0 ,lazy:core-sum #f)
+           (floor 1 1 0 ,lazy:core-floor #f)
+           (ceiling 1 1 0 ,lazy:core-ceiling #f)
+           (round 1 1 0 ,lazy:core-round #f))))
+    (cond
+      ((not (eq? (caadr op) 'function-name))
+       (<a href="xpath-context.html#codefunc8076">draft:signal-semantic-error</a> &quot;not an FunctionName - &quot; (cadr op)))
+      ((assq (string-&gt;symbol (cadadr op)) core-alist)       
+       =&gt; (lambda (description)  ; Core function found
+            (cond
+              ((&lt; (length (cddr op)) (cadr description))
+               (<a href="xpath-context.html#codefunc8076">draft:signal-semantic-error</a>
+                &quot;too few arguments for the Core Function call - &quot;
+                (cadadr op)))
+              ((and (&gt;= (caddr description) 0)
+                    (&gt; (length (cddr op)) (caddr description)))
+               (<a href="xpath-context.html#codefunc8076">draft:signal-semantic-error</a>
+                &quot;too many arguments for the Core Function call - &quot;
+                (cadadr op)))
+              (else  ; correct number of arguments
+               (and-let*
+                ((args-impl (<a href="lazy-xpath.html#codefunc22666">lazy:ast-function-arguments</a> (cddr op))))
+                (list
+                 ; Producing a function implementation
+                 (apply (list-ref description 4) num-anc args-impl)
+                 (list-ref description 3)
+                 (list-ref description 5)  ; requires-last?
+                 ))))))
+           (else  ; function definition not found
+            (<a href="xpath-context.html#codefunc8076">draft:signal-semantic-error</a>
+             &quot;function call to an unknown function - &quot; (cadadr op))))))
+</pre>
+<h4><a name='codefunc22666' href='#docfunc22666'>lazy:ast-function-arguments</a></h4>
+<i><a href='#tocfunc22666'>Index</a></i><br>
+
+<pre> {22a} ( (argument  &lt;Expr&gt; )* )
+ Returns: (listof expr-impl) or #f
+</pre>
+<pre>(define (<a href="lazy-xpath.html#codefunc22666">lazy:ast-function-arguments</a> op-lst)
+  (let ((arg-res-lst
+         (map
+          (lambda (op)
+            (if
+             (not (eq? (car op) 'argument))
+             (<a href="xpath-context.html#codefunc8076">draft:signal-semantic-error</a> &quot;not an Argument - &quot; op)
+             (<a href="lazy-xpath.html#codefunc34476">lazy:ast-expr</a> (cadr op) 0)))
+          op-lst)))
+    (if
+     (member #f arg-res-lst)  ; semantic error detected
+     #f
+     (map car arg-res-lst))))
+</pre></body></html>

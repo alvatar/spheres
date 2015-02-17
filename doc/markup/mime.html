@@ -1,0 +1,166 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN""http://www.w3.org/TR/html401/loose.dtd"><html><head><meta name="GENERATOR" content="Mole: The Scheme Source Code Digger"><title>Module: mime</title><meta name='keywords' content=''></head><body bgcolor='#ffffff' text='#384412'  link='#11af05' vlink='#728b09'>
+<center><h1>Module: mime</h1></center>
+<p><br>
+<!-- Table of content -->
+<p><dl>
+
+f:  <a name='tocfunc14055' href='#docfunc14055' style='text-decoration:none'>http-token-char?</a><br>
+
+<dl><dt><a name='tocsect14816' href='#sect14816'><b>		Parse the Content-type string</b></a><dd>
+
+f:  <a name='tocfunc26421' href='#docfunc26421' style='text-decoration:none'>MIME:parse-content-type</a><br>
+
+f:  <a name='tocfunc52288' href='#docfunc52288' style='text-decoration:none'>MIME:read-headers</a><br>
+</dl>
+</dl>
+
+<h4><a name='docfunc14055' href='#tocfunc14055'>http-token-char?</a></h4>
+(define (http-token-char? x)<i><br> ... <a href='#codefunc14055'>Full Code</a> ... )</i>
+<pre> Section &quot;2.2 Basic Rules&quot; of the HTTP 1.1 document
+</pre><p><br>
+
+<hr width='40%' align='center'><center><h3><a name='sect14816' href='#tocsect14816'>		Parse the Content-type string</a></h3></center>
+
+<pre>
+ Given a Content-Type string:
+	media-type [; attr=value]*
+ return the list of associations (attr . value)
+ where attr is a symbol and value is a string.
+ The media-type is returned as an association with the type
+ '=mime-type'
+ See Sections 2.2 and 3.6 of rfc2616 (HTTP/1.1) for syntax of the
+ Content-Type string
+</pre>
+<h4><a name='docfunc26421' href='#tocfunc26421'>MIME:parse-content-type</a></h4>
+(define (MIME:parse-content-type ctype-str)<i><br> ... <a href='#codefunc26421'>Full Code</a> ... )</i><p><br>
+
+<h4><a name='docfunc52288' href='#tocfunc52288'>MIME:read-headers</a></h4>
+(define MIME:read-headers <i><br> ... <a href='#codefunc52288'>Full Code</a> ... )</i>
+<pre> read-headers port
+ The procedure reads MIME headers from the port.
+ The port will be positioned after the empty line that
+ separates the headers.
+ Later on, make a separate procedure: read-a-header
+</pre><p><br>
+<center><h1>Code</h1></center>
+
+<h4><a name='codefunc14055' href='#docfunc14055'>http-token-char?</a></h4>
+<i><a href='#tocfunc14055'>Index</a></i><br>
+
+<pre> Section &quot;2.2 Basic Rules&quot; of the HTTP 1.1 document
+</pre>
+<pre>(define (<a href="mime.html#codefunc14055">http-token-char?</a> x)
+  (or (char-alphabetic? x)
+      (char-numeric? x)
+      (string-index &quot;!#$%&amp;'*+-.^_`|~&quot; x)))
+</pre>
+<h4><a name='codefunc26421' href='#docfunc26421'>MIME:parse-content-type</a></h4>
+<i><a href='#tocfunc26421'>Index</a></i><br>
+
+<pre>(define (<a href="mime.html#codefunc26421">MIME:parse-content-type</a> ctype-str)
+  (<a href="myenv.html#codefunc15729">call-with-input-string</a> ctype-str
+    (lambda (port)
+      (let loop ((attrs 
+		  (list (cons '=mime-type 
+			      (<a href="input-parse.html#codefunc10217">next-token</a> '() '(#\space #\; *eof* #\tab) 
+					  &quot;reading media type&quot; port)))))
+	(<a href="input-parse.html#codefunc8671">skip-while</a> '(#\space #\tab) port)
+	(if (not (eqv? #\; (read-char port)))	; must be EOF
+	    attrs				; return the attributes
+	    (let ((attr-name
+		   (string-&gt;symbol (<a href="input-parse.html#codefunc10217">next-token</a> '(#\space #\tab) '(#\=)
+					 &quot;reading attr-name&quot; port))))
+	      (read-char port)		; skip the #\= separator
+	      ; loading attr-value, which is (section 2.2 of HTTP1.1):
+	      ;   attr-value = token | quoted-string
+	      ;   quoted-string  = ( &lt;&quot;&gt; *(qdtext | quoted-pair ) &lt;&quot;&gt; )
+	      ;   qdtext         = &lt;any TEXT except &lt;&quot;&gt;&gt;
+	      ;   quoted-pair    = &quot;\&quot; CHAR
+	      (cond 
+	       ((eq? #\&quot; (peek-char port))	; we're reading a quoted-string
+		(read-char port)		; skip the opening quote
+		(let qsloop ((old-fragments '()))
+		  (let ((fragments
+			 (cons
+			  (<a href="input-parse.html#codefunc10217">next-token</a> '() '(#\&quot; #\\)
+				      &quot;reading quoted-string&quot; port)
+			  old-fragments)))
+		    (if (char=? #\&quot; (read-char port))
+			(loop		; finished reading the quoted-string
+			 (cons
+			  (cons
+			   attr-name
+			   (apply string-append (reverse fragments)))
+			  attrs))
+		      ; we've read a backslash. Read the next char literally
+			(qsloop (cons (string (read-char port)) fragments))
+			))))
+	       (else			; reading token
+		(<a href="myenv.html#codemacro19783">assert</a> (char? (peek-char port))
+			(<a href="mime.html#codefunc14055">http-token-char?</a> (peek-char port)))
+		(loop
+		 (cons
+		  (cons attr-name
+			(<a href="input-parse.html#codefunc10217">next-token</a> '() '(#\space #\; *eof* #\tab) 
+					  &quot;reading token&quot; port))
+		  attrs))))
+	      ))))))
+</pre>
+<h4><a name='codefunc52288' href='#docfunc52288'>MIME:read-headers</a></h4>
+<i><a href='#tocfunc52288'>Index</a></i><br>
+
+<pre> read-headers port
+ The procedure reads MIME headers from the port.
+ The port will be positioned after the empty line that
+ separates the headers.
+ Later on, make a separate procedure: read-a-header
+</pre>
+<pre>(define <a href="mime.html#codefunc52288">MIME:read-headers</a>
+    (let ()
+      (define (read-new-header http-port resp-headers)
+	(let ((c (peek-char http-port)))
+	  (cond
+	   ((eqv? c #\return)		; An empty line, the end of headers
+	    (if (eqv? #\newline (<a href="input-parse.html#codefunc49057">peek-next-char</a> http-port))
+		(read-char http-port))	; skip the following \n if any
+	    resp-headers)
+	   ((eqv? c #\newline)	  ; #\return should have been appeared before
+	    (read-char http-port) ; but not all servers are compliant
+	    resp-headers)
+	   ((char-alphabetic? c)  ; beginning of the new header
+	    (let* ((header-name
+		    (string-&gt;symbol
+		     (string-upcase
+		      (<a href="input-parse.html#codefunc10217">next-token</a> '() '(#\: #\space #\tab *eof*) &quot;&quot;
+				  http-port))))
+		   (delim (<a href="input-parse.html#codefunc8671">skip-while</a> '(#\space #\tab) http-port))
+		   (header-value
+		    (if (eqv? delim #\:)
+			(begin (read-char http-port)
+			       (<a href="input-parse.html#codefunc8671">skip-while</a> '(#\space #\tab) http-port)
+			       (read-line http-port))
+			#f)))
+	      (if (string? header-value)
+		  (check-cont http-port resp-headers
+			      header-name header-value)
+		  (error &quot;BAD-HEADER: &quot; resp-headers))))
+	   (else
+	    (error &quot;BAD-HEADER: &quot; resp-headers)))))
+
+      ; check to see if the value of the header continues on the next line
+      (define (check-cont http-port resp-headers
+			  header-name header-value)
+	(let ((c (peek-char http-port)))
+	  (cond
+	   ((or (eqv? c #\space) (eqv? c #\tab))	; it continues
+	    (let ((cont-value (read-line http-port)))
+	      (check-cont http-port resp-headers
+		    header-name (string-append header-value cont-value))))
+	   (else
+	    (read-new-header http-port
+			     (cons (cons header-name header-value)
+				   resp-headers))))))
+      (lambda (http-port)
+	(read-new-header http-port '()))
+      ))
+</pre></body></html>

@@ -1,0 +1,1846 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN""http://www.w3.org/TR/html401/loose.dtd"><html><head><meta name="GENERATOR" content="Mole: The Scheme Source Code Digger"><title>Module: xpath-parser</title><meta name='keywords' content=''></head><body bgcolor='#ffffff' text='#384412'  link='#11af05' vlink='#728b09'>
+<center><h1>Module: xpath-parser</h1></center>
+
+<pre> XPath/XPointer grammar parser.
+
+ This software is in Public Domain.
+ IT IS PROVIDED &quot;AS IS&quot;, WITHOUT WARRANTY OF ANY KIND.
+
+ Please send bug reports and comments to:
+   lisovsky@acm.org      Kirill Lisovsky
+   lizorkin@hotbox.ru    Dmitry Lizorkin
+</pre><p><br>
+<!-- Table of content -->
+<p><dl>
+<p><dt><a name='tocchapt56440' href='#chapt56440'><b>Parser parameterization</b></a><dd>
+
+f:  <a name='tocfunc31356' href='#docfunc31356' style='text-decoration:none'>txp:param-value</a><br>
+<p><dt><a name='tocchapt1761' href='#chapt1761'><b>Errors handling</b></a><dd>
+
+f:  <a name='tocfunc54318' href='#docfunc54318' style='text-decoration:none'>txp:error?</a><br>
+
+<dl><dt><a name='tocsect55631' href='#sect55631'><b>Syntactic error (also called a parser error)</b></a><dd>
+
+f:  <a name='tocfunc45677' href='#docfunc45677' style='text-decoration:none'>sxml:xpointer-parse-error</a><br>
+
+f:  <a name='tocfunc3806' href='#docfunc3806' style='text-decoration:none'>sxml:xpointer-parse-warning</a><br>
+</dl>
+
+<dl><dt><a name='tocsect59546' href='#sect59546'><b>Semantic error</b></a><dd>
+
+f:  <a name='tocfunc64144' href='#docfunc64144' style='text-decoration:none'>txp:semantic-errs-detected?</a><br>
+
+f:  <a name='tocfunc48950' href='#docfunc48950' style='text-decoration:none'>txp:signal-semantic-error</a><br>
+</dl>
+<p><dt><a name='tocchapt36849' href='#chapt36849'><b>Low level parsing functions</b></a><dd>
+
+f:  <a name='tocfunc65329' href='#docfunc65329' style='text-decoration:none'>sxml:whitespace</a><br>
+
+f:  <a name='tocfunc2489' href='#docfunc2489' style='text-decoration:none'>sxml:delimiter</a><br>
+
+f:  <a name='tocfunc3796' href='#docfunc3796' style='text-decoration:none'>sxml:non-first?</a><br>
+
+f:  <a name='tocfunc25198' href='#docfunc25198' style='text-decoration:none'>sxml:skip-ws</a><br>
+
+f:  <a name='tocfunc16536' href='#docfunc16536' style='text-decoration:none'>sxml:assert-end-of-path</a><br>
+
+<dl><dt><a name='tocsect56220' href='#sect56220'><b>These two functions read expected information from the path</b></a><dd>
+
+f:  <a name='tocfunc24809' href='#docfunc24809' style='text-decoration:none'>sxml:parse-check</a><br>
+
+f:  <a name='tocfunc3781' href='#docfunc3781' style='text-decoration:none'>sxml:parse-check-sequence</a><br>
+
+f:  <a name='tocfunc29802' href='#docfunc29802' style='text-decoration:none'>sxml:parse-assert</a><br>
+</dl>
+
+<dl><dt><a name='tocsect46694' href='#sect46694'><b>NCName readers</b></a><dd>
+
+f:  <a name='tocfunc30535' href='#docfunc30535' style='text-decoration:none'>sxml:parse-ncname</a><br>
+
+f:  <a name='tocfunc2276' href='#docfunc2276' style='text-decoration:none'>sxml:parse-name</a><br>
+
+f:  <a name='tocfunc25849' href='#docfunc25849' style='text-decoration:none'>sxml:parse-qname</a><br>
+</dl>
+
+<dl><dt><a name='tocsect5220' href='#sect5220'><b>Parsers for data of basic types</b></a><dd>
+
+f:  <a name='tocfunc61013' href='#docfunc61013' style='text-decoration:none'>sxml:parse-natural</a><br>
+
+f:  <a name='tocfunc60493' href='#docfunc60493' style='text-decoration:none'>sxml:parse-literal</a><br>
+
+f:  <a name='tocfunc28263' href='#docfunc28263' style='text-decoration:none'>sxml:parse-number</a><br>
+</dl>
+<p><dt><a name='tocchapt61570' href='#chapt61570'><b>XPath/XPointer grammar parsing</b></a><dd>
+
+f:  <a name='tocfunc22538' href='#docfunc22538' style='text-decoration:none'>txp:parameterize-parser</a><br>
+</dl>
+<hr height='5'><center><h3><a name='chapt56440' href='#tocchapt56440'>Parser parameterization</a></h3></center>
+
+<pre> For building a specific XPath/XPointer implementation, grammar parser is to
+ be parameterized
+  txp-params ::= (listof  txp-param )
+  txp-param ::= (list  param-name  param-value  [parameterized-func] )
+  parameterized-func is optional
+ Each parser-param generally specifies the parser result for the single
+ XPath/XPointer grammar rule
+</pre>
+<h4><a name='docfunc31356' href='#tocfunc31356'>txp:param-value</a></h4>
+(define (txp:param-value param-name txp-params)<i><br> ... <a href='#codefunc31356'>Full Code</a> ... )</i>
+<pre> Given param-name, returns the corresponding lambda
+</pre><p><br>
+<hr height='5'><center><h3><a name='chapt1761' href='#tocchapt1761'>Errors handling</a></h3></center>
+
+<pre> There are 2 kinds of errors: syntactic errors and semantic errors
+ - Syntactic error is raised when the location path (fragment identifier)
+   doesn't satisfy XPath (XPointer) grammar. Syntactic error is discovered
+   and raised by the parser.
+ - Semantic error can be raised by the specific parser parametrization
+</pre>
+<h4><a name='docfunc54318' href='#tocfunc54318'>txp:error?</a></h4>
+(define (txp:error? obj)<i><br> ... <a href='#codefunc54318'>Full Code</a> ... )</i>
+<pre> Whether a parser returns an error
+</pre><p><br>
+
+<hr width='40%' align='center'><center><h3><a name='sect55631' href='#tocsect55631'>Syntactic error (also called a parser error)</a></h3></center>
+
+<pre></pre>
+<h4><a name='docfunc45677' href='#tocfunc45677'>sxml:xpointer-parse-error</a></h4>
+(define (sxml:xpointer-parse-error . text)<i><br> ... <a href='#codefunc45677'>Full Code</a> ... )</i><p><br>
+
+<h4><a name='docfunc3806' href='#tocfunc3806'>sxml:xpointer-parse-warning</a></h4>
+(define (sxml:xpointer-parse-warning . text)<i><br> ... <a href='#codefunc3806'>Full Code</a> ... )</i>
+<pre> A warning message for grammar features which are not supported by this
+ implementation
+</pre><p><br>
+
+<hr width='40%' align='center'><center><h3><a name='sect59546' href='#tocsect59546'>Semantic error</a></h3></center>
+
+<pre> To signal the parser about the semantic error, the specific parametrization
+ is to return the symbol  'txp:semantic-error
+</pre>
+<h4><a name='docfunc64144' href='#tocfunc64144'>txp:semantic-errs-detected?</a></h4>
+(define (txp:semantic-errs-detected? . res-list)<i><br> ... <a href='#codefunc64144'>Full Code</a> ... )</i><p><br>
+
+<h4><a name='docfunc48950' href='#tocfunc48950'>txp:signal-semantic-error</a></h4>
+(define (txp:signal-semantic-error . text)<i><br> ... <a href='#codefunc48950'>Full Code</a> ... )</i>
+<pre> Constructed specific parsers may wish to use this function
+</pre><p><br>
+<hr height='5'><center><h3><a name='chapt36849' href='#tocchapt36849'>Low level parsing functions</a></h3></center>
+
+<pre> XPath location path (XPointer fragment identifier) is represented as a list
+ of chars
+</pre>
+<h4><a name='docfunc65329' href='#tocfunc65329'>sxml:whitespace</a></h4>
+(define sxml:whitespace <i><br> ... <a href='#codefunc65329'>Full Code</a> ... )</i>
+<pre> A list of whitespace characters
+</pre><p><br>
+
+<h4><a name='docfunc2489' href='#tocfunc2489'>sxml:delimiter</a></h4>
+(define sxml:delimiter <i><br> ... <a href='#codefunc2489'>Full Code</a> ... )</i>
+<pre> A sxml:whitespace or () &lt;&gt; [] : / + * , = | ! &quot; ' @ $
+</pre><p><br>
+
+<h4><a name='docfunc3796' href='#tocfunc3796'>sxml:non-first?</a></h4>
+(define (sxml:non-first? ch)<i><br> ... <a href='#codefunc3796'>Full Code</a> ... )</i>
+<pre> A list of characters a NCName cannot start with
+</pre><p><br>
+
+<h4><a name='docfunc25198' href='#tocfunc25198'>sxml:skip-ws</a></h4>
+(define (sxml:skip-ws path)<i><br> ... <a href='#codefunc25198'>Full Code</a> ... )</i>
+<pre> The function reads a whitespace , production [3] (S) in XML Rec.
+  path - xpointer path string as a list of chars 
+ It returns a new path
+</pre><p><br>
+
+<h4><a name='docfunc16536' href='#tocfunc16536'>sxml:assert-end-of-path</a></h4>
+(define (sxml:assert-end-of-path path)<i><br> ... <a href='#codefunc16536'>Full Code</a> ... )</i>
+<pre> Asserts that the path is over, possibly with trailing whitespace symbols at
+ the end. Returns the boolean value - whether assertion passes. If assertion
+ fails, signals an error message
+</pre><p><br>
+
+<hr width='40%' align='center'><center><h3><a name='sect56220' href='#tocsect56220'>These two functions read expected information from the path</a></h3></center>
+
+<pre></pre>
+<h4><a name='docfunc24809' href='#tocfunc24809'>sxml:parse-check</a></h4>
+(define (sxml:parse-check str path . char-list)<i><br> ... <a href='#codefunc24809'>Full Code</a> ... )</i>
+<pre> Whether the path begins with a 'str' (starting whitespaces are ignored)
+  str - a string to match
+  path - an xpointer path represented as a list of chars
+  char-list - an optional argument. If this argument is supplied, a 'str'
+ pattern must be followed by a character from a 'char-list'
+ If 'str' is really in the beginning of path, a new path is returned
+ Otherwise, function returns #f (path remains unchanged)
+</pre><p><br>
+
+<h4><a name='docfunc3781' href='#tocfunc3781'>sxml:parse-check-sequence</a></h4>
+(define (sxml:parse-check-sequence str-seq path . char-list)<i><br> ... <a href='#codefunc3781'>Full Code</a> ... )</i>
+<pre> Checks whether the PATH starts with a sequence of strings (possibly
+ separated by a whitespace) from STR-SEQ
+ Returns a new PATH (match successful) or #f (otherwise)
+</pre><p><br>
+
+<h4><a name='docfunc29802' href='#tocfunc29802'>sxml:parse-assert</a></h4>
+(define (sxml:parse-assert str path)<i><br> ... <a href='#codefunc29802'>Full Code</a> ... )</i>
+<pre> Similar to the 'parse-check' function. But this function also has a side
+ effect. It displays an error message if the 'str' doesn't match the beginning
+ of 'path'.
+</pre><p><br>
+
+<hr width='40%' align='center'><center><h3><a name='sect46694' href='#tocsect46694'>NCName readers</a></h3></center>
+
+<pre></pre>
+<h4><a name='docfunc30535' href='#tocfunc30535'>sxml:parse-ncname</a></h4>
+(define (sxml:parse-ncname path)<i><br> ... <a href='#codefunc30535'>Full Code</a> ... )</i>
+<pre> Reads a NCName, taking into account that whitespaces and characters:
+ ( ) &lt; &gt; [ ] : / + * , = | ! &quot; ' @ $
+ may not be used in it.
+ Moreover, its first character can't be: . - or a digit
+ The result:  (list  ncname  new-path)
+          or  #f
+  ncname - NCName represented as a string
+ If there is no NCName in the current position of the path, then an error 
+ message is displayed and #f is returned
+</pre><p><br>
+
+<h4><a name='docfunc2276' href='#tocfunc2276'>sxml:parse-name</a></h4>
+(define (sxml:parse-name path)<i><br> ... <a href='#codefunc2276'>Full Code</a> ... )</i>
+<pre> Reads a Name production. It is similar to a 'parse-ncname' function.
+ The only difference is that #\: is allowed within a Name
+</pre><p><br>
+
+<h4><a name='docfunc25849' href='#tocfunc25849'>sxml:parse-qname</a></h4>
+(define (sxml:parse-qname path)<i><br> ... <a href='#codefunc25849'>Full Code</a> ... )</i>
+<pre> The function reads a qualified name (QName)
+ Returns: ( (prefix . local-part) new-path )
+      or  ( local-part new-path )    if there is no prefix
+       if there is not QName in the beginning of the 'path' it calls 
+          sxml:xpointer-parse-error
+  prefix, local-part - strings
+  new-path - a list of characters
+</pre><p><br>
+
+<hr width='40%' align='center'><center><h3><a name='sect5220' href='#tocsect5220'>Parsers for data of basic types</a></h3></center>
+
+<pre></pre>
+<h4><a name='docfunc61013' href='#tocfunc61013'>sxml:parse-natural</a></h4>
+(define (sxml:parse-natural path)<i><br> ... <a href='#codefunc61013'>Full Code</a> ... )</i>
+<pre> Reads a natural number:
+ [1-9] [0-9]*
+ The result:  (list  number  new-path)  or  #f
+</pre><p><br>
+
+<h4><a name='docfunc60493' href='#tocfunc60493'>sxml:parse-literal</a></h4>
+(define (sxml:parse-literal path)<i><br> ... <a href='#codefunc60493'>Full Code</a> ... )</i>
+<pre> Reads a Literal ([29] in XPath specification)
+ [29]    Literal    ::=    '&quot;' [^&quot;]* '&quot;'  
+                           | &quot;'&quot; [^']* &quot;'&quot;
+ The result:  (string new-path)  or  #f
+</pre><p><br>
+
+<h4><a name='docfunc28263' href='#tocfunc28263'>sxml:parse-number</a></h4>
+(define (sxml:parse-number path)<i><br> ... <a href='#codefunc28263'>Full Code</a> ... )</i>
+<pre> Reads a Number ([30]-[31] in XPath specification)
+ [30]    Number    ::=    Digits ('.' Digits?)?  
+                          | '.' Digits  
+ [31]    Digits    ::=    [0-9]+
+ The result:  (number new-path)  or  #f
+</pre><p><br>
+<hr height='5'><center><h3><a name='chapt61570' href='#tocchapt61570'>XPath/XPointer grammar parsing</a></h3></center>
+
+<pre></pre>
+<h4><a name='docfunc22538' href='#tocfunc22538'>txp:parameterize-parser</a></h4>
+(define (txp:parameterize-parser txp-params)<i><br> ... <a href='#codefunc22538'>Full Code</a> ... )</i>
+<pre> Produces a parameterized parser
+ txp-params - a long associative list of parameters which specify handlers
+  for different grammar rules. Precise content for 'txp-params' is discussed
+  iteratively in comments within function's body. However, 'txp-params' are
+  currently intended for TXPath developers only and are thus documented very
+  briefly
+
+ The function returns an associative list:
+ (list  (list  'xpath     xpath-implementation-res)
+        (list  'xpointer  xpointer-implementation-res)
+        (list  'expr      xpath-expression-implementation-res))
+ xpath-implementation-res - XPath implementation produced, as was conducted
+  by 'txp-params'
+ xpointer-implementation-res - XPointer implementation produced (for XPointer
+  grammar from W3C Candidate Recommendation 11 September 2001), as was
+  conducted by 'txp-params'
+ xpath-expression-implementation-res - implementation for XPath Expr grammar
+  production
+
+ NOTE: Future versions of this function may include additional members to the
+ associative list which is returned as the result
+</pre><p><br>
+<center><h1>Code</h1></center>
+
+<h4><a name='codefunc31356' href='#docfunc31356'>txp:param-value</a></h4>
+<i><a href='#tocfunc31356'>Index</a></i><br>
+
+<pre> Given param-name, returns the corresponding lambda
+</pre>
+<pre>(define (<a href="xpath-parser.html#codefunc31356">txp:param-value</a> param-name txp-params)
+  (cond
+    ((assq param-name txp-params)
+     =&gt; cadr)
+    (else
+     (display &quot;Parameter unspecified: &quot;)
+     (display param-name)
+     0  ; this would cause program termination
+     )))
+</pre>
+<h4><a name='codefunc54318' href='#docfunc54318'>txp:error?</a></h4>
+<i><a href='#tocfunc54318'>Index</a></i><br>
+
+<pre> Whether a parser returns an error
+</pre>
+<pre>(define (<a href="xpath-parser.html#codefunc54318">txp:error?</a> obj)
+  (or (eq? obj 'txp:parser-error)
+      (eq? obj 'txp:semantic-error)))
+</pre>
+<h4><a name='codefunc65329' href='#docfunc65329'>sxml:whitespace</a></h4>
+<i><a href='#tocfunc65329'>Index</a></i><br>
+
+<pre> A list of whitespace characters
+</pre>
+<pre>(define <a href="xpath-parser.html#codefunc65329">sxml:whitespace</a> '(#\space #\return #\newline #\tab))
+</pre>
+<h4><a name='codefunc2489' href='#docfunc2489'>sxml:delimiter</a></h4>
+<i><a href='#tocfunc2489'>Index</a></i><br>
+
+<pre> A sxml:whitespace or () &lt;&gt; [] : / + * , = | ! &quot; ' @ $
+</pre>
+<pre>(define <a href="xpath-parser.html#codefunc2489">sxml:delimiter</a> (append <a href="xpath-parser.html#codefunc65329">sxml:whitespace</a>
+                              '(#\( #\) #\&lt; #\&gt; #\[ #\] #\: #\/ #\+ 
+                                #\* #\, #\= #\| #\! #\&quot; #\' #\@ #\$)))
+</pre>
+<h4><a name='codefunc3796' href='#docfunc3796'>sxml:non-first?</a></h4>
+<i><a href='#tocfunc3796'>Index</a></i><br>
+
+<pre> A list of characters a NCName cannot start with
+</pre>
+<pre>(define (<a href="xpath-parser.html#codefunc3796">sxml:non-first?</a> ch)
+  (or (char-numeric? ch)
+      (memv ch <a href="xpath-parser.html#codefunc2489">sxml:delimiter</a>) 
+      (memv ch '(#\. #\-))))
+</pre>
+<h4><a name='codefunc25198' href='#docfunc25198'>sxml:skip-ws</a></h4>
+<i><a href='#tocfunc25198'>Index</a></i><br>
+
+<pre> The function reads a whitespace , production [3] (S) in XML Rec.
+  path - xpointer path string as a list of chars 
+ It returns a new path
+</pre>
+<pre>(define (<a href="xpath-parser.html#codefunc25198">sxml:skip-ws</a> path)
+  (if (or (null? path)
+	  (not (memv (car path) <a href="xpath-parser.html#codefunc65329">sxml:whitespace</a>)))
+    path
+    (<a href="xpath-parser.html#codefunc25198">sxml:skip-ws</a> (cdr path))))
+</pre>
+<h4><a name='codefunc16536' href='#docfunc16536'>sxml:assert-end-of-path</a></h4>
+<i><a href='#tocfunc16536'>Index</a></i><br>
+
+<pre> Asserts that the path is over, possibly with trailing whitespace symbols at
+ the end. Returns the boolean value - whether assertion passes. If assertion
+ fails, signals an error message
+</pre>
+<pre>(define (<a href="xpath-parser.html#codefunc16536">sxml:assert-end-of-path</a> path)
+  (let ((path (<a href="xpath-parser.html#codefunc25198">sxml:skip-ws</a> path)))
+    (or 
+     (null? path)
+     (begin
+       (<a href="xpath-parser.html#codefunc45677">sxml:xpointer-parse-error</a> &quot;unexpected - \&quot;&quot; (list-&gt;string path) &quot;\&quot;&quot;)
+       #f))))
+</pre>
+<h4><a name='codefunc22538' href='#docfunc22538'>txp:parameterize-parser</a></h4>
+<i><a href='#tocfunc22538'>Index</a></i><br>
+
+<pre> Produces a parameterized parser
+ txp-params - a long associative list of parameters which specify handlers
+  for different grammar rules. Precise content for 'txp-params' is discussed
+  iteratively in comments within function's body. However, 'txp-params' are
+  currently intended for TXPath developers only and are thus documented very
+  briefly
+
+ The function returns an associative list:
+ (list  (list  'xpath     xpath-implementation-res)
+        (list  'xpointer  xpointer-implementation-res)
+        (list  'expr      xpath-expression-implementation-res))
+ xpath-implementation-res - XPath implementation produced, as was conducted
+  by 'txp-params'
+ xpointer-implementation-res - XPointer implementation produced (for XPointer
+  grammar from W3C Candidate Recommendation 11 September 2001), as was
+  conducted by 'txp-params'
+ xpath-expression-implementation-res - implementation for XPath Expr grammar
+  production
+
+ NOTE: Future versions of this function may include additional members to the
+ associative list which is returned as the result
+</pre>
+<pre>(define (<a href="xpath-parser.html#codefunc22538">txp:parameterize-parser</a> txp-params)
+  (letrec
+      (
+       ; All these functions have similar arguments:
+       ;  path - an xpath location path represented as a list of chars
+       ;  ns-binding - declared namespace prefixes (not for all functions)
+       ; ns-binding = (listof (prefix . uri))
+       ; prefix - symbol, uri - string
+       
+       ;-------------------------------------------------
+       ; Functions which parse XPath grammar
+       
+       ; Parses an AxisSpecifier production ([5],[6],[13] in XPath specification)
+       ; [5]    AxisSpecifier    ::=    AxisName '::'  
+       ;                                | AbbreviatedAxisSpecifier
+       ; [6]    AxisName    ::=    'ancestor'  
+       ;                           | 'ancestor-or-self'  
+       ;                           | 'attribute'  
+       ;                           | 'child'  
+       ;                           | 'descendant'  
+       ;                           | 'descendant-or-self'  
+       ;                           | 'following'  
+       ;                           | 'following-sibling'  
+       ;                           | 'namespace'  
+       ;                           | 'parent'  
+       ;                           | 'preceding'  
+       ;                           | 'preceding-sibling'  
+       ;                           | '<a href="libmisc.html#codefunc52191">self</a>' 
+       ; [13]    AbbreviatedAxisSpecifier    ::=    '@'? 
+       ;
+       ; txp-params are to <a href="myenv.html#codemacro16295">include</a> the following parameter:
+       ;  param-name = 'axis
+       ;  param-value =
+       ;   (list (list  'ancestor  (lambda (add-on) ...) )
+       ;         (list  'ancestor-or-self  (lambda (add-on) ...) )
+       ;         (list  'attribute  (lambda (add-on) ...) )
+       ;         ...)  ; the remaining axes in the same manner
+       (txp:parse-axis-specifier
+        (let* ((axis-param-value (<a href="xpath-parser.html#codefunc31356">txp:param-value</a> 'axis txp-params))
+               (child-impl (<a href="xpath-parser.html#codefunc31356">txp:param-value</a> 'child axis-param-value))
+               (parser-pairs
+                (cons
+                 `((&quot;@&quot;) ,(<a href="xpath-parser.html#codefunc31356">txp:param-value</a> 'attribute axis-param-value))
+                 (map
+                  (lambda (single-pair)
+                    (list
+                     (list (symbol-&gt;string (car single-pair)) &quot;::&quot;)
+                     (cadr single-pair)))
+                  axis-param-value))))
+          (lambda (path ns-binding add-on)   ; ns-binding is dummy here
+            (let loop ((pairs parser-pairs))
+              (cond
+                ((null? pairs)  ; a default (child) axis
+                 (list (child-impl add-on) path))
+                ((<a href="xpath-parser.html#codefunc3781">sxml:parse-check-sequence</a> (caar pairs) path)
+                 =&gt; (lambda (path)
+                      (list ((cadar pairs) add-on) path)))
+                (else  ; continue loop
+                 (loop (cdr pairs))))))))
+       
+       ; Parses a NodeTest production 
+       ; ([7],[37] in XPath specification, [11] in XPointer specification)
+       ; [7]    NodeTest    ::=    NameTest  
+       ;                           | NodeType '(' ')'  
+       ;                           | 'processing-instruction' '(' Literal ')' 
+       ; [37]    NameTest    ::=    '*'  
+       ;                            | NCName ':' '*'  
+       ;                            | QName  
+       ; [11]   NodeType   ::=   'comment'  
+       ;                         | 'text'  
+       ;                         | 'processing-instruction'  
+       ;                         | 'node'
+       ;                         | 'point'
+       ;                         | 'range'
+       ;
+       ; txp-params are to <a href="myenv.html#codemacro16295">include</a> the following parameter:
+       ;  param-name ::= 'node-test
+       ;  param-value ::=
+       ;   (list (list  'star  (lambda (add-on) ...) )
+       ;         (list  'uri+star  (lambda (uri add-on) ...) )
+       ;         (list  'qname  (lambda (uri local-name add-on) ...) )
+       ;         (list  'comment  (lambda (add-on) ...) )
+       ;         (list  'text  (lambda (add-on) ...) )
+       ;         (list  'processing-instruction
+       ;                (lambda (literal-string add-on) ...) )
+       ;         (list  'node  (lambda (add-on) ...) )
+       ;         (list  'point  (lambda (add-on) ...) )
+       ;         (list  'range  (lambda (add-on) ...) ))
+       ; uri - a string or #f (the latter is possible for 'qname only)
+       ; local-name - a string
+       ; literal - a string
+       (txp:parse-node-test
+        (let* ((ntest-param-value (<a href="xpath-parser.html#codefunc31356">txp:param-value</a> 'node-test txp-params))
+               (star-impl (<a href="xpath-parser.html#codefunc31356">txp:param-value</a> 'star ntest-param-value))
+               (uri+star-impl (<a href="xpath-parser.html#codefunc31356">txp:param-value</a> 'uri+star ntest-param-value))
+               (qname-impl (<a href="xpath-parser.html#codefunc31356">txp:param-value</a> 'qname ntest-param-value))
+               (comment-impl (<a href="xpath-parser.html#codefunc31356">txp:param-value</a> 'comment ntest-param-value))
+               (text-impl (<a href="xpath-parser.html#codefunc31356">txp:param-value</a> 'text ntest-param-value))
+               (pi-impl
+                (<a href="xpath-parser.html#codefunc31356">txp:param-value</a> 'processing-instruction ntest-param-value))
+               (node-impl (<a href="xpath-parser.html#codefunc31356">txp:param-value</a> 'node ntest-param-value))
+               (point-impl (<a href="xpath-parser.html#codefunc31356">txp:param-value</a> 'point ntest-param-value))
+               (range-impl (<a href="xpath-parser.html#codefunc31356">txp:param-value</a> 'range ntest-param-value))
+               (brackets
+                (lambda (path)
+                  (and-let* ((path (<a href="xpath-parser.html#codefunc29802">sxml:parse-assert</a> &quot;(&quot; path)))
+                            (<a href="xpath-parser.html#codefunc29802">sxml:parse-assert</a> &quot;)&quot; path)))))
+          (lambda (path ns-binding add-on)
+            (cond
+              ((<a href="xpath-parser.html#codefunc3781">sxml:parse-check-sequence</a> '(&quot;comment&quot; &quot;(&quot;) path)
+               =&gt; (lambda (path)
+                    (and-let* ((path (<a href="xpath-parser.html#codefunc29802">sxml:parse-assert</a> &quot;)&quot; path)))
+                              (list (comment-impl add-on) path))))
+              ((<a href="xpath-parser.html#codefunc3781">sxml:parse-check-sequence</a> '(&quot;text&quot; &quot;(&quot;) path)
+               =&gt; (lambda (path)
+                    (and-let* ((path (<a href="xpath-parser.html#codefunc29802">sxml:parse-assert</a> &quot;)&quot; path)))
+                              (list (text-impl add-on) path))))
+              ((<a href="xpath-parser.html#codefunc3781">sxml:parse-check-sequence</a> '(&quot;node&quot; &quot;(&quot;) path)
+               =&gt; (lambda (path)
+                    (and-let* ((path (<a href="xpath-parser.html#codefunc29802">sxml:parse-assert</a> &quot;)&quot; path)))
+                          (list (node-impl add-on) path))))
+              ((<a href="xpath-parser.html#codefunc3781">sxml:parse-check-sequence</a> '(&quot;processing-instruction&quot; &quot;(&quot;) path)
+               =&gt; (lambda (path)
+                    (cond
+                      ((<a href="xpath-parser.html#codefunc24809">sxml:parse-check</a> &quot;)&quot; path)
+                       =&gt; (lambda (path)
+                            (list (pi-impl #f add-on) path)))
+                      (else
+                       (and-let*
+                        ((lst (<a href="xpath-parser.html#codefunc60493">sxml:parse-literal</a> path))
+                         (name (car lst))
+                         (path (<a href="xpath-parser.html#codefunc29802">sxml:parse-assert</a> &quot;)&quot; (cadr lst))))
+                        (list (pi-impl name add-on) path))))))
+              ((<a href="xpath-parser.html#codefunc3781">sxml:parse-check-sequence</a> '(&quot;point&quot; &quot;(&quot;) path)
+               =&gt; (lambda (path)
+                    (and-let* ((path (<a href="xpath-parser.html#codefunc29802">sxml:parse-assert</a> &quot;)&quot; path)))
+                              (list (point-impl add-on) path))))
+              ((<a href="xpath-parser.html#codefunc3781">sxml:parse-check-sequence</a> '(&quot;range&quot; &quot;(&quot;) path)
+               =&gt; (lambda (path)
+                    (and-let* ((path (<a href="xpath-parser.html#codefunc29802">sxml:parse-assert</a> &quot;)&quot; path)))
+                              (list (range-impl add-on) path))))
+              ((<a href="xpath-parser.html#codefunc24809">sxml:parse-check</a> &quot;*&quot; path)
+               =&gt; (lambda (path)
+                    (list (star-impl add-on) path)))
+              (else  ; NCName ':' '*'  |  QName
+               (and-let*
+                ((lst (<a href="xpath-parser.html#codefunc30535">sxml:parse-ncname</a> path)))
+                (let ((path (cadr lst)))
+                  (if
+                   (or (null? path) (not (char=? (car path) #\:))) ; local name
+                   (list (qname-impl #f (car lst) add-on) path)
+                   (let* ((name (string-&gt;symbol (car lst)))
+                          (path (<a href="xpath-parser.html#codefunc29802">sxml:parse-assert</a> &quot;:&quot; path))
+                          (pair (assq name ns-binding)))
+                     (cond
+                       ((not pair)
+                        (<a href="xpath-parser.html#codefunc45677">sxml:xpointer-parse-error</a>
+                         &quot;unknown namespace prefix - &quot; name))
+                       ((and (not (null? path)) (char=? (car path) #\*))
+                        (list
+                         (uri+star-impl (cdr pair) add-on)
+                         (<a href="xpath-parser.html#codefunc29802">sxml:parse-assert</a> &quot;*&quot; path)))
+                       (else
+                        (and-let*
+                         ((lst (<a href="xpath-parser.html#codefunc30535">sxml:parse-ncname</a> path)))
+                         (list
+                          (qname-impl (cdr pair) (car lst) add-on)                      
+                          (cadr lst))))))))))))))
+                
+       ; Parses a Step production 
+       ; ([4xptr] in XPointer specification, [12] in XPath specification)
+       ; [4xptr] Step ::= AxisSpecifier NodeTest Predicate*
+       ;                  | AbbreviatedStep
+       ;                  | 'range-to' '(' Expr ')' Predicate*
+       ; [12]    AbbreviatedStep    ::=    '.'  
+       ;                                   | '..' 
+       ;
+       ; txp-params are to <a href="myenv.html#codemacro16295">include</a> the following parameter:
+       ;  param-name ::= 'step
+       ;  param-value ::=
+       ;   (list
+       ;    (list  'common
+       ;      (lambda (axis-res node-test-res predicate-res-lst add-on) ...) )
+       ;    (list  'range-to
+       ;      (lambda (expr-res predicate-res-lst add-on) ...) ))
+       (txp:parse-step
+        (let* ((step-param-value (<a href="xpath-parser.html#codefunc31356">txp:param-value</a> 'step txp-params))
+               (common-value (<a href="xpath-parser.html#codefunc31356">txp:param-value</a> 'common step-param-value))
+               (range-to-value (<a href="xpath-parser.html#codefunc31356">txp:param-value</a> 'range-to step-param-value))
+               (axis-param-value (<a href="xpath-parser.html#codefunc31356">txp:param-value</a> 'axis txp-params))
+               (self-value (<a href="xpath-parser.html#codefunc31356">txp:param-value</a> '<a href="libmisc.html#codefunc52191">self</a> axis-param-value))
+               (parent-value (<a href="xpath-parser.html#codefunc31356">txp:param-value</a> 'parent axis-param-value))
+               (ntest-param-value (<a href="xpath-parser.html#codefunc31356">txp:param-value</a> 'node-test txp-params))
+               (node-value (<a href="xpath-parser.html#codefunc31356">txp:param-value</a> 'node ntest-param-value)))
+          (lambda (path ns-binding add-on)
+            (cond
+              ((<a href="xpath-parser.html#codefunc24809">sxml:parse-check</a> &quot;..&quot; path)
+               (list
+                (common-value (parent-value add-on)
+                              (node-value add-on) '() add-on)
+                (<a href="xpath-parser.html#codefunc29802">sxml:parse-assert</a> &quot;..&quot; path)))
+              ((<a href="xpath-parser.html#codefunc24809">sxml:parse-check</a> &quot;.&quot; path)
+               (list
+                (common-value (self-value add-on)
+                              (node-value add-on) '() add-on)
+                (<a href="xpath-parser.html#codefunc29802">sxml:parse-assert</a> &quot;.&quot; path)))
+              ((<a href="xpath-parser.html#codefunc24809">sxml:parse-check</a> &quot;range-to&quot; path)
+               (and-let*
+                ((path0
+                  (<a href="xpath-parser.html#codefunc29802">sxml:parse-assert</a> &quot;(&quot; (<a href="xpath-parser.html#codefunc29802">sxml:parse-assert</a> &quot;range-to&quot; path)))
+                 (lst (txp:parse-expr path0 ns-binding add-on))
+                 (path (<a href="xpath-parser.html#codefunc29802">sxml:parse-assert</a> &quot;)&quot; (cadr lst))))
+                (let ((expr-res (car lst)))
+                  (let loop ((path path)
+                             (pred-lst '()))
+                    (if
+                     (<a href="xpath-parser.html#codefunc24809">sxml:parse-check</a> &quot;[&quot; path)
+                     (and-let*
+                      ((lst (txp:parse-predicate path ns-binding add-on)))
+                      (loop (cadr lst)
+                            (cons (car lst) pred-lst)))
+                     ; Predicates are over
+                     (list
+                      (if
+                       (apply <a href="xpath-parser.html#codefunc64144">txp:semantic-errs-detected?</a>
+                              (cons expr-res pred-lst))
+                       'txp:semantic-error
+                       (range-to-value expr-res (reverse pred-lst) add-on))
+                      path))))))
+              (else  ; common implementation
+               (and-let*
+                ((lst (txp:parse-axis-specifier path ns-binding add-on)))
+                (let ((axis (car lst)))
+                  (and-let*
+                   ((lst (txp:parse-node-test (cadr lst) ns-binding add-on)))
+                   (let ((test (car lst)))
+                     (let loop ((preds '())
+                                (path (cadr lst)))
+                       (if
+                        (<a href="xpath-parser.html#codefunc24809">sxml:parse-check</a> &quot;[&quot; path)
+                        (and-let*
+                         ((lst (txp:parse-predicate path ns-binding add-on)))
+                         (loop (cons (car lst) preds)
+                               (cadr lst)))
+                        ; No more predicates                   
+                        (list
+                         (if (or (<a href="xpath-parser.html#codefunc64144">txp:semantic-errs-detected?</a> axis test)
+                                 (apply <a href="xpath-parser.html#codefunc64144">txp:semantic-errs-detected?</a> preds))
+                             'txp:semantic-error
+                             (common-value axis test (reverse preds) add-on))
+                         path))))))))))))
+
+       ; Parses a RelativeLocationPath production ([3],[11] in
+       ; XPath specification)
+       ; [3]  RelativeLocationPath  ::=  Step  
+       ;                                 | RelativeLocationPath '/' Step  
+       ;                                 | AbbreviatedRelativeLocationPath 
+       ; [11]  AbbreviatedRelativeLocationPath  ::=
+       ;                                    RelativeLocationPath '//' Step
+       ;
+       ; txp-params are to <a href="myenv.html#codemacro16295">include</a> the following parameter:
+       ;  param-name ::= 'relative-lpath
+       ;  param-value ::= (lambda (step-res-lst add-on) ...)
+       (txp:parse-relative-location-path
+        (let* ((relative-lpath-value
+                (<a href="xpath-parser.html#codefunc31356">txp:param-value</a> 'relative-lpath txp-params))
+               (step-param-value (<a href="xpath-parser.html#codefunc31356">txp:param-value</a> 'step txp-params))
+               (common-value (<a href="xpath-parser.html#codefunc31356">txp:param-value</a> 'common step-param-value))
+               (axis-param-value (<a href="xpath-parser.html#codefunc31356">txp:param-value</a> 'axis txp-params))
+               (descendant-or-self-value
+                (<a href="xpath-parser.html#codefunc31356">txp:param-value</a> 'descendant-or-self axis-param-value))
+               (ntest-param-value (<a href="xpath-parser.html#codefunc31356">txp:param-value</a> 'node-test txp-params))
+               (node-value (<a href="xpath-parser.html#codefunc31356">txp:param-value</a> 'node ntest-param-value)))
+          (lambda (path ns-binding add-on)
+            (let loop ((step-res-lst '())
+                       (path path))
+              (and-let*
+               ((lst (txp:parse-step path ns-binding add-on)))
+               (let ((step-res (car lst))
+                     (path (cadr lst)))
+                 (cond
+                   ((<a href="xpath-parser.html#codefunc24809">sxml:parse-check</a> &quot;//&quot; path)
+                    (loop
+                     (cons
+                      ; // = /descendant-or-self::node()/
+                      (common-value
+                       (descendant-or-self-value add-on)
+                       (node-value add-on) '() add-on)
+                      (cons step-res step-res-lst))
+                     (<a href="xpath-parser.html#codefunc29802">sxml:parse-assert</a> &quot;//&quot; path)))
+                   ((<a href="xpath-parser.html#codefunc24809">sxml:parse-check</a> &quot;/&quot; path)
+                    (loop (cons step-res step-res-lst)
+                          (<a href="xpath-parser.html#codefunc29802">sxml:parse-assert</a> &quot;/&quot; path)))                          
+                   (else  ; no more steps
+                    (list
+                     (if
+                      (apply <a href="xpath-parser.html#codefunc64144">txp:semantic-errs-detected?</a> step-res-lst)
+                      'txp:semantic-error
+                      (relative-lpath-value
+                       (reverse (cons step-res step-res-lst)) add-on))
+                     path)))))))))
+
+       ; Parses a LocationPath production ([1],[2],[10] in XPath specification)
+       ; [1]    LocationPath    ::=    RelativeLocationPath  
+       ;                               | AbsoluteLocationPath  
+       ; [2]    AbsoluteLocationPath    ::=   '/' RelativeLocationPath?  
+       ;                                      | AbbreviatedAbsoluteLocationPath
+       ; [10]    AbbreviatedAbsoluteLocationPath    ::=
+       ;                                              '//' RelativeLocationPath
+       ;
+       ; txp-params are to <a href="myenv.html#codemacro16295">include</a> the following parameter:
+       ;  param-name ::= 'location-path
+       ;  param-value ::=
+       ;   (list
+       ;    (list  'bare-slash  (lambda (add-on) ...) )
+       ;    (list  'slash  (lambda (relative-lpath-res add-on) ...) )
+       ;    (list  'double-slash  (lambda (relative-lpath-res add-on) ...) ))
+       (txp:parse-location-path
+        (let* ((location-path-value
+                (<a href="xpath-parser.html#codefunc31356">txp:param-value</a> 'location-path txp-params))
+               (bare-slash-value
+                (<a href="xpath-parser.html#codefunc31356">txp:param-value</a> 'bare-slash location-path-value))
+               (slash-value
+                (<a href="xpath-parser.html#codefunc31356">txp:param-value</a> 'slash location-path-value))
+               (double-slash-value
+                (<a href="xpath-parser.html#codefunc31356">txp:param-value</a> 'double-slash location-path-value))               
+               (nothing?  ; whether no relative location path follows '/'
+                (lambda (path)
+                  (let ((path (<a href="xpath-parser.html#codefunc25198">sxml:skip-ws</a> path)))
+                    (cond
+                      ((null? path) #t)
+                      ((memv (car path)
+                             '(#\| #\+ #\- #\&lt; #\&gt; #\= #\) #\] #\,)) #t)
+                      ((or (<a href="xpath-parser.html#codefunc24809">sxml:parse-check</a> &quot;mod&quot; path <a href="xpath-parser.html#codefunc2489">sxml:delimiter</a>)
+                           (<a href="xpath-parser.html#codefunc24809">sxml:parse-check</a> &quot;div&quot; path <a href="xpath-parser.html#codefunc2489">sxml:delimiter</a>)
+                           (<a href="xpath-parser.html#codefunc24809">sxml:parse-check</a> &quot;!=&quot; path)
+                           (<a href="xpath-parser.html#codefunc24809">sxml:parse-check</a> &quot;and&quot; path <a href="xpath-parser.html#codefunc2489">sxml:delimiter</a>)
+                           (<a href="xpath-parser.html#codefunc24809">sxml:parse-check</a> &quot;or&quot; path <a href="xpath-parser.html#codefunc2489">sxml:delimiter</a>)) #t)
+                      (else #f))))))
+          (lambda (path ns-binding add-on)
+            (cond
+              ((<a href="xpath-parser.html#codefunc24809">sxml:parse-check</a> &quot;//&quot; path)
+               (and-let*
+                ((lst (txp:parse-relative-location-path
+                       (<a href="xpath-parser.html#codefunc29802">sxml:parse-assert</a> &quot;//&quot; path) ns-binding add-on)))
+                (let ((relative-res (car lst))
+                      (path (cadr lst)))
+                  (list
+                   (if (<a href="xpath-parser.html#codefunc64144">txp:semantic-errs-detected?</a> relative-res)
+                       'txp:semantic-error
+                       (double-slash-value relative-res add-on))
+                   path))))
+              ((<a href="xpath-parser.html#codefunc24809">sxml:parse-check</a> &quot;/&quot; path)
+               =&gt; (lambda (path)
+                    (if (nothing? path)
+                        (list (bare-slash-value add-on) path)
+                        (and-let*
+                         ((lst (txp:parse-relative-location-path
+                                path ns-binding add-on)))
+                         (let ((relative-res (car lst))
+                               (path (cadr lst)))
+                           (list
+                            (if (<a href="xpath-parser.html#codefunc64144">txp:semantic-errs-detected?</a> relative-res)
+                                'txp:semantic-error
+                                (slash-value relative-res add-on))
+                            path))))))
+              (else  ; Location path is a Relative location path
+               (txp:parse-relative-location-path path ns-binding add-on))))))
+
+       ; Parses a Predicate production ([8]-[9] in XPath specification)
+       ; [8]    Predicate    ::=    '[' PredicateExpr ']'  
+       ; [9]    PredicateExpr    ::=    Expr 
+       ;
+       ; txp-params are to <a href="myenv.html#codemacro16295">include</a> the following parameter:
+       ;  param-name ::= 'predicate
+       ;  param-value ::= (lambda (expr-res add-on) ...)
+       (txp:parse-predicate
+        (let ((predicate-value (<a href="xpath-parser.html#codefunc31356">txp:param-value</a> 'predicate txp-params)))
+          (lambda (path ns-binding add-on)
+            (and-let*
+             ((path0 (<a href="xpath-parser.html#codefunc29802">sxml:parse-assert</a> &quot;[&quot; path))
+              (lst (txp:parse-expr path0 ns-binding add-on))
+              (path (<a href="xpath-parser.html#codefunc29802">sxml:parse-assert</a> &quot;]&quot; (cadr lst))))
+             (list
+              (if (<a href="xpath-parser.html#codefunc64144">txp:semantic-errs-detected?</a> (car lst))
+                  'txp:semantic-error
+                  (predicate-value (car lst) add-on))
+              path)))))
+
+       ; Parses a VariableReference production ([36] in XPath specification)
+       ; [36]    VariableReference    ::=    '$' QName 
+       ;
+       ; txp-params are to <a href="myenv.html#codemacro16295">include</a> the following parameter:
+       ;  param-name ::= 'variable-ref
+       ;  param-value ::= (lambda (var-name-string add-on) ...)
+       (txp:parse-variable-reference  
+        (let ((var-ref-value (<a href="xpath-parser.html#codefunc31356">txp:param-value</a> 'variable-ref txp-params)))
+          (lambda (path ns-binding add-on)
+            (and-let*
+             ((path (<a href="xpath-parser.html#codefunc29802">sxml:parse-assert</a> &quot;$&quot; path))
+              (lst (<a href="xpath-parser.html#codefunc25849">sxml:parse-qname</a> path)))
+             (let ((name              
+                    (if (pair? (car lst))  ; contains a prefix-part
+                        (string-append (caar lst) &quot;:&quot; (cdar lst))
+                        (car lst))))
+               (list (var-ref-value name add-on) (cadr lst)))))))
+
+       ; Parses a FunctionCall production ([16],[17],[35] in
+       ; XPath specification)
+       ; [16]    FunctionCall    ::=    FunctionName 
+       ;                                '(' ( Argument ( ',' Argument )* )? ')'
+       ; [17]    Argument    ::=    Expr 
+       ; [35]    FunctionName    ::=    QName - NodeType
+       ;
+       ; txp-params are to <a href="myenv.html#codemacro16295">include</a> the following parameter:
+       ;  param-name ::= 'function-call
+       ;  param-value ::= (lambda (fun-name-string arg-res-lst add-on) ...)
+       ;
+       ; NOTE: prefix resolution for qualified function names not implemented
+       (txp:parse-function-call
+        (let ((fun-call-value (<a href="xpath-parser.html#codefunc31356">txp:param-value</a> 'function-call txp-params))
+              (parse-arguments
+               ; Returns (list (listof arg-res) new-path)
+               (lambda (path ns-binding add-on)
+                 (and-let*
+                  ((path (<a href="xpath-parser.html#codefunc29802">sxml:parse-assert</a> &quot;(&quot; path)))
+                  (cond	
+                    ((<a href="xpath-parser.html#codefunc24809">sxml:parse-check</a> &quot;)&quot; path)
+                      =&gt; (lambda (path) (list '() path)))
+                    (else
+                     (let single-arg ((arg-res-lst '())
+                                      (path path))
+                       (and-let*
+                        ((lst (txp:parse-expr path ns-binding add-on)))
+                        (let ((arg-res (car lst))
+                              (path (cadr lst)))
+                          (cond
+                            ((<a href="xpath-parser.html#codefunc24809">sxml:parse-check</a> &quot;)&quot; path)
+                             =&gt; (lambda (path)
+                                  (list (reverse (cons arg-res arg-res-lst))
+                                        path)))
+                            (else
+                             (and-let*
+                              ((path (<a href="xpath-parser.html#codefunc29802">sxml:parse-assert</a> &quot;,&quot; path)))
+                              (single-arg
+                               (cons arg-res arg-res-lst) path)))))))))))))
+          (lambda (path ns-binding add-on)
+            (and-let*
+             ((lst (<a href="xpath-parser.html#codefunc25849">sxml:parse-qname</a> path)))
+             (let ((fun-name (car lst)))  ; can be a pair
+               (and-let*
+                ((lst (parse-arguments (cadr lst) ns-binding add-on)))
+                (let ((arg-res-lst (car lst))
+                      (path (cadr lst)))
+                  (list
+                   (if (apply <a href="xpath-parser.html#codefunc64144">txp:semantic-errs-detected?</a> arg-res-lst)
+                       'txp:semantic-error
+                       (fun-call-value
+                        (if (pair? fun-name)  ; a prefix and a local part
+                            (string-append (car fun-name) &quot;:&quot; (cdr fun-name))
+                            fun-name)
+                        arg-res-lst add-on))
+                   path))))))))
+                     
+       ; Parses a PrimaryExpr production ([15] in XPath specification)
+       ; [15]    PrimaryExpr    ::=    VariableReference  
+       ;                               | '(' Expr ')'  
+       ;                               | Literal  
+       ;                               | Number  
+       ;                               | FunctionCall 
+       ; [29]    Literal    ::=    '&quot;' [^&quot;]* '&quot;'  
+       ;                           | &quot;'&quot; [^']* &quot;'&quot;  
+       ; [30]    Number    ::=    Digits ('.' Digits?)?  
+       ;                          | '.' Digits  
+       ; [31]    Digits    ::=    [0-9]+ 
+       ;
+       ; txp-params are to <a href="myenv.html#codemacro16295">include</a> the following parameter:
+       ;  param-name ::= 'primary-expr
+       ;  param-value ::= 
+       ;   (list  (list  'literal  (lambda (literal add-on) ...) )
+       ;          (list  'number   (lambda (number add-on) ...)  ))
+       (txp:parse-primary-expr
+        (let* ((primary-expr-value (<a href="xpath-parser.html#codefunc31356">txp:param-value</a> 'primary-expr txp-params))
+               (literal-value (<a href="xpath-parser.html#codefunc31356">txp:param-value</a> 'literal primary-expr-value))
+               (number-value (<a href="xpath-parser.html#codefunc31356">txp:param-value</a> 'number primary-expr-value)))
+          (lambda (path ns-binding add-on)
+            (cond
+              ((<a href="xpath-parser.html#codefunc24809">sxml:parse-check</a> &quot;$&quot; path)  ; a VariableReference
+               (txp:parse-variable-reference path ns-binding add-on))
+              ((<a href="xpath-parser.html#codefunc24809">sxml:parse-check</a> &quot;(&quot; path)  ; an '(' Expr ')'
+               (and-let*
+                ((lst (txp:parse-expr
+                       (<a href="xpath-parser.html#codefunc29802">sxml:parse-assert</a> &quot;(&quot; path) ns-binding add-on))
+                 (path (<a href="xpath-parser.html#codefunc29802">sxml:parse-assert</a> &quot;)&quot; (cadr lst))))
+                (let ((expr-res (car lst)))
+                  (list expr-res path))))
+              ((or (<a href="xpath-parser.html#codefunc24809">sxml:parse-check</a> &quot;\&quot;&quot; path)
+                   (<a href="xpath-parser.html#codefunc24809">sxml:parse-check</a> &quot;'&quot; path))  ; a Literal
+               (and-let*
+                ((lst (<a href="xpath-parser.html#codefunc60493">sxml:parse-literal</a> path)))
+                (list
+                 (literal-value (car lst) add-on)
+                 (cadr lst))))
+              ((let ((p (<a href="xpath-parser.html#codefunc25198">sxml:skip-ws</a> path)))  ; a Number?
+                 (cond ((null? p) #f)
+                       ((char=? (car p) #\.) #t)
+                       ((and (char&gt;=? (car p) #\0) (char&lt;=? (car p) #\9)) #t)
+                       (else #f)))
+               (and-let*
+                ((lst (<a href="xpath-parser.html#codefunc28263">sxml:parse-number</a> path)))                               
+                (list
+                 (number-value (car lst) add-on)	   
+                 (cadr lst))))
+              (else   ; a Function call
+               (txp:parse-function-call path ns-binding add-on))))))
+
+       ; Parses a FilterExpr production ([20] in XPath specification)
+       ; [20]    FilterExpr    ::=    PrimaryExpr  
+       ;                              | FilterExpr Predicate 
+       ;
+       ; txp-params are to <a href="myenv.html#codemacro16295">include</a> the following parameter:
+       ;  param-name ::= 'filter-expr
+       ;  param-value ::=
+       ;            (lambda (primary-expr-res predicate-res-lst add-on) ...) )
+       (txp:parse-filter-expr
+        (let ((filter-expr-value (<a href="xpath-parser.html#codefunc31356">txp:param-value</a> 'filter-expr txp-params)))
+          (lambda (path ns-binding add-on)
+            (and-let*
+             ((lst (txp:parse-primary-expr path ns-binding add-on)))
+             (let ((prim-res (car lst)))
+               (let loop ((pred-res-lst '())
+                          (path (cadr lst)))
+                 (cond
+                   ((<a href="xpath-parser.html#codefunc24809">sxml:parse-check</a> &quot;[&quot; path)
+                    (and-let*
+                     ((lst (txp:parse-predicate path ns-binding add-on)))
+                     (loop (cons (car lst) pred-res-lst)
+                           (cadr lst))))
+                   ; No more predicates
+                   ((null? pred-res-lst) (list prim-res path))
+                   (else              
+                    (list
+                     (if
+                      (apply <a href="xpath-parser.html#codefunc64144">txp:semantic-errs-detected?</a>
+                             (cons prim-res pred-res-lst))
+                      'txp:semantic-error
+                      (filter-expr-value prim-res (reverse pred-res-lst) add-on))
+                     path)))))))))
+
+       ; Parses a PathExpr production ([19] in XPath specification)
+       ; [19]    PathExpr    ::=    LocationPath  
+       ;                            | FilterExpr  
+       ;                            | FilterExpr '/' RelativeLocationPath  
+       ;                            | FilterExpr '//' RelativeLocationPath
+       ;
+       ; txp-params are to <a href="myenv.html#codemacro16295">include</a> the following parameter:
+       ;  param-name ::= 'path-expr
+       ;  param-value ::=
+       ;   (list
+       ;    (list  'slash
+       ;           (lambda (filter-expr-res relative-lpath-res add-on) ...) )
+       ;    (list  'double-slash
+       ;           (lambda (filter-expr-res relative-lpath-res add-on) ...) ))
+       (txp:parse-path-expr
+         (let ((filter-expr?
+                (lambda (path)
+                  (let ((path (<a href="xpath-parser.html#codefunc25198">sxml:skip-ws</a> path)))
+                    (cond
+                      ((null? path) #f)
+                      ((member 
+                        (car path) 
+                        '(#\$ #\( #\&quot; #\' #\0 #\1 #\2 #\3 #\4 #\5 #\6 #\7 #\8 #\9))
+                       #t)
+                      ((char=? (car path) #\.)
+                       (cond
+                         ((null? (cdr path)) #f)
+                         ((member
+                           (cadr path)
+                           '(#\0 #\1 #\2 #\3 #\4 #\5 #\6 #\7 #\8 #\9))
+                          #t)
+                         (else #f)))
+                      ((member
+                        (car path)
+                        '(#\) #\&lt; #\&gt; #\[ #\] #\/ #\+ #\* #\, #\= #\| #\! #\@ #\-))
+                       #f)
+                      (else
+                       (let ((lst (<a href="xpath-parser.html#codefunc30535">sxml:parse-ncname</a> path)))
+                         (cond
+                           ((not lst) #f)
+                           ((<a href="xpath-parser.html#codefunc24809">sxml:parse-check</a> &quot;::&quot; (cadr lst)) #f)
+                           (else
+                            (and-let*
+                             ((lst (<a href="xpath-parser.html#codefunc2276">sxml:parse-name</a> path)))
+                             (let ((name (car lst))
+                                   (new-path (<a href="xpath-parser.html#codefunc25198">sxml:skip-ws</a> (cadr lst))))
+                               (cond
+                                 ((string=? name &quot;range-to&quot;) #f)
+                                 ((string=? name &quot;comment&quot;) #f)
+                                 ((string=? name &quot;text&quot;) #f)
+                                 ((string=? name &quot;processing-instruction&quot;) #f)
+                                 ((string=? name &quot;node&quot;) #f)
+                                 ((string=? name &quot;point&quot;) #f)
+                                 ((string=? name &quot;range&quot;) #f)
+                                 ((null? new-path) #f)
+                                 ((char=? (car new-path) #\() #t)
+                                 (else #f)))))))))))))
+           (let* ((path-expr-value (<a href="xpath-parser.html#codefunc31356">txp:param-value</a> 'path-expr txp-params))
+                  (slash-value (<a href="xpath-parser.html#codefunc31356">txp:param-value</a> 'slash path-expr-value))
+                  (double-slash-value
+                   (<a href="xpath-parser.html#codefunc31356">txp:param-value</a> 'double-slash path-expr-value)))
+             (lambda (path ns-binding add-on)
+               (if
+                (not (filter-expr? path))
+                (txp:parse-location-path path ns-binding add-on)
+                (and-let*
+                 ((lst (txp:parse-filter-expr path ns-binding add-on)))
+                 (let ((filter-ex-res (car lst))
+                       (path (cadr lst)))
+                   (cond
+                     ((<a href="xpath-parser.html#codefunc24809">sxml:parse-check</a> &quot;//&quot; path)
+                      (and-let*
+                       ((lst2
+                         (txp:parse-relative-location-path
+                          (<a href="xpath-parser.html#codefunc29802">sxml:parse-assert</a> &quot;//&quot; path) ns-binding add-on)))
+                       (let ((rel-lpath-res (car lst2))
+                             (path (cadr lst2)))
+                         (list
+                          (if
+                           (<a href="xpath-parser.html#codefunc64144">txp:semantic-errs-detected?</a>
+                            filter-ex-res rel-lpath-res)
+                           'txp:semantic-error
+                           (double-slash-value
+                            filter-ex-res rel-lpath-res add-on))
+                          path))))
+                     ((<a href="xpath-parser.html#codefunc24809">sxml:parse-check</a> &quot;/&quot; path)
+                      (and-let*
+                       ((lst2
+                         (txp:parse-relative-location-path
+                          (<a href="xpath-parser.html#codefunc29802">sxml:parse-assert</a> &quot;/&quot; path) ns-binding add-on)))
+                       (let ((rel-lpath-res (car lst2))
+                             (path (cadr lst2)))
+                         (list
+                          (if
+                           (<a href="xpath-parser.html#codefunc64144">txp:semantic-errs-detected?</a>
+                            filter-ex-res rel-lpath-res)
+                           'txp:semantic-error
+                           (slash-value filter-ex-res rel-lpath-res add-on))
+                          path))))
+                     (else  ; A single <a href="common.html#codefunc20536">filter</a> expression, not followed by lpath
+                      lst)))))))))
+
+       ; Parses a UnionExpr production ([18] in XPath specification)
+       ; [18]    UnionExpr    ::=    PathExpr  
+       ;                             | UnionExpr '|' PathExpr
+       ;
+       ; txp-params are to <a href="myenv.html#codemacro16295">include</a> the following parameter:
+       ;  param-name ::= 'union-expr
+       ;  param-value ::= (lambda (path-expr-res-lst add-on) ...)
+       (txp:parse-union-expr
+        (let ((union-expr-value (<a href="xpath-parser.html#codefunc31356">txp:param-value</a> 'union-expr txp-params)))              
+          (lambda (path ns-binding add-on)
+            (let loop ((p-e-res-lst '())
+                       (path path))
+              (and-let*
+               ((lst (txp:parse-path-expr path ns-binding add-on)))
+               (let ((p-e-res (car lst))
+                     (path (cadr lst)))
+                 (let ((new-path (<a href="xpath-parser.html#codefunc24809">sxml:parse-check</a> &quot;|&quot; path)))
+                   (cond
+                     (new-path  ; more PathExprs
+                      (loop (cons p-e-res p-e-res-lst) new-path))
+                     ; no more PathExprs
+                     ((null? p-e-res-lst)  ; only one PathExpr                                
+                      (list p-e-res path))
+                     (else  ; several Path-exprs
+                      (list
+                       (if
+                        (apply <a href="xpath-parser.html#codefunc64144">txp:semantic-errs-detected?</a>
+                               (cons p-e-res p-e-res-lst))
+                        'txp:semantic-error
+                        (union-expr-value
+                         (reverse (cons p-e-res p-e-res-lst)) add-on))
+                       path))))))))))
+ 
+       ; Parses a UnaryExpr production ([27] in XPath specification)
+       ; [27]    UnaryExpr    ::=    UnionExpr  
+       ;                             | '-' UnaryExpr 
+       ; Note that the grammar allows multiple unary minuses
+       ;
+       ; txp-params are to <a href="myenv.html#codemacro16295">include</a> the following parameter:
+       ;  param-name ::= 'unary-expr
+       ;  param-value ::= (lambda (union-expr-res num-minuses add-on) ...)
+       (txp:parse-unary-expr
+        (let ((unary-expr-value (<a href="xpath-parser.html#codefunc31356">txp:param-value</a> 'unary-expr txp-params)))              
+          (lambda (path ns-binding add-on)
+            (if (not (<a href="xpath-parser.html#codefunc24809">sxml:parse-check</a> &quot;-&quot; path))
+                (txp:parse-union-expr path ns-binding add-on)
+                (let loop ((num-minuses 0) (path path))
+                  (let ((new-path (<a href="xpath-parser.html#codefunc24809">sxml:parse-check</a> &quot;-&quot; path)))
+                    (if new-path   ; more minuses
+                        (loop (+ num-minuses 1) new-path)               
+                        (and-let*
+                         ((lst (txp:parse-union-expr path ns-binding add-on)))
+                         (let ((union-expr-res (car lst))
+                               (path (cadr lst)))
+                           (list
+                            (if
+                             (<a href="xpath-parser.html#codefunc64144">txp:semantic-errs-detected?</a> union-expr-res)
+                             'txp:semantic-error
+                             (unary-expr-value
+                              union-expr-res num-minuses add-on))
+                            path))))))))))
+                     			
+       ; Parses a MultiplicativeExpr production ([26],[34] in
+       ; XPath specification)
+       ; [26] MultiplicativeExpr  ::=
+       ;                 UnaryExpr  
+       ;                 | MultiplicativeExpr MultiplyOperator UnaryExpr
+       ;                 | MultiplicativeExpr 'div' UnaryExpr  
+       ;                 | MultiplicativeExpr 'mod' UnaryExpr 
+       ; [34] MultiplyOperator  ::=  '*'
+       ;
+       ; txp-params are to <a href="myenv.html#codemacro16295">include</a> the following parameter:
+       ;  param-name ::= 'mul-expr
+       ;  param-value ::= (lambda (unary-expr-res-lst op-lst add-on) ...)
+       (txp:parse-multiplicative-expr
+        (let* ((mul-expr-value (<a href="xpath-parser.html#codefunc31356">txp:param-value</a> 'mul-expr txp-params))
+               (operations-value (<a href="xpath-parser.html#codefunc31356">txp:param-value</a> 'operations txp-params))
+               (multiply-value (<a href="xpath-parser.html#codefunc31356">txp:param-value</a> '* operations-value))
+               (div-value (<a href="xpath-parser.html#codefunc31356">txp:param-value</a> 'div operations-value))
+               (mod-value (<a href="xpath-parser.html#codefunc31356">txp:param-value</a> 'mod operations-value)))
+          (lambda (path ns-binding add-on)
+            (let loop ((unary-expr-res-lst '())
+                       (op-lst '())
+                       (path path))
+              (and-let*
+               ((lst (txp:parse-unary-expr path ns-binding add-on)))
+               (let ((unary-expr-res (car lst))
+                     (path (cadr lst)))
+                 (cond
+                   ((<a href="xpath-parser.html#codefunc24809">sxml:parse-check</a> &quot;*&quot; path)
+                    (loop (cons unary-expr-res unary-expr-res-lst)
+                          (cons (multiply-value add-on) op-lst)
+                          (<a href="xpath-parser.html#codefunc29802">sxml:parse-assert</a> &quot;*&quot; path)))
+                   ((<a href="xpath-parser.html#codefunc24809">sxml:parse-check</a> &quot;div&quot; path <a href="xpath-parser.html#codefunc2489">sxml:delimiter</a>)
+                    (loop (cons unary-expr-res unary-expr-res-lst)
+                          (cons (div-value add-on) op-lst)
+                          (<a href="xpath-parser.html#codefunc29802">sxml:parse-assert</a> &quot;div&quot; path)))
+                   ((<a href="xpath-parser.html#codefunc24809">sxml:parse-check</a> &quot;mod&quot; path <a href="xpath-parser.html#codefunc2489">sxml:delimiter</a>)
+                    (loop (cons unary-expr-res unary-expr-res-lst)
+                          (cons (mod-value add-on) op-lst)
+                          (<a href="xpath-parser.html#codefunc29802">sxml:parse-assert</a> &quot;mod&quot; path)))
+                   ; no more UnaryExprs
+                   ((null? unary-expr-res-lst)  ; single UnaryExpr
+                    lst)
+                   (else   ; several UnaryExprs
+                    (list
+                     (if
+                      (apply <a href="xpath-parser.html#codefunc64144">txp:semantic-errs-detected?</a>
+                             (cons unary-expr-res unary-expr-res-lst))
+                      'txp:semantic-error
+                      (mul-expr-value
+                       (reverse (cons unary-expr-res unary-expr-res-lst))
+                       (reverse op-lst) add-on))
+                     path)))))))))
+              
+       ; Parses a AdditiveExpr production ([25] in XPath specification)
+       ; [25]    AdditiveExpr    ::=    MultiplicativeExpr  
+       ;                                | AdditiveExpr '+' MultiplicativeExpr  
+       ;                                | AdditiveExpr '-' MultiplicativeExpr 
+       ;
+       ; txp-params are to <a href="myenv.html#codemacro16295">include</a> the following parameter:
+       ;  param-name ::= 'add-expr
+       ;  param-value ::= (lambda (mul-expr-res-lst op-lst add-on) ...)
+       (txp:parse-additive-expr
+        (let* ((add-expr-value (<a href="xpath-parser.html#codefunc31356">txp:param-value</a> 'add-expr txp-params))
+               (operations-value (<a href="xpath-parser.html#codefunc31356">txp:param-value</a> 'operations txp-params))
+               (plus-value (<a href="xpath-parser.html#codefunc31356">txp:param-value</a> '+ operations-value))
+               (minus-value (<a href="xpath-parser.html#codefunc31356">txp:param-value</a> '- operations-value)))
+          (lambda (path ns-binding add-on)
+            (let loop ((mul-expr-res-lst '())
+                       (op-lst '())
+                       (path path))
+              (and-let*
+               ((lst (txp:parse-multiplicative-expr path ns-binding add-on)))
+               (let ((mul-expr-res (car lst))
+                     (path (cadr lst)))
+                 (cond
+                   ((<a href="xpath-parser.html#codefunc24809">sxml:parse-check</a> &quot;+&quot; path)
+                    (loop (cons mul-expr-res mul-expr-res-lst)
+                          (cons (plus-value add-on) op-lst)
+                          (<a href="xpath-parser.html#codefunc29802">sxml:parse-assert</a> &quot;+&quot; path)))
+                   ((<a href="xpath-parser.html#codefunc24809">sxml:parse-check</a> &quot;-&quot; path)
+                    (loop (cons mul-expr-res mul-expr-res-lst)
+                          (cons (minus-value add-on) op-lst)
+                          (<a href="xpath-parser.html#codefunc29802">sxml:parse-assert</a> &quot;-&quot; path)))
+                   ; no more MultiplicativeExprs
+                   ((null? mul-expr-res-lst)  ; single MultiplicativeExpr
+                    lst)
+                   (else   ; several MultiplicativeExprs
+                    (list
+                     (if
+                      (apply <a href="xpath-parser.html#codefunc64144">txp:semantic-errs-detected?</a>
+                             (cons mul-expr-res mul-expr-res-lst))
+                      'txp:semantic-error
+                      (add-expr-value
+                       (reverse (cons mul-expr-res mul-expr-res-lst))
+                       (reverse op-lst) add-on))
+                     path)))))))))
+       
+       ; Parses a RelationalExpr production ([24] in XPath specification)
+       ; [24]    RelationalExpr    ::=    AdditiveExpr  
+       ;                                  | RelationalExpr '&lt;' AdditiveExpr
+       ;                                  | RelationalExpr '&gt;' AdditiveExpr
+       ;                                  | RelationalExpr '&lt;=' AdditiveExpr
+       ;                                  | RelationalExpr '&gt;=' AdditiveExpr
+       ;
+       ; txp-params are to <a href="myenv.html#codemacro16295">include</a> the following parameter:
+       ;  param-name ::= 'relational-expr
+       ;  param-value ::=
+       ;           (lambda (additive-expr-res-lst cmp-op-lst add-on) ...)
+       (txp:parse-relational-expr
+        (let* ((rel-expr-value (<a href="xpath-parser.html#codefunc31356">txp:param-value</a> 'relational-expr txp-params))
+               (operations-value (<a href="xpath-parser.html#codefunc31356">txp:param-value</a> 'operations txp-params))
+               (ls-value (<a href="xpath-parser.html#codefunc31356">txp:param-value</a> '&lt; operations-value))
+               (gt-value (<a href="xpath-parser.html#codefunc31356">txp:param-value</a> '&gt; operations-value))
+               (le-value (<a href="xpath-parser.html#codefunc31356">txp:param-value</a> '&lt;= operations-value))
+               (ge-value (<a href="xpath-parser.html#codefunc31356">txp:param-value</a> '&gt;= operations-value)))                              
+          (lambda (path ns-binding add-on)
+            (let loop ((add-res-lst '())
+                       (cmp-op-lst '())
+                       (path path))
+              (and-let*
+               ((lst (txp:parse-additive-expr path ns-binding add-on)))
+               (let ((add-res (car lst))
+                     (path (cadr lst)))
+                 (cond
+                   ((<a href="xpath-parser.html#codefunc24809">sxml:parse-check</a> &quot;&lt;=&quot; path)
+                    (loop (cons add-res add-res-lst)
+                          (cons (le-value add-on) cmp-op-lst)
+                          (<a href="xpath-parser.html#codefunc29802">sxml:parse-assert</a> &quot;&lt;=&quot; path)))
+                   ((<a href="xpath-parser.html#codefunc24809">sxml:parse-check</a> &quot;&gt;=&quot; path)
+                    (loop (cons add-res add-res-lst)
+                          (cons (ge-value add-on) cmp-op-lst)
+                          (<a href="xpath-parser.html#codefunc29802">sxml:parse-assert</a> &quot;&gt;=&quot; path)))
+                   ((<a href="xpath-parser.html#codefunc24809">sxml:parse-check</a> &quot;&lt;&quot; path)
+                    (loop (cons add-res add-res-lst)
+                          (cons (ls-value add-on) cmp-op-lst)
+                          (<a href="xpath-parser.html#codefunc29802">sxml:parse-assert</a> &quot;&lt;&quot; path)))
+                   ((<a href="xpath-parser.html#codefunc24809">sxml:parse-check</a> &quot;&gt;&quot; path)
+                    (loop (cons add-res add-res-lst)
+                          (cons (gt-value add-on) cmp-op-lst)
+                          (<a href="xpath-parser.html#codefunc29802">sxml:parse-assert</a> &quot;&gt;&quot; path)))
+                   ; no more AdditiveExprs                   
+                   ((null? add-res-lst) ; single AdditiveExpr
+                    lst)
+                   (else   ; several AdditiveExprs
+                    (list
+                     (if
+                      (apply <a href="xpath-parser.html#codefunc64144">txp:semantic-errs-detected?</a>
+                             (cons add-res add-res-lst))
+                      'txp:semantic-error
+                      (rel-expr-value
+                       (reverse (cons add-res add-res-lst))
+                       (reverse cmp-op-lst) add-on))
+                     path)))))))))
+       
+       ; Parses an EqualityExpr production ([23] in XPath specification)
+       ; [23]    EqualityExpr    ::=    RelationalExpr
+       ;                                | EqualityExpr '=' RelationalExpr
+       ;                                | EqualityExpr '!=' RelationalExpr
+       ;
+       ; txp-params are to <a href="myenv.html#codemacro16295">include</a> the following parameter:
+       ;  param-name ::= 'equality-expr
+       ;  param-value ::=
+       ;           (lambda (relational-expr-res-lst cmp-op-lst add-on) ...)
+       (txp:parse-equality-expr
+        (let* ((equality-expr-value
+                (<a href="xpath-parser.html#codefunc31356">txp:param-value</a> 'equality-expr txp-params))
+               (operations-value
+                (<a href="xpath-parser.html#codefunc31356">txp:param-value</a> 'operations txp-params))
+               (equal-value (<a href="xpath-parser.html#codefunc31356">txp:param-value</a> '= operations-value))
+               (not-equal-value (<a href="xpath-parser.html#codefunc31356">txp:param-value</a> '!= operations-value)))
+          (lambda (path ns-binding add-on)
+            (let loop ((rel-res-lst '())
+                       (cmp-op-lst '())
+                       (path path))
+              (and-let*
+               ((lst (txp:parse-relational-expr path ns-binding add-on)))
+               (let ((rel-res (car lst))
+                     (path (cadr lst)))
+                 (cond
+                   ((<a href="xpath-parser.html#codefunc24809">sxml:parse-check</a> &quot;=&quot; path)
+                    (loop (cons rel-res rel-res-lst)
+                          (cons (equal-value add-on) cmp-op-lst)
+                          (<a href="xpath-parser.html#codefunc29802">sxml:parse-assert</a> &quot;=&quot; path)))
+		  ((<a href="xpath-parser.html#codefunc24809">sxml:parse-check</a> &quot;!=&quot; path)
+		   (loop (cons rel-res rel-res-lst)
+                         (cons (not-equal-value add-on) cmp-op-lst)
+			 (<a href="xpath-parser.html#codefunc29802">sxml:parse-assert</a> &quot;!=&quot; path)))
+		  ; no more RelationalExprs
+                  ((null? rel-res-lst) ; only one RelationalExpr
+                   lst)
+                  (else  ; several RelationalExprs
+                   (list
+                    (if
+                     (apply <a href="xpath-parser.html#codefunc64144">txp:semantic-errs-detected?</a>
+                            (cons rel-res rel-res-lst))
+                      'txp:semantic-error
+                      (equality-expr-value
+                       (reverse (cons rel-res rel-res-lst))
+                       (reverse cmp-op-lst) add-on))
+                     path)))))))))
+                   
+       ; Parses an AndExpr production ([22] in XPath specification)
+       ; [22]    AndExpr    ::=    EqualityExpr
+       ;                           | AndExpr 'and' EqualityExpr
+       ; Note that according to 3.4 in XPath specification, the right operand
+       ; is not evaluated if the left operand evaluates to false
+       ;
+       ; txp-params are to <a href="myenv.html#codemacro16295">include</a> the following parameter:
+       ;  param-name ::= 'and-expr
+       ;  param-value ::= (lambda (equality-expr-res-lst add-on) ...)
+       (txp:parse-and-expr
+        (let ((and-expr-value (<a href="xpath-parser.html#codefunc31356">txp:param-value</a> 'and-expr txp-params)))
+          (lambda (path ns-binding add-on)
+            (let loop ((equality-res-lst '())
+                       (path path))
+              (and-let*
+               ((lst (txp:parse-equality-expr path ns-binding add-on)))
+               (let ((equality-res (car lst))
+                     (path (cadr lst)))
+                 (let ((new-path (<a href="xpath-parser.html#codefunc24809">sxml:parse-check</a> &quot;and&quot; path <a href="xpath-parser.html#codefunc2489">sxml:delimiter</a>)))
+                   (cond
+                     (new-path
+                      (loop (cons equality-res equality-res-lst) new-path))
+                     ; no more EqualityExprs
+                     ((null? equality-res-lst)  ; only one EqualityExpr
+                      lst)
+                     (else  ; several EqualityExprs
+                      (list
+                       (if
+                        (apply <a href="xpath-parser.html#codefunc64144">txp:semantic-errs-detected?</a>
+                               (cons equality-res equality-res-lst))
+                        'txp:semantic-error
+                        (and-expr-value
+                         (reverse (cons equality-res equality-res-lst))
+                         add-on))
+                     path))))))))))
+                  
+       ; Parses an Expr production ([14],[21] in XPath specification)
+       ; [14]    Expr    ::=    OrExpr 
+       ; [21]    OrExpr    ::=    AndExpr  
+       ;                          | OrExpr 'or' AndExpr
+       ; Note that according to 3.4 in XPath specification, the right operand
+       ; is not evaluated if the left operand evaluates to true
+       ;
+       ; txp-params are to <a href="myenv.html#codemacro16295">include</a> the following parameter:
+       ;  param-name ::= 'or-expr
+       ;  param-value ::= (lambda (and-expr-res-lst add-on) ...)
+       (txp:parse-expr
+        (let ((or-expr-value (<a href="xpath-parser.html#codefunc31356">txp:param-value</a> 'or-expr txp-params)))
+          (lambda (path ns-binding add-on)
+            (let loop ((and-res-lst '())
+                       (path path))
+              (and-let*
+               ((lst (txp:parse-and-expr path ns-binding add-on)))
+               (let ((and-res (car lst))
+                     (path (cadr lst)))
+                 (let ((new-path (<a href="xpath-parser.html#codefunc24809">sxml:parse-check</a> &quot;or&quot; path <a href="xpath-parser.html#codefunc2489">sxml:delimiter</a>)))
+                   (cond
+                     (new-path
+                      (loop (cons and-res and-res-lst) new-path))
+                     ; no more AndExprs
+                     ((null? and-res-lst)  ; only one AndExpr
+                      lst)
+                     (else  ; several AndExprs
+                      (list
+                       (if
+                        (apply <a href="xpath-parser.html#codefunc64144">txp:semantic-errs-detected?</a>
+                               (cons and-res and-res-lst))
+                        'txp:semantic-error
+                        (or-expr-value
+                         (reverse (cons and-res and-res-lst)) add-on))
+                      path))))))))))
+       
+       ;------------------------------------------------
+       ; Functions which parse XPointer grammar
+       
+       ; Parses an FullXPtr production ([3]-[10] in XPointer specification)
+       ; [3]    FullXPtr    ::=    XPtrPart (S? XPtrPart)* 
+       ; [4]    XPtrPart    ::=    'xpointer' '(' XPtrExpr ')'
+       ;                           | 'xmlns' '(' XPtrNsDecl? ')' 
+       ;                           | Scheme '(' SchemeSpecificExpr ')' 
+       ; [5]    Scheme    ::=    NCName 
+       ; [6]    SchemeSpecificExpr    ::=    StringWithBalancedParens 
+       ; [7]    StringWithBalancedParens    ::=
+       ;                    [^()]* ('(' StringWithBalancedParens ')' [^()]*)*
+       ; [8]    XPtrExpr    ::=    Expr
+       ; [9]    XPtrNsDecl    ::=    NCName S? '=' S? XPtrNsURI 
+       ; [10]    XPtrNsURI    ::=    Char*
+       ;
+       ; txp-params are to <a href="myenv.html#codemacro16295">include</a> the following parameter:
+       ;  param-name ::= 'full-xptr
+       ;  param-value ::= (lambda (expr-res-lst add-on) ...)
+       (txp:parse-full-xptr
+        (let ((full-xptr-value (<a href="xpath-parser.html#codefunc31356">txp:param-value</a> 'full-xptr txp-params)))
+          (lambda (path ns-binding add-on)
+            (let loop ((expr-res-lst '())
+                       (ns-binding ns-binding)
+                       (path path))
+              (if
+               (null? (<a href="xpath-parser.html#codefunc25198">sxml:skip-ws</a> path))  ; the string is over               
+               (cond
+                 ((= (length expr-res-lst) 1)  ; a single XPointer part
+                  (car expr-res-lst))
+                 ((apply <a href="xpath-parser.html#codefunc64144">txp:semantic-errs-detected?</a> expr-res-lst)
+                  'txp:semantic-error)
+                 (else
+                  (full-xptr-value (reverse expr-res-lst) add-on)))
+               (and-let*
+                ((lst (<a href="xpath-parser.html#codefunc2276">sxml:parse-name</a> path))
+                 (name (car lst))
+                 (path (cadr lst)))
+                (cond
+                  ((string=? name &quot;xpointer&quot;)  ; xpointer part
+                   (and-let*
+                    ((path (<a href="xpath-parser.html#codefunc29802">sxml:parse-assert</a> &quot;(&quot; path))
+                     (lst2 (txp:parse-expr path ns-binding add-on)))
+                    (let ((expr-res (car lst2))
+                          (path (cadr lst2)))
+                      (and-let*
+                       ((path (<a href="xpath-parser.html#codefunc29802">sxml:parse-assert</a> &quot;)&quot; path)))
+                       (loop (cons expr-res expr-res-lst) ns-binding path)))))
+                  ((string=? name &quot;xmlns&quot;)  ; xmlns part
+                   (and-let*
+                    ((path0 (<a href="xpath-parser.html#codefunc29802">sxml:parse-assert</a> &quot;(&quot; path))
+                     (lst2 (<a href="xpath-parser.html#codefunc30535">sxml:parse-ncname</a> path0))
+                     (prefix (string-&gt;symbol (car lst2)))
+                     (path (<a href="xpath-parser.html#codefunc29802">sxml:parse-assert</a> &quot;=&quot; (cadr lst2))))
+                    (let rpt2 ((path (<a href="xpath-parser.html#codefunc25198">sxml:skip-ws</a> path)) (uri '()))
+                      (cond
+                        ((null? path)
+                         (<a href="xpath-parser.html#codefunc29802">sxml:parse-assert</a> &quot;)&quot; path)
+                         #f)
+                        ((and (char=? (car path) #\)) (null? uri))
+                         (<a href="xpath-parser.html#codefunc45677">sxml:xpointer-parse-error</a>
+                          &quot;namespace URI cannot be empty&quot;))
+                        ((char=? (car path) #\))
+                         (loop expr-res-lst
+                               (cons
+                                (cons prefix (list-&gt;string (reverse uri)))
+                                ns-binding)
+                               (cdr path)))
+                        (else
+                         (rpt2 (cdr path) (cons (car path) uri)))))))
+                  (else  ; any other XPointer scheme
+                   (and-let*
+                    ((path (<a href="xpath-parser.html#codefunc29802">sxml:parse-assert</a> &quot;(&quot; path)))
+                    (let rpt3 ((n 1) (path path))
+                      (cond
+                        ((= n 0)
+                         (<a href="xpath-parser.html#codefunc3806">sxml:xpointer-parse-warning</a>
+                          &quot;unknown xpointer schema - &quot; name &quot;. Ignoring&quot;)
+                         (loop expr-res-lst ns-binding path))
+                        ((null? path)
+                         (<a href="xpath-parser.html#codefunc29802">sxml:parse-assert</a> &quot;)&quot; path)
+                         #f)
+                        ((char=? (car path) #\() (rpt3 (+ n 1) (cdr path)))
+                        ((char=? (car path) #\)) (rpt3 (- n 1) (cdr path)))
+                        (else (rpt3 n (cdr path))))))))))))))
+       
+       ; Parses an ChildSeq production ([2] in XPointer specification)
+       ; [2]    ChildSeq    ::=    Name? ('/' [1-9] [0-9]* )+
+       ;
+       ; txp-params are to <a href="myenv.html#codemacro16295">include</a> the following parameter:
+       ;  param-name ::= 'child-seq
+       ;  param-value ::=
+       ;   (list
+       ;    (list  'with-name
+       ;           (lambda (name-string number-lst add-on) ...) )
+       ;    (list  'without-name
+       ;           (lambda (number-lst add-on) ...) ))
+       (txp:parse-child-seq
+        (let ((helper
+               (lambda (path)
+                 (let loop ((num-lst '())
+                            (path path))
+                   (let ((path2 (<a href="xpath-parser.html#codefunc24809">sxml:parse-check</a> &quot;/&quot; path)))
+                     (cond
+                       (path2  ; #\/ found
+                        (and-let* ((lst (<a href="xpath-parser.html#codefunc61013">sxml:parse-natural</a> path2)))
+                                  (loop (cons (car lst) num-lst)
+                                        (cadr lst))))
+                       ((null? (<a href="xpath-parser.html#codefunc25198">sxml:skip-ws</a> path))  ; end of path
+                        (reverse num-lst))
+                       (else    ; this will cause an error message
+                        (<a href="xpath-parser.html#codefunc29802">sxml:parse-assert</a> &quot;/&quot; path))))))))                         
+          (let* ((child-seq-value (<a href="xpath-parser.html#codefunc31356">txp:param-value</a> 'child-seq txp-params))
+                 (with-name-value (<a href="xpath-parser.html#codefunc31356">txp:param-value</a> 'with-name child-seq-value))
+                  (without-name-value
+                   (<a href="xpath-parser.html#codefunc31356">txp:param-value</a> 'without-name child-seq-value)))
+            (lambda (path ns-binding add-on)
+              (let ((path2 (<a href="xpath-parser.html#codefunc24809">sxml:parse-check</a> &quot;/&quot; path)))
+                (if
+                 path2  ; &quot;/&quot; found =&gt; no Name supported
+                 (and-let*
+                  ((number-lst (helper path)))                  
+                  (without-name-value number-lst add-on))
+                 (and-let*
+                  ((lst (<a href="xpath-parser.html#codefunc2276">sxml:parse-name</a> path))
+                   (name (car lst))
+                   (number-lst (helper (cadr lst))))
+                  (with-name-value name number-lst add-on))))))))
+                   
+       ;-------------------------------------------------
+       ; Higher level functions
+       ;  ns-binding - declared namespace prefixes (an optional argument)
+       ;  add-on - whatever; may be useful for specific parser
+       ; implementations, since this parameter is passed throughout all
+       ; grammar rules
+       ;
+       ;  ns-binding = (listof  (prefix . uri))
+       ;  prefix - a symbol
+       ;  uri - a string
+       
+       ; Parses XPath grammar
+       ;  path is a string here
+       (txp:parse-xpath
+        (lambda (path-string ns-binding add-on)
+          (let ((res (txp:parse-location-path
+                      (string-&gt;list path-string) ns-binding add-on)))
+            (if (and res  ; no parser errors
+                     (<a href="xpath-parser.html#codefunc16536">sxml:assert-end-of-path</a> (cadr res)))
+                (car res)
+                'txp:parser-error))))
+       
+       ; Parses an XPointer production ([1] in XPointer specification)
+       ; [1]    XPointer    ::=    Name | ChildSeq | FullXPtr 
+       (txp:parse-xpointer
+        (lambda (path-string ns-binding add-on)
+          (let ((path (string-&gt;list path-string)))
+            (if (<a href="xpath-parser.html#codefunc24809">sxml:parse-check</a> &quot;/&quot; path)   ; =&gt; ChildSeq
+                (txp:parse-child-seq path ns-binding add-on)
+                (and-let*
+                 ((lst (<a href="xpath-parser.html#codefunc2276">sxml:parse-name</a> path))
+                  (new-path (cadr lst)))
+                 (if (<a href="xpath-parser.html#codefunc24809">sxml:parse-check</a> &quot;(&quot; new-path)  ; FullXPtr production
+                     (txp:parse-full-xptr path ns-binding add-on)
+                     (txp:parse-child-seq path ns-binding add-on)))))))
+       
+       ; Parses XPath Expression
+       ; [14]    Expr    ::=    OrExpr
+       (txp:parse-xpath-expression
+        (lambda (path-string ns-binding add-on)
+          (let ((res (txp:parse-expr
+                      (string-&gt;list path-string) ns-binding add-on)))
+            (if (and res  ; no parser errors
+                     (<a href="xpath-parser.html#codefunc16536">sxml:assert-end-of-path</a> (cadr res)))
+                (car res)
+                'txp:parser-error))))
+       
+       )
+        
+    `((xpath ,txp:parse-xpath)
+      (xpointer ,txp:parse-xpointer)
+      (expr ,txp:parse-xpath-expression))
+    ))
+</pre>
+<h4><a name='codefunc45677' href='#docfunc45677'>sxml:xpointer-parse-error</a></h4>
+<i><a href='#tocfunc45677'>Index</a></i><br>
+
+<pre>(define (<a href="xpath-parser.html#codefunc45677">sxml:xpointer-parse-error</a> . text)
+  (apply <a href="myenv.html#codefunc55253">cerr</a>
+         (append (list &quot;XPath/XPointer parser error: &quot;) text (list <a href="myenv.html#codefunc27758">nl</a>)))
+  #f)
+</pre>
+<h4><a name='codefunc3806' href='#docfunc3806'>sxml:xpointer-parse-warning</a></h4>
+<i><a href='#tocfunc3806'>Index</a></i><br>
+
+<pre> A warning message for grammar features which are not supported by this
+ implementation
+</pre>
+<pre>(define (<a href="xpath-parser.html#codefunc3806">sxml:xpointer-parse-warning</a> . text)
+  (apply <a href="myenv.html#codefunc55253">cerr</a> (append (list &quot;XPointer parser warning: &quot;) text (list <a href="myenv.html#codefunc27758">nl</a>))))
+</pre>
+<h4><a name='codefunc64144' href='#docfunc64144'>txp:semantic-errs-detected?</a></h4>
+<i><a href='#tocfunc64144'>Index</a></i><br>
+
+<pre>(define (<a href="xpath-parser.html#codefunc64144">txp:semantic-errs-detected?</a> . res-list)
+  (not (null?
+        (<a href="common.html#codefunc20536">filter</a>
+         (lambda (res) (eq? res 'txp:semantic-error))
+         res-list))))
+</pre>
+<h4><a name='codefunc48950' href='#docfunc48950'>txp:signal-semantic-error</a></h4>
+<i><a href='#tocfunc48950'>Index</a></i><br>
+
+<pre> Constructed specific parsers may wish to use this function
+</pre>
+<pre>(define (<a href="xpath-parser.html#codefunc48950">txp:signal-semantic-error</a> . text)
+  (apply <a href="myenv.html#codefunc55253">cerr</a>
+         (append (list &quot;XPath/XPointer semantic error: &quot;) text (list <a href="myenv.html#codefunc27758">nl</a>)))
+  'txp:semantic-error)
+</pre>
+<h4><a name='codefunc24809' href='#docfunc24809'>sxml:parse-check</a></h4>
+<i><a href='#tocfunc24809'>Index</a></i><br>
+
+<pre> Whether the path begins with a 'str' (starting whitespaces are ignored)
+  str - a string to match
+  path - an xpointer path represented as a list of chars
+  char-list - an optional argument. If this argument is supplied, a 'str'
+ pattern must be followed by a character from a 'char-list'
+ If 'str' is really in the beginning of path, a new path is returned
+ Otherwise, function returns #f (path remains unchanged)
+</pre>
+<pre>(define (<a href="xpath-parser.html#codefunc24809">sxml:parse-check</a> str path . char-list)
+  (let loop ((lst (string-&gt;list str)) 
+             (p (<a href="xpath-parser.html#codefunc25198">sxml:skip-ws</a> path)))
+    (cond
+      ((null? lst)
+       (if
+        (or (null? p) (null? char-list) (memv (car p) (car char-list)))
+        p
+        #f))
+      ((null? p) #f)
+      ((char=? (car lst) (car p))
+       (loop (cdr lst) (cdr p)))
+      (else #f))))
+</pre>
+<h4><a name='codefunc3781' href='#docfunc3781'>sxml:parse-check-sequence</a></h4>
+<i><a href='#tocfunc3781'>Index</a></i><br>
+
+<pre> Checks whether the PATH starts with a sequence of strings (possibly
+ separated by a whitespace) from STR-SEQ
+ Returns a new PATH (match successful) or #f (otherwise)
+</pre>
+<pre>(define (<a href="xpath-parser.html#codefunc3781">sxml:parse-check-sequence</a> str-seq path . char-list)
+  (let ((char-list (if (null? char-list) #f (car char-list))))
+    (let loop ((str-seq str-seq)
+               (path path))
+      (cond
+        ((null? str-seq) path)  ; successful match
+        ((if char-list
+             (<a href="xpath-parser.html#codefunc24809">sxml:parse-check</a> (car str-seq) path char-list)
+             (<a href="xpath-parser.html#codefunc24809">sxml:parse-check</a> (car str-seq) path))
+         =&gt; (lambda (new-path)
+              (loop (cdr str-seq) new-path)))
+        (else #f)))))  ; unsuccessful match
+</pre>
+<h4><a name='codefunc29802' href='#docfunc29802'>sxml:parse-assert</a></h4>
+<i><a href='#tocfunc29802'>Index</a></i><br>
+
+<pre> Similar to the 'parse-check' function. But this function also has a side
+ effect. It displays an error message if the 'str' doesn't match the beginning
+ of 'path'.
+</pre>
+<pre>(define (<a href="xpath-parser.html#codefunc29802">sxml:parse-assert</a> str path)
+  (let loop ((lst (string-&gt;list str)) 
+	     (p (<a href="xpath-parser.html#codefunc25198">sxml:skip-ws</a> path)))
+    (cond
+      ((null? lst) p)
+      ((null? p) 
+       (<a href="xpath-parser.html#codefunc45677">sxml:xpointer-parse-error</a> 
+        &quot;unexpected end of XPointer path. &quot;
+        &quot;Expected - \&quot;&quot; str &quot;\&quot;, given - \&quot;&quot; (list-&gt;string path) &quot;\&quot;&quot;))
+      ((char=? (car lst) (car p)) (loop (cdr lst) (cdr p)))
+      (else
+       (<a href="xpath-parser.html#codefunc45677">sxml:xpointer-parse-error</a>
+        &quot;expected - \&quot;&quot; str &quot;\&quot;, given - \&quot;&quot; (list-&gt;string path) &quot;\&quot;&quot;)))))
+</pre>
+<h4><a name='codefunc30535' href='#docfunc30535'>sxml:parse-ncname</a></h4>
+<i><a href='#tocfunc30535'>Index</a></i><br>
+
+<pre> Reads a NCName, taking into account that whitespaces and characters:
+ ( ) &lt; &gt; [ ] : / + * , = | ! &quot; ' @ $
+ may not be used in it.
+ Moreover, its first character can't be: . - or a digit
+ The result:  (list  ncname  new-path)
+          or  #f
+  ncname - NCName represented as a string
+ If there is no NCName in the current position of the path, then an error 
+ message is displayed and #f is returned
+</pre>
+<pre>(define (<a href="xpath-parser.html#codefunc30535">sxml:parse-ncname</a> path)
+  (let((path (<a href="xpath-parser.html#codefunc25198">sxml:skip-ws</a> path)))
+    (cond
+      ((null? path) 
+       (<a href="xpath-parser.html#codefunc45677">sxml:xpointer-parse-error</a>
+        &quot;unexpected end of XPointer path. Expected - NCName&quot;))
+      ((<a href="xpath-parser.html#codefunc3796">sxml:non-first?</a> (car path))
+       (<a href="xpath-parser.html#codefunc45677">sxml:xpointer-parse-error</a>
+        &quot;expected - NCName instead of &quot; (car path)))
+      (else
+       (let loop ((ncname (list (car path)))
+                  (path (cdr path)))
+         (cond
+           ((null? path) (list (list-&gt;string (reverse ncname)) path))
+           ((memv (car path) <a href="xpath-parser.html#codefunc2489">sxml:delimiter</a>)           
+            (list (list-&gt;string (reverse ncname)) path))
+           (else (loop (cons (car path) ncname) (cdr path)))))))))
+</pre>
+<h4><a name='codefunc2276' href='#docfunc2276'>sxml:parse-name</a></h4>
+<i><a href='#tocfunc2276'>Index</a></i><br>
+
+<pre> Reads a Name production. It is similar to a 'parse-ncname' function.
+ The only difference is that #\: is allowed within a Name
+</pre>
+<pre>(define (<a href="xpath-parser.html#codefunc2276">sxml:parse-name</a> path)
+  (let ((path (<a href="xpath-parser.html#codefunc25198">sxml:skip-ws</a> path)))
+    (cond
+      ((null? path)
+       (<a href="xpath-parser.html#codefunc45677">sxml:xpointer-parse-error</a>
+	 &quot;unexpected end of XPointer path. Expected - Name&quot;))
+      ((and (<a href="xpath-parser.html#codefunc3796">sxml:non-first?</a> (car path))
+	    (not (char=? (car path) #\:)))
+       (<a href="xpath-parser.html#codefunc45677">sxml:xpointer-parse-error</a> &quot;expected - Name instead of &quot; (car path)))
+      (else (let loop ((ncname (list (car path)))
+		       (path (cdr path)))
+	      (cond
+		((null? path) 
+		 (list (list-&gt;string (reverse ncname)) path))
+		((and (memv (car path) <a href="xpath-parser.html#codefunc2489">sxml:delimiter</a>)
+		      (not (char=? (car path) #\:)))
+		 (list (list-&gt;string (reverse ncname)) path))
+		(else (loop (cons (car path) ncname) (cdr path)))))))))
+</pre>
+<h4><a name='codefunc25849' href='#docfunc25849'>sxml:parse-qname</a></h4>
+<i><a href='#tocfunc25849'>Index</a></i><br>
+
+<pre> The function reads a qualified name (QName)
+ Returns: ( (prefix . local-part) new-path )
+      or  ( local-part new-path )    if there is no prefix
+       if there is not QName in the beginning of the 'path' it calls 
+          sxml:xpointer-parse-error
+  prefix, local-part - strings
+  new-path - a list of characters
+</pre>
+<pre>(define (<a href="xpath-parser.html#codefunc25849">sxml:parse-qname</a> path)
+  (and-let* ((r1 (<a href="xpath-parser.html#codefunc30535">sxml:parse-ncname</a> path)))
+	    (let ((first (car r1))
+		  (path2 (cadr r1)))
+	      (cond
+		((null? path2) (list first path2))
+		((not (char=? (car path2) #\:)) (list first path2))
+		((null? (cdr path2))
+		 (<a href="xpath-parser.html#codefunc45677">sxml:xpointer-parse-error</a> &quot;no local part of a qualified name&quot;))
+		((char=? (cadr path2) #\:) (list first path2))
+		(else (and-let* ((r2 (<a href="xpath-parser.html#codefunc30535">sxml:parse-ncname</a> (cdr path2))))
+				(list (cons first (car r2)) (cadr r2)))
+		      )))))
+</pre>
+<h4><a name='codefunc61013' href='#docfunc61013'>sxml:parse-natural</a></h4>
+<i><a href='#tocfunc61013'>Index</a></i><br>
+
+<pre> Reads a natural number:
+ [1-9] [0-9]*
+ The result:  (list  number  new-path)  or  #f
+</pre>
+<pre>(define (<a href="xpath-parser.html#codefunc61013">sxml:parse-natural</a> path)
+  (let ((path (<a href="xpath-parser.html#codefunc25198">sxml:skip-ws</a> path)))
+    (cond
+      ((null? path)
+       (<a href="xpath-parser.html#codefunc45677">sxml:xpointer-parse-error</a>
+        &quot;unexpected end of XPointer path. Expected - number&quot;))
+      ((or (char&lt;? (car path) #\1) (char&gt;? (car path) #\9))
+       (<a href="xpath-parser.html#codefunc45677">sxml:xpointer-parse-error</a> &quot;expected - number instead of &quot; (car path)))
+      (else (let loop ((res (- (char-&gt;integer (car path))
+			  48)) ; (char-&gt;integer #\0)
+                  (path (cdr path)))
+         (cond
+           ((null? path) (list res path))
+           ((char-numeric? (car path))
+            (loop (+ (* res 10) (- (char-&gt;integer (car path)) 
+				   48)) ; (char-&gt;integer #\0)
+                  (cdr path)))
+           (else (list res path))))))))
+</pre>
+<h4><a name='codefunc60493' href='#docfunc60493'>sxml:parse-literal</a></h4>
+<i><a href='#tocfunc60493'>Index</a></i><br>
+
+<pre> Reads a Literal ([29] in XPath specification)
+ [29]    Literal    ::=    '&quot;' [^&quot;]* '&quot;'  
+                           | &quot;'&quot; [^']* &quot;'&quot;
+ The result:  (string new-path)  or  #f
+</pre>
+<pre>(define (<a href="xpath-parser.html#codefunc60493">sxml:parse-literal</a> path)
+  (let ((ch (if (<a href="xpath-parser.html#codefunc24809">sxml:parse-check</a> &quot;\&quot;&quot; path) #\&quot; #\')))
+    (let loop ((res '())
+	       (path (<a href="xpath-parser.html#codefunc29802">sxml:parse-assert</a> (if (char=? ch #\&quot;) &quot;\&quot;&quot; &quot;'&quot;) 
+				       path)))
+      (cond
+	((not path) #f)
+	((null? path)
+	 (<a href="xpath-parser.html#codefunc29802">sxml:parse-assert</a> (if (char=? ch #\&quot;) &quot;\&quot;&quot; &quot;'&quot;) 
+			   path)
+	 #f)
+	((char=? (car path) ch)
+	 (list (list-&gt;string (reverse res))
+	       (cdr path)))
+	(else (loop (cons (car path) res) (cdr path)))))))
+</pre>
+<h4><a name='codefunc28263' href='#docfunc28263'>sxml:parse-number</a></h4>
+<i><a href='#tocfunc28263'>Index</a></i><br>
+
+<pre> Reads a Number ([30]-[31] in XPath specification)
+ [30]    Number    ::=    Digits ('.' Digits?)?  
+                          | '.' Digits  
+ [31]    Digits    ::=    [0-9]+
+ The result:  (number new-path)  or  #f
+</pre>
+<pre>(define (<a href="xpath-parser.html#codefunc28263">sxml:parse-number</a> path) 
+  (define (digits path)
+    (let loop ((n-lst '())
+               (path path))
+      (cond
+        ((and (null? path) (null? n-lst))
+         (<a href="xpath-parser.html#codefunc45677">sxml:xpointer-parse-error</a> 
+          &quot;unexpected end of XPointer path. Expected - number&quot;))
+        ((null? path) (list n-lst path))
+        ((and (or (char&lt;? (car path) #\0) (char&gt;? (car path) #\9))
+              (null? n-lst))       
+         (<a href="xpath-parser.html#codefunc45677">sxml:xpointer-parse-error</a> &quot;expected - number instead of &quot; (car path)))
+        ((or (char&lt;? (car path) #\0) (char&gt;? (car path) #\9))
+         (list n-lst path))
+        (else
+         (loop (cons (- (char-&gt;integer (car path)) (char-&gt;integer #\0)) n-lst)
+               (cdr path))))))
+    
+  (let ((path (<a href="xpath-parser.html#codefunc25198">sxml:skip-ws</a> path)))
+    (cond
+      ((null? path)
+       (<a href="xpath-parser.html#codefunc45677">sxml:xpointer-parse-error</a> 
+        &quot;unexpected end of XPointer path. Expected - number&quot;))
+      ((char=? (car path) #\.)
+       (and-let* ((lst (digits (cdr path))))
+            (let rpt ((res 0)
+                      (n-lst (car lst))
+                      (path (cadr lst)))
+              (if(null? n-lst)
+                 (list (/ res 10) path)
+                 (rpt (+ (/ res 10) (car n-lst))
+                      (cdr n-lst) 
+                      path)))))
+      (else (and-let* ((lst (digits path)))
+		      (let loop ((num1 0)
+				 (n-lst (reverse (car lst)))
+				 (path (cadr lst)))
+			(if (null? n-lst)
+			  (cond
+			    ((null? path) (list num1 path))
+			    ((not (char=? (car path) #\.)) (list num1 path))
+			    (else
+			      (and-let* ((lst2 (digits (cdr path))))
+					(let rpt ((num2 0)
+						  (n-lst (car lst2))
+						  (path (cadr lst2)))
+					  (if (null? n-lst)
+					    (list (+ num1 (/ num2 10)) path)
+					    (rpt (+ (/ num2 10) (car n-lst))
+						 (cdr n-lst) 
+						 path))))))
+			  (loop (+ (* num1 10) (car n-lst))
+				(cdr n-lst) 
+				path))))))))
+</pre></body></html>

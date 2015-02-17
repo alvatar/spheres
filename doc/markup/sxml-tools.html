@@ -1,0 +1,1717 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN""http://www.w3.org/TR/html401/loose.dtd"><html><head><meta name="GENERATOR" content="Mole: The Scheme Source Code Digger"><title>Module: sxml-tools</title><meta name='keywords' content=''></head><body bgcolor='#ffffff' text='#384412'  link='#11af05' vlink='#728b09'>
+<center><h1>Module: sxml-tools</h1></center>
+
+<pre>                            S X M L   T o o l s               
+ $Revision: 3.14 $ from $Date: 2003/12/23 05:39:31 $:
+
+ This software is in Public Domain.
+ IT IS PROVIDED &quot;AS IS&quot;, WITHOUT WARRANTY OF ANY KIND.
+
+ Please send bug reports and comments to lisovsky@acm.org
+           Kirill Lisovsky
+
+   SXML normal form used for normalization-dependent functions:
+ If attr-list is present it's always the second in SXML element.
+ If aux-list is present - then list of attributes is always
+ included, and aux-list is always the third.
+   Minimized form is just the same, but all the empty aux-lists are 
+ absent, and empty attr-lists are present only in elements with aux-lists
+ present. 
+</pre><p><br>
+<!-- Table of content -->
+<p><dl>
+<p><dt><a name='tocchapt47660' href='#chapt47660'><b>Auxiliary functions.</b></a><dd>
+
+f:  <a name='tocfunc62306' href='#docfunc62306' style='text-decoration:none'>filter-and-map</a><br>
+
+f:  <a name='tocfunc55059' href='#docfunc55059' style='text-decoration:none'>check-list</a><br>
+
+f:  <a name='tocfunc39139' href='#docfunc39139' style='text-decoration:none'>sxml:attr-list-node</a><br>
+
+f:  <a name='tocfunc15214' href='#docfunc15214' style='text-decoration:none'>sxml:attr-as-list</a><br>
+
+f:  <a name='tocfunc41070' href='#docfunc41070' style='text-decoration:none'>sxml:aux-list-node</a><br>
+
+f:  <a name='tocfunc11025' href='#docfunc11025' style='text-decoration:none'>sxml:aux-as-list</a><br>
+
+m:  <a name='tocmacro60041' href='#docmacro60041' style='text-decoration:none'>sxml:find-name-separator</a><br>
+
+f:  <a name='tocfunc12029' href='#docfunc12029' style='text-decoration:none'>sxml:error</a><br>
+<p><dt><a name='tocchapt8678' href='#chapt8678'><b>Predicates</b></a><dd>
+
+f:  <a name='tocfunc55473' href='#docfunc55473' style='text-decoration:none'>sxml:empty-element?</a><br>
+
+f:  <a name='tocfunc60852' href='#docfunc60852' style='text-decoration:none'>sxml:shallow-normalized?</a><br>
+
+f:  <a name='tocfunc13635' href='#docfunc13635' style='text-decoration:none'>sxml:normalized?</a><br>
+
+f:  <a name='tocfunc50541' href='#docfunc50541' style='text-decoration:none'>sxml:shallow-minimized?</a><br>
+
+f:  <a name='tocfunc3324' href='#docfunc3324' style='text-decoration:none'>sxml:minimized?</a><br>
+<p><dt><a name='tocchapt53018' href='#chapt53018'><b>Accessors  </b></a><dd>
+
+f:  <a name='tocfunc49377' href='#docfunc49377' style='text-decoration:none'>sxml:name</a><br>
+
+f:  <a name='tocfunc25943' href='#docfunc25943' style='text-decoration:none'>sxml:element-name</a><br>
+
+f:  <a name='tocfunc43979' href='#docfunc43979' style='text-decoration:none'>sxml:node-name</a><br>
+
+f:  <a name='tocfunc12101' href='#docfunc12101' style='text-decoration:none'>sxml:ncname</a><br>
+
+f:  <a name='tocfunc60924' href='#docfunc60924' style='text-decoration:none'>sxml:name->ns-id</a><br>
+
+f:  <a name='tocfunc36973' href='#docfunc36973' style='text-decoration:none'>sxml:content</a><br>
+
+f:  <a name='tocfunc53748' href='#docfunc53748' style='text-decoration:none'>sxml:text</a><br>
+
+<dl><dt><a name='tocsect16892' href='#sect16892'><b>Normalization-dependent accessors</b></a><dd>
+
+f:  <a name='tocfunc31228' href='#docfunc31228' style='text-decoration:none'>sxml:content-raw</a><br>
+
+f:  <a name='tocfunc15119' href='#docfunc15119' style='text-decoration:none'>sxml:attr-list-u</a><br>
+
+f:  <a name='tocfunc40603' href='#docfunc40603' style='text-decoration:none'>sxml:aux-list</a><br>
+
+f:  <a name='tocfunc52240' href='#docfunc52240' style='text-decoration:none'>sxml:aux-list-u</a><br>
+
+f:  <a name='tocfunc37266' href='#docfunc37266' style='text-decoration:none'>sxml:aux-node</a><br>
+
+f:  <a name='tocfunc1171' href='#docfunc1171' style='text-decoration:none'>sxml:aux-nodes</a><br>
+
+f:  <a name='tocfunc47873' href='#docfunc47873' style='text-decoration:none'>sxml:attr</a><br>
+
+f:  <a name='tocfunc42978' href='#docfunc42978' style='text-decoration:none'>sxml:attr-from-list</a><br>
+
+f:  <a name='tocfunc38564' href='#docfunc38564' style='text-decoration:none'>sxml:num-attr</a><br>
+
+f:  <a name='tocfunc59510' href='#docfunc59510' style='text-decoration:none'>sxml:attr-u</a><br>
+
+f:  <a name='tocfunc24174' href='#docfunc24174' style='text-decoration:none'>sxml:ns-list</a><br>
+
+f:  <a name='tocfunc63594' href='#docfunc63594' style='text-decoration:none'>sxml:ns-id->nodes</a><br>
+
+f:  <a name='tocfunc38403' href='#docfunc38403' style='text-decoration:none'>sxml:ns-id->uri</a><br>
+
+f:  <a name='tocfunc26240' href='#docfunc26240' style='text-decoration:none'>sxml:ns-uri->nodes</a><br>
+
+f:  <a name='tocfunc35343' href='#docfunc35343' style='text-decoration:none'>sxml:ns-uri->id</a><br>
+
+f:  <a name='tocfunc58615' href='#docfunc58615' style='text-decoration:none'>sxml:ns-id</a><br>
+
+f:  <a name='tocfunc62316' href='#docfunc62316' style='text-decoration:none'>sxml:ns-uri</a><br>
+
+f:  <a name='tocfunc53709' href='#docfunc53709' style='text-decoration:none'>sxml:ns-prefix</a><br>
+</dl>
+<p><dt><a name='tocchapt4992' href='#chapt4992'><b>Data modification functions</b></a><dd>
+
+f:  <a name='tocfunc45570' href='#docfunc45570' style='text-decoration:none'>sxml:change-content!</a><br>
+
+f:  <a name='tocfunc37122' href='#docfunc37122' style='text-decoration:none'>sxml:change-content</a><br>
+
+f:  <a name='tocfunc781' href='#docfunc781' style='text-decoration:none'>sxml:change-attrlist</a><br>
+
+f:  <a name='tocfunc814' href='#docfunc814' style='text-decoration:none'>sxml:change-attrlist!</a><br>
+
+f:  <a name='tocfunc1364' href='#docfunc1364' style='text-decoration:none'>sxml:change-name!</a><br>
+
+f:  <a name='tocfunc1331' href='#docfunc1331' style='text-decoration:none'>sxml:change-name</a><br>
+
+f:  <a name='tocfunc32915' href='#docfunc32915' style='text-decoration:none'>sxml:add-attr</a><br>
+
+f:  <a name='tocfunc41363' href='#docfunc41363' style='text-decoration:none'>sxml:add-attr!</a><br>
+
+f:  <a name='tocfunc9517' href='#docfunc9517' style='text-decoration:none'>sxml:change-attr</a><br>
+
+f:  <a name='tocfunc9550' href='#docfunc9550' style='text-decoration:none'>sxml:change-attr!</a><br>
+
+f:  <a name='tocfunc41620' href='#docfunc41620' style='text-decoration:none'>sxml:set-attr</a><br>
+
+f:  <a name='tocfunc50068' href='#docfunc50068' style='text-decoration:none'>sxml:set-attr!</a><br>
+
+f:  <a name='tocfunc33826' href='#docfunc33826' style='text-decoration:none'>sxml:add-aux</a><br>
+
+f:  <a name='tocfunc33859' href='#docfunc33859' style='text-decoration:none'>sxml:add-aux!</a><br>
+
+f:  <a name='tocfunc39053' href='#docfunc39053' style='text-decoration:none'>sxml:squeeze!</a><br>
+
+f:  <a name='tocfunc39020' href='#docfunc39020' style='text-decoration:none'>sxml:squeeze</a><br>
+
+f:  <a name='tocfunc7145' href='#docfunc7145' style='text-decoration:none'>sxml:clean</a><br>
+<p><dt><a name='tocchapt55697' href='#chapt55697'><b>SXPath-related </b></a><dd>
+
+<dl><dt><a name='tocsect13312' href='#sect13312'><b>Extensions</b></a><dd>
+
+f:  <a name='tocfunc23524' href='#docfunc23524' style='text-decoration:none'>select-first-kid</a><br>
+</dl>
+
+<dl><dt><a name='tocsect4384' href='#sect4384'><b>Fast node-parent </b></a><dd>
+
+f:  <a name='tocfunc8257' href='#docfunc8257' style='text-decoration:none'>sxml:node-parent</a><br>
+
+f:  <a name='tocfunc28392' href='#docfunc28392' style='text-decoration:none'>sxml:add-parents</a><br>
+
+f:  <a name='tocfunc13926' href='#docfunc13926' style='text-decoration:none'>sxml:lookup</a><br>
+</dl>
+<p><dt><a name='tocchapt26969' href='#chapt26969'><b>Markup generation</b></a><dd>
+
+<dl><dt><a name='tocsect19876' href='#sect19876'><b>XML</b></a><dd>
+
+f:  <a name='tocfunc52397' href='#docfunc52397' style='text-decoration:none'>sxml:attr->xml</a><br>
+
+f:  <a name='tocfunc19212' href='#docfunc19212' style='text-decoration:none'>sxml:string->xml</a><br>
+
+f:  <a name='tocfunc55211' href='#docfunc55211' style='text-decoration:none'>sxml:sxml->xml</a><br>
+</dl>
+
+<dl><dt><a name='tocsect41109' href='#sect41109'><b>HTML</b></a><dd>
+
+f:  <a name='tocfunc48672' href='#docfunc48672' style='text-decoration:none'>sxml:attr->html</a><br>
+
+f:  <a name='tocfunc15487' href='#docfunc15487' style='text-decoration:none'>sxml:string->html</a><br>
+
+f:  <a name='tocfunc49781' href='#docfunc49781' style='text-decoration:none'>sxml:non-terminated-html-tag?</a><br>
+
+f:  <a name='tocfunc51486' href='#docfunc51486' style='text-decoration:none'>sxml:sxml->html</a><br>
+</dl>
+</dl>
+<hr height='5'><center><h3><a name='chapt47660' href='#tocchapt47660'>Auxiliary functions.</a></h3></center>
+
+<pre></pre>
+<h4><a name='docfunc62306' href='#tocfunc62306'>filter-and-map</a></h4>
+(define (filter-and-map pred proc lis)<i><br> ... <a href='#codefunc62306'>Full Code</a> ... )</i>
+<pre> unlike filter-map from SRFI-1 this function uses separate predicate 
+ and mapping functions. 
+ Applies proc to  all the elements of source list that satisfy the predicate 
+ and return the list of the results.
+</pre><p><br>
+
+<h4><a name='docfunc55059' href='#tocfunc55059'>check-list</a></h4>
+(define (check-list pred lst)<i><br> ... <a href='#codefunc55059'>Full Code</a> ... )</i>
+<pre> Applies pred to every member of lst and yields #t if all the results
+ are #t
+</pre><p><br>
+
+<h4><a name='docfunc39139' href='#tocfunc39139'>sxml:attr-list-node</a></h4>
+(define (sxml:attr-list-node obj)<i><br> ... <a href='#codefunc39139'>Full Code</a> ... )</i>
+<pre> Returns attr-list node for a given obj 
+   or #f if it is absent
+</pre><p><br>
+
+<h4><a name='docfunc15214' href='#tocfunc15214'>sxml:attr-as-list</a></h4>
+(define (sxml:attr-as-list obj)<i><br> ... <a href='#codefunc15214'>Full Code</a> ... )</i>
+<pre> Returns attr-list wrapped in list
+   or '((@)) if it is absent and aux-list is present 
+   or '() if both lists are absent
+</pre><p><br>
+
+<h4><a name='docfunc41070' href='#tocfunc41070'>sxml:aux-list-node</a></h4>
+(define (sxml:aux-list-node obj)<i><br> ... <a href='#codefunc41070'>Full Code</a> ... )</i>
+<pre> Returns aux-list node for a given obj 
+   or #f if it is absent
+</pre><p><br>
+
+<h4><a name='docfunc11025' href='#tocfunc11025'>sxml:aux-as-list</a></h4>
+(define (sxml:aux-as-list obj)<i><br> ... <a href='#codefunc11025'>Full Code</a> ... )</i>
+<pre> Returns aux-list wrapped in list 
+   or '() if it is absent
+</pre><p><br>
+
+<h4><a name='docmacro60041' href='#tocmacro60041'>sxml:find-name-separator</a></h4>
+(define-macro (sxml:find-name-separator len)<i><br> ... <a href='#codemacro60041'>Full Code</a> ... )</i>
+<pre> optimized (string-rindex name #\:)
+ returns position of a separator between namespace-id and LocalName
+</pre><p><br>
+
+<h4><a name='docfunc12029' href='#tocfunc12029'>sxml:error</a></h4>
+(define (sxml:error . messages)<i><br> ... <a href='#codefunc12029'>Full Code</a> ... )</i>
+<pre> sxml error message
+</pre><p><br>
+<hr height='5'><center><h3><a name='chapt8678' href='#tocchapt8678'>Predicates</a></h3></center>
+
+<pre></pre>
+<h4><a name='docfunc55473' href='#tocfunc55473'>sxml:empty-element?</a></h4>
+(define (sxml:empty-element? obj)<i><br> ... <a href='#codefunc55473'>Full Code</a> ... )</i>
+<pre> Predicate which returns #t if given element &lt;obj&gt; is empty. 
+ Empty element has no nested elements, text nodes, PIs, Comments or entities
+ but it may contain attributes or namespace-id.
+ It is a SXML counterpart of XML empty-element.
+</pre><p><br>
+
+<h4><a name='docfunc60852' href='#tocfunc60852'>sxml:shallow-normalized?</a></h4>
+(define (sxml:shallow-normalized? obj)<i><br> ... <a href='#codefunc60852'>Full Code</a> ... )</i>
+<pre> Returns #t if the given &lt;obj&gt; is shallow-normalized SXML element.
+ The element itself has to be normalised but its nested elements are not tested.
+</pre><p><br>
+
+<h4><a name='docfunc13635' href='#tocfunc13635'>sxml:normalized?</a></h4>
+(define (sxml:normalized? obj)<i><br> ... <a href='#codefunc13635'>Full Code</a> ... )</i>
+<pre> Returns #t if the given &lt;obj&gt; is normalized SXML element.
+  The element itself and all its nested elements have to be normalised.
+</pre><p><br>
+
+<h4><a name='docfunc50541' href='#tocfunc50541'>sxml:shallow-minimized?</a></h4>
+(define (sxml:shallow-minimized? obj)<i><br> ... <a href='#codefunc50541'>Full Code</a> ... )</i>
+<pre> Returns #t if the given &lt;obj&gt; is shallow-minimized SXML element.
+ The element itself has to be minimised but its nested elements are not tested.
+</pre><p><br>
+
+<h4><a name='docfunc3324' href='#tocfunc3324'>sxml:minimized?</a></h4>
+(define (sxml:minimized? obj)<i><br> ... <a href='#codefunc3324'>Full Code</a> ... )</i>
+<pre> Returns #t if the given &lt;obj&gt; is minimized SXML element.
+  The element itself and all its nested elements have to be minimised.
+</pre><p><br>
+<hr height='5'><center><h3><a name='chapt53018' href='#tocchapt53018'>Accessors  </a></h3></center>
+
+<pre></pre>
+<h4><a name='docfunc49377' href='#tocfunc49377'>sxml:name</a></h4>
+(define sxml:name <i><br> ... <a href='#codefunc49377'>Full Code</a> ... )</i>
+<pre> Returns a name of a given SXML node
+ It is introduced for the sake of encapsulation.
+</pre><p><br>
+
+<h4><a name='docfunc25943' href='#tocfunc25943'>sxml:element-name</a></h4>
+(define (sxml:element-name obj)<i><br> ... <a href='#codefunc25943'>Full Code</a> ... )</i>
+<pre> A version of sxml:name, which returns #f if the given &lt;obj&gt; is 
+ not a SXML element.
+ Otherwise returns its name.
+</pre><p><br>
+
+<h4><a name='docfunc43979' href='#tocfunc43979'>sxml:node-name</a></h4>
+(define (sxml:node-name obj)<i><br> ... <a href='#codefunc43979'>Full Code</a> ... )</i>
+<pre> Safe version of sxml:name, which returns #f if the given &lt;obj&gt; is 
+ not a SXML node.
+ Otherwise returns its name.
+</pre><p><br>
+
+<h4><a name='docfunc12101' href='#tocfunc12101'>sxml:ncname</a></h4>
+(define (sxml:ncname obj)<i><br> ... <a href='#codefunc12101'>Full Code</a> ... )</i>
+<pre> Returns Local Part of Qualified Name (Namespaces in XML production [6])
+ for given obj, which is &quot;:&quot;-separated suffix of its Qualified Name
+ If a name of a node given is NCName (Namespaces in XML production [4]), then 
+ it is returned as is.
+ Please note that while SXML name is a symbol this function returns a string.
+</pre><p><br>
+
+<h4><a name='docfunc60924' href='#tocfunc60924'>sxml:name->ns-id</a></h4>
+(define (sxml:name-&gt;ns-id sxml-name)<i><br> ... <a href='#codefunc60924'>Full Code</a> ... )</i>
+<pre> Returns namespace-id part of given name, or #f if it's LocalName
+</pre><p><br>
+
+<h4><a name='docfunc36973' href='#tocfunc36973'>sxml:content</a></h4>
+(define (sxml:content obj)<i><br> ... <a href='#codefunc36973'>Full Code</a> ... )</i>
+<pre> Returns the content of given SXML element or nodeset (just text and element
+ nodes) representing it as a list of strings and nested elements in document 
+ order.  This list is empty if &lt;obj&gt; is empty element or empty list.
+</pre><p><br>
+
+<h4><a name='docfunc53748' href='#tocfunc53748'>sxml:text</a></h4>
+(define (sxml:text obj)<i><br> ... <a href='#codefunc53748'>Full Code</a> ... )</i>
+<pre> Returns a string which combines all the character data 
+ from text node childrens of the given SXML element
+ or &quot;&quot; if there is no text node children
+</pre><p><br>
+
+<hr width='40%' align='center'><center><h3><a name='sect16892' href='#tocsect16892'>Normalization-dependent accessors</a></h3></center>
+
+<pre>
+
+ &quot;Universal&quot; accessors are less effective but may be used for non-normalized SXML
+ Safe accessors are named with suffix '-u'
+
+ &quot;Fast&quot; accessors are optimized for normalized SXML data.
+ They are not applicable to arbitrary non-normalized SXML data
+ Their names has no specific suffixes
+</pre>
+<h4><a name='docfunc31228' href='#tocfunc31228'>sxml:content-raw</a></h4>
+(define (sxml:content-raw obj)<i><br> ... <a href='#codefunc31228'>Full Code</a> ... )</i>
+<pre> Returns all the content of normalized SXML element except attr-list and
+ aux-list.
+ Thus it includes PI, COMMENT and  ENTITY nodes as well as TEXT and ELEMENT nodes
+ returned by sxml:content.
+ Returns  a list of nodes in document order or empty list if &lt;obj&gt; is empty 
+ element or empty list.
+ This function is faster than sxml:content
+</pre><p><br>
+
+<h4><a name='docfunc15119' href='#tocfunc15119'>sxml:attr-list-u</a></h4>
+(define (sxml:attr-list-u obj)<i><br> ... <a href='#codefunc15119'>Full Code</a> ... )</i>
+<pre> Returns the list of attributes for given element or nodeset.
+ Analog of ((sxpath '(@ *)) obj)
+ Empty list is returned if there is no list of attributes.
+</pre><p><br>
+
+<h4><a name='docfunc40603' href='#tocfunc40603'>sxml:aux-list</a></h4>
+(define (sxml:aux-list obj)<i><br> ... <a href='#codefunc40603'>Full Code</a> ... )</i>
+<pre> Returns the list of auxiliary nodes for given element or nodeset.
+ Analog of ((sxpath '(@@ *)) obj)
+ Empty list is returned if a list of auxiliary nodes is absent.
+</pre><p><br>
+
+<h4><a name='docfunc52240' href='#tocfunc52240'>sxml:aux-list-u</a></h4>
+(define (sxml:aux-list-u obj)<i><br> ... <a href='#codefunc52240'>Full Code</a> ... )</i>
+<pre> Returns the list of auxiliary nodes for given element or nodeset.
+ Analog of ((sxpath '(@@ *)) obj)
+ Empty list is returned if a list of auxiliary nodes is absent.
+</pre><p><br>
+
+<h4><a name='docfunc37266' href='#tocfunc37266'>sxml:aux-node</a></h4>
+(define (sxml:aux-node obj aux-name)<i><br> ... <a href='#codefunc37266'>Full Code</a> ... )</i>
+<pre> Return the first aux-node with &lt;aux-name&gt; given in SXML element &lt;obj&gt; 
+ or #f is such a node is absent.
+ NOTE: it returns just the FIRST node found even if multiple nodes are
+ present, so it's mostly intended for nodes with unique names 
+</pre><p><br>
+
+<h4><a name='docfunc1171' href='#tocfunc1171'>sxml:aux-nodes</a></h4>
+(define (sxml:aux-nodes obj aux-name)<i><br> ... <a href='#codefunc1171'>Full Code</a> ... )</i>
+<pre> Return a list of aux-node with &lt;aux-name&gt; given in SXML element &lt;obj&gt; 
+ or '() if such a node is absent.
+</pre><p><br>
+
+<h4><a name='docfunc47873' href='#tocfunc47873'>sxml:attr</a></h4>
+(define (sxml:attr obj attr-name)<i><br> ... <a href='#codefunc47873'>Full Code</a> ... )</i>
+<pre> Accessor for an attribute &lt;attr-name&gt; of given SXML element &lt;obj&gt; which 
+ It returns: 
+    the value of the attribute if the attribute is present
+    #f if there is no such an attribute in the given element
+</pre><p><br>
+
+<h4><a name='docfunc42978' href='#tocfunc42978'>sxml:attr-from-list</a></h4>
+(define (sxml:attr-from-list attr-list name)<i><br> ... <a href='#codefunc42978'>Full Code</a> ... )</i>
+<pre> Extracts a value of attribute with given name from attr-list
+</pre><p><br>
+
+<h4><a name='docfunc38564' href='#tocfunc38564'>sxml:num-attr</a></h4>
+(define (sxml:num-attr obj attr-name)<i><br> ... <a href='#codefunc38564'>Full Code</a> ... )</i>
+<pre> Accessor for a numerical attribute &lt;attr-name&gt; of given SXML element &lt;obj&gt; 
+ which It returns: 
+    a value of the attribute as the attribute as a number if the attribute 
+    is present and its value may be converted to number using string-&gt;number
+    #f if there is no such an attribute in the given element or
+    its value can't be converted to a number
+</pre><p><br>
+
+<h4><a name='docfunc59510' href='#tocfunc59510'>sxml:attr-u</a></h4>
+(define (sxml:attr-u obj attr-name)<i><br> ... <a href='#codefunc59510'>Full Code</a> ... )</i>
+<pre> Accessor for an attribute &lt;attr-name&gt; of given SXML element &lt;obj&gt; which 
+ may also be an attributes-list or nodeset (usually content of SXML element)
+
+ It returns: 
+    the value of the attribute if the attribute is present
+    #f if there is no such an attribute in the given element
+</pre><p><br>
+
+<h4><a name='docfunc24174' href='#tocfunc24174'>sxml:ns-list</a></h4>
+(define (sxml:ns-list obj)<i><br> ... <a href='#codefunc24174'>Full Code</a> ... )</i>
+<pre> Returns the list of namespaces for given element.
+ Analog of ((sxpath '(@@ *NAMESPACES* *)) obj)
+ Empty list is returned if there is no list of namespaces.
+</pre><p><br>
+
+<h4><a name='docfunc63594' href='#tocfunc63594'>sxml:ns-id->nodes</a></h4>
+(define (sxml:ns-id-&gt;nodes obj namespace-id)<i><br> ... <a href='#codefunc63594'>Full Code</a> ... )</i>
+<pre> Returns the list of namespace-assoc's for given namespace-id in 
+ SXML element &lt;obj&gt;.
+ Analog of ((sxpath '(@@ *NAMESPACES* namespace-id)) obj)
+ Empty list is returned if there is no namespace-assoc with namespace-id
+ given.
+</pre><p><br>
+
+<h4><a name='docfunc38403' href='#tocfunc38403'>sxml:ns-id->uri</a></h4>
+(define (sxml:ns-id-&gt;uri obj namespace-id)<i><br> ... <a href='#codefunc38403'>Full Code</a> ... )</i>
+<pre> It returns: 
+    A  URI's for namespace-id given 
+    #f if there is no namespace-assoc with namespace-id given
+</pre><p><br>
+
+<h4><a name='docfunc26240' href='#tocfunc26240'>sxml:ns-uri->nodes</a></h4>
+(define (sxml:ns-uri-&gt;nodes obj URI)<i><br> ... <a href='#codefunc26240'>Full Code</a> ... )</i>
+<pre> Returns a list of namespace-assocs nodes for NS URI given 
+</pre><p><br>
+
+<h4><a name='docfunc35343' href='#tocfunc35343'>sxml:ns-uri->id</a></h4>
+(define (sxml:ns-uri-&gt;id obj URI)<i><br> ... <a href='#codefunc35343'>Full Code</a> ... )</i>
+<pre> Returns a namespace-id for NS URI given 
+</pre><p><br>
+
+<h4><a name='docfunc58615' href='#tocfunc58615'>sxml:ns-id</a></h4>
+(define sxml:ns-id <i><br> ... <a href='#codefunc58615'>Full Code</a> ... )</i>
+<pre> Returns namespace-id for given namespace-assoc list
+</pre><p><br>
+
+<h4><a name='docfunc62316' href='#tocfunc62316'>sxml:ns-uri</a></h4>
+(define sxml:ns-uri <i><br> ... <a href='#codefunc62316'>Full Code</a> ... )</i>
+<pre> Returns URI for given namespace-assoc list
+</pre><p><br>
+
+<h4><a name='docfunc53709' href='#tocfunc53709'>sxml:ns-prefix</a></h4>
+(define (sxml:ns-prefix ns-assoc)<i><br> ... <a href='#codefunc53709'>Full Code</a> ... )</i>
+<pre> It returns namespace prefix for given namespace-assoc list
+  Original (as in XML document) prefix for namespace-id given 
+ has to be strored as the third element in namespace-assoc list 
+ if it is different from namespace-id.
+    If original prefix is omitted in namespace-assoc then
+      namespace-id is used instead
+</pre><p><br>
+<hr height='5'><center><h3><a name='chapt4992' href='#tocchapt4992'>Data modification functions</a></h3></center>
+
+<pre> Constructors and mutators for normalized SXML data
+ 
+ This functions are optimized for normalized SXML data.
+ They are not applicable to arbitrary non-normalized SXML data
+ 
+ Most of the functions are provided in two variants: 
+ 1. side-effect intended functions for linear update of given elements.
+   Their names are ended with exclamation mark.
+   An example: 
+      sxml:change-content! 
+ 2. pure functions without side-effects which return modified elements.
+   An example: 
+      sxml:change-content
+</pre>
+<h4><a name='docfunc45570' href='#tocfunc45570'>sxml:change-content!</a></h4>
+(define (sxml:change-content! obj new-content)<i><br> ... <a href='#codefunc45570'>Full Code</a> ... )</i>
+<pre> Change the content of given SXML element to &lt;new-content&gt;
+ If &lt;new-content&gt; is an empty list then the &lt;obj&gt; is transformed 
+ The resulting SXML element is normalized
+ Former name sxml:content!
+</pre><p><br>
+
+<h4><a name='docfunc37122' href='#tocfunc37122'>sxml:change-content</a></h4>
+(define (sxml:change-content obj new-content)<i><br> ... <a href='#codefunc37122'>Full Code</a> ... )</i>
+<pre> Change the content of given SXML element to &lt;new-content&gt;
+ If &lt;new-content&gt; is an empty list then the &lt;obj&gt; is transformed 
+ to an empty element
+ The resulting SXML element is normalized
+</pre><p><br>
+
+<h4><a name='docfunc781' href='#tocfunc781'>sxml:change-attrlist</a></h4>
+(define (sxml:change-attrlist obj new-attrlist)<i><br> ... <a href='#codefunc781'>Full Code</a> ... )</i>
+<pre> The resulting SXML element is normalized, if &lt;new-attrlist&gt; is empty,
+ the cadr of &lt;obj&gt; is (@)
+</pre><p><br>
+
+<h4><a name='docfunc814' href='#tocfunc814'>sxml:change-attrlist!</a></h4>
+(define (sxml:change-attrlist! obj new-attrlist)<i><br> ... <a href='#codefunc814'>Full Code</a> ... )</i>
+<pre> The resulting SXML element is normalized, if &lt;new-attrlist&gt; is empty,
+ the cadr of &lt;obj&gt; is (@)
+ Former name sxml:attrlist!
+</pre><p><br>
+
+<h4><a name='docfunc1364' href='#tocfunc1364'>sxml:change-name!</a></h4>
+(define (sxml:change-name! obj new-name)<i><br> ... <a href='#codefunc1364'>Full Code</a> ... )</i>
+<pre> Change a name of SXML element destructively
+ Former name was 'sxml:name!'
+</pre><p><br>
+
+<h4><a name='docfunc1331' href='#tocfunc1331'>sxml:change-name</a></h4>
+(define (sxml:change-name obj new-name)<i><br> ... <a href='#codefunc1331'>Full Code</a> ... )</i>
+<pre> Returns SXML element with its name changed 
+</pre><p><br>
+
+<h4><a name='docfunc32915' href='#tocfunc32915'>sxml:add-attr</a></h4>
+(define (sxml:add-attr obj attr)<i><br> ... <a href='#codefunc32915'>Full Code</a> ... )</i>
+<pre> Returns SXML element &lt;obj&gt; with attribute &lt;attr&gt; added or #f
+ if the attribute with given name already exists, 
+ &lt;attr&gt; is (&lt;attr-name&gt; &lt;attr-value&gt;)
+ Pure functional counterpart to sxml:add-attr!
+</pre><p><br>
+
+<h4><a name='docfunc41363' href='#tocfunc41363'>sxml:add-attr!</a></h4>
+(define (sxml:add-attr! obj attr)<i><br> ... <a href='#codefunc41363'>Full Code</a> ... )</i>
+<pre> Add an attribute &lt;attr&gt; for an element &lt;obj&gt;
+ Returns #f if the attribute with given name already exists. 
+ The resulting SXML node is normalized.
+ Linear update counterpart to sxml:add-attr
+</pre><p><br>
+
+<h4><a name='docfunc9517' href='#tocfunc9517'>sxml:change-attr</a></h4>
+(define (sxml:change-attr obj attr)<i><br> ... <a href='#codefunc9517'>Full Code</a> ... )</i>
+<pre> Returns SXML element &lt;obj&gt; with changed value of attribute &lt;attr&gt; or #f
+ if where is no attribute with given name. 
+ &lt;attr&gt; is (&lt;attr-name&gt; &lt;attr-value&gt;)
+</pre><p><br>
+
+<h4><a name='docfunc9550' href='#tocfunc9550'>sxml:change-attr!</a></h4>
+(define (sxml:change-attr! obj attr)<i><br> ... <a href='#codefunc9550'>Full Code</a> ... )</i>
+<pre> Change value of the attribute for element &lt;obj&gt; 
+ &lt;attr&gt; is (&lt;attr-name&gt; &lt;attr-value&gt;)
+ Returns #f if where is no such attribute
+</pre><p><br>
+
+<h4><a name='docfunc41620' href='#tocfunc41620'>sxml:set-attr</a></h4>
+(define (sxml:set-attr obj attr)<i><br> ... <a href='#codefunc41620'>Full Code</a> ... )</i>
+<pre> Set attribute &lt;attr&gt; of element &lt;obj&gt; 
+ If there is no such attribute the new one is added
+</pre><p><br>
+
+<h4><a name='docfunc50068' href='#tocfunc50068'>sxml:set-attr!</a></h4>
+(define (sxml:set-attr! obj attr)<i><br> ... <a href='#codefunc50068'>Full Code</a> ... )</i>
+<pre> Set attribute &lt;attr&gt; of element &lt;obj&gt; 
+ If there is no such attribute the new one is added
+</pre><p><br>
+
+<h4><a name='docfunc33826' href='#tocfunc33826'>sxml:add-aux</a></h4>
+(define (sxml:add-aux obj aux-node)<i><br> ... <a href='#codefunc33826'>Full Code</a> ... )</i>
+<pre> Returns SXML element &lt;obj&gt; with an auxiliary node &lt;aux-node&gt; added 
+</pre><p><br>
+
+<h4><a name='docfunc33859' href='#tocfunc33859'>sxml:add-aux!</a></h4>
+(define (sxml:add-aux! obj aux-node)<i><br> ... <a href='#codefunc33859'>Full Code</a> ... )</i>
+<pre> Add an auxiliary node &lt;aux-node&gt; for an element &lt;obj&gt;
+</pre><p><br>
+
+<h4><a name='docfunc39053' href='#tocfunc39053'>sxml:squeeze!</a></h4>
+(define (sxml:squeeze! obj)<i><br> ... <a href='#codefunc39053'>Full Code</a> ... )</i>
+<pre> Eliminates empty lists of attributes and aux-lists for given SXML element 
+ &lt;obj&gt; and its descendants (&quot;minimize&quot; it)
+ Returns: minimized and normalized SXML element
+</pre><p><br>
+
+<h4><a name='docfunc39020' href='#tocfunc39020'>sxml:squeeze</a></h4>
+(define (sxml:squeeze obj)<i><br> ... <a href='#codefunc39020'>Full Code</a> ... )</i>
+<pre> Eliminates empty lists of attributes and aux-lists for given SXML element 
+ &lt;obj&gt; and its descendants (&quot;minimize&quot; it)
+ Returns: minimized and normalized SXML element
+</pre><p><br>
+
+<h4><a name='docfunc7145' href='#tocfunc7145'>sxml:clean</a></h4>
+(define (sxml:clean obj)<i><br> ... <a href='#codefunc7145'>Full Code</a> ... )</i>
+<pre> Eliminates empty lists of attributes and ALL aux-lists for given SXML element 
+ &lt;obj&gt; and its descendants
+ Returns: minimized and normalized SXML element
+</pre><p><br>
+<hr height='5'><center><h3><a name='chapt55697' href='#tocchapt55697'>SXPath-related </a></h3></center>
+
+<pre></pre>
+<hr width='40%' align='center'><center><h3><a name='sect13312' href='#tocsect13312'>Extensions</a></h3></center>
+
+<pre></pre>
+<h4><a name='docfunc23524' href='#tocfunc23524'>select-first-kid</a></h4>
+(define (select-first-kid test-pred?)<i><br> ... <a href='#codefunc23524'>Full Code</a> ... )</i>
+<pre> select-first-kid:: Pred -&gt; Node -&gt; Node
+ Given a Node, return its first child that satisfy
+ the test-pred?
+ Returns #f if there is no such a child
+ select-first-kid:: Pred -&gt; Nodeset -&gt; Node
+ The same as above, but select among children of all the nodes in
+ the Nodeset
+</pre><p><br>
+
+<hr width='40%' align='center'><center><h3><a name='sect4384' href='#tocsect4384'>Fast node-parent </a></h3></center>
+
+<pre></pre>
+<h4><a name='docfunc8257' href='#tocfunc8257'>sxml:node-parent</a></h4>
+(define (sxml:node-parent rootnode)<i><br> ... <a href='#codefunc8257'>Full Code</a> ... )</i>
+<pre> Returns a function of one argument - SXML element - which returns its parent
+ node using *PARENT* pointer in aux-list
+ '*TOP-PTR* may be used as a pointer to root node
+ It return an empty list when applyed to root node
+</pre><p><br>
+
+<h4><a name='docfunc28392' href='#tocfunc28392'>sxml:add-parents</a></h4>
+(define (sxml:add-parents obj . top-ptr)<i><br> ... <a href='#codefunc28392'>Full Code</a> ... )</i><p><br>
+
+<h4><a name='docfunc13926' href='#tocfunc13926'>sxml:lookup</a></h4>
+(define (sxml:lookup id index)<i><br> ... <a href='#codefunc13926'>Full Code</a> ... )</i>
+<pre> Lookup an element using its ID 
+</pre><p><br>
+<hr height='5'><center><h3><a name='chapt26969' href='#tocchapt26969'>Markup generation</a></h3></center>
+
+<pre></pre>
+<hr width='40%' align='center'><center><h3><a name='sect19876' href='#tocsect19876'>XML</a></h3></center>
+
+<pre></pre>
+<h4><a name='docfunc52397' href='#tocfunc52397'>sxml:attr->xml</a></h4>
+(define (sxml:attr-&gt;xml attr)<i><br> ... <a href='#codefunc52397'>Full Code</a> ... )</i>
+<pre> Creates the XML markup for attributes.
+</pre><p><br>
+
+<h4><a name='docfunc19212' href='#tocfunc19212'>sxml:string->xml</a></h4>
+(define sxml:string-&gt;xml <i><br> ... <a href='#codefunc19212'>Full Code</a> ... )</i>
+<pre> Return a string or a list of strings where all the occurences of 
+ characters &lt; &gt; &amp; &quot; ' in a given string are replaced by corresponding 
+ character entity references. See also:  sxml:string-&gt;html
+</pre><p><br>
+
+<h4><a name='docfunc55211' href='#tocfunc55211'>sxml:sxml->xml</a></h4>
+(define (sxml:sxml-&gt;xml tree)<i><br> ... <a href='#codefunc55211'>Full Code</a> ... )</i>
+<pre> A version of dispatch-node specialized and optimized for SXML-&gt;XML
+ transformation.
+</pre><p><br>
+
+<hr width='40%' align='center'><center><h3><a name='sect41109' href='#tocsect41109'>HTML</a></h3></center>
+
+<pre></pre>
+<h4><a name='docfunc48672' href='#tocfunc48672'>sxml:attr->html</a></h4>
+(define (sxml:attr-&gt;html attr)<i><br> ... <a href='#codefunc48672'>Full Code</a> ... )</i>
+<pre> Creates the HTML markup for attributes.
+</pre><p><br>
+
+<h4><a name='docfunc15487' href='#tocfunc15487'>sxml:string->html</a></h4>
+(define sxml:string-&gt;html <i><br> ... <a href='#codefunc15487'>Full Code</a> ... )</i>
+<pre> Given a string, check to make sure it does not contain characters
+ &lt; &gt; &amp; &quot; that require encoding. Return either the original
+ string, or a list of string fragments with special characters
+ replaced by appropriate character entities.
+ Borrowed from Oleg Kiselyov's XML-to-HTML.scm (where its name is
+ string-&gt;goodHTML)
+</pre><p><br>
+
+<h4><a name='docfunc49781' href='#tocfunc49781'>sxml:non-terminated-html-tag?</a></h4>
+(define (sxml:non-terminated-html-tag? tag)<i><br> ... <a href='#codefunc49781'>Full Code</a> ... )</i>
+<pre> This predicate yields #t for &quot;unterminated&quot; HTML 4.0 tags
+</pre><p><br>
+
+<h4><a name='docfunc51486' href='#tocfunc51486'>sxml:sxml->html</a></h4>
+(define (sxml:sxml-&gt;html tree)<i><br> ... <a href='#codefunc51486'>Full Code</a> ... )</i>
+<pre> A version of dispatch-node specialized and optimized for SXML-&gt;HTML
+ transformation.
+</pre><p><br>
+<center><h1>Code</h1></center>
+
+<h4><a name='codefunc62306' href='#docfunc62306'>filter-and-map</a></h4>
+<i><a href='#tocfunc62306'>Index</a></i><br>
+
+<pre> unlike filter-map from SRFI-1 this function uses separate predicate 
+ and mapping functions. 
+ Applies proc to  all the elements of source list that satisfy the predicate 
+ and return the list of the results.
+</pre>
+<pre>(define (<a href="sxml-tools.html#codefunc62306">filter-and-map</a> pred proc lis)			
+  (let rpt ((l lis))		
+    (if (null? l)
+      '()
+      (if (pred (car l))
+	(cons (proc (car l)) (rpt (cdr l)))
+	(rpt (cdr l))))))
+</pre>
+<h4><a name='codefunc55059' href='#docfunc55059'>check-list</a></h4>
+<i><a href='#tocfunc55059'>Index</a></i><br>
+
+<pre> Applies pred to every member of lst and yields #t if all the results
+ are #t
+</pre>
+<pre>(define (<a href="sxml-tools.html#codefunc55059">check-list</a> pred lst) 
+  (cond
+    ((null? lst) #t)
+    ((pred (car lst))
+     (<a href="sxml-tools.html#codefunc55059">check-list</a> pred (cdr lst)))
+    (else #f)))
+</pre>
+<h4><a name='codefunc39139' href='#docfunc39139'>sxml:attr-list-node</a></h4>
+<i><a href='#tocfunc39139'>Index</a></i><br>
+
+<pre> Returns attr-list node for a given obj 
+   or #f if it is absent
+</pre>
+<pre>(define (<a href="sxml-tools.html#codefunc39139">sxml:attr-list-node</a> obj)
+  (if (and (not (null? (cdr obj)))
+	    (pair? (cadr obj)) 
+	    (eq? '@ (caadr obj)))
+	 (cadr obj)
+	 #f))
+</pre>
+<h4><a name='codefunc15214' href='#docfunc15214'>sxml:attr-as-list</a></h4>
+<i><a href='#tocfunc15214'>Index</a></i><br>
+
+<pre> Returns attr-list wrapped in list
+   or '((@)) if it is absent and aux-list is present 
+   or '() if both lists are absent
+</pre>
+<pre>(define (<a href="sxml-tools.html#codefunc15214">sxml:attr-as-list</a> obj)
+  (cond
+    ((<a href="sxml-tools.html#codefunc39139">sxml:attr-list-node</a> obj)
+     =&gt; list)
+    ((<a href="sxml-tools.html#codefunc41070">sxml:aux-list-node</a> obj)
+     '((@)))
+    (else '())))
+</pre>
+<h4><a name='codefunc41070' href='#docfunc41070'>sxml:aux-list-node</a></h4>
+<i><a href='#tocfunc41070'>Index</a></i><br>
+
+<pre> Returns aux-list node for a given obj 
+   or #f if it is absent
+</pre>
+<pre>(define (<a href="sxml-tools.html#codefunc41070">sxml:aux-list-node</a> obj)
+  (if
+    (or (null? (cdr obj))
+	(null? (cddr obj))
+	(not (pair? (caddr obj)))
+	(not (eq? (caaddr obj) '@@)))
+    #f
+    (caddr obj)))
+</pre>
+<h4><a name='codefunc11025' href='#docfunc11025'>sxml:aux-as-list</a></h4>
+<i><a href='#tocfunc11025'>Index</a></i><br>
+
+<pre> Returns aux-list wrapped in list 
+   or '() if it is absent
+</pre>
+<pre>(define (<a href="sxml-tools.html#codefunc11025">sxml:aux-as-list</a> obj)
+  (cond 
+    ((<a href="sxml-tools.html#codefunc41070">sxml:aux-list-node</a> obj)
+     =&gt; list)
+    (else '())))
+</pre>
+<h5><a name='codemacro60041' href='#docmacro60041'>sxml:find-name-separator</a></h5>
+<i><a href='#tocmacro60041'>Index</a></i><br>
+
+<pre> optimized (string-rindex name #\:)
+ returns position of a separator between namespace-id and LocalName
+</pre>
+<pre>(define-macro (<a href="sxml-tools.html#codemacro60041">sxml:find-name-separator</a> len)
+  `(let rpt ((pos (<a href="myenv.html#codemacro11565">--</a> ,len))) 
+     (cond
+       ((negative? pos) #f) 	
+       ((char=? #\: (string-ref name pos)) pos)
+       (else (rpt (<a href="myenv.html#codemacro11565">--</a> pos))))))
+</pre>
+<h4><a name='codefunc12029' href='#docfunc12029'>sxml:error</a></h4>
+<i><a href='#tocfunc12029'>Index</a></i><br>
+
+<pre> sxml error message
+</pre>
+<pre>(define (<a href="sxml-tools.html#codefunc12029">sxml:error</a> . messages)
+  (<a href="myenv.html#codefunc55253">cerr</a> <a href="myenv.html#codefunc27758">nl</a> &quot;SXML ERROR: &quot;)
+  (apply <a href="myenv.html#codefunc55253">cerr</a> messages)
+  (<a href="myenv.html#codefunc55253">cerr</a> <a href="myenv.html#codefunc27758">nl</a>)
+  (exit -1))
+</pre>
+<h4><a name='codefunc55473' href='#docfunc55473'>sxml:empty-element?</a></h4>
+<i><a href='#tocfunc55473'>Index</a></i><br>
+
+<pre> Predicate which returns #t if given element &lt;obj&gt; is empty. 
+ Empty element has no nested elements, text nodes, PIs, Comments or entities
+ but it may contain attributes or namespace-id.
+ It is a SXML counterpart of XML empty-element.
+</pre>
+<pre>(define (<a href="sxml-tools.html#codefunc55473">sxml:empty-element?</a> obj)
+  (not 
+    ((<a href="sxml-tools.html#codefunc23524">select-first-kid</a> 
+     (lambda(x)
+       (or ((<a href="sxpathlib.html#codefunc6363">ntype-names??</a> '(*PI* *COMMENT* *ENTITY*)) x)
+           ((<a href="sxpathlib.html#codefunc9356">ntype??</a> '*) x)
+	   (string? x)))) obj)))
+</pre>
+<h4><a name='codefunc60852' href='#docfunc60852'>sxml:shallow-normalized?</a></h4>
+<i><a href='#tocfunc60852'>Index</a></i><br>
+
+<pre> Returns #t if the given &lt;obj&gt; is shallow-normalized SXML element.
+ The element itself has to be normalised but its nested elements are not tested.
+</pre>
+<pre>(define (<a href="sxml-tools.html#codefunc60852">sxml:shallow-normalized?</a> obj)
+  (or 
+    (null? (cdr obj))
+    (and (or 
+	   (and 
+	     (pair? (cadr obj)) 
+	     (eq? (caadr obj) '@))
+	   (not ((<a href="sxml-tools.html#codefunc23524">select-first-kid</a> (<a href="sxpathlib.html#codefunc6363">ntype-names??</a> '(@ @@))) obj)))
+	 (or (null? (cddr obj))
+	     (and (pair? (caddr obj)) 
+		  (eq? (caaddr obj) '@@))
+	     (not ((<a href="sxml-tools.html#codefunc23524">select-first-kid</a> (<a href="sxpathlib.html#codefunc9356">ntype??</a> '@@)) obj))))))
+</pre>
+<h4><a name='codefunc13635' href='#docfunc13635'>sxml:normalized?</a></h4>
+<i><a href='#tocfunc13635'>Index</a></i><br>
+
+<pre> Returns #t if the given &lt;obj&gt; is normalized SXML element.
+  The element itself and all its nested elements have to be normalised.
+</pre>
+<pre>(define (<a href="sxml-tools.html#codefunc13635">sxml:normalized?</a> obj)
+    (and
+      (<a href="sxml-tools.html#codefunc60852">sxml:shallow-normalized?</a> obj)
+    (<a href="sxml-tools.html#codefunc55059">check-list</a>
+      (lambda(x)
+	(if
+	   (<a href="sxpathlib.html#codefunc35234">sxml:element?</a> x)
+	   (<a href="sxml-tools.html#codefunc13635">sxml:normalized?</a> x)
+	   #t))
+       (<a href="sxml-tools.html#codefunc36973">sxml:content</a> obj))
+    ))
+</pre>
+<h4><a name='codefunc50541' href='#docfunc50541'>sxml:shallow-minimized?</a></h4>
+<i><a href='#tocfunc50541'>Index</a></i><br>
+
+<pre> Returns #t if the given &lt;obj&gt; is shallow-minimized SXML element.
+ The element itself has to be minimised but its nested elements are not tested.
+</pre>
+<pre>(define (<a href="sxml-tools.html#codefunc50541">sxml:shallow-minimized?</a> obj)
+  (and
+    (<a href="sxml-tools.html#codefunc60852">sxml:shallow-normalized?</a> obj)
+    (not (and (<a href="sxml-tools.html#codefunc41070">sxml:aux-list-node</a> obj) 
+	      (null? (<a href="sxml-tools.html#codefunc40603">sxml:aux-list</a> obj))))
+    (not (and (<a href="sxml-tools.html#codefunc39139">sxml:attr-list-node</a> obj)
+	      (null? (<a href="sxpathlib.html#codefunc50657">sxml:attr-list</a> obj))
+	      (not (<a href="sxml-tools.html#codefunc41070">sxml:aux-list-node</a> obj))))))
+</pre>
+<h4><a name='codefunc3324' href='#docfunc3324'>sxml:minimized?</a></h4>
+<i><a href='#tocfunc3324'>Index</a></i><br>
+
+<pre> Returns #t if the given &lt;obj&gt; is minimized SXML element.
+  The element itself and all its nested elements have to be minimised.
+</pre>
+<pre>(define (<a href="sxml-tools.html#codefunc3324">sxml:minimized?</a> obj)
+    (and
+      (<a href="sxml-tools.html#codefunc50541">sxml:shallow-minimized?</a> obj)
+    (<a href="sxml-tools.html#codefunc55059">check-list</a>
+      (lambda(x)
+	(if
+	   (<a href="sxpathlib.html#codefunc35234">sxml:element?</a> x)
+	   (<a href="sxml-tools.html#codefunc3324">sxml:minimized?</a> x)
+	   #t))
+       (<a href="sxml-tools.html#codefunc36973">sxml:content</a> obj))
+    ))
+</pre>
+<h4><a name='codefunc49377' href='#docfunc49377'>sxml:name</a></h4>
+<i><a href='#tocfunc49377'>Index</a></i><br>
+
+<pre> Returns a name of a given SXML node
+ It is introduced for the sake of encapsulation.
+</pre>
+<pre>(define <a href="sxml-tools.html#codefunc49377">sxml:name</a> car)
+</pre>
+<h4><a name='codefunc25943' href='#docfunc25943'>sxml:element-name</a></h4>
+<i><a href='#tocfunc25943'>Index</a></i><br>
+
+<pre> A version of sxml:name, which returns #f if the given &lt;obj&gt; is 
+ not a SXML element.
+ Otherwise returns its name.
+</pre>
+<pre>(define (<a href="sxml-tools.html#codefunc25943">sxml:element-name</a> obj)
+  (and ((<a href="sxpathlib.html#codefunc9356">ntype??</a> '*) obj) 
+       (car obj)))
+</pre>
+<h4><a name='codefunc43979' href='#docfunc43979'>sxml:node-name</a></h4>
+<i><a href='#tocfunc43979'>Index</a></i><br>
+
+<pre> Safe version of sxml:name, which returns #f if the given &lt;obj&gt; is 
+ not a SXML node.
+ Otherwise returns its name.
+</pre>
+<pre>(define (<a href="sxml-tools.html#codefunc43979">sxml:node-name</a> obj)
+  (and (pair? obj) 
+       (symbol? (car obj))
+    (car obj)))
+</pre>
+<h4><a name='codefunc12101' href='#docfunc12101'>sxml:ncname</a></h4>
+<i><a href='#tocfunc12101'>Index</a></i><br>
+
+<pre> Returns Local Part of Qualified Name (Namespaces in XML production [6])
+ for given obj, which is &quot;:&quot;-separated suffix of its Qualified Name
+ If a name of a node given is NCName (Namespaces in XML production [4]), then 
+ it is returned as is.
+ Please note that while SXML name is a symbol this function returns a string.
+</pre>
+<pre>(define (<a href="sxml-tools.html#codefunc12101">sxml:ncname</a> obj)
+  (let* ((name (symbol-&gt;string (car obj)))
+	 (len (string-length name)))
+    (cond
+      ((<a href="sxml-tools.html#codemacro60041">sxml:find-name-separator</a> len)
+       =&gt; (lambda (pos) 
+	    (substring name (+ pos 1) len)))
+      (else name))))
+</pre>
+<h4><a name='codefunc60924' href='#docfunc60924'>sxml:name->ns-id</a></h4>
+<i><a href='#tocfunc60924'>Index</a></i><br>
+
+<pre> Returns namespace-id part of given name, or #f if it's LocalName
+</pre>
+<pre>(define (<a href="sxml-tools.html#codefunc60924">sxml:name-&gt;ns-id</a> sxml-name)
+  (let* ((name (symbol-&gt;string sxml-name)))
+    (cond
+      ((<a href="sxml-tools.html#codemacro60041">sxml:find-name-separator</a> (string-length name))
+       =&gt; (lambda (pos) 
+	    (substring name  0 pos)))
+      (else #f))))
+</pre>
+<h4><a name='codefunc36973' href='#docfunc36973'>sxml:content</a></h4>
+<i><a href='#tocfunc36973'>Index</a></i><br>
+
+<pre> Returns the content of given SXML element or nodeset (just text and element
+ nodes) representing it as a list of strings and nested elements in document 
+ order.  This list is empty if &lt;obj&gt; is empty element or empty list.
+</pre>
+<pre>(define (<a href="sxml-tools.html#codefunc36973">sxml:content</a> obj)
+  (((if (<a href="sxpathlib.html#codefunc31162">nodeset?</a> obj) 
+      <a href="sxpathlib.html#codefunc7531">sxml:filter</a>
+      <a href="sxpathlib.html#codefunc3917">select-kids</a>) 
+    (lambda(x)
+      (or
+	(string? x)   ;  ((<a href="sxpathlib.html#codefunc9356">ntype??</a> '*text*) x)
+       ((<a href="sxpathlib.html#codefunc9356">ntype??</a> '*) x)))) 
+   obj))
+</pre>
+<h4><a name='codefunc53748' href='#docfunc53748'>sxml:text</a></h4>
+<i><a href='#tocfunc53748'>Index</a></i><br>
+
+<pre> Returns a string which combines all the character data 
+ from text node childrens of the given SXML element
+ or &quot;&quot; if there is no text node children
+</pre>
+<pre>(define (<a href="sxml-tools.html#codefunc53748">sxml:text</a> obj)
+  (let ((tnodes
+	 ((<a href="sxpathlib.html#codefunc3917">select-kids</a>
+	   string?) 
+	   obj)))
+    (cond 
+      ((null? tnodes) &quot;&quot;)
+      ((null? (cdr tnodes))
+       (car tnodes))
+      (else (apply string-append tnodes)))))
+</pre>
+<h4><a name='codefunc45570' href='#docfunc45570'>sxml:change-content!</a></h4>
+<i><a href='#tocfunc45570'>Index</a></i><br>
+
+<pre> Change the content of given SXML element to &lt;new-content&gt;
+ If &lt;new-content&gt; is an empty list then the &lt;obj&gt; is transformed 
+ The resulting SXML element is normalized
+ Former name sxml:content!
+</pre>
+<pre>(define (<a href="sxml-tools.html#codefunc45570">sxml:change-content!</a> obj new-content)
+  (set-cdr! obj 
+	    `(
+              ,@(<a href="sxml-tools.html#codefunc15214">sxml:attr-as-list</a> obj)
+              ,@(<a href="sxml-tools.html#codefunc11025">sxml:aux-as-list</a> obj)
+	      ,@new-content)))
+</pre>
+<h4><a name='codefunc37122' href='#docfunc37122'>sxml:change-content</a></h4>
+<i><a href='#tocfunc37122'>Index</a></i><br>
+
+<pre> Change the content of given SXML element to &lt;new-content&gt;
+ If &lt;new-content&gt; is an empty list then the &lt;obj&gt; is transformed 
+ to an empty element
+ The resulting SXML element is normalized
+</pre>
+<pre>(define (<a href="sxml-tools.html#codefunc37122">sxml:change-content</a> obj new-content)
+  `(,(<a href="sxml-tools.html#codefunc49377">sxml:name</a> obj) 
+              ,@(<a href="sxml-tools.html#codefunc15214">sxml:attr-as-list</a> obj)
+              ,@(<a href="sxml-tools.html#codefunc11025">sxml:aux-as-list</a> obj)
+	,@new-content))
+</pre>
+<h4><a name='codefunc781' href='#docfunc781'>sxml:change-attrlist</a></h4>
+<i><a href='#tocfunc781'>Index</a></i><br>
+
+<pre> The resulting SXML element is normalized, if &lt;new-attrlist&gt; is empty,
+ the cadr of &lt;obj&gt; is (@)
+</pre>
+<pre>(define (<a href="sxml-tools.html#codefunc781">sxml:change-attrlist</a> obj new-attrlist)
+  `(,(<a href="sxml-tools.html#codefunc49377">sxml:name</a> obj) 
+     ,@(cond 
+	 (new-attrlist
+	  `((@ ,@new-attrlist)))
+	 ((<a href="sxml-tools.html#codefunc41070">sxml:aux-list-node</a> obj)
+	   '((@)))
+	 (else `()))
+     ,@(<a href="sxml-tools.html#codefunc11025">sxml:aux-as-list</a> obj)
+     ,@(<a href="sxml-tools.html#codefunc36973">sxml:content</a> obj)))
+</pre>
+<h4><a name='codefunc814' href='#docfunc814'>sxml:change-attrlist!</a></h4>
+<i><a href='#tocfunc814'>Index</a></i><br>
+
+<pre> The resulting SXML element is normalized, if &lt;new-attrlist&gt; is empty,
+ the cadr of &lt;obj&gt; is (@)
+ Former name sxml:attrlist!
+</pre>
+<pre>(define (<a href="sxml-tools.html#codefunc814">sxml:change-attrlist!</a> obj new-attrlist)
+  (set-cdr! obj 
+	`(
+	  ,@(cond 
+	      (new-attrlist
+		`((@ ,@new-attrlist)))
+	      ((<a href="sxml-tools.html#codefunc41070">sxml:aux-list-node</a> obj)
+	       '((@)))
+	      (else `()))
+	  ,@(<a href="sxml-tools.html#codefunc11025">sxml:aux-as-list</a> obj)
+	  ,@(<a href="sxml-tools.html#codefunc36973">sxml:content</a> obj))))
+</pre>
+<h4><a name='codefunc1364' href='#docfunc1364'>sxml:change-name!</a></h4>
+<i><a href='#tocfunc1364'>Index</a></i><br>
+
+<pre> Change a name of SXML element destructively
+ Former name was 'sxml:name!'
+</pre>
+<pre>(define (<a href="sxml-tools.html#codefunc1364">sxml:change-name!</a> obj new-name)
+  (set-car! obj new-name))
+</pre>
+<h4><a name='codefunc1331' href='#docfunc1331'>sxml:change-name</a></h4>
+<i><a href='#tocfunc1331'>Index</a></i><br>
+
+<pre> Returns SXML element with its name changed 
+</pre>
+<pre>(define (<a href="sxml-tools.html#codefunc1331">sxml:change-name</a> obj new-name)
+  (cons new-name (cdr obj)))
+</pre>
+<h4><a name='codefunc32915' href='#docfunc32915'>sxml:add-attr</a></h4>
+<i><a href='#tocfunc32915'>Index</a></i><br>
+
+<pre> Returns SXML element &lt;obj&gt; with attribute &lt;attr&gt; added or #f
+ if the attribute with given name already exists, 
+ &lt;attr&gt; is (&lt;attr-name&gt; &lt;attr-value&gt;)
+ Pure functional counterpart to sxml:add-attr!
+</pre>
+<pre>(define (<a href="sxml-tools.html#codefunc32915">sxml:add-attr</a> obj attr)
+  (let ((attr-list (<a href="sxpathlib.html#codefunc50657">sxml:attr-list</a> obj)))
+    (if (assq (car attr) attr-list) 
+      #f
+      `(,(<a href="sxml-tools.html#codefunc49377">sxml:name</a> obj)
+	(@ ,@(cons attr attr-list))
+	,@(<a href="sxml-tools.html#codefunc11025">sxml:aux-as-list</a> obj)
+	,@(<a href="sxml-tools.html#codefunc36973">sxml:content</a> obj)))))
+</pre>
+<h4><a name='codefunc41363' href='#docfunc41363'>sxml:add-attr!</a></h4>
+<i><a href='#tocfunc41363'>Index</a></i><br>
+
+<pre> Add an attribute &lt;attr&gt; for an element &lt;obj&gt;
+ Returns #f if the attribute with given name already exists. 
+ The resulting SXML node is normalized.
+ Linear update counterpart to sxml:add-attr
+</pre>
+<pre>(define (<a href="sxml-tools.html#codefunc41363">sxml:add-attr!</a> obj attr)
+  (let ((attr-list (<a href="sxpathlib.html#codefunc50657">sxml:attr-list</a> obj)))
+    (if (assq (car attr) attr-list) 
+      #f
+      (begin
+      (set-cdr! obj 
+	`(
+	(@ ,@(cons attr attr-list))
+	,@(<a href="sxml-tools.html#codefunc11025">sxml:aux-as-list</a> obj)
+	,@(<a href="sxml-tools.html#codefunc36973">sxml:content</a> obj)))
+      obj))))
+</pre>
+<h4><a name='codefunc9517' href='#docfunc9517'>sxml:change-attr</a></h4>
+<i><a href='#tocfunc9517'>Index</a></i><br>
+
+<pre> Returns SXML element &lt;obj&gt; with changed value of attribute &lt;attr&gt; or #f
+ if where is no attribute with given name. 
+ &lt;attr&gt; is (&lt;attr-name&gt; &lt;attr-value&gt;)
+</pre>
+<pre>(define (<a href="sxml-tools.html#codefunc9517">sxml:change-attr</a> obj attr)
+  (let ((attr-list (<a href="sxpathlib.html#codefunc50657">sxml:attr-list</a> obj)))
+    (if (null? attr-list)
+      #f
+      (cond 
+	((assv (car attr) attr-list) 
+	 =&gt; (lambda (y)
+	      `(,(<a href="sxml-tools.html#codefunc49377">sxml:name</a> obj)
+		 (@ ,@(map
+			(lambda(at)
+			  (if
+			    (eq? at y)
+			    attr
+			    at))
+			attr-list))
+		 ,@(<a href="sxml-tools.html#codefunc11025">sxml:aux-as-list</a> obj)
+		 ,@(<a href="sxml-tools.html#codefunc36973">sxml:content</a> obj)
+		 )))
+	(else #f)))))
+</pre>
+<h4><a name='codefunc9550' href='#docfunc9550'>sxml:change-attr!</a></h4>
+<i><a href='#tocfunc9550'>Index</a></i><br>
+
+<pre> Change value of the attribute for element &lt;obj&gt; 
+ &lt;attr&gt; is (&lt;attr-name&gt; &lt;attr-value&gt;)
+ Returns #f if where is no such attribute
+</pre>
+<pre>(define (<a href="sxml-tools.html#codefunc9550">sxml:change-attr!</a> obj attr)
+  (let ((x (<a href="sxpathlib.html#codefunc50657">sxml:attr-list</a> obj)))
+     (if (null? x)
+       #f
+       (cond 
+	 ((assv (car attr) x) =&gt; (lambda (y)
+				  (set-cdr! y (cdr attr)) obj))
+	 (else #f)))))
+</pre>
+<h4><a name='codefunc41620' href='#docfunc41620'>sxml:set-attr</a></h4>
+<i><a href='#tocfunc41620'>Index</a></i><br>
+
+<pre> Set attribute &lt;attr&gt; of element &lt;obj&gt; 
+ If there is no such attribute the new one is added
+</pre>
+<pre>(define (<a href="sxml-tools.html#codefunc41620">sxml:set-attr</a> obj attr)
+  (let ((attr-list (<a href="sxpathlib.html#codefunc50657">sxml:attr-list</a> obj)))
+    (cond 
+      ((assv (car attr) attr-list) 
+       =&gt; (lambda (y)
+	    `(,(<a href="sxml-tools.html#codefunc49377">sxml:name</a> obj)
+	       (@ ,@(map
+		      (lambda(at)
+			(if
+			  (eq? at y)
+			  attr
+			  at))
+		      attr-list))
+	       ,@(<a href="sxml-tools.html#codefunc11025">sxml:aux-as-list</a> obj)
+	       ,@(<a href="sxml-tools.html#codefunc36973">sxml:content</a> obj)
+	       )))
+      (else 
+	`(,(<a href="sxml-tools.html#codefunc49377">sxml:name</a> obj)
+	   (@ ,@(cons attr attr-list)) 
+	   ,@(<a href="sxml-tools.html#codefunc11025">sxml:aux-as-list</a> obj)
+	   ,@(<a href="sxml-tools.html#codefunc36973">sxml:content</a> obj))))
+    ))
+</pre>
+<h4><a name='codefunc50068' href='#docfunc50068'>sxml:set-attr!</a></h4>
+<i><a href='#tocfunc50068'>Index</a></i><br>
+
+<pre> Set attribute &lt;attr&gt; of element &lt;obj&gt; 
+ If there is no such attribute the new one is added
+</pre>
+<pre>(define (<a href="sxml-tools.html#codefunc50068">sxml:set-attr!</a> obj attr)
+  (let ((attr-list (<a href="sxpathlib.html#codefunc50657">sxml:attr-list</a> obj)))
+     (cond 
+       ((assv (car attr) attr-list) 
+	=&gt; (lambda (x) (set-cdr! x (cdr attr))))
+       (else (set-cdr! obj
+		       `((@ ,@(cons attr attr-list)) 
+			 ,@(<a href="sxml-tools.html#codefunc11025">sxml:aux-as-list</a> obj)
+			 ,@(<a href="sxml-tools.html#codefunc36973">sxml:content</a> obj))))
+   )))
+</pre>
+<h4><a name='codefunc33826' href='#docfunc33826'>sxml:add-aux</a></h4>
+<i><a href='#tocfunc33826'>Index</a></i><br>
+
+<pre> Returns SXML element &lt;obj&gt; with an auxiliary node &lt;aux-node&gt; added 
+</pre>
+<pre>(define (<a href="sxml-tools.html#codefunc33826">sxml:add-aux</a> obj aux-node)
+      `(,(<a href="sxml-tools.html#codefunc49377">sxml:name</a> obj)
+	(@ ,@(<a href="sxpathlib.html#codefunc50657">sxml:attr-list</a> obj))
+	(@@ ,@(cons aux-node (<a href="sxml-tools.html#codefunc40603">sxml:aux-list</a> obj)))
+	,@(<a href="sxml-tools.html#codefunc36973">sxml:content</a> obj)))
+</pre>
+<h4><a name='codefunc33859' href='#docfunc33859'>sxml:add-aux!</a></h4>
+<i><a href='#tocfunc33859'>Index</a></i><br>
+
+<pre> Add an auxiliary node &lt;aux-node&gt; for an element &lt;obj&gt;
+</pre>
+<pre>(define (<a href="sxml-tools.html#codefunc33859">sxml:add-aux!</a> obj aux-node)
+      (set-cdr! obj 
+	`(
+	(@ ,@(<a href="sxpathlib.html#codefunc50657">sxml:attr-list</a> obj))
+	(@@ ,@(cons aux-node (<a href="sxml-tools.html#codefunc40603">sxml:aux-list</a> obj)))
+	,@(<a href="sxml-tools.html#codefunc36973">sxml:content</a> obj)))
+      obj)
+</pre>
+<h4><a name='codefunc39053' href='#docfunc39053'>sxml:squeeze!</a></h4>
+<i><a href='#tocfunc39053'>Index</a></i><br>
+
+<pre> Eliminates empty lists of attributes and aux-lists for given SXML element 
+ &lt;obj&gt; and its descendants (&quot;minimize&quot; it)
+ Returns: minimized and normalized SXML element
+</pre>
+<pre>(define (<a href="sxml-tools.html#codefunc39053">sxml:squeeze!</a> obj)
+   (set-cdr! obj 
+  `(,@(cond 
+	((<a href="sxml-tools.html#codefunc39139">sxml:attr-list-node</a> obj)
+	 =&gt; (lambda (atl) 
+	      (if (and (null? (cdr atl)) 
+		       (null? (<a href="sxml-tools.html#codefunc40603">sxml:aux-list</a> obj)))
+		 '()
+	         (list atl))))	
+	(else '()))
+    ,@(cond ((<a href="sxml-tools.html#codefunc41070">sxml:aux-list-node</a> obj)
+	     =&gt; (lambda (axl) 
+	      (if (null? (cdr axl))
+		'()
+	         (list axl))))
+	(else '()))
+    ,@(map
+	(lambda(x)
+	  (cond 
+	    (((<a href="sxpathlib.html#codefunc9356">ntype??</a> '*) x)
+	     (<a href="sxml-tools.html#codefunc39053">sxml:squeeze!</a> x)
+	     x)
+	    (else x)))
+       (<a href="sxml-tools.html#codefunc36973">sxml:content</a> obj))
+    ))
+   )
+</pre>
+<h4><a name='codefunc39020' href='#docfunc39020'>sxml:squeeze</a></h4>
+<i><a href='#tocfunc39020'>Index</a></i><br>
+
+<pre> Eliminates empty lists of attributes and aux-lists for given SXML element 
+ &lt;obj&gt; and its descendants (&quot;minimize&quot; it)
+ Returns: minimized and normalized SXML element
+</pre>
+<pre>(define (<a href="sxml-tools.html#codefunc39020">sxml:squeeze</a> obj)
+  `(,(<a href="sxml-tools.html#codefunc49377">sxml:name</a> obj)
+   ,@(cond 
+	((<a href="sxml-tools.html#codefunc39139">sxml:attr-list-node</a> obj)
+	 =&gt; (lambda (atl) 
+	      (if (and (null? (cdr atl)) 
+		       (null? (<a href="sxml-tools.html#codefunc40603">sxml:aux-list</a> obj)))
+		 '()
+	         (list atl))))	
+	(else '()))
+    ,@(cond ((<a href="sxml-tools.html#codefunc41070">sxml:aux-list-node</a> obj)
+	     =&gt; (lambda (axl) 
+	      (if (null? (cdr axl))
+		'()
+	         (list axl))))
+	(else '()))
+    ,@(map
+	(lambda(x)
+	  (cond 
+	    (((<a href="sxpathlib.html#codefunc9356">ntype??</a> '*) x)
+	     (<a href="sxml-tools.html#codefunc39020">sxml:squeeze</a> x))
+	    (else x)))
+       (<a href="sxml-tools.html#codefunc36973">sxml:content</a> obj))))
+</pre>
+<h4><a name='codefunc7145' href='#docfunc7145'>sxml:clean</a></h4>
+<i><a href='#tocfunc7145'>Index</a></i><br>
+
+<pre> Eliminates empty lists of attributes and ALL aux-lists for given SXML element 
+ &lt;obj&gt; and its descendants
+ Returns: minimized and normalized SXML element
+</pre>
+<pre>(define (<a href="sxml-tools.html#codefunc7145">sxml:clean</a> obj)
+  `(,(<a href="sxml-tools.html#codefunc49377">sxml:name</a> obj)
+   ,@(cond 
+	((<a href="sxml-tools.html#codefunc39139">sxml:attr-list-node</a> obj)
+	 =&gt; (lambda (atl) 
+	      (if (null? (cdr atl)) 
+		 '()
+	         (list atl))))	
+	(else '()))
+    ,@(map
+	(lambda(x)
+	  (cond 
+	    (((<a href="sxpathlib.html#codefunc9356">ntype??</a> '*) x)
+	     (<a href="sxml-tools.html#codefunc7145">sxml:clean</a> x))
+	    (else x)))
+       (<a href="sxml-tools.html#codefunc36973">sxml:content</a> obj))))
+</pre>
+<h4><a name='codefunc31228' href='#docfunc31228'>sxml:content-raw</a></h4>
+<i><a href='#tocfunc31228'>Index</a></i><br>
+
+<pre> Returns all the content of normalized SXML element except attr-list and
+ aux-list.
+ Thus it includes PI, COMMENT and  ENTITY nodes as well as TEXT and ELEMENT nodes
+ returned by sxml:content.
+ Returns  a list of nodes in document order or empty list if &lt;obj&gt; is empty 
+ element or empty list.
+ This function is faster than sxml:content
+</pre>
+<pre>(define (<a href="sxml-tools.html#codefunc31228">sxml:content-raw</a> obj)
+  ((if (and (not (null? (cdr obj))) 
+	    (pair? (cadr obj)) (eq? (caadr obj) '@))
+     (if (and (not (null? (cddr obj))) 
+	      (pair? (caddr obj)) (eq? (caaddr obj) '@@))
+       cdddr
+       cddr)
+     cdr) obj))
+</pre>
+<h4><a name='codefunc15119' href='#docfunc15119'>sxml:attr-list-u</a></h4>
+<i><a href='#tocfunc15119'>Index</a></i><br>
+
+<pre> Returns the list of attributes for given element or nodeset.
+ Analog of ((sxpath '(@ *)) obj)
+ Empty list is returned if there is no list of attributes.
+</pre>
+<pre>(define (<a href="sxml-tools.html#codefunc15119">sxml:attr-list-u</a> obj)
+  (cond (((<a href="sxml-tools.html#codefunc23524">select-first-kid</a> (<a href="sxpathlib.html#codefunc9356">ntype??</a> '@)) obj)
+	 =&gt; cdr)
+	(else '())))
+</pre>
+<h4><a name='codefunc40603' href='#docfunc40603'>sxml:aux-list</a></h4>
+<i><a href='#tocfunc40603'>Index</a></i><br>
+
+<pre> Returns the list of auxiliary nodes for given element or nodeset.
+ Analog of ((sxpath '(@@ *)) obj)
+ Empty list is returned if a list of auxiliary nodes is absent.
+</pre>
+<pre>(define (<a href="sxml-tools.html#codefunc40603">sxml:aux-list</a> obj)
+  (if
+    (or (null? (cdr obj))
+	(null? (cddr obj))
+	(not (pair? (caddr obj)))
+	(not (eq? (caaddr obj) '@@)))
+    '()
+    (cdaddr obj)))  
+</pre>
+<h4><a name='codefunc52240' href='#docfunc52240'>sxml:aux-list-u</a></h4>
+<i><a href='#tocfunc52240'>Index</a></i><br>
+
+<pre> Returns the list of auxiliary nodes for given element or nodeset.
+ Analog of ((sxpath '(@@ *)) obj)
+ Empty list is returned if a list of auxiliary nodes is absent.
+</pre>
+<pre>(define (<a href="sxml-tools.html#codefunc52240">sxml:aux-list-u</a> obj)
+  (cond (((<a href="sxml-tools.html#codefunc23524">select-first-kid</a> (<a href="sxpathlib.html#codefunc9356">ntype??</a> '@@)) obj)
+	 =&gt; cdr)
+	(else '())))
+</pre>
+<h4><a name='codefunc37266' href='#docfunc37266'>sxml:aux-node</a></h4>
+<i><a href='#tocfunc37266'>Index</a></i><br>
+
+<pre> Return the first aux-node with &lt;aux-name&gt; given in SXML element &lt;obj&gt; 
+ or #f is such a node is absent.
+ NOTE: it returns just the FIRST node found even if multiple nodes are
+ present, so it's mostly intended for nodes with unique names 
+</pre>
+<pre>(define (<a href="sxml-tools.html#codefunc37266">sxml:aux-node</a> obj aux-name)
+  (cond 
+    ((assq aux-name (<a href="sxml-tools.html#codefunc40603">sxml:aux-list</a> obj)))
+    (else #f))) 
+</pre>
+<h4><a name='codefunc1171' href='#docfunc1171'>sxml:aux-nodes</a></h4>
+<i><a href='#tocfunc1171'>Index</a></i><br>
+
+<pre> Return a list of aux-node with &lt;aux-name&gt; given in SXML element &lt;obj&gt; 
+ or '() if such a node is absent.
+</pre>
+<pre>(define (<a href="sxml-tools.html#codefunc1171">sxml:aux-nodes</a> obj aux-name)
+  (<a href="common.html#codefunc20536">filter</a> 
+    (lambda(x) (eq? aux-name (car x)))
+    (<a href="sxml-tools.html#codefunc40603">sxml:aux-list</a> obj)))
+</pre>
+<h4><a name='codefunc47873' href='#docfunc47873'>sxml:attr</a></h4>
+<i><a href='#tocfunc47873'>Index</a></i><br>
+
+<pre> Accessor for an attribute &lt;attr-name&gt; of given SXML element &lt;obj&gt; which 
+ It returns: 
+    the value of the attribute if the attribute is present
+    #f if there is no such an attribute in the given element
+</pre>
+<pre>(define (<a href="sxml-tools.html#codefunc47873">sxml:attr</a> obj attr-name)
+  (cond 
+    ((assq attr-name (<a href="sxpathlib.html#codefunc50657">sxml:attr-list</a> obj))
+     =&gt; cadr)
+    (else #f)))
+</pre>
+<h4><a name='codefunc42978' href='#docfunc42978'>sxml:attr-from-list</a></h4>
+<i><a href='#tocfunc42978'>Index</a></i><br>
+
+<pre> Extracts a value of attribute with given name from attr-list
+</pre>
+<pre>(define (<a href="sxml-tools.html#codefunc42978">sxml:attr-from-list</a> attr-list name)
+	    (cond 
+	      ((assq name attr-list) 
+	       =&gt; cadr)
+	      (else #f)))
+</pre>
+<h4><a name='codefunc38564' href='#docfunc38564'>sxml:num-attr</a></h4>
+<i><a href='#tocfunc38564'>Index</a></i><br>
+
+<pre> Accessor for a numerical attribute &lt;attr-name&gt; of given SXML element &lt;obj&gt; 
+ which It returns: 
+    a value of the attribute as the attribute as a number if the attribute 
+    is present and its value may be converted to number using string-&gt;number
+    #f if there is no such an attribute in the given element or
+    its value can't be converted to a number
+</pre>
+<pre>(define (<a href="sxml-tools.html#codefunc38564">sxml:num-attr</a> obj attr-name)
+  (cond 
+    ((assq attr-name (<a href="sxpathlib.html#codefunc50657">sxml:attr-list</a> obj))
+     =&gt; (lambda(x) (string-&gt;number (cadr x))))
+    (else #f)))
+</pre>
+<h4><a name='codefunc59510' href='#docfunc59510'>sxml:attr-u</a></h4>
+<i><a href='#tocfunc59510'>Index</a></i><br>
+
+<pre> Accessor for an attribute &lt;attr-name&gt; of given SXML element &lt;obj&gt; which 
+ may also be an attributes-list or nodeset (usually content of SXML element)
+
+ It returns: 
+    the value of the attribute if the attribute is present
+    #f if there is no such an attribute in the given element
+</pre>
+<pre>(define (<a href="sxml-tools.html#codefunc59510">sxml:attr-u</a> obj attr-name)
+  (cond 
+    ((assq attr-name
+	   ; the list of attributes is computed below
+	   (cond
+	     ((and (not (null? (cdr obj))) 
+		   (pair? (cadr obj))
+		   (eq? '@ (caadr obj)))
+	      (cdadr obj))   ; fast track for normalized elements 
+	     ((eq? '@ (car obj))
+	      (cdr obj))     ; if applied to attr-list
+	     (else (<a href="sxml-tools.html#codefunc15119">sxml:attr-list-u</a> obj))))
+     =&gt; cadr)
+    (else #f)))
+</pre>
+<h4><a name='codefunc24174' href='#docfunc24174'>sxml:ns-list</a></h4>
+<i><a href='#tocfunc24174'>Index</a></i><br>
+
+<pre> Returns the list of namespaces for given element.
+ Analog of ((sxpath '(@@ *NAMESPACES* *)) obj)
+ Empty list is returned if there is no list of namespaces.
+</pre>
+<pre>(define (<a href="sxml-tools.html#codefunc24174">sxml:ns-list</a> obj)
+  (cond ((assv '*NAMESPACES* (<a href="sxml-tools.html#codefunc40603">sxml:aux-list</a> obj))
+	 =&gt; cdr)
+	(else '())))
+</pre>
+<h4><a name='codefunc63594' href='#docfunc63594'>sxml:ns-id->nodes</a></h4>
+<i><a href='#tocfunc63594'>Index</a></i><br>
+
+<pre> Returns the list of namespace-assoc's for given namespace-id in 
+ SXML element &lt;obj&gt;.
+ Analog of ((sxpath '(@@ *NAMESPACES* namespace-id)) obj)
+ Empty list is returned if there is no namespace-assoc with namespace-id
+ given.
+</pre>
+<pre>(define (<a href="sxml-tools.html#codefunc63594">sxml:ns-id-&gt;nodes</a> obj namespace-id)
+  (<a href="common.html#codefunc20536">filter</a> 
+    (lambda(x)
+      (eq? (car x) namespace-id))
+    (<a href="sxml-tools.html#codefunc24174">sxml:ns-list</a> obj)))
+</pre>
+<h4><a name='codefunc38403' href='#docfunc38403'>sxml:ns-id->uri</a></h4>
+<i><a href='#tocfunc38403'>Index</a></i><br>
+
+<pre> It returns: 
+    A  URI's for namespace-id given 
+    #f if there is no namespace-assoc with namespace-id given
+</pre>
+<pre>(define (<a href="sxml-tools.html#codefunc38403">sxml:ns-id-&gt;uri</a> obj namespace-id)
+  (cond 
+    ((assq namespace-id (<a href="sxml-tools.html#codefunc24174">sxml:ns-list</a> obj))
+     =&gt; cadr)
+    (else #f)))
+</pre>
+<h4><a name='codefunc26240' href='#docfunc26240'>sxml:ns-uri->nodes</a></h4>
+<i><a href='#tocfunc26240'>Index</a></i><br>
+
+<pre> Returns a list of namespace-assocs nodes for NS URI given 
+</pre>
+<pre>(define (<a href="sxml-tools.html#codefunc26240">sxml:ns-uri-&gt;nodes</a> obj URI)
+  (<a href="common.html#codefunc20536">filter</a>
+    (lambda (ns-assoc) 
+      (string=? (cadr ns-assoc) URI))
+    (<a href="sxml-tools.html#codefunc24174">sxml:ns-list</a> obj)))
+</pre>
+<h4><a name='codefunc35343' href='#docfunc35343'>sxml:ns-uri->id</a></h4>
+<i><a href='#tocfunc35343'>Index</a></i><br>
+
+<pre> Returns a namespace-id for NS URI given 
+</pre>
+<pre>(define (<a href="sxml-tools.html#codefunc35343">sxml:ns-uri-&gt;id</a> obj URI)
+  (let rpt ((ns-assocs (<a href="sxml-tools.html#codefunc24174">sxml:ns-list</a> obj)))
+  (cond
+      ((null? ns-assocs) #f)
+      ((string=? (cadar ns-assocs) URI)
+       (caar ns-assocs))
+      (else (rpt (cdr ns-assocs)))
+    )))
+</pre>
+<h4><a name='codefunc58615' href='#docfunc58615'>sxml:ns-id</a></h4>
+<i><a href='#tocfunc58615'>Index</a></i><br>
+
+<pre> Returns namespace-id for given namespace-assoc list
+</pre>
+<pre>(define <a href="sxml-tools.html#codefunc58615">sxml:ns-id</a> car)
+</pre>
+<h4><a name='codefunc62316' href='#docfunc62316'>sxml:ns-uri</a></h4>
+<i><a href='#tocfunc62316'>Index</a></i><br>
+
+<pre> Returns URI for given namespace-assoc list
+</pre>
+<pre>(define <a href="sxml-tools.html#codefunc62316">sxml:ns-uri</a> cadr)
+</pre>
+<h4><a name='codefunc53709' href='#docfunc53709'>sxml:ns-prefix</a></h4>
+<i><a href='#tocfunc53709'>Index</a></i><br>
+
+<pre> It returns namespace prefix for given namespace-assoc list
+  Original (as in XML document) prefix for namespace-id given 
+ has to be strored as the third element in namespace-assoc list 
+ if it is different from namespace-id.
+    If original prefix is omitted in namespace-assoc then
+      namespace-id is used instead
+</pre>
+<pre>(define (<a href="sxml-tools.html#codefunc53709">sxml:ns-prefix</a> ns-assoc)
+      (if (&gt; (length ns-assoc) 2)
+	(caddr ns-assoc)
+	(car ns-assoc))) 
+</pre>
+<h4><a name='codefunc23524' href='#docfunc23524'>select-first-kid</a></h4>
+<i><a href='#tocfunc23524'>Index</a></i><br>
+
+<pre> select-first-kid:: Pred -&gt; Node -&gt; Node
+ Given a Node, return its first child that satisfy
+ the test-pred?
+ Returns #f if there is no such a child
+ select-first-kid:: Pred -&gt; Nodeset -&gt; Node
+ The same as above, but select among children of all the nodes in
+ the Nodeset
+</pre>
+<pre>(define (<a href="sxml-tools.html#codefunc23524">select-first-kid</a> test-pred?)
+ (lambda(obj)
+  (let rpt ((lst (if (symbol? (car obj)) 
+		  (cdr obj)
+		  obj)))
+    (cond 
+      ((null? lst) #f)
+      ((and (pair? (car lst))
+	    (test-pred? (car lst)))
+	(car lst))
+      (else (rpt (cdr lst)))) 
+    )))
+</pre>
+<h4><a name='codefunc8257' href='#docfunc8257'>sxml:node-parent</a></h4>
+<i><a href='#tocfunc8257'>Index</a></i><br>
+
+<pre> Returns a function of one argument - SXML element - which returns its parent
+ node using *PARENT* pointer in aux-list
+ '*TOP-PTR* may be used as a pointer to root node
+ It return an empty list when applyed to root node
+</pre>
+<pre>(define (<a href="sxml-tools.html#codefunc8257">sxml:node-parent</a> rootnode)
+  (lambda(obj)
+  (cond 
+    ((<a href="sxml-tools.html#codefunc37266">sxml:aux-node</a> obj '*PARENT*)
+     =&gt; (lambda(x)
+ 	  (if 
+ 	    (eq? '*TOP-PTR* (cadr x))
+	  rootnode
+	  ((cadr x)))))
+    ((and (pair? obj)
+          (eq? (car obj) '*TOP* ))
+     '())           
+     (else (<a href="sxml-tools.html#codefunc12029">sxml:error</a> <a href="myenv.html#codefunc27758">nl</a> &quot;PARENT pointer is absent in: &quot; obj <a href="myenv.html#codefunc27758">nl</a>)
+	   ))))
+</pre>
+<h4><a name='codefunc28392' href='#docfunc28392'>sxml:add-parents</a></h4>
+<i><a href='#tocfunc28392'>Index</a></i><br>
+
+<pre>(define (<a href="sxml-tools.html#codefunc28392">sxml:add-parents</a> obj . top-ptr)
+  (let rpt 
+    ((elt obj)
+     (p '*TOP*)
+     (at-aux (if (eq? (<a href="sxml-tools.html#codefunc49377">sxml:name</a> obj) '*TOP*)
+		(list (cons '@@ (<a href="sxml-tools.html#codefunc52240">sxml:aux-list-u</a> obj)))
+		(list
+		  (cons '@ (<a href="sxpathlib.html#codefunc50657">sxml:attr-list</a> obj))
+		  (cons '@@ (cons `(*PARENT* ,(lambda() (car top-ptr))) 
+						 (<a href="sxml-tools.html#codefunc40603">sxml:aux-list</a> obj))))))
+     ) ; *TOP* is a parent for top-level element
+    (let* ((h (list (<a href="sxml-tools.html#codefunc49377">sxml:name</a> elt)))
+	   (b  (append 
+		 at-aux
+		 (map
+		     (lambda(x)
+		       (cond 
+			 (((<a href="sxpathlib.html#codefunc9356">ntype??</a> '*) x)
+			  (rpt x h
+			       (list
+				 (cons '@ (<a href="sxpathlib.html#codefunc50657">sxml:attr-list</a> x))
+				 (cons '@@ (cons `(*PARENT* ,(lambda() h)) 
+						 (<a href="sxml-tools.html#codefunc40603">sxml:aux-list</a> x))))
+			       ))
+			 (else x)))
+		     (<a href="sxml-tools.html#codefunc36973">sxml:content</a> elt)))))
+      (set-cdr! h b)
+      h)))
+</pre>
+<h4><a name='codefunc13926' href='#docfunc13926'>sxml:lookup</a></h4>
+<i><a href='#tocfunc13926'>Index</a></i><br>
+
+<pre> Lookup an element using its ID 
+</pre>
+<pre>(define (<a href="sxml-tools.html#codefunc13926">sxml:lookup</a> id index)
+    (cond
+      ((assoc id index) 
+       =&gt; cdr)
+      (else #f)))
+</pre>
+<h4><a name='codefunc52397' href='#docfunc52397'>sxml:attr->xml</a></h4>
+<i><a href='#tocfunc52397'>Index</a></i><br>
+
+<pre> Creates the XML markup for attributes.
+</pre>
+<pre>(define (<a href="sxml-tools.html#codefunc52397">sxml:attr-&gt;xml</a> attr)
+   (list &quot; &quot; (<a href="sxml-tools.html#codefunc12101">sxml:ncname</a> attr)
+	 &quot;='&quot; (cadr attr) &quot;'&quot;))
+</pre>
+<h4><a name='codefunc19212' href='#docfunc19212'>sxml:string->xml</a></h4>
+<i><a href='#tocfunc19212'>Index</a></i><br>
+
+<pre> Return a string or a list of strings where all the occurences of 
+ characters &lt; &gt; &amp; &quot; ' in a given string are replaced by corresponding 
+ character entity references. See also:  sxml:string-&gt;html
+</pre>
+<pre>(define <a href="sxml-tools.html#codefunc19212">sxml:string-&gt;xml</a>
+  (<a href="util.html#codefunc35218">make-char-quotator</a>
+   '((#\&lt; . &quot;&amp;lt;&quot;) (#\&gt; . &quot;&amp;gt;&quot;) (#\&amp; . &quot;&amp;amp;&quot;) 
+		    (#\&quot; . &quot;&amp;quot;&quot;) (#\' . &quot;&amp;apos;&quot;))))
+</pre>
+<h4><a name='codefunc55211' href='#docfunc55211'>sxml:sxml->xml</a></h4>
+<i><a href='#tocfunc55211'>Index</a></i><br>
+
+<pre> A version of dispatch-node specialized and optimized for SXML-&gt;XML
+ transformation.
+</pre>
+<pre>(define (<a href="sxml-tools.html#codefunc55211">sxml:sxml-&gt;xml</a> tree)
+  (cond
+    ((<a href="sxpathlib.html#codefunc31162">nodeset?</a> tree)
+     (map (lambda (a-tree) 
+	    (<a href="sxml-tools.html#codefunc55211">sxml:sxml-&gt;xml</a> a-tree)) 
+	  tree))
+    ((pair? tree)
+     (let* ((name (<a href="sxml-tools.html#codefunc49377">sxml:name</a> tree))   ; NS (URI-prefixed) not supported
+	    (nm (symbol-&gt;string name))
+	    (content (<a href="sxml-tools.html#codefunc31228">sxml:content-raw</a> tree)))
+	 `(&quot;&lt;&quot; ,nm ,@(map <a href="sxml-tools.html#codefunc52397">sxml:attr-&gt;xml</a> (<a href="sxpathlib.html#codefunc50657">sxml:attr-list</a> tree))
+	   ,@(if (null? content) '(&quot;/&gt;&quot;)
+	       `(&quot;&gt;&quot; ,@(<a href="sxml-tools.html#codefunc55211">sxml:sxml-&gt;xml</a> content) &quot;&lt;/&quot; ,nm &quot;&gt;&quot;)))))
+    ((string? tree) (<a href="sxml-tools.html#codefunc19212">sxml:string-&gt;xml</a> tree)) ; *text*
+    (else (<a href="sxml-tools.html#codefunc12029">sxml:error</a> &quot;sxml-&gt;html - unexpected type of node: &quot; tree))))
+</pre>
+<h4><a name='codefunc48672' href='#docfunc48672'>sxml:attr->html</a></h4>
+<i><a href='#tocfunc48672'>Index</a></i><br>
+
+<pre> Creates the HTML markup for attributes.
+</pre>
+<pre>(define (<a href="sxml-tools.html#codefunc48672">sxml:attr-&gt;html</a> attr)
+	 (if (equal? &quot;&quot; (cadr attr))
+             (list &quot; &quot; (<a href="sxml-tools.html#codefunc12101">sxml:ncname</a> attr))
+             (list &quot; &quot; (<a href="sxml-tools.html#codefunc12101">sxml:ncname</a> attr) &quot;='&quot; (cadr attr) &quot;'&quot;)))
+</pre>
+<h4><a name='codefunc15487' href='#docfunc15487'>sxml:string->html</a></h4>
+<i><a href='#tocfunc15487'>Index</a></i><br>
+
+<pre> Given a string, check to make sure it does not contain characters
+ &lt; &gt; &amp; &quot; that require encoding. Return either the original
+ string, or a list of string fragments with special characters
+ replaced by appropriate character entities.
+ Borrowed from Oleg Kiselyov's XML-to-HTML.scm (where its name is
+ string-&gt;goodHTML)
+</pre>
+<pre>(define <a href="sxml-tools.html#codefunc15487">sxml:string-&gt;html</a>
+  (<a href="util.html#codefunc35218">make-char-quotator</a>
+   '((#\&lt; . &quot;&amp;lt;&quot;) (#\&gt; . &quot;&amp;gt;&quot;) (#\&amp; . &quot;&amp;amp;&quot;) (#\&quot; . &quot;&amp;quot;&quot;))))
+</pre>
+<h4><a name='codefunc49781' href='#docfunc49781'>sxml:non-terminated-html-tag?</a></h4>
+<i><a href='#tocfunc49781'>Index</a></i><br>
+
+<pre> This predicate yields #t for &quot;unterminated&quot; HTML 4.0 tags
+</pre>
+<pre>(define (<a href="sxml-tools.html#codefunc49781">sxml:non-terminated-html-tag?</a> tag) 
+  (memq tag 
+     '(area base basefont br col frame hr img input isindex link meta param)))
+</pre>
+<h4><a name='codefunc51486' href='#docfunc51486'>sxml:sxml->html</a></h4>
+<i><a href='#tocfunc51486'>Index</a></i><br>
+
+<pre> A version of dispatch-node specialized and optimized for SXML-&gt;HTML
+ transformation.
+</pre>
+<pre>(define (<a href="sxml-tools.html#codefunc51486">sxml:sxml-&gt;html</a> tree)
+  (cond
+    ((<a href="sxpathlib.html#codefunc31162">nodeset?</a> tree)
+     (map (lambda (a-tree) 
+	    (<a href="sxml-tools.html#codefunc51486">sxml:sxml-&gt;html</a> a-tree)) 
+	  tree))
+    ((pair? tree)
+     (let* ((name (<a href="sxml-tools.html#codefunc49377">sxml:name</a> tree))
+	    (nm (symbol-&gt;string name))
+	    (content (<a href="sxml-tools.html#codefunc31228">sxml:content-raw</a> tree)))
+	 `(&quot;&lt;&quot; ,nm ,@(map <a href="sxml-tools.html#codefunc48672">sxml:attr-&gt;html</a> (<a href="sxpathlib.html#codefunc50657">sxml:attr-list</a> tree))
+	   ,@(if (null? content)
+	       (if (<a href="sxml-tools.html#codefunc49781">sxml:non-terminated-html-tag?</a> name) '(&quot;&gt;&quot;) '(&quot;/&gt;&quot;))
+	       `(&quot;&gt;&quot; ,@(<a href="sxml-tools.html#codefunc51486">sxml:sxml-&gt;html</a> content) &quot;&lt;/&quot; ,nm &quot;&gt;&quot;)))))
+    ((string? tree) (<a href="sxml-tools.html#codefunc15487">sxml:string-&gt;html</a> tree)) ; *text*
+    (else (<a href="sxml-tools.html#codefunc12029">sxml:error</a> &quot;sxml-&gt;html - unexpected type of node: &quot; tree))))
+</pre></body></html>

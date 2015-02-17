@@ -1,0 +1,541 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN""http://www.w3.org/TR/html401/loose.dtd"><html><head><meta name="GENERATOR" content="Mole: The Scheme Source Code Digger"><title>Module: myenv</title><meta name='keywords' content=''></head><body bgcolor='#ffffff' text='#384412'  link='#11af05' vlink='#728b09'>
+<center><h1>Module: myenv</h1></center>
+
+<pre> $Id: myenv.ss,v 1.14 2002/03/28 22:23:06 nwv Exp $
+ $Source: /home/nwv/cvsroot/projects/ssax-plt/myenv.ss,v $
+ [ssax-plt] This is a modified version of &quot;official/lib/myenv.scm&quot;.
+ ;(module myenv mzscheme
+ ;  (require (lib &quot;defmacro.ss&quot;))
+ ;  (require (rename (lib &quot;pretty.ss&quot;) pp pretty-print))
+</pre><p><br>
+<!-- Table of content -->
+<p><dl>
+
+m:  <a name='tocmacro19783' href='#docmacro19783' style='text-decoration:none'>assert</a><br>
+
+m:  <a name='tocmacro20039' href='#docmacro20039' style='text-decoration:none'>assure</a><br>
+
+f:  <a name='tocfunc65464' href='#docfunc65464' style='text-decoration:none'>identify-error</a><br>
+
+f:  <a name='tocfunc58328' href='#docfunc58328' style='text-decoration:none'>cout</a><br>
+
+f:  <a name='tocfunc55253' href='#docfunc55253' style='text-decoration:none'>cerr</a><br>
+
+f:  <a name='tocfunc27758' href='#docfunc27758' style='text-decoration:none'>nl</a><br>
+
+m:  <a name='tocmacro11084' href='#docmacro11084' style='text-decoration:none'>++!</a><br>
+
+m:  <a name='tocmacro11051' href='#docmacro11051' style='text-decoration:none'>++</a><br>
+
+m:  <a name='tocmacro11598' href='#docmacro11598' style='text-decoration:none'>--!</a><br>
+
+m:  <a name='tocmacro11565' href='#docmacro11565' style='text-decoration:none'>--</a><br>
+
+m:  <a name='tocmacro18111' href='#docmacro18111' style='text-decoration:none'>whennot</a><br>
+
+m:  <a name='tocmacro56836' href='#docmacro56836' style='text-decoration:none'>push!</a><br>
+
+m:  <a name='tocmacro56658' href='#docmacro56658' style='text-decoration:none'>let-values*</a><br>
+
+m:  <a name='tocmacro44903' href='#docmacro44903' style='text-decoration:none'>assq-def</a><br>
+
+m:  <a name='tocmacro46183' href='#docmacro46183' style='text-decoration:none'>assv-def</a><br>
+
+m:  <a name='tocmacro30210' href='#docmacro30210' style='text-decoration:none'>assoc-def</a><br>
+
+m:  <a name='tocmacro27312' href='#docmacro27312' style='text-decoration:none'>env.find</a><br>
+
+m:  <a name='tocmacro51227' href='#docmacro51227' style='text-decoration:none'>env.demand</a><br>
+
+m:  <a name='tocmacro27308' href='#docmacro27308' style='text-decoration:none'>env.bind</a><br>
+
+m:  <a name='tocmacro6205' href='#docmacro6205' style='text-decoration:none'>cond-expand</a><br>
+
+f:  <a name='tocfunc15729' href='#docfunc15729' style='text-decoration:none'>call-with-input-string</a><br>
+
+f:  <a name='tocfunc26718' href='#docfunc26718' style='text-decoration:none'>with-input-from-string</a><br>
+<p><dt><a name='tocchapt29757' href='#chapt29757'><b>DL: this piece of code is taken from the previous version of "myenv.scm"</b></a><dd>
+
+m:  <a name='tocmacro28364' href='#docmacro28364' style='text-decoration:none'>inc</a><br>
+
+m:  <a name='tocmacro26055' href='#docmacro26055' style='text-decoration:none'>dec</a><br>
+
+f:  <a name='tocfunc58107' href='#docfunc58107' style='text-decoration:none'>cons*</a><br>
+
+m:  <a name='tocmacro16295' href='#docmacro16295' style='text-decoration:none'>include</a><br>
+
+m:  <a name='tocmacro17550' href='#docmacro17550' style='text-decoration:none'>declare</a><br>
+</dl>
+
+<h4><a name='docmacro19783' href='#tocmacro19783'>assert</a></h4>
+(define-macro (assert expr . others)<i><br> ... <a href='#codemacro19783'>Full Code</a> ... )</i>
+<pre> syntax: assert ?expr ?expr ... [report: ?r-exp ?r-exp ...]
+
+ If (and ?expr ?expr ...) evaluates to anything but #f, the result
+ is the value of that expression.
+ If (and ?expr ?expr ...) evaluates to #f, an error is reported.
+ The error message will show the failed expressions, as well
+ as the values of selected variables (or expressions, in general).
+ The user may explicitly specify the expressions whose
+ values are to be printed upon assertion failure -- as ?r-exp that
+ follow the identifier 'report:'
+ Typically, ?r-exp is either a variable or a string constant.
+ If the user specified no ?r-exp, the values of variables that are
+ referenced in ?expr will be printed upon the assertion failure.
+</pre><p><br>
+
+<h4><a name='docmacro20039' href='#tocmacro20039'>assure</a></h4>
+(define-macro (assure exp error-msg)<i><br> ... <a href='#codemacro20039'>Full Code</a> ... )</i><p><br>
+
+<h4><a name='docfunc65464' href='#tocfunc65464'>identify-error</a></h4>
+(define identify-error <i><br> ... <a href='#codefunc65464'>Full Code</a> ... )</i>
+<pre>  (##identify-error &quot;ERROR&quot; #f #f msg args disposition-msgs))
+</pre><p><br>
+
+<h4><a name='docfunc58328' href='#tocfunc58328'>cout</a></h4>
+(define (cout . args)<i><br> ... <a href='#codefunc58328'>Full Code</a> ... )</i>
+<pre> like cout &lt;&lt; arguments &lt;&lt; args
+ where argument can be any Scheme object. If it's a procedure
+ (without args) it's executed rather than printed (like newline)
+</pre><p><br>
+
+<h4><a name='docfunc55253' href='#tocfunc55253'>cerr</a></h4>
+(define (cerr . args)<i><br> ... <a href='#codefunc55253'>Full Code</a> ... )</i><p><br>
+
+<h4><a name='docfunc27758' href='#tocfunc27758'>nl</a></h4>
+(define nl <i><br> ... <a href='#codefunc27758'>Full Code</a> ... )</i><p><br>
+
+<h4><a name='docmacro11084' href='#tocmacro11084'>++!</a></h4>
+(define-macro (++! x)<i><br> ... <a href='#codemacro11084'>Full Code</a> ... )</i><p><br>
+
+<h4><a name='docmacro11051' href='#tocmacro11051'>++</a></h4>
+(define-macro (++ x)<i><br> ... <a href='#codemacro11051'>Full Code</a> ... )</i><p><br>
+
+<h4><a name='docmacro11598' href='#tocmacro11598'>--!</a></h4>
+(define-macro (--! x)<i><br> ... <a href='#codemacro11598'>Full Code</a> ... )</i><p><br>
+
+<h4><a name='docmacro11565' href='#tocmacro11565'>--</a></h4>
+(define-macro (-- x)<i><br> ... <a href='#codemacro11565'>Full Code</a> ... )</i><p><br>
+
+<h4><a name='docmacro18111' href='#tocmacro18111'>whennot</a></h4>
+(define-macro (whennot condition . stmts)<i><br> ... <a href='#codemacro18111'>Full Code</a> ... )</i><p><br>
+
+<h4><a name='docmacro56836' href='#tocmacro56836'>push!</a></h4>
+(define-macro (push! item ls)<i><br> ... <a href='#codemacro56836'>Full Code</a> ... )</i><p><br>
+
+<h4><a name='docmacro56658' href='#tocmacro56658'>let-values*</a></h4>
+(define-macro let-values* (lambda (bindings . body)<i><br> ... <a href='#codemacro56658'>Full Code</a> ... )</i>
+<pre> Like let* but allowing for multiple-value bindings
+(define-macro (let-values* bindings . body)
+  (if (null? bindings) (cons 'begin body)
+      (apply (lambda (vars initializer)
+	 (let ((cont 
+		(cons 'let-values* 
+		      (cons (cdr bindings) body))))
+	   (cond
+	    ((not (pair? vars))		; regular let case, a single var
+	     `(let ((,vars ,initializer)) ,cont))
+	    ((null? (cdr vars))		; single var, see the prev case
+	     `(let ((,(car vars) ,initializer)) ,cont))
+	    ((null? (cddr vars))	; two variables
+	     (let ((val (gensym)))
+	       `(let* ((,val ,initializer)
+		       (,(car vars) (car ,val))
+		       (,(cadr vars) (cadr ,val))) ,cont)))
+	   (else			; the most generic case
+	    `(apply (lambda ,vars ,cont) ,initializer)))))
+       (car bindings))))
+</pre><p><br>
+
+<h4><a name='docmacro44903' href='#tocmacro44903'>assq-def</a></h4>
+(define-macro (assq-def key alist . default-action-arg)<i><br> ... <a href='#codemacro44903'>Full Code</a> ... )</i><p><br>
+
+<h4><a name='docmacro46183' href='#tocmacro46183'>assv-def</a></h4>
+(define-macro (assv-def key alist . default-action-arg)<i><br> ... <a href='#codemacro46183'>Full Code</a> ... )</i><p><br>
+
+<h4><a name='docmacro30210' href='#tocmacro30210'>assoc-def</a></h4>
+(define-macro (assoc-def key alist . default-action-arg)<i><br> ... <a href='#codemacro30210'>Full Code</a> ... )</i><p><br>
+
+<h4><a name='docmacro27312' href='#tocmacro27312'>env.find</a></h4>
+(define-macro (env.find key)<i><br> ... <a href='#codemacro27312'>Full Code</a> ... )</i><p><br>
+
+<h4><a name='docmacro51227' href='#tocmacro51227'>env.demand</a></h4>
+(define-macro (env.demand key)<i><br> ... <a href='#codemacro51227'>Full Code</a> ... )</i><p><br>
+
+<h4><a name='docmacro27308' href='#tocmacro27308'>env.bind</a></h4>
+(define-macro (env.bind key value)<i><br> ... <a href='#codemacro27308'>Full Code</a> ... )</i><p><br>
+
+<h4><a name='docmacro6205' href='#tocmacro6205'>cond-expand</a></h4>
+(define-macro (cond-expand . clauses)<i><br> ... <a href='#codemacro6205'>Full Code</a> ... )</i><p><br>
+
+<h4><a name='docfunc15729' href='#tocfunc15729'>call-with-input-string</a></h4>
+(define (call-with-input-string str proc)<i><br> ... <a href='#codefunc15729'>Full Code</a> ... )</i><p><br>
+
+<h4><a name='docfunc26718' href='#tocfunc26718'>with-input-from-string</a></h4>
+(define (with-input-from-string str thunk)<i><br> ... <a href='#codefunc26718'>Full Code</a> ... )</i>
+<pre> I guess there's only one way to write this... :)
+(define (string-index str chr)
+  (let ((len (string-length str)))
+    (let search ((i 0))
+      (cond ((= i len)                       #f)
+            ((char=? chr (string-ref str i)) i)
+            (else                            (search (+ i 1)))))))
+</pre><p><br>
+<hr height='5'><center><h3><a name='chapt29757' href='#tocchapt29757'>DL: this piece of code is taken from the previous version of "myenv.scm"</a></h3></center>
+
+<pre> Stubs
+</pre>
+<h4><a name='docmacro28364' href='#tocmacro28364'>inc</a></h4>
+(define-macro (inc x)<i><br> ... <a href='#codemacro28364'>Full Code</a> ... )</i><p><br>
+
+<h4><a name='docmacro26055' href='#tocmacro26055'>dec</a></h4>
+(define-macro (dec x)<i><br> ... <a href='#codemacro26055'>Full Code</a> ... )</i><p><br>
+
+<h4><a name='docfunc58107' href='#tocfunc58107'>cons*</a></h4>
+(define (cons* a1 a2 . rest)<i><br> ... <a href='#codefunc58107'>Full Code</a> ... )</i><p><br>
+
+<h4><a name='docmacro16295' href='#tocmacro16295'>include</a></h4>
+(define-macro include (lambda (file)<i><br> ... <a href='#codemacro16295'>Full Code</a> ... )</i><p><br>
+
+<h4><a name='docmacro17550' href='#tocmacro17550'>declare</a></h4>
+(define-macro declare (lambda x<i><br> ... <a href='#codemacro17550'>Full Code</a> ... )</i><p><br>
+<center><h1>Code</h1></center>
+
+<h5><a name='codemacro19783' href='#docmacro19783'>assert</a></h5>
+<i><a href='#tocmacro19783'>Index</a></i><br>
+
+<pre> syntax: assert ?expr ?expr ... [report: ?r-exp ?r-exp ...]
+
+ If (and ?expr ?expr ...) evaluates to anything but #f, the result
+ is the value of that expression.
+ If (and ?expr ?expr ...) evaluates to #f, an error is reported.
+ The error message will show the failed expressions, as well
+ as the values of selected variables (or expressions, in general).
+ The user may explicitly specify the expressions whose
+ values are to be printed upon assertion failure -- as ?r-exp that
+ follow the identifier 'report:'
+ Typically, ?r-exp is either a variable or a string constant.
+ If the user specified no ?r-exp, the values of variables that are
+ referenced in ?expr will be printed upon the assertion failure.
+</pre>
+<pre>(define-macro (<a href="myenv.html#codemacro19783">assert</a> expr . others)
+			; given the list of expressions or vars,
+			; make the list appropriate for <a href="myenv.html#codefunc55253">cerr</a>
+  (define (make-print-list prefix lst)
+    (cond
+     ((null? lst) '())
+     ((symbol? (car lst))
+      (cons #\newline
+	(cons (list 'quote (car lst))
+	  (cons &quot;: &quot; (cons (car lst) (make-print-list #\newline (cdr lst)))))))
+     (else 
+      (cons prefix (cons (car lst) (make-print-list &quot;&quot; (cdr lst)))))))
+
+			; return the list of all unique &quot;interesting&quot;
+			; variables in the expr. Variables that are certain
+			; to be bound to procedures are not interesting.
+  (define (vars-of expr)
+    (let loop ((expr expr) (vars '()))
+      (cond
+       ((not (pair? expr)) vars)	; not an application <a href="myenv.html#codemacro11565">--</a> ignore
+       ((memq (car expr) 
+	      '(quote let let* letrec <a href="myenv.html#codemacro56658">let-values*</a> lambda cond quasiquote
+		      case define do <a href="myenv.html#codemacro19783">assert</a>))
+	vars)				; won't go there
+       (else				; ignore the head of the application
+	(let inner ((expr (cdr expr)) (vars vars))
+	  (cond 
+	   ((null? expr) vars)
+	   ((symbol? (car expr))
+	    (inner (cdr expr)
+		   (if (memq (car expr) vars) vars (cons (car expr) vars))))
+	   (else
+	    (inner (cdr expr) (loop (car expr) vars)))))))))
+
+  (cond
+   ((null? others)		; the most common case
+    `(or ,expr (begin (<a href="myenv.html#codefunc55253">cerr</a> &quot;failed assertion: &quot; ',expr <a href="myenv.html#codefunc27758">nl</a> &quot;bindings&quot;
+			    ,@(make-print-list #\newline (vars-of expr)) <a href="myenv.html#codefunc27758">nl</a>)
+		      (error &quot;assertion failure&quot;))))
+   ((eq? (car others) 'report:) ; another common case
+    `(or ,expr (begin (<a href="myenv.html#codefunc55253">cerr</a> &quot;failed assertion: &quot; ',expr
+			    ,@(make-print-list #\newline (cdr others)) <a href="myenv.html#codefunc27758">nl</a>)
+		      (error &quot;assertion failure&quot;))))
+   ((not (memq 'report: others))
+    `(or (and ,expr ,@others)
+	 (begin (<a href="myenv.html#codefunc55253">cerr</a> &quot;failed assertion: &quot; '(,expr ,@others) <a href="myenv.html#codefunc27758">nl</a> &quot;bindings&quot;
+		      ,@(make-print-list #\newline
+			 (vars-of (cons 'and (cons expr others)))) <a href="myenv.html#codefunc27758">nl</a>)
+		      (error &quot;assertion failure&quot;))))
+   (else			; report: occurs somewhere in 'others'
+    (let loop ((exprs (list expr)) (reported others))
+      (cond
+       ((eq? (car reported) 'report:)
+	`(or (and ,@(reverse exprs))
+	     (begin (<a href="myenv.html#codefunc55253">cerr</a> &quot;failed assertion: &quot; ',(reverse exprs)
+			  ,@(make-print-list #\newline (cdr reported)) <a href="myenv.html#codefunc27758">nl</a>)
+		    (error &quot;assertion failure&quot;))))
+       (else (loop (cons (car reported) exprs) (cdr reported)))))))
+)
+</pre>
+<h5><a name='codemacro20039' href='#docmacro20039'>assure</a></h5>
+<i><a href='#tocmacro20039'>Index</a></i><br>
+
+<pre>(define-macro (<a href="myenv.html#codemacro20039">assure</a> exp error-msg) `(<a href="myenv.html#codemacro19783">assert</a> ,exp report: ,error-msg))
+</pre>
+<h4><a name='codefunc65464' href='#docfunc65464'>identify-error</a></h4>
+<i><a href='#tocfunc65464'>Index</a></i><br>
+
+<pre>  (##identify-error &quot;ERROR&quot; #f #f msg args disposition-msgs))
+</pre>
+<pre>(define <a href="myenv.html#codefunc65464">identify-error</a>
+  (let ((display-list (lambda (lst)
+                        (for-each (lambda (arg)
+                                    (display &quot; &quot;)
+                                    (display arg))
+                                  lst))))
+    (lambda (msg args . disposition-msgs)
+      (parameterize ((current-output-port (current-error-port)))
+        (newline)
+        (display &quot;ERROR: &quot;)
+        (display msg)
+        (display-list args)
+        (unless (null? disposition-msgs)
+          (newline)
+          (display &quot;ERROR DISPOSITION:&quot;)
+          (display-list disposition-msgs))
+        (newline)))))
+</pre>
+<h4><a name='codefunc58328' href='#docfunc58328'>cout</a></h4>
+<i><a href='#tocfunc58328'>Index</a></i><br>
+
+<pre> like cout &lt;&lt; arguments &lt;&lt; args
+ where argument can be any Scheme object. If it's a procedure
+ (without args) it's executed rather than printed (like newline)
+</pre>
+<pre>(define (<a href="myenv.html#codefunc58328">cout</a> . args)
+  (for-each (lambda (x)
+              (if (procedure? x) (x) (display x)))
+            args))
+</pre>
+<h4><a name='codefunc55253' href='#docfunc55253'>cerr</a></h4>
+<i><a href='#tocfunc55253'>Index</a></i><br>
+
+<pre>(define (<a href="myenv.html#codefunc55253">cerr</a> . args)
+  (for-each (lambda (x)
+              (if (procedure? x)
+                  (x (current-error-port))
+                  (display x (current-error-port))))
+            args))
+</pre>
+<h4><a name='codefunc27758' href='#docfunc27758'>nl</a></h4>
+<i><a href='#tocfunc27758'>Index</a></i><br>
+
+<pre>(define <a href="myenv.html#codefunc27758">nl</a> (string #\newline))
+</pre>
+<h5><a name='codemacro11084' href='#docmacro11084'>++!</a></h5>
+<i><a href='#tocmacro11084'>Index</a></i><br>
+
+<pre>(define-macro (<a href="myenv.html#codemacro11084">++!</a> x) `(set! ,x (+ 1 ,x)))
+</pre>
+<h5><a name='codemacro11051' href='#docmacro11051'>++</a></h5>
+<i><a href='#tocmacro11051'>Index</a></i><br>
+
+<pre>(define-macro (<a href="myenv.html#codemacro11051">++</a> x) `(+ 1 ,x))
+</pre>
+<h5><a name='codemacro11598' href='#docmacro11598'>--!</a></h5>
+<i><a href='#tocmacro11598'>Index</a></i><br>
+
+<pre>(define-macro (<a href="myenv.html#codemacro11598">--!</a> x) `(set! ,x (- ,x 1)))
+</pre>
+<h5><a name='codemacro11565' href='#docmacro11565'>--</a></h5>
+<i><a href='#tocmacro11565'>Index</a></i><br>
+
+<pre>(define-macro (<a href="myenv.html#codemacro11565">--</a> x) `(- ,x 1))
+</pre>
+<h5><a name='codemacro18111' href='#docmacro18111'>whennot</a></h5>
+<i><a href='#tocmacro18111'>Index</a></i><br>
+
+<pre>(define-macro (<a href="myenv.html#codemacro18111">whennot</a> condition . stmts)
+  `(or ,condition (begin ,@stmts)))
+</pre>
+<h5><a name='codemacro56836' href='#docmacro56836'>push!</a></h5>
+<i><a href='#tocmacro56836'>Index</a></i><br>
+
+<pre>(define-macro (<a href="myenv.html#codemacro56836">push!</a> item ls)
+  `(set! ,ls (cons ,item ,ls)))
+</pre>
+<h5><a name='codemacro56658' href='#docmacro56658'>let-values*</a></h5>
+<i><a href='#tocmacro56658'>Index</a></i><br>
+
+<pre> Like let* but allowing for multiple-value bindings
+(define-macro (let-values* bindings . body)
+  (if (null? bindings) (cons 'begin body)
+      (apply (lambda (vars initializer)
+	 (let ((cont 
+		(cons 'let-values* 
+		      (cons (cdr bindings) body))))
+	   (cond
+	    ((not (pair? vars))		; regular let case, a single var
+	     `(let ((,vars ,initializer)) ,cont))
+	    ((null? (cdr vars))		; single var, see the prev case
+	     `(let ((,(car vars) ,initializer)) ,cont))
+	    ((null? (cddr vars))	; two variables
+	     (let ((val (gensym)))
+	       `(let* ((,val ,initializer)
+		       (,(car vars) (car ,val))
+		       (,(cadr vars) (cadr ,val))) ,cont)))
+	   (else			; the most generic case
+	    `(apply (lambda ,vars ,cont) ,initializer)))))
+       (car bindings))))
+</pre>
+<pre>(define-macro <a href="myenv.html#codemacro56658">let-values*</a> (lambda (bindings . body)
+  (if (null? bindings) (cons 'begin body)
+      (apply (lambda (vars initializer)
+	 (let ((cont 
+		(cons '<a href="myenv.html#codemacro56658">let-values*</a> 
+		      (cons (cdr bindings) body))))
+	   (cond
+	    ((not (pair? vars))		; regular let case, a single var
+	     `(let ((,vars ,initializer)) ,cont))
+	    ((null? (cdr vars))		; single var, see the prev case
+	     `(let ((,(car vars) ,initializer)) ,cont))
+	   (else			; the most generic case
+	    `(call-with-values (lambda () ,initializer)
+	      (lambda ,vars ,cont))))))
+       (car bindings)))))
+</pre>
+<h5><a name='codemacro44903' href='#docmacro44903'>assq-def</a></h5>
+<i><a href='#tocmacro44903'>Index</a></i><br>
+
+<pre>(define-macro (<a href="myenv.html#codemacro44903">assq-def</a> key alist . default-action-arg)
+  (let ((default-action
+        (if (null? default-action-arg)
+          `(error &quot;failed to assq key '&quot; ,key &quot;' in a list &quot; ,alist)
+          (let ((defact-symb (gensym)))
+	    `(let ((,defact-symb ,(car default-action-arg)))
+               (if (procedure? ,defact-symb) (,defact-symb) ,defact-symb))))))
+    `(or (assq ,key ,alist) ,default-action)))
+</pre>
+<h5><a name='codemacro46183' href='#docmacro46183'>assv-def</a></h5>
+<i><a href='#tocmacro46183'>Index</a></i><br>
+
+<pre>(define-macro (<a href="myenv.html#codemacro46183">assv-def</a> key alist . default-action-arg)
+  (let ((default-action
+        (if (null? default-action-arg)
+          `(error &quot;failed to assv key '&quot; ,key &quot;' in a list &quot; ,alist)
+          (let ((defact-symb (gensym)))
+	    `(let ((,defact-symb ,(car default-action-arg)))
+               (if (procedure? ,defact-symb) (,defact-symb) ,defact-symb))))))
+    `(or (assv ,key ,alist) ,default-action)))
+</pre>
+<h5><a name='codemacro30210' href='#docmacro30210'>assoc-def</a></h5>
+<i><a href='#tocmacro30210'>Index</a></i><br>
+
+<pre>(define-macro (<a href="myenv.html#codemacro30210">assoc-def</a> key alist . default-action-arg)
+  (let ((default-action
+        (if (null? default-action-arg)
+          `(error &quot;failed to assoc key '&quot; ,key &quot;' in a list &quot; ,alist)
+          (let ((defact-symb (gensym)))
+	    `(let ((,defact-symb ,(car default-action-arg)))
+               (if (procedure? ,defact-symb) (,defact-symb) ,defact-symb))))))
+    `(or (assoc ,key ,alist) ,default-action)))
+</pre>
+<h5><a name='codemacro27312' href='#docmacro27312'>env.find</a></h5>
+<i><a href='#tocmacro27312'>Index</a></i><br>
+
+<pre>(define-macro (<a href="myenv.html#codemacro27312">env.find</a> key) `(%%env.find ',key))
+</pre>
+<h5><a name='codemacro51227' href='#docmacro51227'>env.demand</a></h5>
+<i><a href='#tocmacro51227'>Index</a></i><br>
+
+<pre>(define-macro (<a href="myenv.html#codemacro51227">env.demand</a> key) `(%%env.demand ',key))
+</pre>
+<h5><a name='codemacro27308' href='#docmacro27308'>env.bind</a></h5>
+<i><a href='#tocmacro27308'>Index</a></i><br>
+
+<pre>(define-macro (<a href="myenv.html#codemacro27308">env.bind</a> key value) `(%%env.bind ',key ,value))
+</pre>
+<h5><a name='codemacro6205' href='#docmacro6205'>cond-expand</a></h5>
+<i><a href='#tocmacro6205'>Index</a></i><br>
+
+<pre>(define-macro (<a href="myenv.html#codemacro6205">cond-expand</a> . clauses)
+  (define feature-ids '(plt srfi-0))
+  (define (feature-req-satisfies? fr) ; does feature-request satisfies?
+    (cond
+     ((memq fr feature-ids) #t)
+     ((not (pair? fr)) #f)
+     ((eq? 'and (car fr))
+      (let loop ((clauses (cdr fr)))
+	(or (null? clauses)
+	    (and (feature-req-satisfies? (car clauses))
+		 (loop (cdr clauses))))))
+     ((eq? 'or (car fr))
+      (let loop ((clauses (cdr fr)))
+	(and (pair? clauses)
+	     (or (feature-req-satisfies? (car clauses))
+		 (loop (cdr clauses))))))
+     ((eq? 'not (car fr))
+      (not (feature-req-satisfies? (and (pair? (cdr fr)) (cadr fr)))))
+     (else #f)))
+  (let loop ((clauses clauses))
+    (if (null? clauses) '(error &quot;Unfulfilled cond-expand&quot;)
+	(let* ((feature-req (if (pair? (car clauses)) (caar clauses)
+				(error &quot;&lt;cond-expand clause&gt; is not a list&quot;)))
+	       (cmd-or-defs* (cons 'begin (cdar clauses))))
+	  (cond
+	   ((and (eq? 'else feature-req) (null? (cdr clauses)))
+	    cmd-or-defs*)
+	   ((feature-req-satisfies? feature-req)
+	    cmd-or-defs*)
+	   (else (loop (cdr clauses))))))))
+</pre>
+<h4><a name='codefunc15729' href='#docfunc15729'>call-with-input-string</a></h4>
+<i><a href='#tocfunc15729'>Index</a></i><br>
+
+<pre>(define (<a href="myenv.html#codefunc15729">call-with-input-string</a> str proc)
+  (proc (open-input-string str)))
+</pre>
+<h4><a name='codefunc26718' href='#docfunc26718'>with-input-from-string</a></h4>
+<i><a href='#tocfunc26718'>Index</a></i><br>
+
+<pre> I guess there's only one way to write this... :)
+(define (string-index str chr)
+  (let ((len (string-length str)))
+    (let search ((i 0))
+      (cond ((= i len)                       #f)
+            ((char=? chr (string-ref str i)) i)
+            (else                            (search (+ i 1)))))))
+</pre>
+<pre>(define (<a href="myenv.html#codefunc26718">with-input-from-string</a> str thunk)
+  (parameterize ((current-input-port (open-input-string str)))
+    (thunk)))
+</pre>
+<h5><a name='codemacro28364' href='#docmacro28364'>inc</a></h5>
+<i><a href='#tocmacro28364'>Index</a></i><br>
+
+<pre>(define-macro (<a href="myenv.html#codemacro28364">inc</a> x) `(+ 1 ,x))
+</pre>
+<h5><a name='codemacro26055' href='#docmacro26055'>dec</a></h5>
+<i><a href='#tocmacro26055'>Index</a></i><br>
+
+<pre>(define-macro (<a href="myenv.html#codemacro26055">dec</a> x) `(- ,x 1))
+</pre>
+<h4><a name='codefunc58107' href='#docfunc58107'>cons*</a></h4>
+<i><a href='#tocfunc58107'>Index</a></i><br>
+
+<pre>(define (<a href="myenv.html#codefunc58107">cons*</a> a1 a2 . rest)
+  (if (null? rest)
+      (cons a1 a2)
+      (cons a1 (apply <a href="myenv.html#codefunc58107">cons*</a> (cons a2 rest)))))
+</pre>
+<h5><a name='codemacro16295' href='#docmacro16295'>include</a></h5>
+<i><a href='#tocmacro16295'>Index</a></i><br>
+
+<pre>(define-macro <a href="myenv.html#codemacro16295">include</a> (lambda (file) #f))
+</pre>
+<h5><a name='codemacro17550' href='#docmacro17550'>declare</a></h5>
+<i><a href='#tocmacro17550'>Index</a></i><br>
+
+<pre>(define-macro <a href="myenv.html#codemacro17550">declare</a> (lambda x #f))
+</pre></body></html>

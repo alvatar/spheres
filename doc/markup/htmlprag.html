@@ -1,0 +1,2111 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN""http://www.w3.org/TR/html401/loose.dtd"><html><head><meta name="GENERATOR" content="Mole: The Scheme Source Code Digger"><title>Module: htmlprag</title><meta name='keywords' content=''></head><body bgcolor='#ffffff' text='#384412'  link='#11af05' vlink='#728b09'>
+<center><h1>Module: htmlprag</h1></center>
+
+<pre> @Package     HtmlPrag
+ @Subtitle    Pragmatic Parsing and Emitting of HTML using SXML and SHTML
+ @HomePage    http://www.neilvandyke.org/htmlprag/
+ @Author      Neil W. Van Dyke
+ @AuthorEmail neil@@neilvandyke.org
+ @Version     0.13
+ @Date        2005-02-23
+</pre><p><br>
+<!-- Table of content -->
+<p><dl>
+
+f:  <a name='tocfunc5284' href='#docfunc5284' style='text-decoration:none'>%htmlprag:a2c</a><br>
+
+f:  <a name='tocfunc7233' href='#docfunc7233' style='text-decoration:none'>%htmlprag:append!</a><br>
+
+f:  <a name='tocfunc44303' href='#docfunc44303' style='text-decoration:none'>%htmlprag:reverse!ok</a><br>
+
+f:  <a name='tocfunc49083' href='#docfunc49083' style='text-decoration:none'>%htmlprag:down</a><br>
+
+f:  <a name='tocfunc12104' href='#docfunc12104' style='text-decoration:none'>%htmlprag:down!ok</a><br>
+
+f:  <a name='tocfunc46266' href='#docfunc46266' style='text-decoration:none'>%htmlprag:gosc</a><br>
+
+f:  <a name='tocfunc50254' href='#docfunc50254' style='text-decoration:none'>shtml-comment-symbol</a><br>
+
+f:  <a name='tocfunc9617' href='#docfunc9617' style='text-decoration:none'>shtml-decl-symbol</a><br>
+
+f:  <a name='tocfunc23283' href='#docfunc23283' style='text-decoration:none'>shtml-empty-symbol</a><br>
+
+f:  <a name='tocfunc59245' href='#docfunc59245' style='text-decoration:none'>shtml-end-symbol</a><br>
+
+f:  <a name='tocfunc42263' href='#docfunc42263' style='text-decoration:none'>shtml-entity-symbol</a><br>
+
+f:  <a name='tocfunc48441' href='#docfunc48441' style='text-decoration:none'>shtml-pi-symbol</a><br>
+
+f:  <a name='tocfunc24557' href='#docfunc24557' style='text-decoration:none'>shtml-start-symbol</a><br>
+
+f:  <a name='tocfunc11702' href='#docfunc11702' style='text-decoration:none'>shtml-text-symbol</a><br>
+
+f:  <a name='tocfunc59528' href='#docfunc59528' style='text-decoration:none'>shtml-top-symbol</a><br>
+
+f:  <a name='tocfunc15338' href='#docfunc15338' style='text-decoration:none'>shtml-named-char-id</a><br>
+
+f:  <a name='tocfunc47451' href='#docfunc47451' style='text-decoration:none'>shtml-numeric-char-id</a><br>
+
+f:  <a name='tocfunc26970' href='#docfunc26970' style='text-decoration:none'>make-shtml-entity</a><br>
+
+f:  <a name='tocfunc40102' href='#docfunc40102' style='text-decoration:none'>shtml-entity-value</a><br>
+
+f:  <a name='tocfunc28193' href='#docfunc28193' style='text-decoration:none'>make-html-tokenizer</a><br>
+
+f:  <a name='tocfunc31190' href='#docfunc31190' style='text-decoration:none'>tokenize-html</a><br>
+
+f:  <a name='tocfunc54139' href='#docfunc54139' style='text-decoration:none'>shtml-token-kind</a><br>
+
+f:  <a name='tocfunc44243' href='#docfunc44243' style='text-decoration:none'>%htmlprag:empty-elements</a><br>
+
+f:  <a name='tocfunc7665' href='#docfunc7665' style='text-decoration:none'>parse-html/tokenizer</a><br>
+
+f:  <a name='tocfunc50429' href='#docfunc50429' style='text-decoration:none'>%htmlprag:parse-html</a><br>
+
+f:  <a name='tocfunc39551' href='#docfunc39551' style='text-decoration:none'>html->sxml-0nf</a><br>
+
+f:  <a name='tocfunc39807' href='#docfunc39807' style='text-decoration:none'>html->sxml-1nf</a><br>
+
+f:  <a name='tocfunc40063' href='#docfunc40063' style='text-decoration:none'>html->sxml-2nf</a><br>
+
+f:  <a name='tocfunc996' href='#docfunc996' style='text-decoration:none'>html->sxml</a><br>
+
+f:  <a name='tocfunc62806' href='#docfunc62806' style='text-decoration:none'>html->shtml</a><br>
+
+f:  <a name='tocfunc16684' href='#docfunc16684' style='text-decoration:none'>%htmlprag:write-shtml-as-html/fixed</a><br>
+
+f:  <a name='tocfunc24841' href='#docfunc24841' style='text-decoration:none'>write-shtml-as-html</a><br>
+
+f:  <a name='tocfunc55666' href='#docfunc55666' style='text-decoration:none'>shtml->html</a><br>
+
+f:  <a name='tocfunc996' href='#docfunc996' style='text-decoration:none'>sxml->html</a><br>
+
+f:  <a name='tocfunc53044' href='#docfunc53044' style='text-decoration:none'>write-sxml-html</a><br>
+
+f:  <a name='tocfunc48071' href='#docfunc48071' style='text-decoration:none'>%htmlprag:test</a><br>
+</dl>
+
+<h4><a name='docfunc5284' href='#tocfunc5284'>%htmlprag:a2c</a></h4>
+(define %htmlprag:a2c <i><br> ... <a href='#codefunc5284'>Full Code</a> ... )</i><p><br>
+
+<h4><a name='docfunc7233' href='#tocfunc7233'>%htmlprag:append!</a></h4>
+(define (%htmlprag:append! a b)<i><br> ... <a href='#codefunc7233'>Full Code</a> ... )</i><p><br>
+
+<h4><a name='docfunc44303' href='#tocfunc44303'>%htmlprag:reverse!ok</a></h4>
+(define %htmlprag:reverse!ok <i><br> ... <a href='#codefunc44303'>Full Code</a> ... )</i><p><br>
+
+<h4><a name='docfunc49083' href='#tocfunc49083'>%htmlprag:down</a></h4>
+(define (%htmlprag:down s)<i><br> ... <a href='#codefunc49083'>Full Code</a> ... )</i><p><br>
+
+<h4><a name='docfunc12104' href='#tocfunc12104'>%htmlprag:down!ok</a></h4>
+(define %htmlprag:down!ok <i><br> ... <a href='#codefunc12104'>Full Code</a> ... )</i><p><br>
+
+<h4><a name='docfunc46266' href='#tocfunc46266'>%htmlprag:gosc</a></h4>
+(define (%htmlprag:gosc os)<i><br> ... <a href='#codefunc46266'>Full Code</a> ... )</i><p><br>
+
+<h4><a name='docfunc50254' href='#tocfunc50254'>shtml-comment-symbol</a></h4>
+(define shtml-comment-symbol <i><br> ... <a href='#codefunc50254'>Full Code</a> ... )</i><p><br>
+
+<h4><a name='docfunc9617' href='#tocfunc9617'>shtml-decl-symbol</a></h4>
+(define shtml-decl-symbol <i><br> ... <a href='#codefunc9617'>Full Code</a> ... )</i><p><br>
+
+<h4><a name='docfunc23283' href='#tocfunc23283'>shtml-empty-symbol</a></h4>
+(define shtml-empty-symbol <i><br> ... <a href='#codefunc23283'>Full Code</a> ... )</i><p><br>
+
+<h4><a name='docfunc59245' href='#tocfunc59245'>shtml-end-symbol</a></h4>
+(define shtml-end-symbol <i><br> ... <a href='#codefunc59245'>Full Code</a> ... )</i><p><br>
+
+<h4><a name='docfunc42263' href='#tocfunc42263'>shtml-entity-symbol</a></h4>
+(define shtml-entity-symbol <i><br> ... <a href='#codefunc42263'>Full Code</a> ... )</i><p><br>
+
+<h4><a name='docfunc48441' href='#tocfunc48441'>shtml-pi-symbol</a></h4>
+(define shtml-pi-symbol <i><br> ... <a href='#codefunc48441'>Full Code</a> ... )</i><p><br>
+
+<h4><a name='docfunc24557' href='#tocfunc24557'>shtml-start-symbol</a></h4>
+(define shtml-start-symbol <i><br> ... <a href='#codefunc24557'>Full Code</a> ... )</i><p><br>
+
+<h4><a name='docfunc11702' href='#tocfunc11702'>shtml-text-symbol</a></h4>
+(define shtml-text-symbol <i><br> ... <a href='#codefunc11702'>Full Code</a> ... )</i><p><br>
+
+<h4><a name='docfunc59528' href='#tocfunc59528'>shtml-top-symbol</a></h4>
+(define shtml-top-symbol <i><br> ... <a href='#codefunc59528'>Full Code</a> ... )</i><p><br>
+
+<h4><a name='docfunc15338' href='#tocfunc15338'>shtml-named-char-id</a></h4>
+(define shtml-named-char-id <i><br> ... <a href='#codefunc15338'>Full Code</a> ... )</i><p><br>
+
+<h4><a name='docfunc47451' href='#tocfunc47451'>shtml-numeric-char-id</a></h4>
+(define shtml-numeric-char-id <i><br> ... <a href='#codefunc47451'>Full Code</a> ... )</i><p><br>
+
+<h4><a name='docfunc26970' href='#tocfunc26970'>make-shtml-entity</a></h4>
+(define (make-shtml-entity val)<i><br> ... <a href='#codefunc26970'>Full Code</a> ... )</i><p><br>
+
+<h4><a name='docfunc40102' href='#tocfunc40102'>shtml-entity-value</a></h4>
+(define (shtml-entity-value entity)<i><br> ... <a href='#codefunc40102'>Full Code</a> ... )</i><p><br>
+
+<h4><a name='docfunc28193' href='#tocfunc28193'>make-html-tokenizer</a></h4>
+(define make-html-tokenizer <i><br> ... <a href='#codefunc28193'>Full Code</a> ... )</i><p><br>
+
+<h4><a name='docfunc31190' href='#tocfunc31190'>tokenize-html</a></h4>
+(define (tokenize-html in normalized?)<i><br> ... <a href='#codefunc31190'>Full Code</a> ... )</i><p><br>
+
+<h4><a name='docfunc54139' href='#tocfunc54139'>shtml-token-kind</a></h4>
+(define (shtml-token-kind token)<i><br> ... <a href='#codefunc54139'>Full Code</a> ... )</i><p><br>
+
+<h4><a name='docfunc44243' href='#tocfunc44243'>%htmlprag:empty-elements</a></h4>
+(define %htmlprag:empty-elements <i><br> ... <a href='#codefunc44243'>Full Code</a> ... )</i><p><br>
+
+<h4><a name='docfunc7665' href='#tocfunc7665'>parse-html/tokenizer</a></h4>
+(define parse-html/tokenizer <i><br> ... <a href='#codefunc7665'>Full Code</a> ... )</i><p><br>
+
+<h4><a name='docfunc50429' href='#tocfunc50429'>%htmlprag:parse-html</a></h4>
+(define (%htmlprag:parse-html input normalized? top?)<i><br> ... <a href='#codefunc50429'>Full Code</a> ... )</i><p><br>
+
+<h4><a name='docfunc39551' href='#tocfunc39551'>html->sxml-0nf</a></h4>
+(define (html-&gt;sxml-0nf input)<i><br> ... <a href='#codefunc39551'>Full Code</a> ... )</i><p><br>
+
+<h4><a name='docfunc39807' href='#tocfunc39807'>html->sxml-1nf</a></h4>
+(define (html-&gt;sxml-1nf input)<i><br> ... <a href='#codefunc39807'>Full Code</a> ... )</i><p><br>
+
+<h4><a name='docfunc40063' href='#tocfunc40063'>html->sxml-2nf</a></h4>
+(define (html-&gt;sxml-2nf input)<i><br> ... <a href='#codefunc40063'>Full Code</a> ... )</i><p><br>
+
+<h4><a name='docfunc996' href='#tocfunc996'>html->sxml</a></h4>
+(define html-&gt;sxml <i><br> ... <a href='#codefunc996'>Full Code</a> ... )</i><p><br>
+
+<h4><a name='docfunc62806' href='#tocfunc62806'>html->shtml</a></h4>
+(define html-&gt;shtml <i><br> ... <a href='#codefunc62806'>Full Code</a> ... )</i><p><br>
+
+<h4><a name='docfunc16684' href='#tocfunc16684'>%htmlprag:write-shtml-as-html/fixed</a></h4>
+(define (%htmlprag:write-shtml-as-html/fixed shtml out foreign-filter)<i><br> ... <a href='#codefunc16684'>Full Code</a> ... )</i><p><br>
+
+<h4><a name='docfunc24841' href='#tocfunc24841'>write-shtml-as-html</a></h4>
+(define write-shtml-as-html <i><br> ... <a href='#codefunc24841'>Full Code</a> ... )</i><p><br>
+
+<h4><a name='docfunc55666' href='#tocfunc55666'>shtml->html</a></h4>
+(define (shtml-&gt;html shtml)<i><br> ... <a href='#codefunc55666'>Full Code</a> ... )</i><p><br>
+
+<h4><a name='docfunc996' href='#tocfunc996'>sxml->html</a></h4>
+(define sxml-&gt;html <i><br> ... <a href='#codefunc996'>Full Code</a> ... )</i><p><br>
+
+<h4><a name='docfunc53044' href='#tocfunc53044'>write-sxml-html</a></h4>
+(define write-sxml-html <i><br> ... <a href='#codefunc53044'>Full Code</a> ... )</i><p><br>
+
+<h4><a name='docfunc48071' href='#tocfunc48071'>%htmlprag:test</a></h4>
+(define (%htmlprag:test)<i><br> ... <a href='#codefunc48071'>Full Code</a> ... )</i><p><br>
+<center><h1>Code</h1></center>
+
+<h5><a name='codeapp6205' href='#docapp6205'>cond-expand</a></h5>
+<i><a href='#tocapp6205'>Index</a></i><br>
+
+<pre> DL: disable tests for Bigloo
+</pre>
+<pre>(cond-expand
+ ((or bigloo chicken gambit)
+  (define-macro (%htmlprag:testeez . x) #t)
+ )
+ (else
+
+(define-syntax %htmlprag:testeez
+  (syntax-rules () ((_ x ...)
+                    ;;(testeez x ...)
+                    (error &quot;Tests disabled.&quot;)
+                    )))
+))
+</pre>
+<h4><a name='codefunc5284' href='#docfunc5284'>%htmlprag:a2c</a></h4>
+<i><a href='#tocfunc5284'>Index</a></i><br>
+
+<pre>(define <a href="htmlprag.html#codefunc5284">%htmlprag:a2c</a> integer-&gt;char)
+</pre>
+<h4><a name='codefunc7233' href='#docfunc7233'>%htmlprag:append!</a></h4>
+<i><a href='#tocfunc7233'>Index</a></i><br>
+
+<pre>(define (<a href="htmlprag.html#codefunc7233">%htmlprag:append!</a> a b)
+  (cond ((null? a) b)
+        ((null? b) a)
+        (else      (let loop  ((sub a))
+                     (if (null? (cdr sub))
+                         (begin (set-cdr! sub b)
+                                a)
+                         (loop (cdr sub)))))))
+</pre>
+<h4><a name='codefunc44303' href='#docfunc44303'>%htmlprag:reverse!ok</a></h4>
+<i><a href='#tocfunc44303'>Index</a></i><br>
+
+<pre>(define <a href="htmlprag.html#codefunc44303">%htmlprag:reverse!ok</a> reverse)
+</pre>
+<h5><a name='codeapp6205' href='#docapp6205'>cond-expand</a></h5>
+<i><a href='#tocapp6205'>Index</a></i><br>
+
+<pre>(cond-expand  ; DL: wrote this explicitly as a cond-expand
+ ((or bigloo chicken gambit)
+   (define %htmlprag:error error)
+ )
+ (else 
+
+(define-syntax %htmlprag:error
+  (syntax-rules ()
+    ((_ p m o) (error (string-append p &quot; : &quot; m) o))
+    ;; ((_ p m o) (error p m o))))
+    ))
+))
+</pre>
+<h4><a name='codefunc49083' href='#docfunc49083'>%htmlprag:down</a></h4>
+<i><a href='#tocfunc49083'>Index</a></i><br>
+
+<pre>(define (<a href="htmlprag.html#codefunc49083">%htmlprag:down</a> s)
+  (list-&gt;string (map char-downcase (string-&gt;list s))))
+</pre>
+<h4><a name='codefunc12104' href='#docfunc12104'>%htmlprag:down!ok</a></h4>
+<i><a href='#tocfunc12104'>Index</a></i><br>
+
+<pre>(define <a href="htmlprag.html#codefunc12104">%htmlprag:down!ok</a> <a href="htmlprag.html#codefunc49083">%htmlprag:down</a>)
+</pre>
+<h4><a name='codefunc46266' href='#docfunc46266'>%htmlprag:gosc</a></h4>
+<i><a href='#tocfunc46266'>Index</a></i><br>
+
+<pre>(define (<a href="htmlprag.html#codefunc46266">%htmlprag:gosc</a> os)
+  (let ((str (get-output-string os)))
+    ;; Note: By default, we don't call close-output-port, since at least one
+    ;; tested Scheme implementation barfs on that.
+    ;;
+    ;; (close-output-port os)
+    str))
+</pre>
+<h4><a name='codefunc50254' href='#docfunc50254'>shtml-comment-symbol</a></h4>
+<i><a href='#tocfunc50254'>Index</a></i><br>
+
+<pre>(define <a href="htmlprag.html#codefunc50254">shtml-comment-symbol</a> (string-&gt;symbol &quot;*COMMENT*&quot;))
+</pre>
+<h4><a name='codefunc9617' href='#docfunc9617'>shtml-decl-symbol</a></h4>
+<i><a href='#tocfunc9617'>Index</a></i><br>
+
+<pre>(define <a href="htmlprag.html#codefunc9617">shtml-decl-symbol</a>    (string-&gt;symbol &quot;*DECL*&quot;))
+</pre>
+<h4><a name='codefunc23283' href='#docfunc23283'>shtml-empty-symbol</a></h4>
+<i><a href='#tocfunc23283'>Index</a></i><br>
+
+<pre>(define <a href="htmlprag.html#codefunc23283">shtml-empty-symbol</a>   (string-&gt;symbol &quot;*EMPTY*&quot;))
+</pre>
+<h4><a name='codefunc59245' href='#docfunc59245'>shtml-end-symbol</a></h4>
+<i><a href='#tocfunc59245'>Index</a></i><br>
+
+<pre>(define <a href="htmlprag.html#codefunc59245">shtml-end-symbol</a>     (string-&gt;symbol &quot;*END*&quot;))
+</pre>
+<h4><a name='codefunc42263' href='#docfunc42263'>shtml-entity-symbol</a></h4>
+<i><a href='#tocfunc42263'>Index</a></i><br>
+
+<pre>(define <a href="htmlprag.html#codefunc42263">shtml-entity-symbol</a>  (string-&gt;symbol &quot;*ENTITY*&quot;))
+</pre>
+<h4><a name='codefunc48441' href='#docfunc48441'>shtml-pi-symbol</a></h4>
+<i><a href='#tocfunc48441'>Index</a></i><br>
+
+<pre>(define <a href="htmlprag.html#codefunc48441">shtml-pi-symbol</a>      (string-&gt;symbol &quot;*PI*&quot;))
+</pre>
+<h4><a name='codefunc24557' href='#docfunc24557'>shtml-start-symbol</a></h4>
+<i><a href='#tocfunc24557'>Index</a></i><br>
+
+<pre>(define <a href="htmlprag.html#codefunc24557">shtml-start-symbol</a>   (string-&gt;symbol &quot;*START*&quot;))
+</pre>
+<h4><a name='codefunc11702' href='#docfunc11702'>shtml-text-symbol</a></h4>
+<i><a href='#tocfunc11702'>Index</a></i><br>
+
+<pre>(define <a href="htmlprag.html#codefunc11702">shtml-text-symbol</a>    (string-&gt;symbol &quot;*TEXT*&quot;))
+</pre>
+<h4><a name='codefunc59528' href='#docfunc59528'>shtml-top-symbol</a></h4>
+<i><a href='#tocfunc59528'>Index</a></i><br>
+
+<pre>(define <a href="htmlprag.html#codefunc59528">shtml-top-symbol</a>     (string-&gt;symbol &quot;*TOP*&quot;))
+</pre>
+<h4><a name='codefunc15338' href='#docfunc15338'>shtml-named-char-id</a></h4>
+<i><a href='#tocfunc15338'>Index</a></i><br>
+
+<pre>(define <a href="htmlprag.html#codefunc15338">shtml-named-char-id</a>   &quot;shtml-named-char&quot;)
+</pre>
+<h4><a name='codefunc47451' href='#docfunc47451'>shtml-numeric-char-id</a></h4>
+<i><a href='#tocfunc47451'>Index</a></i><br>
+
+<pre>(define <a href="htmlprag.html#codefunc47451">shtml-numeric-char-id</a> &quot;shtml-numeric-char&quot;)
+</pre>
+<h4><a name='codefunc26970' href='#docfunc26970'>make-shtml-entity</a></h4>
+<i><a href='#tocfunc26970'>Index</a></i><br>
+
+<pre>(define (<a href="htmlprag.html#codefunc26970">make-shtml-entity</a> val)
+  (list '&amp; (cond ((symbol?  val) val)
+                 ((integer? val) val)
+                 ((string?  val) (string-&gt;symbol val))
+                 (else (%htmlprag:error &quot;make-shtml-entity&quot;
+                                        &quot;invalid SHTML entity value:&quot;
+                                        val)))))
+</pre>
+<h4><a name='codefunc40102' href='#docfunc40102'>shtml-entity-value</a></h4>
+<i><a href='#tocfunc40102'>Index</a></i><br>
+
+<pre>(define (<a href="htmlprag.html#codefunc40102">shtml-entity-value</a> entity)
+  (cond ((not (pair? entity)) #f)
+        ((null? (cdr entity)) #f)
+        ((eqv? (car entity) '&amp;)
+         ;; TODO: Error-check for extraneous list members?
+         (let ((val (cadr entity)))
+           (cond ((symbol?  val) val)
+                 ((integer? val) val)
+                 ((string?  val) (string-&gt;symbol val))
+                 (else           #f))))
+        ((eqv? (car entity) <a href="htmlprag.html#codefunc42263">shtml-entity-symbol</a>)
+         (if (null? (cddr entity))
+             #f
+             (let ((public-id (list-ref entity 1))
+                   (system-id (list-ref entity 2)))
+               ;; TODO: Error-check for extraneous list members?
+               (cond ((equal? public-id <a href="htmlprag.html#codefunc15338">shtml-named-char-id</a>)
+                      (string-&gt;symbol system-id))
+                     ((equal? public-id <a href="htmlprag.html#codefunc47451">shtml-numeric-char-id</a>)
+                      (string-&gt;number system-id))
+                     (else #f)))))
+        (else #f)))
+</pre>
+<h4><a name='codefunc28193' href='#docfunc28193'>make-html-tokenizer</a></h4>
+<i><a href='#tocfunc28193'>Index</a></i><br>
+
+<pre>(define <a href="htmlprag.html#codefunc28193">make-html-tokenizer</a>
+  ;; TODO: Have the tokenizer replace contiguous whitespace within individual
+  ;; text tokens with single space characters (except for when in `pre' and
+  ;; verbatim elements).  The parser will introduce new contiguous whitespace
+  ;; (e.g., when text tokens are concatenated, invalid end tags are removed,
+  ;; whitespace is irrelevant between certain elements), but then the parser
+  ;; only has to worry about the first and last character of each string.
+  ;; Perhaps the text tokens should have both leading and trailing whitespace
+  ;; stripped, and contain flags for whether or not leading and trailing
+  ;; whitespace occurred.
+  (letrec ((no-token '())
+
+           ;; TODO: Maybe make this an option.
+           (verbatim-to-eof-elems '(plaintext))
+
+           ;; TODO: Implement proper parsing of `verbatim-pair-elems' elements.
+           ;; Note that we must support invalid termination like this:
+           (verbatim-pair-elems '(script server style xmp))
+
+           (ws-chars (list #\space
+                           (<a href="htmlprag.html#codefunc5284">%htmlprag:a2c</a> 9)
+                           (<a href="htmlprag.html#codefunc5284">%htmlprag:a2c</a> 10)
+                           (<a href="htmlprag.html#codefunc5284">%htmlprag:a2c</a> 11)
+                           (<a href="htmlprag.html#codefunc5284">%htmlprag:a2c</a> 12)
+                           (<a href="htmlprag.html#codefunc5284">%htmlprag:a2c</a> 13)))
+
+           (output-string-&gt;string-or-false
+            (lambda (os)
+              (let ((s (<a href="htmlprag.html#codefunc46266">%htmlprag:gosc</a> os)))
+                (if (string=? s &quot;&quot;) #f s))))
+
+           (output-string-&gt;symbol-or-false
+            (lambda (os)
+              (let ((s (output-string-&gt;string-or-false os)))
+                (if s (string-&gt;symbol s) #f))))
+           )
+    (lambda (in normalized?)
+      ;; TODO: Make a tokenizer option that causes XML namespace qualifiers to
+      ;; be ignored.
+      (letrec
+          (
+           ;; Port buffer with inexpensive unread of one character and slightly
+           ;; more expensive pushback of second character to unread.  The
+           ;; procedures themselves do no consing.  The tokenizer currently
+           ;; needs two-symbol lookahead, due to ambiguous &quot;/&quot; while parsing
+           ;; element and attribute names, which could be either empty-tag
+           ;; syntax or XML qualified names.
+           (c           #f)
+           (next-c      #f)
+           (c-consumed? #t)
+           (read-c      (lambda ()
+                          (if c-consumed?
+                              (if next-c
+                                  (begin (set! c      next-c)
+                                         (set! next-c #f))
+                                  (set! c (read-char in)))
+                              (set! c-consumed? #t))))
+           (unread-c    (lambda ()
+                          (if c-consumed?
+                              (set! c-consumed? #f)
+                              ;; TODO: Procedure name in error message really
+                              ;; isn't &quot;make-html-tokenizer&quot;...
+                              (%htmlprag:error &quot;make-html-tokenizer&quot;
+                                               &quot;already unread:&quot;
+                                               c))))
+           (push-c      (lambda (new-c)
+                          (if c-consumed?
+                              (begin (set! c           new-c)
+                                     (set! c-consumed? #f))
+                              (if next-c
+                                  (%htmlprag:error
+                                   &quot;make-html-tokenizer&quot;
+                                   &quot;pushback full:&quot;
+                                   c)
+                                  (begin (set! next-c      c)
+                                         (set! c           new-c)
+                                         (set! c-consumed? #f))))))
+
+           ;; TODO: These procedures are a temporary convenience for
+           ;; enumerating the pertinent character classes, with an eye towards
+           ;; removing redundant tests of character class.  These procedures
+           ;; should be eliminated in a future version.
+           (c-eof?      (lambda () (eof-object? c)))
+           (c-amp?      (lambda () (eqv? c #\&amp;)))
+           (c-apos?     (lambda () (eqv? c #\')))
+           (c-bang?     (lambda () (eqv? c #\!)))
+           (c-colon?    (lambda () (eqv? c #\:)))
+           (c-quot?     (lambda () (eqv? c #\&quot;)))
+           (c-equals?   (lambda () (eqv? c #\=)))
+           (c-gt?       (lambda () (eqv? c #\&gt;)))
+           (c-lt?       (lambda () (eqv? c #\&lt;)))
+           (c-minus?    (lambda () (eqv? c #\-)))
+           (c-pound?    (lambda () (eqv? c #\#)))
+           (c-ques?     (lambda () (eqv? c #\?)))
+           (c-semi?     (lambda () (eqv? c #\;)))
+           (c-slash?    (lambda () (eqv? c #\/)))
+           (c-splat?    (lambda () (eqv? c #\*)))
+           (c-lf?       (lambda () (eqv? c #\newline)))
+           (c-angle?    (lambda () (memv c '(#\&lt; #\&gt;))))
+           (c-ws?       (lambda () (memv c ws-chars)))
+           (c-alpha?    (lambda () (char-alphabetic? c)))
+           (c-digit?    (lambda () (char-numeric? c)))
+           (c-alphanum? (lambda () (or (c-alpha?) (c-digit?))))
+           (c-hexlet?   (lambda () (memv c '(#\a #\b #\c #\d #\e #\f
+                                             #\A #\B #\C #\D #\E #\F))))
+
+           (skip-ws     (lambda () (read-c) (if (c-ws?) (skip-ws) (unread-c))))
+
+           (make-start-token
+            (if normalized?
+                (lambda (name ns attrs)
+                  (list name (cons '@ attrs)))
+                (lambda (name ns attrs)
+                  (if (null? attrs)
+                      (list name)
+                      (list name (cons '@ attrs))))))
+
+           (make-empty-token
+            (lambda (name ns attrs)
+              (cons <a href="htmlprag.html#codefunc23283">shtml-empty-symbol</a>
+                    (make-start-token name ns attrs))))
+
+           (make-end-token
+            (if normalized?
+                (lambda (name ns attrs)
+                  (list <a href="htmlprag.html#codefunc59245">shtml-end-symbol</a>
+                        name
+                        (cons '@ attrs)))
+                (lambda (name ns attrs)
+                  (if (null? attrs)
+                      (list <a href="htmlprag.html#codefunc59245">shtml-end-symbol</a> name)
+                      (list <a href="htmlprag.html#codefunc59245">shtml-end-symbol</a>
+                            name
+                            (cons '@ attrs))))))
+
+           (make-comment-token
+            (lambda (str) (list <a href="htmlprag.html#codefunc50254">shtml-comment-symbol</a> str)))
+
+           (make-decl-token
+            (lambda (parts) (cons <a href="htmlprag.html#codefunc9617">shtml-decl-symbol</a> parts)))
+
+           (scan-qname
+            ;; TODO: Make sure we don't accept local names that have &quot;*&quot;, since
+            ;; this can break SXML tools.  Have to validate this afterwards if
+            ;; &quot;verbatim-safe?&quot;.  Also check for &quot;@&quot; and maybe &quot;@@&quot;.  Check
+            ;; qname parsing code, especially for verbatim mode.  This is
+            ;; important!
+            (lambda (verbatim-safe?)
+              ;; Note: If we accept some invalid local names, we only need two
+              ;; symbols of lookahead to determine the end of a qname.
+              (letrec ((os      #f)
+                       (ns      '())
+                       (vcolons 0)
+                       (good-os (lambda ()
+                                  (or os
+                                      (begin (set! os (open-output-string))
+                                             os)))))
+                (let loop ()
+                  (read-c)
+                  (cond ((c-eof?) #f)
+                        ((or (c-ws?) (c-splat?))
+                         (if verbatim-safe?
+                             (unread-c)))
+                        ((or (c-angle?) (c-equals?) (c-quot?) (c-apos?))
+                         (unread-c))
+                        ((c-colon?)
+                         (or (null? ns)
+                             (set! ns (cons &quot;:&quot; ns)))
+                         (if os
+                             (begin
+                               (set! ns (cons (<a href="htmlprag.html#codefunc46266">%htmlprag:gosc</a> os)
+                                              ns))
+                               (set! os #f)))
+                         (loop))
+                        ((c-slash?)
+                         (read-c)
+                         (cond ((or (c-eof?)
+                                    (c-ws?)
+                                    (c-equals?)
+                                    (c-apos?)
+                                    (c-quot?)
+                                    (c-angle?)
+                                    (c-splat?))
+                                (unread-c)
+                                (push-c #\/))
+                               (else (write-char #\/ (good-os))
+                                     (write-char c   os)
+                                     (loop))))
+                        (else (write-char c (good-os))
+                              (loop))))
+                (let ((ns    (if (null? ns)
+                                 #f
+                                 (apply string-append
+                                        (<a href="htmlprag.html#codefunc44303">%htmlprag:reverse!ok</a> ns))))
+                      (local (if os (<a href="htmlprag.html#codefunc46266">%htmlprag:gosc</a> os) #f)))
+                  (if verbatim-safe?
+                      ;; TODO: Make sure we don't have ambiguous &quot;:&quot; or drop
+                      ;; any characters!
+                      (cons ns local)
+                      ;; Note: We represent &quot;xml:&quot; and &quot;xmlns:&quot; syntax as
+                      ;; normal qnames, for lack of something better to do with
+                      ;; them when we don't support XML namespaces.
+                      ;;
+                      ;; TODO: Local names are currently forced to lowercase,
+                      ;; since HTML is usually case-insensitive.  If XML
+                      ;; namespaces are used, we might wish to keep local names
+                      ;; case-sensitive.
+                      (if local
+                          (if ns
+                              (if (or (string=? ns &quot;xml&quot;)
+                                      (string=? ns &quot;xmlns&quot;))
+                                  (string-&gt;symbol (string-append ns &quot;:&quot; local))
+                                  (cons ns
+                                        (string-&gt;symbol
+                                         (<a href="htmlprag.html#codefunc12104">%htmlprag:down!ok</a>
+                                          local))))
+                              (string-&gt;symbol
+                               (<a href="htmlprag.html#codefunc12104">%htmlprag:down!ok</a> local)))
+                          (if ns
+                              (string-&gt;symbol
+                               (<a href="htmlprag.html#codefunc12104">%htmlprag:down!ok</a> ns))
+                              ;; TODO: Ensure that it's OK to return #f as a
+                              ;; name.
+                              #f)))))))
+
+           (scan-tag
+            (lambda (start?)
+              (skip-ws)
+              (let ((tag-name   (scan-qname #f))
+                    (tag-ns     #f)
+                    (tag-attrs  #f)
+                    (tag-empty? #f))
+                ;; Scan element name.
+                (if (pair? tag-name)
+                    (begin (set! tag-ns   (car tag-name))
+                           (set! tag-name (cdr tag-name))))
+                ;; TODO: Ensure there's no case in which a #f tag-name isn't
+                ;; compensated for later.
+                ;;
+                ;; Scan element attributes.
+                (set! tag-attrs
+                      (let scan-attr-list ()
+                        (read-c)
+                        (cond ((c-eof?)   '())
+                              ((c-angle?) (unread-c) '())
+                              ((c-slash?)
+                               (set! tag-empty? #t)
+                               (scan-attr-list))
+                              ((c-alpha?)
+                               (unread-c)
+                               (let ((attr (scan-attr)))
+                                 (cons attr (scan-attr-list))))
+                              (else (scan-attr-list)))))
+                ;; Find &quot;&gt;&quot; or unnatural end.
+                (let loop ()
+                  (read-c)
+                  (cond ((c-eof?)   no-token)
+                        ((c-slash?) (set! tag-empty? #t) (loop))
+                        ((c-gt?)    #f)
+                        ((c-ws?)    (loop))
+                        (else       (unread-c))))
+                ;; Change the tokenizer mode if necessary.
+                (cond ((not start?) #f)
+                      (tag-empty?   #f)
+                      ;; TODO: Maybe make one alist lookup here, instead of
+                      ;; two.
+                      ((memq tag-name verbatim-to-eof-elems)
+                       (set! nexttok verbeof-nexttok))
+                      ((memq tag-name verbatim-pair-elems)
+                       (set! nexttok (make-verbpair-nexttok tag-name))))
+                ;; Return a token object.
+                (if start?
+                    (if tag-empty?
+                        (make-empty-token tag-name tag-ns tag-attrs)
+                        (make-start-token tag-name tag-ns tag-attrs))
+                    (make-end-token tag-name tag-ns tag-attrs)))))
+
+           (scan-attr
+            (lambda ()
+              (let ((name (scan-qname #f))
+                    (val  #f))
+                (if (pair? name)
+                    (set! name (cdr name)))
+                (let loop-equals-or-end ()
+                  (read-c)
+                  (cond ((c-eof?) no-token)
+                        ((c-ws?)  (loop-equals-or-end))
+                        ((c-equals?)
+                         (let loop-quote-or-unquoted ()
+                           (read-c)
+                           (cond ((c-eof?) no-token)
+                                 ((c-ws?) (loop-quote-or-unquoted))
+                                 ((or (c-apos?) (c-quot?))
+                                  (let ((term c))
+                                    (set! val (open-output-string))
+                                    (let loop-quoted-val ()
+                                      (read-c)
+                                      (cond ((c-eof?)      #f)
+                                            ((eqv? c term) #f)
+                                            (else (write-char c val)
+                                                  (loop-quoted-val))))))
+                                 ((c-angle?) (unread-c))
+                                 (else
+                                  (set! val (open-output-string))
+                                  (write-char c val)
+                                  (let loop-unquoted-val ()
+                                    (read-c)
+                                    (cond ((c-eof?)  no-token)
+                                          ((c-apos?) #f)
+                                          ((c-quot?) #f)
+                                          ((or (c-ws?) (c-angle?)
+                                               ;;(c-slash?)
+                                               )
+                                           (unread-c))
+                                          ;; Note: We can treat a slash in an
+                                          ;; unquoted attribute value as a
+                                          ;; value constituent because the
+                                          ;; slash is specially-handled only
+                                          ;; for XHTML, and XHTML attribute
+                                          ;; values must always be quoted.  We
+                                          ;; could do lookahead for &quot;/&gt;&quot;, but
+                                          ;; that wouldn't let us parse HTML
+                                          ;; &quot;&lt;a href=/&gt;&quot; correctly, so this is
+                                          ;; an easier and more correct way to
+                                          ;; do things.
+                                          (else (write-char c val)
+                                                (loop-unquoted-val))))))))
+                        (else (unread-c))))
+                (if normalized?
+                    (list name (if val
+                                   (<a href="htmlprag.html#codefunc46266">%htmlprag:gosc</a> val)
+                                   (symbol-&gt;string name)))
+                    (if val
+                        (list name (<a href="htmlprag.html#codefunc46266">%htmlprag:gosc</a> val))
+                        (list name))))))
+
+           (scan-comment
+            ;; TODO: Rewrite this to use tail recursion rather than a state
+            ;; variable.
+            (lambda ()
+              (let ((os    (open-output-string))
+                    (state 'start-minus))
+                (let loop ()
+                  (read-c)
+                  (cond ((c-eof?) #f)
+                        ((c-minus?)
+                         (set! state
+                               (case state
+                                 ((start-minus) 'start-minus-minus)
+                                 ((start-minus-minus body) 'end-minus)
+                                 ((end-minus) 'end-minus-minus)
+                                 ((end-minus-minus)
+                                  (write-char #\- os)
+                                  state)
+                                 (else (%htmlprag:error
+                                        &quot;make-html-tokenizer&quot;
+                                        &quot;invalid state:&quot;
+                                        state))))
+                         (loop))
+                        ((and (c-gt?) (eq? state 'end-minus-minus)) #f)
+                        (else (case state
+                                ((end-minus)       (write-char #\- os))
+                                ((end-minus-minus) (display &quot;--&quot; os)))
+                              (set! state 'body)
+                              (write-char c os)
+                              (loop))))
+                (make-comment-token (<a href="htmlprag.html#codefunc46266">%htmlprag:gosc</a> os)))))
+
+           (scan-pi
+            (lambda ()
+              (skip-ws)
+              (let ((name (open-output-string))
+                    (val  (open-output-string)))
+                (let scan-name ()
+                  (read-c)
+                  (cond ((c-eof?)   #f)
+                        ((c-ws?)    #f)
+                        ((c-alpha?) (write-char c name) (scan-name))
+                        (else       (unread-c))))
+                ;; TODO: Do we really want to emit #f for PI name?
+                (set! name (output-string-&gt;symbol-or-false name))
+                (let scan-val ()
+                  (read-c)
+                  (cond ((c-eof?)  #f)
+                        ;; ((c-amp?) (display (scan-entity) val)
+                        ;;           (scan-val))
+                        ((c-ques?)
+                         (read-c)
+                         (cond ((c-eof?) (write-char #\? val))
+                               ((c-gt?)  #f)
+                               (else     (write-char #\? val)
+                                         (unread-c)
+                                         (scan-val))))
+                        (else (write-char c val) (scan-val))))
+                (list <a href="htmlprag.html#codefunc48441">shtml-pi-symbol</a>
+                      name
+                      (<a href="htmlprag.html#codefunc46266">%htmlprag:gosc</a> val)))))
+
+           (scan-decl
+            ;; TODO: Find if SXML includes declaration forms, and if so, use
+            ;; whatever format SXML wants.
+            ;;
+            ;; TODO: Rewrite to eliminate state variables.
+            (letrec
+                ((scan-parts
+                  (lambda ()
+                    (let ((part       (open-output-string))
+                          (nonsymbol? #f)
+                          (state      'before)
+                          (last?      #f))
+                      (let loop ()
+                        (read-c)
+                        (cond ((c-eof?) #f)
+                              ((c-ws?)
+                               (case state
+                                 ((before) (loop))
+                                 ((quoted) (write-char c part) (loop))))
+                              ((and (c-gt?) (not (eq? state 'quoted)))
+                               (set! last? #t))
+                              ((and (c-lt?) (not (eq? state 'quoted)))
+                               (unread-c))
+                              ((c-quot?)
+                               (case state
+                                 ((before)   (set! state 'quoted) (loop))
+                                 ((unquoted) (unread-c))
+                                 ((quoted)   #f)))
+                              (else
+                               (if (eq? state 'before)
+                                   (set! state 'unquoted))
+                               (set! nonsymbol? (or nonsymbol?
+                                                    (not (c-alphanum?))))
+                               (write-char c part)
+                               (loop))))
+                      (set! part (<a href="htmlprag.html#codefunc46266">%htmlprag:gosc</a> part))
+                      (if (string=? part &quot;&quot;)
+                          '()
+                          (cons (if (or (eq? state 'quoted) nonsymbol?)
+                                    part
+                                    ;; TODO: Normalize case of things we make
+                                    ;; into symbols here.
+                                    (string-&gt;symbol part))
+                                (if last?
+                                    '()
+                                    (scan-parts))))))))
+              (lambda () (make-decl-token (scan-parts)))))
+
+           (scan-entity
+            (lambda ()
+              (read-c)
+              (cond ((c-eof?) &quot;&amp;&quot;)
+                    ((c-alpha?)
+                     ;; TODO: Do entity names have a maximum length?
+                     (let ((name (open-output-string)))
+                       (write-char c name)
+                       (let loop ()
+                         (read-c)
+                         (cond ((c-eof?)   #f)
+                               ((c-alpha?) (write-char c name) (loop))
+                               ((c-semi?)  #f)
+                               (else       (unread-c))))
+                       (set! name (<a href="htmlprag.html#codefunc46266">%htmlprag:gosc</a> name))
+                       ;; TODO: Make the entity map an option.
+                       (let ((pair (assoc name '((&quot;amp&quot;  . &quot;&amp;&quot;)
+                                                 (&quot;apos&quot; . &quot;'&quot;)
+                                                 (&quot;gt&quot;   . &quot;&gt;&quot;)
+                                                 (&quot;lt&quot;   . &quot;&lt;&quot;)
+                                                 (&quot;quot&quot; . &quot;\&quot;&quot;)))))
+                         (if pair
+                             (cdr pair)
+                             (<a href="htmlprag.html#codefunc26970">make-shtml-entity</a> name)))))
+                    ((c-pound?)
+                     (let ((num  (open-output-string))
+                           (hex? #f))
+                       (read-c)
+                       (cond ((c-eof?)            #f)
+                             ((memv c '(#\x #\X)) (set! hex? #t) (read-c)))
+                       (let loop ()
+                         (cond ((c-eof?)  #f)
+                               ((c-semi?) #f)
+                               ((or (c-digit?) (and hex? (c-hexlet?)))
+                                (write-char c num)
+                                (read-c)
+                                (loop))
+                               (else (unread-c))))
+                       (set! num (<a href="htmlprag.html#codefunc46266">%htmlprag:gosc</a> num))
+                       (if (string=? num &quot;&quot;)
+                           &quot;&amp;#;&quot;
+                           (let ((n (string-&gt;number num (if hex? 16 10))))
+                             (if (and (&lt;= 32 n 255) (not (= n 127)))
+                                 (string (<a href="htmlprag.html#codefunc5284">%htmlprag:a2c</a> n))
+                                 (<a href="htmlprag.html#codefunc26970">make-shtml-entity</a> n))))))
+                    (else (unread-c) &quot;&amp;&quot;))))
+
+           (normal-nexttok
+            (lambda ()
+              (read-c)
+              (cond ((c-eof?) no-token)
+                    ((c-lt?)
+                     (let loop ()
+                       (read-c)
+                       (cond ((c-eof?)   &quot;&lt;&quot;)
+                             ((c-ws?)    (loop))
+                             ((c-slash?) (scan-tag #f))
+                             ((c-ques?)  (scan-pi))
+                             ((c-bang?)  (let loop ()
+                                           (read-c)
+                                           (cond ((c-eof?)   no-token)
+                                                 ((c-ws?)    (loop))
+                                                 ((c-minus?) (scan-comment))
+                                                 (else       (unread-c)
+                                                             (scan-decl)))))
+                             ((c-alpha?) (unread-c) (scan-tag #t))
+                             (else       (unread-c) &quot;&lt;&quot;))))
+                    ((c-gt?) &quot;&gt;&quot;)
+                    (else (let ((os (open-output-string)))
+                            (let loop ()
+                              (cond ((c-eof?)   #f)
+                                    ((c-angle?) (unread-c))
+                                    ((c-amp?)
+                                     (let ((entity (scan-entity)))
+                                       (if (string? entity)
+                                           (begin (display entity os)
+                                                  (read-c)
+                                                  (loop))
+                                           (let ((saved-nexttok nexttok))
+                                             (set! nexttok
+                                                   (lambda ()
+                                                     (set! nexttok
+                                                           saved-nexttok)
+                                                     entity))))))
+                                    (else (write-char c os)
+                                          (or (c-lf?)
+                                              (begin (read-c) (loop))))))
+                            (let ((text (<a href="htmlprag.html#codefunc46266">%htmlprag:gosc</a> os)))
+                              (if (equal? text &quot;&quot;)
+                                  (nexttok)
+                                  text)))))))
+
+           (verbeof-nexttok
+            (lambda ()
+              (read-c)
+              (if (c-eof?)
+                  no-token
+                  (let ((os (open-output-string)))
+                    (let loop ()
+                      (or (c-eof?)
+                          (begin (write-char c os)
+                                 (or (c-lf?)
+                                     (begin (read-c) (loop))))))
+                    (<a href="htmlprag.html#codefunc46266">%htmlprag:gosc</a> os)))))
+
+           (make-verbpair-nexttok
+            (lambda (elem-name)
+              (lambda ()
+                (let ((os (open-output-string)))
+                  ;; Accumulate up to a newline-terminated line.
+                  (let loop ()
+                    (read-c)
+                    (cond ((c-eof?)
+                           ;; Got EOF in verbatim context, so set the normal
+                           ;; nextok procedure, then fall out of loop.
+                           (set! nexttok normal-nexttok))
+                          ((c-lt?)
+                           ;; Got &quot;&lt;&quot; in verbatim context, so get next
+                           ;; character.
+                           (read-c)
+                           (cond ((c-eof?)
+                                  ;; Got &quot;&lt;&quot; then EOF, so set to the normal
+                                  ;; nexttok procedure, add the &quot;&lt;&quot; to the
+                                  ;; verbatim string, and fall out of loop.
+                                  (set! nexttok normal-nexttok)
+                                  (write-char #\&lt; os))
+                                 ((c-slash?)
+                                  ;; Got &quot;&lt;/&quot;, so...
+                                  (read-c)
+                                  (cond
+                                   ((c-eof?)
+                                    (display &quot;&lt;/&quot; os))
+                                   ((c-alpha?)
+                                    ;; Got &quot;&lt;/&quot; followed by alpha, so unread
+                                    ;; the alpha, scan qname, compare...
+                                    (unread-c)
+                                    (let* ((vqname (scan-qname #t))
+                                           (ns     (car vqname))
+                                           (local  (cdr vqname)))
+                                      ;; Note: We ignore XML namespace
+                                      ;; qualifier for purposes of comparison.
+                                      ;;
+                                      ;; Note: We're interning strings here for
+                                      ;; comparison when in theory there could
+                                      ;; be many such unique interned strings
+                                      ;; in a valid HTML document, although in
+                                      ;; practice this should not be a problem.
+                                      (if (and local
+                                               (eqv? (string-&gt;symbol
+                                                      (<a href="htmlprag.html#codefunc49083">%htmlprag:down</a>
+                                                       local))
+                                                     elem-name))
+                                          ;; This is the terminator tag, so
+                                          ;; scan to the end of it, set the
+                                          ;; nexttok, and fall out of the loop.
+                                          (begin
+                                            (let scan-to-end ()
+                                              (read-c)
+                                              (cond ((c-eof?) #f)
+                                                    ((c-gt?)  #f)
+                                                    ((c-lt?)  (unread-c))
+                                                    ((c-alpha?)
+                                                     (unread-c)
+                                                     ;; Note: This is an
+                                                     ;; expensive way to skip
+                                                     ;; over an attribute, but
+                                                     ;; in practice more
+                                                     ;; verbatim end tags will
+                                                     ;; not have attributes.
+                                                     (scan-attr)
+                                                     (scan-to-end))
+                                                    (else (scan-to-end))))
+                                            (set! nexttok
+                                                  (lambda ()
+                                                    (set! nexttok
+                                                          normal-nexttok)
+                                                    (make-end-token
+                                                     elem-name #f '()))))
+                                          ;; This isn't the terminator tag, so
+                                          ;; add to the verbatim string the
+                                          ;; &quot;&lt;/&quot; and the characters of what we
+                                          ;; were scanning as a qname, and
+                                          ;; recurse in the loop.
+                                          (begin
+                                            (display &quot;&lt;/&quot; os)
+                                            (if ns
+                                                (begin (display ns os)
+                                                       (display &quot;:&quot; os)))
+                                            (if local
+                                                (display local os))
+                                            (loop)))))
+                                   (else
+                                    ;; Got &quot;&lt;/&quot; and non-alpha, so unread new
+                                    ;; character, add the &quot;&lt;/&quot; to verbatim
+                                    ;; string, then loop.
+                                    (unread-c)
+                                    (display &quot;&lt;/&quot; os)
+                                    (loop))))
+                                 (else
+                                  ;; Got &quot;&lt;&quot; and non-slash, so unread the new
+                                  ;; character, write the &quot;&lt;&quot; to the verbatim
+                                  ;; string, then loop.
+                                  (unread-c)
+                                  (write-char #\&lt; os)
+                                  (loop))))
+                          (else
+                           ;; Got non-&quot;&lt;&quot; in verbatim context, so just add it
+                           ;; to the buffer, then, if it's not a linefeed, fall
+                           ;; out of the loop so that the token can be
+                           ;; returned.
+                           (write-char c os)
+                           (or (c-lf?) (loop)))))
+                  ;; Return the accumulated line string, if non-null, or call
+                  ;; nexttok.
+                  (or (output-string-&gt;string-or-false os) (nexttok))))))
+
+           (nexttok #f))
+
+        (set! nexttok normal-nexttok)
+        (lambda () (nexttok))))))
+</pre>
+<h4><a name='codefunc31190' href='#docfunc31190'>tokenize-html</a></h4>
+<i><a href='#tocfunc31190'>Index</a></i><br>
+
+<pre>(define (<a href="htmlprag.html#codefunc31190">tokenize-html</a> in normalized?)
+  (let ((next-tok (<a href="htmlprag.html#codefunc28193">make-html-tokenizer</a> in normalized?)))
+    (let loop ((tok (next-tok)))
+      (if (null? tok)
+          '()
+          (cons tok (loop (next-tok)))))))
+</pre>
+<h4><a name='codefunc54139' href='#docfunc54139'>shtml-token-kind</a></h4>
+<i><a href='#tocfunc54139'>Index</a></i><br>
+
+<pre>(define (<a href="htmlprag.html#codefunc54139">shtml-token-kind</a> token)
+  (cond ((string? token) <a href="htmlprag.html#codefunc11702">shtml-text-symbol</a>)
+        ((list?   token)
+         (let ((s (list-ref token 0)))
+           (if (memq s `(,shtml-comment-symbol
+                         ,shtml-decl-symbol
+                         ,shtml-empty-symbol
+                         ,shtml-end-symbol
+                         ,shtml-entity-symbol
+                         ,shtml-pi-symbol))
+               s
+               <a href="htmlprag.html#codefunc24557">shtml-start-symbol</a>)))
+        (else (%htmlprag:error &quot;shtml-token-kind&quot;
+                               &quot;unrecognized token kind:&quot;
+                               token))))
+</pre>
+<h4><a name='codefunc44243' href='#docfunc44243'>%htmlprag:empty-elements</a></h4>
+<i><a href='#tocfunc44243'>Index</a></i><br>
+
+<pre>(define <a href="htmlprag.html#codefunc44243">%htmlprag:empty-elements</a>
+  '(&amp; area base br frame hr img input isindex keygen link meta object param
+      spacer wbr))
+</pre>
+<h4><a name='codefunc7665' href='#docfunc7665'>parse-html/tokenizer</a></h4>
+<i><a href='#tocfunc7665'>Index</a></i><br>
+
+<pre>(define <a href="htmlprag.html#codefunc7665">parse-html/tokenizer</a>
+  ;; TODO: Document the algorithm, then see if rewriting as idiomatic Scheme
+  ;; can make it more clear.
+  (letrec ((empty-elements
+            ;; TODO: Maybe make this an option.  This might also be an
+            ;; acceptable way to parse old HTML that uses the `p' element as a
+            ;; paragraph terminator.
+            <a href="htmlprag.html#codefunc44243">%htmlprag:empty-elements</a>)
+           (parent-constraints
+            ;; TODO: Maybe make this an option.
+            '((area     . (map))
+              (body     . (html))
+              (caption  . (table))
+              (colgroup . (table))
+              (dd       . (dl))
+              (dt       . (dl))
+              (frame    . (frameset))
+              (head     . (html))
+              (isindex  . (head))
+              (li       . (dir menu ol ul))
+              (meta     . (head))
+              (noframes . (frameset))
+              (option   . (select))
+              (p        . (body td th))
+              (param    . (applet))
+              (tbody    . (table))
+              (td       . (tr))
+              (th       . (tr))
+              (thead    . (table))
+              (title    . (head))
+              (tr       . (table tbody thead))))
+           (start-tag-name (lambda (tag-token) (car tag-token)))
+           (end-tag-name   (lambda (tag-token) (list-ref tag-token 1))))
+    (lambda (tokenizer normalized?)
+      ;; Example `begs' value:
+      ;;
+      ;; ( ((head ...) . ( (title ...)                         ))
+      ;;   ((html ...) . ( (head  ...) (*COMMENT* ...)         ))
+      ;;   (#f         . ( (html  ...) (*DECL*    doctype ...) )) )
+      (let ((begs (list (cons #f '()))))
+        (letrec ((add-to-current-beg
+                  (lambda (tok)
+                    (set-cdr! (car begs) (cons tok (cdr (car begs))))))
+                 (finish-all-begs
+                  (lambda ()
+                    (let ((toplist #f))
+                      (map (lambda (beg) (set! toplist (finish-beg beg)))
+                           begs)
+                      toplist)))
+                 (finish-beg
+                  (lambda (beg)
+                    (let ((start-tok (car beg)))
+                      (if start-tok
+                          (<a href="htmlprag.html#codefunc7233">%htmlprag:append!</a>
+                           (car beg)
+                           (<a href="htmlprag.html#codefunc44303">%htmlprag:reverse!ok</a> (cdr beg)))
+                          (<a href="htmlprag.html#codefunc44303">%htmlprag:reverse!ok</a> (cdr beg))))))
+                 (finish-begs-to
+                  (lambda (name lst)
+                    (let* ((top      (car lst))
+                           (starttag (car top)))
+                      (cond ((not starttag) #f)
+                            ((eqv? name (start-tag-name starttag))
+                             (set! begs (cdr lst))
+                             (finish-beg top)
+                             #t)
+                            (else (if (finish-begs-to name (cdr lst))
+                                      (begin (finish-beg top) #t)
+                                      #f))))))
+                 (finish-begs-upto
+                  (lambda (parents lst)
+                    (let* ((top      (car lst))
+                           (starttag (car top)))
+                      (cond ((not starttag) #f)
+                            ((memq (start-tag-name starttag) parents)
+                             (set! begs lst)
+                             #t)
+                            (else (if (finish-begs-upto parents (cdr lst))
+                                      (begin (finish-beg top) #t)
+                                      #f)))))))
+          (let loop ()
+            (let ((tok (tokenizer)))
+              (if (null? tok)
+                  (finish-all-begs)
+                  (let ((kind (<a href="htmlprag.html#codefunc54139">shtml-token-kind</a> tok)))
+                    (cond ((memv kind `(,shtml-comment-symbol
+                                        ,shtml-decl-symbol
+                                        ,shtml-entity-symbol
+                                        ,shtml-pi-symbol
+                                        ,shtml-text-symbol))
+                           (add-to-current-beg tok))
+                          ((eqv? kind <a href="htmlprag.html#codefunc24557">shtml-start-symbol</a>)
+                           (let* ((name (start-tag-name tok))
+                                  (cell (assq name parent-constraints)))
+                             (and cell (finish-begs-upto (cdr cell) begs))
+                             (add-to-current-beg tok)
+                             (or (memq name empty-elements)
+                                 (set! begs (cons (cons tok '()) begs)))))
+                          ((eqv? kind <a href="htmlprag.html#codefunc23283">shtml-empty-symbol</a>)
+                           ;; Empty tag token, so just add it to current
+                           ;; beginning while stripping off leading `*EMPTY*'
+                           ;; symbol so that the token becomes normal SXML
+                           ;; element syntax.
+                           (add-to-current-beg (cdr tok)))
+                          ((eqv? kind <a href="htmlprag.html#codefunc59245">shtml-end-symbol</a>)
+                           (let ((name (end-tag-name tok)))
+                             (if name
+                                 ;; Try to finish to a start tag matching this
+                                 ;; end tag.  If none, just drop the token,
+                                 ;; though we used to add it to the current
+                                 ;; beginning.
+                                 (finish-begs-to name begs)
+                                 ;; We have an anonymous end tag, so match it
+                                 ;; with the most recent beginning.  If no
+                                 ;; beginning to match, then just drop the
+                                 ;; token, though we used to add it to the
+                                 ;; current beginning.
+                                 (and (car (car begs))
+                                      (begin (finish-beg (car begs))
+                                             (set! begs (cdr begs)))))))
+                          (else (%htmlprag:error &quot;parse-html/tokenizer&quot;
+                                                 &quot;unknown tag kind:&quot;
+                                                 kind)))
+                    (loop))))))))))
+</pre>
+<h4><a name='codefunc50429' href='#docfunc50429'>%htmlprag:parse-html</a></h4>
+<i><a href='#tocfunc50429'>Index</a></i><br>
+
+<pre>(define (<a href="htmlprag.html#codefunc50429">%htmlprag:parse-html</a> input normalized? top?)
+  (let ((parse
+         (lambda ()
+           (<a href="htmlprag.html#codefunc7665">parse-html/tokenizer</a>
+            (<a href="htmlprag.html#codefunc28193">make-html-tokenizer</a>
+             (cond ((input-port? input) input)
+                   ((string?     input) (open-input-string input))
+                   (else (%htmlprag:error
+                          &quot;%htmlprag:parse-html&quot;
+                          &quot;invalid input type:&quot;
+                          input)))
+             normalized?)
+            normalized?))))
+    (if top?
+        (cons <a href="htmlprag.html#codefunc59528">shtml-top-symbol</a> (parse))
+        (parse))))
+</pre>
+<h4><a name='codefunc39551' href='#docfunc39551'>html->sxml-0nf</a></h4>
+<i><a href='#tocfunc39551'>Index</a></i><br>
+
+<pre>(define (<a href="htmlprag.html#codefunc39551">html-&gt;sxml-0nf</a> input) (<a href="htmlprag.html#codefunc50429">%htmlprag:parse-html</a> input #f #t))
+</pre>
+<h4><a name='codefunc39807' href='#docfunc39807'>html->sxml-1nf</a></h4>
+<i><a href='#tocfunc39807'>Index</a></i><br>
+
+<pre>(define (<a href="htmlprag.html#codefunc39807">html-&gt;sxml-1nf</a> input) (<a href="htmlprag.html#codefunc50429">%htmlprag:parse-html</a> input #f #t))
+</pre>
+<h4><a name='codefunc40063' href='#docfunc40063'>html->sxml-2nf</a></h4>
+<i><a href='#tocfunc40063'>Index</a></i><br>
+
+<pre>(define (<a href="htmlprag.html#codefunc40063">html-&gt;sxml-2nf</a> input) (<a href="htmlprag.html#codefunc50429">%htmlprag:parse-html</a> input #t #t))
+</pre>
+<h4><a name='codefunc996' href='#docfunc996'>html->sxml</a></h4>
+<i><a href='#tocfunc996'>Index</a></i><br>
+
+<pre>(define <a href="htmlprag.html#codefunc996">html-&gt;sxml</a>  <a href="htmlprag.html#codefunc39551">html-&gt;sxml-0nf</a>)
+</pre>
+<h4><a name='codefunc62806' href='#docfunc62806'>html->shtml</a></h4>
+<i><a href='#tocfunc62806'>Index</a></i><br>
+
+<pre>(define <a href="htmlprag.html#codefunc62806">html-&gt;shtml</a> <a href="htmlprag.html#codefunc39551">html-&gt;sxml-0nf</a>)
+</pre>
+<h4><a name='codefunc16684' href='#docfunc16684'>%htmlprag:write-shtml-as-html/fixed</a></h4>
+<i><a href='#tocfunc16684'>Index</a></i><br>
+
+<pre>(define (<a href="htmlprag.html#codefunc16684">%htmlprag:write-shtml-as-html/fixed</a> shtml out foreign-filter)
+  (letrec
+      ((write-shtml-text
+        (lambda (str out)
+          (let ((len (string-length str)))
+            (let loop ((i 0))
+              (if (&lt; i len)
+                  (begin (display (let ((c (string-ref str i)))
+                                    (case c
+                                      ;; ((#\&quot;) &quot;&amp;quot;&quot;)
+                                      ((#\&amp;) &quot;&amp;amp;&quot;)
+                                      ((#\&lt;) &quot;&amp;lt;&quot;)
+                                      ((#\&gt;) &quot;&amp;gt;&quot;)
+                                      (else c)))
+                                  out)
+                         (loop (+ 1 i))))))))
+       (write-dquote-ampified
+        (lambda (str out)
+          ;; TODO: If we emit &quot;&amp;quot;&quot;, we really should parse it, and HTML
+          ;; 4.01 says we should, but anachronisms in HTML create the potential
+          ;; for nasty mutilation of URI in attribute values.
+          (let ((len (string-length str)))
+            (let loop ((i 0))
+              (if (&lt; i len)
+                  (begin (display (let ((c (string-ref str i)))
+                                    (if (eqv? c #\&quot;) &quot;&amp;quot;&quot; c))
+                                  out)
+                         (loop (+ 1 i))))))))
+       (do-thing
+        (lambda (thing)
+          (cond ((string? thing) (write-shtml-text thing out))
+                ((list? thing)   (if (not (null? thing))
+                                     (do-list-thing thing)))
+                (else (do-thing (foreign-filter thing #f))))))
+       (do-list-thing
+        (lambda (thing)
+          (let ((head (car thing)))
+            (cond ((symbol? head)
+                   ;; Head is a symbol, so...
+                   (cond ((eq? head <a href="htmlprag.html#codefunc50254">shtml-comment-symbol</a>)
+                          ;; TODO: Make sure the comment text doesn't contain a
+                          ;; comment end sequence.
+                          (display &quot;&lt;!-- &quot; out)
+                          (let ((text (car (cdr thing))))
+                            (if (string? text)
+                                ;; TODO: Enforce whitespace safety without
+                                ;; padding unnecessarily.
+                                ;;
+                                ;; (let ((len (string-length text)))
+                                ;; (if (= len 0)
+                                ;; (display #\space out)
+                                ;; (begin (if (not (eqv?
+                                ;; (string-ref text 0)
+                                ;; #\space))
+                                (display text out)
+                                (%htmlprag:error
+                                 &quot;write-shtml-as-html&quot;
+                                 &quot;invalid SHTML comment text:&quot;
+                                 thing)))
+                          (or (null? (cdr (cdr thing)))
+                              (%htmlprag:error
+                               &quot;write-shtml-as-html&quot;
+                               &quot;invalid SHTML comment body:&quot;
+                               thing))
+                          (display &quot; --&gt;&quot; out))
+                         ((eq? head <a href="htmlprag.html#codefunc9617">shtml-decl-symbol</a>)
+                          (let ((head (car (cdr thing))))
+                            (display &quot;&lt;!&quot; out)
+                            (display (symbol-&gt;string head) out)
+                            (for-each
+                             (lambda (n)
+                               (cond ((symbol? n)
+                                      (display #\space out)
+                                      (display (symbol-&gt;string n) out))
+                                     ((string? n)
+                                      (display &quot; \&quot;&quot; out)
+                                      (write-dquote-ampified n out)
+                                      (display #\&quot; out))
+                                     (else (%htmlprag:error
+                                            &quot;write-shtml-as-html&quot;
+                                            &quot;invalid SHTML decl:&quot;
+                                            thing))))
+                             (cdr (cdr thing)))
+                            (display #\&gt; out)))
+                         ((eq? head <a href="htmlprag.html#codefunc48441">shtml-pi-symbol</a>)
+                          (display &quot;&lt;?&quot; out)
+                          (display (symbol-&gt;string (car (cdr thing))) out)
+                          (display #\space out)
+                          (display (car (cdr (cdr thing))) out)
+                          ;; TODO: Error-check that no more rest of PI.
+                          (display &quot;?&gt;&quot; out))
+                         ((eq? head <a href="htmlprag.html#codefunc59528">shtml-top-symbol</a>)
+                          (for-each do-thing (cdr thing)))
+                         ((eq? head <a href="htmlprag.html#codefunc23283">shtml-empty-symbol</a>)
+                          #f)
+                         ((eq? head '@)
+                          (%htmlprag:error
+                           &quot;write-shtml-as-html&quot;
+                           &quot;illegal position of SHTML attributes:&quot;
+                           thing))
+                         ((or (eq? head '&amp;) (eq? head <a href="htmlprag.html#codefunc42263">shtml-entity-symbol</a>))
+                          (let ((val (<a href="htmlprag.html#codefunc40102">shtml-entity-value</a> thing)))
+                            (if val
+                                (begin (write-char     #\&amp; out)
+                                       (if (integer? val)
+                                           (write-char #\# out))
+                                       (display        val out)
+                                       (write-char     #\; out))
+                                (%htmlprag:error
+                                 &quot;write-shtml-as-html&quot;
+                                 &quot;invalid SHTML entity reference:&quot;
+                                 thing))))
+                         ((memq head `(,shtml-end-symbol
+                                       ,shtml-start-symbol
+                                       ,shtml-text-symbol))
+                          (%htmlprag:error &quot;write-shtml-as-html&quot;
+                                           &quot;invalid SHTML symbol:&quot;
+                                           head))
+                         (else
+                          (display #\&lt; out)
+                          (display head out)
+                          (let* ((rest   (cdr thing)))
+                            (if (not (null? rest))
+                                (let ((second (car rest)))
+                                  (and (list? second)
+                                       (not (null? second))
+                                       (eq? (car second)
+                                            '@)
+                                       (begin (for-each do-attr (cdr second))
+                                              (set! rest (cdr rest))))))
+                            (if (memq head
+                                      <a href="htmlprag.html#codefunc44243">%htmlprag:empty-elements</a>)
+                                ;; TODO: Error-check to make sure the element
+                                ;; has no content other than attributes.  We
+                                ;; have to test for cases like: (br (@) ()
+                                ;; (()))
+                                (display &quot; /&gt;&quot; out)
+                                (begin (display #\&gt; out)
+                                       (for-each do-thing rest)
+                                       (display &quot;&lt;/&quot; out)
+                                       (display (symbol-&gt;string head) out)
+                                       (display #\&gt; out)))))))
+                  ;; ((or (list? head) (string? head))
+                  ;;
+                  ;; Head is a list or string, which might occur as the result
+                  ;; of an SXML transform, so we'll cope.
+                  (else
+                   ;; Head is not a symbol, which might occur as the result of
+                   ;; an SXML transform, so we'll cope.
+                   (for-each do-thing thing))
+                  ;;(else
+                  ;; ;; Head is NOT a symbol, list, or string, so error.
+                  ;; (%htmlprag:error &quot;write-shtml-as-html&quot;
+                  ;;                          &quot;invalid SHTML list:&quot;
+                  ;;                          thing))
+                  ))))
+       (write-attr-val-dquoted
+        (lambda (str out)
+          (display #\&quot; out)
+          (display str out)
+          (display #\&quot; out)))
+       (write-attr-val-squoted
+        (lambda (str out)
+          (display #\' out)
+          (display str out)
+          (display #\' out)))
+       (write-attr-val-dquoted-and-amped
+        (lambda (str out)
+          (display #\&quot; out)
+          (write-dquote-ampified str out)
+          (display #\&quot; out)))
+       (write-attr-val
+        (lambda (str out)
+          (let ((len (string-length str)))
+            (let find-dquote-and-squote ((i 0))
+              (if (= i len)
+                  (write-attr-val-dquoted str out)
+                  (let ((c (string-ref str i)))
+                    (cond ((eqv? c #\&quot;)
+                           (let find-squote ((i (+ 1 i)))
+                             (if (= i len)
+                                 (write-attr-val-squoted str out)
+                                 (if (eqv? (string-ref str i) #\')
+                                     (write-attr-val-dquoted-and-amped str
+                                                                       out)
+                                     (find-squote (+ 1 i))))))
+                          ((eqv? c #\')
+                           (let find-dquote ((i (+ 1 i)))
+                             (if (= i len)
+                                 (write-attr-val-dquoted str out)
+                                 (if (eqv? (string-ref str i) #\&quot;)
+                                     (write-attr-val-dquoted-and-amped str
+                                                                       out)
+                                     (find-dquote (+ 1 i))))))
+                          (else (find-dquote-and-squote (+ 1 i))))))))))
+
+       (collect-and-write-attr-val
+        ;; TODO: Take another look at this.
+        (lambda (lst out)
+          (let ((os #f))
+            (let do-list ((lst lst))
+              (for-each
+               (lambda (thing)
+                 (let do-thing ((thing thing))
+                   (cond ((string? thing)
+                          (or os (set! os (open-output-string)))
+                          (display thing os))
+                         ((list? thing)
+                          (do-list thing))
+                         ((eq? thing #t)
+                          #f)
+                         (else
+                          (do-thing (foreign-filter thing #t))))))
+               lst))
+            (if os
+                (begin
+                  (display #\= out)
+                  (write-attr-val (<a href="htmlprag.html#codefunc46266">%htmlprag:gosc</a> os) out))))))
+
+       (do-attr
+        (lambda (attr)
+          (or (list? attr)
+              (%htmlprag:error &quot;write-shtml-as-html&quot;
+                               &quot;invalid SHTML attribute:&quot;
+                               attr))
+          (if (not (null? attr))
+              (let ((name (car attr)))
+                (or (symbol? name)
+                    (%htmlprag:error
+                     &quot;write-shtml-as-html&quot;
+                     &quot;invalid name in SHTML attribute:&quot;
+                     attr))
+                (if (not (eq? name '@))
+                    (begin
+                      (display #\space out)
+                      (display name    out)
+                      (collect-and-write-attr-val (cdr attr) out)
+
+                      )))))))
+    (do-thing shtml)
+    (if #f #f)))
+</pre>
+<h4><a name='codefunc24841' href='#docfunc24841'>write-shtml-as-html</a></h4>
+<i><a href='#tocfunc24841'>Index</a></i><br>
+
+<pre>(define <a href="htmlprag.html#codefunc24841">write-shtml-as-html</a>
+  (letrec ((error-foreign-filter
+            (lambda (foreign-object in-attribute-value?)
+              (%htmlprag:error
+               &quot;write-shtml-as-html&quot;
+               (if in-attribute-value?
+                   &quot;unhandled foreign object in shtml attribute value:&quot;
+                   &quot;unhandled foreign object in shtml:&quot;)
+               foreign-object))))
+    (lambda (shtml . rest)
+      (case (length rest)
+        ((0) (<a href="htmlprag.html#codefunc16684">%htmlprag:write-shtml-as-html/fixed</a>
+              shtml
+              (current-output-port)
+              error-foreign-filter))
+        ((1) (<a href="htmlprag.html#codefunc16684">%htmlprag:write-shtml-as-html/fixed</a>
+              shtml
+              (car rest)
+              error-foreign-filter))
+        ((2) (<a href="htmlprag.html#codefunc16684">%htmlprag:write-shtml-as-html/fixed</a>
+              shtml
+              (car rest)
+              (cadr rest)))
+        (else
+         (%htmlprag:error &quot;write-shtml-as-html&quot;
+                          &quot;extraneous arguments:&quot;
+                          (cddr rest)))))))
+</pre>
+<h4><a name='codefunc55666' href='#docfunc55666'>shtml->html</a></h4>
+<i><a href='#tocfunc55666'>Index</a></i><br>
+
+<pre>(define (<a href="htmlprag.html#codefunc55666">shtml-&gt;html</a> shtml)
+  (let ((os (open-output-string)))
+    (<a href="htmlprag.html#codefunc24841">write-shtml-as-html</a> shtml os)
+    (<a href="htmlprag.html#codefunc46266">%htmlprag:gosc</a> os)))
+</pre>
+<h4><a name='codefunc996' href='#docfunc996'>sxml->html</a></h4>
+<i><a href='#tocfunc996'>Index</a></i><br>
+
+<pre>(define <a href="htmlprag.html#codefunc996">sxml-&gt;html</a>      <a href="htmlprag.html#codefunc55666">shtml-&gt;html</a>)
+</pre>
+<h4><a name='codefunc53044' href='#docfunc53044'>write-sxml-html</a></h4>
+<i><a href='#tocfunc53044'>Index</a></i><br>
+
+<pre>(define <a href="htmlprag.html#codefunc53044">write-sxml-html</a> <a href="htmlprag.html#codefunc24841">write-shtml-as-html</a>)
+</pre>
+<h4><a name='codefunc48071' href='#docfunc48071'>%htmlprag:test</a></h4>
+<i><a href='#tocfunc48071'>Index</a></i><br>
+
+<pre>(define (<a href="htmlprag.html#codefunc48071">%htmlprag:test</a>)
+  (%htmlprag:testeez
+   &quot;HtmlPrag&quot;
+
+   (test-define &quot;&quot; lf (string (<a href="htmlprag.html#codefunc5284">%htmlprag:a2c</a> 10)))
+
+   (test/equal &quot;&quot; (<a href="htmlprag.html#codefunc62806">html-&gt;shtml</a> &quot;&lt;a&gt;&gt;&quot;) `(,shtml-top-symbol (a &quot;&gt;&quot;)))
+   (test/equal &quot;&quot; (<a href="htmlprag.html#codefunc62806">html-&gt;shtml</a> &quot;&lt;a&lt;&gt;&quot;) `(,shtml-top-symbol (a &quot;&lt;&quot; &quot;&gt;&quot;)))
+
+   (test/equal &quot;&quot; (<a href="htmlprag.html#codefunc62806">html-&gt;shtml</a> &quot;&lt;&gt;&quot;)      `(,shtml-top-symbol &quot;&lt;&quot; &quot;&gt;&quot;))
+   (test/equal &quot;&quot; (<a href="htmlprag.html#codefunc62806">html-&gt;shtml</a> &quot;&lt; &gt;&quot;)     `(,shtml-top-symbol &quot;&lt;&quot; &quot;&gt;&quot;))
+   (test/equal &quot;&quot; (<a href="htmlprag.html#codefunc62806">html-&gt;shtml</a> &quot;&lt; a&gt;&quot;)    `(,shtml-top-symbol (a)))
+   (test/equal &quot;&quot; (<a href="htmlprag.html#codefunc62806">html-&gt;shtml</a> &quot;&lt; a / &gt;&quot;) `(,shtml-top-symbol (a)))
+
+   (test/equal &quot;&quot; (<a href="htmlprag.html#codefunc62806">html-&gt;shtml</a> &quot;&lt;a&lt;&quot;)  `(,shtml-top-symbol (a &quot;&lt;&quot;)))
+   (test/equal &quot;&quot; (<a href="htmlprag.html#codefunc62806">html-&gt;shtml</a> &quot;&lt;a&lt;b&quot;) `(,shtml-top-symbol (a (b))))
+
+   (test/equal &quot;&quot; (<a href="htmlprag.html#codefunc62806">html-&gt;shtml</a> &quot;&gt;&lt;a&gt;&quot;) `(,shtml-top-symbol &quot;&gt;&quot; (a)))
+
+   (test/equal &quot;&quot; (<a href="htmlprag.html#codefunc62806">html-&gt;shtml</a> &quot;&lt;/&gt;&quot;) `(,shtml-top-symbol))
+
+   (test/equal &quot;&quot; (<a href="htmlprag.html#codefunc62806">html-&gt;shtml</a> &quot;&lt;\&quot;&gt;&quot;) `(,shtml-top-symbol &quot;&lt;&quot; &quot;\&quot;&quot; &quot;&gt;&quot;))
+
+   (test/equal &quot;&quot;
+               (<a href="htmlprag.html#codefunc62806">html-&gt;shtml</a> (string-append &quot;&lt;a&gt;xxx&lt;plaintext&gt;aaa&quot; lf
+                                           &quot;bbb&quot; lf
+                                           &quot;c&lt;c&lt;c&quot;))
+               `(,shtml-top-symbol
+                 (a &quot;xxx&quot; (plaintext ,(string-append &quot;aaa&quot; lf)
+                                     ,(string-append &quot;bbb&quot; lf)
+                                     &quot;c&lt;c&lt;c&quot;))))
+
+   (test/equal &quot;&quot;
+               (<a href="htmlprag.html#codefunc62806">html-&gt;shtml</a> &quot;aaa&lt;!-- xxx --&gt;bbb&quot;)
+               `(,shtml-top-symbol
+                 &quot;aaa&quot; (,shtml-comment-symbol &quot; xxx &quot;)   &quot;bbb&quot;))
+
+   (test/equal &quot;&quot;
+               (<a href="htmlprag.html#codefunc62806">html-&gt;shtml</a> &quot;aaa&lt;! <a href="myenv.html#codemacro11565">--</a> xxx --&gt;bbb&quot;)
+               `(,shtml-top-symbol
+                 &quot;aaa&quot; (,shtml-comment-symbol &quot; xxx &quot;)   &quot;bbb&quot;))
+
+   (test/equal &quot;&quot;
+               (<a href="htmlprag.html#codefunc62806">html-&gt;shtml</a> &quot;aaa&lt;!-- xxx ---&gt;bbb&quot;)
+               `(,shtml-top-symbol
+                 &quot;aaa&quot; (,shtml-comment-symbol &quot; xxx -&quot;)  &quot;bbb&quot;))
+
+   (test/equal &quot;&quot;
+               (<a href="htmlprag.html#codefunc62806">html-&gt;shtml</a> &quot;aaa&lt;!-- xxx ----&gt;bbb&quot;)
+               `(,shtml-top-symbol
+                 &quot;aaa&quot; (,shtml-comment-symbol &quot; xxx --&quot;) &quot;bbb&quot;))
+
+   (test/equal &quot;&quot;
+               (<a href="htmlprag.html#codefunc62806">html-&gt;shtml</a> &quot;aaa&lt;!-- xxx -y--&gt;bbb&quot;)
+               `(,shtml-top-symbol
+                 &quot;aaa&quot; (,shtml-comment-symbol &quot; xxx -y&quot;) &quot;bbb&quot;))
+
+   (test/equal &quot;&quot;
+               (<a href="htmlprag.html#codefunc62806">html-&gt;shtml</a> &quot;aaa&lt;!-----&gt;bbb&quot;)
+               `(,shtml-top-symbol
+                 &quot;aaa&quot; (,shtml-comment-symbol &quot;-&quot;)       &quot;bbb&quot;))
+
+   (test/equal &quot;&quot;
+               (<a href="htmlprag.html#codefunc62806">html-&gt;shtml</a> &quot;aaa&lt;!----&gt;bbb&quot;)
+               `(,shtml-top-symbol
+                 &quot;aaa&quot; (,shtml-comment-symbol &quot;&quot;)        &quot;bbb&quot;))
+
+   (test/equal &quot;&quot;
+               (<a href="htmlprag.html#codefunc62806">html-&gt;shtml</a> &quot;aaa&lt;!---&gt;bbb&quot;)
+               `(,shtml-top-symbol &quot;aaa&quot; (,shtml-comment-symbol &quot;-&gt;bbb&quot;)))
+
+   (test/equal &quot;&quot; (<a href="htmlprag.html#codefunc62806">html-&gt;shtml</a> &quot;&lt;hr&gt;&quot;)   `(,shtml-top-symbol (hr)))
+   (test/equal &quot;&quot; (<a href="htmlprag.html#codefunc62806">html-&gt;shtml</a> &quot;&lt;hr/&gt;&quot;)  `(,shtml-top-symbol (hr)))
+   (test/equal &quot;&quot; (<a href="htmlprag.html#codefunc62806">html-&gt;shtml</a> &quot;&lt;hr /&gt;&quot;) `(,shtml-top-symbol (hr)))
+
+   (test/equal &quot;&quot;
+               (<a href="htmlprag.html#codefunc62806">html-&gt;shtml</a> &quot;&lt;hr noshade&gt;&quot;)
+               `(,shtml-top-symbol (hr (@ (noshade)))))
+   (test/equal &quot;&quot;
+               (<a href="htmlprag.html#codefunc62806">html-&gt;shtml</a> &quot;&lt;hr noshade/&gt;&quot;)
+               `(,shtml-top-symbol (hr (@ (noshade)))))
+   (test/equal &quot;&quot;
+               (<a href="htmlprag.html#codefunc62806">html-&gt;shtml</a> &quot;&lt;hr noshade /&gt;&quot;)
+               `(,shtml-top-symbol (hr (@ (noshade)))))
+   (test/equal &quot;&quot;
+               (<a href="htmlprag.html#codefunc62806">html-&gt;shtml</a> &quot;&lt;hr noshade / &gt;&quot;)
+               `(,shtml-top-symbol (hr (@ (noshade)))))
+   (test/equal &quot;&quot;
+               (<a href="htmlprag.html#codefunc62806">html-&gt;shtml</a> &quot;&lt;hr noshade=1 /&gt;&quot;)
+               `(,shtml-top-symbol (hr (@ (noshade &quot;1&quot;)))))
+   (test/equal &quot;&quot;
+               (<a href="htmlprag.html#codefunc62806">html-&gt;shtml</a> &quot;&lt;hr noshade=1/&gt;&quot;)
+               `(,shtml-top-symbol (hr (@ (noshade &quot;1/&quot;)))))
+
+   (test/equal &quot;&quot;
+               (<a href="htmlprag.html#codefunc62806">html-&gt;shtml</a> &quot;&lt;q&gt;aaa&lt;p/&gt;bbb&lt;/q&gt;ccc&lt;/p&gt;ddd&quot;)
+               `(,shtml-top-symbol (q &quot;aaa&quot; (p) &quot;bbb&quot;) &quot;ccc&quot; &quot;ddd&quot;))
+
+   (test/equal &quot;&quot; (<a href="htmlprag.html#codefunc62806">html-&gt;shtml</a> &quot;&amp;lt;&quot;) `(,shtml-top-symbol &quot;&lt;&quot;))
+   (test/equal &quot;&quot; (<a href="htmlprag.html#codefunc62806">html-&gt;shtml</a> &quot;&amp;gt;&quot;) `(,shtml-top-symbol &quot;&gt;&quot;))
+
+   (test/equal &quot;&quot;
+               (<a href="htmlprag.html#codefunc62806">html-&gt;shtml</a> &quot;Gilbert &amp;amp; Sullivan&quot;)
+               `(,shtml-top-symbol &quot;Gilbert &amp; Sullivan&quot;))
+   (test/equal &quot;&quot;
+               (<a href="htmlprag.html#codefunc62806">html-&gt;shtml</a> &quot;Gilbert &amp;amp Sullivan&quot;)
+               `(,shtml-top-symbol &quot;Gilbert &amp; Sullivan&quot;))
+   (test/equal &quot;&quot;
+               (<a href="htmlprag.html#codefunc62806">html-&gt;shtml</a> &quot;Gilbert &amp; Sullivan&quot;)
+               `(,shtml-top-symbol &quot;Gilbert &amp; Sullivan&quot;))
+
+   (test/equal &quot;&quot;
+               (<a href="htmlprag.html#codefunc62806">html-&gt;shtml</a> &quot;Copyright &amp;copy; Foo&quot;)
+               `(,shtml-top-symbol &quot;Copyright &quot;
+                                   (&amp; ,(string-&gt;symbol &quot;copy&quot;))
+                                   &quot; Foo&quot;))
+   (test/equal &quot;&quot;
+               (<a href="htmlprag.html#codefunc62806">html-&gt;shtml</a> &quot;aaa&amp;copy;bbb&quot;)
+               `(,shtml-top-symbol
+                 &quot;aaa&quot; (&amp; ,(string-&gt;symbol &quot;copy&quot;)) &quot;bbb&quot;))
+   (test/equal &quot;&quot;
+               (<a href="htmlprag.html#codefunc62806">html-&gt;shtml</a> &quot;aaa&amp;copy&quot;)
+               `(,shtml-top-symbol
+                 &quot;aaa&quot; (&amp; ,(string-&gt;symbol &quot;copy&quot;))))
+
+   (test/equal &quot;&quot; (<a href="htmlprag.html#codefunc62806">html-&gt;shtml</a> &quot;&amp;#42;&quot;)  `(,shtml-top-symbol &quot;*&quot;))
+   (test/equal &quot;&quot; (<a href="htmlprag.html#codefunc62806">html-&gt;shtml</a> &quot;&amp;#42&quot;)   `(,shtml-top-symbol &quot;*&quot;))
+   (test/equal &quot;&quot; (<a href="htmlprag.html#codefunc62806">html-&gt;shtml</a> &quot;&amp;#42x&quot;)  `(,shtml-top-symbol &quot;*x&quot;))
+   (test/equal &quot;&quot; (<a href="htmlprag.html#codefunc62806">html-&gt;shtml</a> &quot;&amp;#151&quot;)  `(,shtml-top-symbol
+                                           ,(string (<a href="htmlprag.html#codefunc5284">%htmlprag:a2c</a> 151))))
+   (test/equal &quot;&quot; (<a href="htmlprag.html#codefunc62806">html-&gt;shtml</a> &quot;&amp;#1000&quot;) `(,shtml-top-symbol (&amp; 1000)))
+   (test/equal &quot;&quot; (<a href="htmlprag.html#codefunc62806">html-&gt;shtml</a> &quot;&amp;#x42&quot;)  `(,shtml-top-symbol &quot;B&quot;))
+   (test/equal &quot;&quot; (<a href="htmlprag.html#codefunc62806">html-&gt;shtml</a> &quot;&amp;#xA2&quot;)  `(,shtml-top-symbol
+                                           ,(string (<a href="htmlprag.html#codefunc5284">%htmlprag:a2c</a> 162))))
+   (test/equal &quot;&quot; (<a href="htmlprag.html#codefunc62806">html-&gt;shtml</a> &quot;&amp;#xFF&quot;)  `(,shtml-top-symbol
+                                           ,(string (<a href="htmlprag.html#codefunc5284">%htmlprag:a2c</a> 255))))
+   (test/equal &quot;&quot; (<a href="htmlprag.html#codefunc62806">html-&gt;shtml</a> &quot;&amp;#x100&quot;) `(,shtml-top-symbol (&amp; 256)))
+   (test/equal &quot;&quot; (<a href="htmlprag.html#codefunc62806">html-&gt;shtml</a> &quot;&amp;#X42&quot;)  `(,shtml-top-symbol &quot;B&quot;))
+   (test/equal &quot;&quot; (<a href="htmlprag.html#codefunc62806">html-&gt;shtml</a> &quot;&amp;42;&quot;)   `(,shtml-top-symbol &quot;&amp;42;&quot;))
+
+   (test/equal &quot;&quot;
+               (<a href="htmlprag.html#codefunc62806">html-&gt;shtml</a> (string-append &quot;aaa&amp;copy;bbb&amp;amp;ccc&amp;lt;ddd&amp;&amp;gt;&quot;
+                                           &quot;eee&amp;#42;fff&amp;#1000;ggg&amp;#x5a;hhh&quot;))
+               `(,shtml-top-symbol
+                 &quot;aaa&quot;
+                 (&amp; ,(string-&gt;symbol &quot;copy&quot;))
+                 &quot;bbb&amp;ccc&lt;ddd&amp;&gt;eee*fff&quot;
+                 (&amp; 1000)
+                 &quot;gggZhhh&quot;))
+
+   (test/equal &quot;&quot;
+               (<a href="htmlprag.html#codefunc62806">html-&gt;shtml</a>
+                (string-append
+                 &quot;&lt;IMG src=\&quot;http://e.e/aw/pics/listings/&quot;
+                 &quot;ebayLogo_38x16.gif\&quot; border=0 width=\&quot;38\&quot; height=\&quot;16\&quot; &quot;
+                 &quot;HSPACE=5 VSPACE=0\&quot;&gt;2&lt;/FONT&gt;&quot;))
+               `(,shtml-top-symbol
+                 (img (@
+                       (src
+                        &quot;http://e.e/aw/pics/listings/ebayLogo_38x16.gif&quot;)
+                       (border &quot;0&quot;) (width &quot;38&quot;) (height &quot;16&quot;)
+                       (hspace &quot;5&quot;) (vspace &quot;0&quot;)))
+                 &quot;2&quot;))
+
+   (test/equal &quot;&quot;
+               (<a href="htmlprag.html#codefunc62806">html-&gt;shtml</a> &quot;&lt;aaa bbb=ccc\&quot;ddd&gt;eee&quot;)
+               `(,shtml-top-symbol (aaa (@ (bbb &quot;ccc&quot;) (ddd)) &quot;eee&quot;)))
+   (test/equal &quot;&quot;
+               (<a href="htmlprag.html#codefunc62806">html-&gt;shtml</a> &quot;&lt;aaa bbb=ccc \&quot;ddd&gt;eee&quot;)
+               `(,shtml-top-symbol (aaa (@ (bbb &quot;ccc&quot;) (ddd)) &quot;eee&quot;)))
+
+   (test/equal &quot;&quot;
+               (<a href="htmlprag.html#codefunc62806">html-&gt;shtml</a>
+                (string-append
+                 &quot;&lt;HTML&gt;&lt;Head&gt;&lt;Title&gt;My Title&lt;/Title&gt;&lt;/Head&gt;&quot;
+                 &quot;&lt;Body BGColor=\&quot;white\&quot; Foo=42&gt;&quot;
+                 &quot;This is a &lt;B&gt;&lt;I&gt;bold-italic&lt;/B&gt;&lt;/I&gt; test of &lt;/Erk&gt;&quot;
+                 &quot;broken HTML.&lt;br&gt;Yes it is.&lt;/Body&gt;&lt;/HTML&gt;&quot;))
+               `(,shtml-top-symbol
+                 (html (head (title &quot;My Title&quot;))
+                       (body (@ (bgcolor &quot;white&quot;) (foo &quot;42&quot;))
+                             &quot;This is a &quot;
+                             (b (i &quot;bold-italic&quot;))
+                             &quot; test of &quot;
+                             &quot;broken HTML.&quot;
+                             (br)
+                             &quot;Yes it is.&quot;))))
+
+   (test/equal &quot;&quot;
+               (<a href="htmlprag.html#codefunc62806">html-&gt;shtml</a>
+                (string-append
+                 &quot;&lt;!DOCTYPE html PUBLIC \&quot;-//W3C//DTD XHTML 1.0 Strict//EN\&quot;&quot;
+                 &quot; \&quot;http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd\&quot;&gt;&quot;))
+               `(,shtml-top-symbol
+                 (,shtml-decl-symbol
+                  ,(string-&gt;symbol &quot;DOCTYPE&quot;)
+                  html
+                  ,(string-&gt;symbol &quot;PUBLIC&quot;)
+                  &quot;-//W3C//DTD XHTML 1.0 Strict//EN&quot;
+                  &quot;http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd&quot;)))
+
+   (test/equal &quot;&quot;
+               (<a href="htmlprag.html#codefunc62806">html-&gt;shtml</a>
+                (string-append
+                 &quot;&lt;html xmlns=\&quot;http://www.w3.org/1999/xhtml\&quot; &quot;
+                 &quot;xml:lang=\&quot;en\&quot; &quot;
+                 &quot;lang=\&quot;en\&quot;&gt;&quot;))
+               `(,shtml-top-symbol
+                 (html (@ (xmlns &quot;http://www.w3.org/1999/xhtml&quot;)
+                          (xml:lang &quot;en&quot;) (lang &quot;en&quot;)))))
+
+   (test/equal
+    &quot;&quot;
+    (<a href="htmlprag.html#codefunc62806">html-&gt;shtml</a>
+     (string-append
+      &quot;&lt;html:html xmlns:html=\&quot;http://www.w3.org/TR/REC-html40\&quot;&gt;&quot;
+      &quot;&lt;html:head&gt;&lt;html:title&gt;Frobnostication&lt;/html:title&gt;&lt;/html:head&gt;&quot;
+      &quot;&lt;html:body&gt;&lt;html:p&gt;Moved to &lt;html:a href=\&quot;http://frob.com\&quot;&gt;&quot;
+      &quot;here.&lt;/html:a&gt;&lt;/html:p&gt;&lt;/html:body&gt;&lt;/html:html&gt;&quot;))
+    `(,shtml-top-symbol
+      (html (@ (xmlns:html &quot;http://www.w3.org/TR/REC-html40&quot;))
+            (head (title &quot;Frobnostication&quot;))
+            (body (p &quot;Moved to &quot;
+                     (a (@ (href &quot;http://frob.com&quot;))
+                        &quot;here.&quot;))))))
+
+   (test/equal &quot;&quot;
+               (<a href="htmlprag.html#codefunc62806">html-&gt;shtml</a>
+                (string-append
+                 &quot;&lt;RESERVATION xmlns:HTML=\&quot;http://www.w3.org/TR/REC-html40\&quot;&gt;&quot;
+                 &quot;&lt;NAME HTML:CLASS=\&quot;largeSansSerif\&quot;&gt;Layman, A&lt;/NAME&gt;&quot;
+                 &quot;&lt;SEAT CLASS=\&quot;Y\&quot; HTML:CLASS=\&quot;largeMonotype\&quot;&gt;33B&lt;/SEAT&gt;&quot;
+                 &quot;&lt;HTML:A HREF=\&quot;/cgi-bin/ResStatus\&quot;&gt;Check Status&lt;/HTML:A&gt;&quot;
+                 &quot;&lt;DEPARTURE&gt;1997-05-24T07:55:00+1&lt;/DEPARTURE&gt;&lt;/RESERVATION&gt;&quot;))
+               `(,shtml-top-symbol
+                 (reservation (@ (,(string-&gt;symbol &quot;xmlns:HTML&quot;)
+                                  &quot;http://www.w3.org/TR/REC-html40&quot;))
+                              (name (@ (class &quot;largeSansSerif&quot;))
+                                    &quot;Layman, A&quot;)
+                              (seat (@ (class &quot;Y&quot;) (class &quot;largeMonotype&quot;))
+                                    &quot;33B&quot;)
+                              (a (@ (href &quot;/cgi-bin/ResStatus&quot;))
+                                 &quot;Check Status&quot;)
+                              (departure &quot;1997-05-24T07:55:00+1&quot;))))
+
+   (test/equal
+    &quot;&quot;
+    (<a href="htmlprag.html#codefunc62806">html-&gt;shtml</a>
+     (string-append
+      &quot;&lt;html&gt;&lt;head&gt;&lt;title&gt;&lt;/title&gt;&lt;title&gt;whatever&lt;/title&gt;&lt;/head&gt;&lt;body&gt;&quot;
+      &quot;&lt;a href=\&quot;url\&quot;&gt;link&lt;/a&gt;&lt;p align=center&gt;&lt;ul compact style=\&quot;aa\&quot;&gt;&quot;
+      &quot;&lt;p&gt;BLah&lt;!-- comment &lt;comment&gt; --&gt; &lt;i&gt; italic &lt;b&gt; bold &lt;tt&gt; ened &lt;/i&gt;&quot;
+      &quot; still &amp;lt; bold &lt;/b&gt;&lt;/body&gt;&lt;P&gt; But not done yet...&quot;))
+    `(,shtml-top-symbol
+      (html (head (title) (title &quot;whatever&quot;))
+            (body (a (@ (href &quot;url&quot;)) &quot;link&quot;)
+                  (p (@ (align &quot;center&quot;))
+                     (ul (@ (compact) (style &quot;aa&quot;))))
+                  (p &quot;BLah&quot;
+                     (,shtml-comment-symbol &quot; comment &lt;comment&gt; &quot;)
+                     &quot; &quot;
+                     (i &quot; italic &quot; (b &quot; bold &quot; (tt &quot; ened &quot;)))
+                     &quot; still &lt; bold &quot;))
+            (p &quot; But not done yet...&quot;))))
+
+   (test/equal &quot;&quot;
+               (<a href="htmlprag.html#codefunc62806">html-&gt;shtml</a> &quot;&lt;?xml version=\&quot;1.0\&quot; encoding=\&quot;UTF-8\&quot;?&gt;&quot;)
+               `(,shtml-top-symbol
+                 (,shtml-pi-symbol xml &quot;version=\&quot;1.0\&quot; encoding=\&quot;UTF-8\&quot;&quot;)))
+
+   (test/equal &quot;&quot;
+               (<a href="htmlprag.html#codefunc62806">html-&gt;shtml</a> &quot;&lt;?php php_info(); ?&gt;&quot;)
+               `(,shtml-top-symbol (,shtml-pi-symbol php &quot;php_info(); &quot;)))
+   (test/equal &quot;&quot;
+               (<a href="htmlprag.html#codefunc62806">html-&gt;shtml</a> &quot;&lt;?php php_info(); ?&quot;)
+               `(,shtml-top-symbol (,shtml-pi-symbol php &quot;php_info(); ?&quot;)))
+   (test/equal &quot;&quot;
+               (<a href="htmlprag.html#codefunc62806">html-&gt;shtml</a> &quot;&lt;?php php_info(); &quot;)
+               `(,shtml-top-symbol (,shtml-pi-symbol php &quot;php_info(); &quot;)))
+
+   (test/equal &quot;&quot;
+               (<a href="htmlprag.html#codefunc62806">html-&gt;shtml</a> &quot;&lt;?foo bar ? baz &gt; blort ?&gt;&quot;)
+               `(,shtml-top-symbol
+                 (,shtml-pi-symbol foo &quot;bar ? baz &gt; blort &quot;)))
+
+   (test/equal &quot;&quot;
+               (<a href="htmlprag.html#codefunc62806">html-&gt;shtml</a> &quot;&lt;?foo b?&gt;x&quot;)
+               `(,shtml-top-symbol (,shtml-pi-symbol foo &quot;b&quot;) &quot;x&quot;))
+   (test/equal &quot;&quot;
+               (<a href="htmlprag.html#codefunc62806">html-&gt;shtml</a> &quot;&lt;?foo ?&gt;x&quot;)
+               `(,shtml-top-symbol (,shtml-pi-symbol foo &quot;&quot;)  &quot;x&quot;))
+   (test/equal &quot;&quot;
+               (<a href="htmlprag.html#codefunc62806">html-&gt;shtml</a> &quot;&lt;?foo ?&gt;x&quot;)
+               `(,shtml-top-symbol (,shtml-pi-symbol foo &quot;&quot;)  &quot;x&quot;))
+   (test/equal &quot;&quot;
+               (<a href="htmlprag.html#codefunc62806">html-&gt;shtml</a> &quot;&lt;?foo?&gt;x&quot;)
+               `(,shtml-top-symbol (,shtml-pi-symbol foo &quot;&quot;)  &quot;x&quot;))
+   (test/equal &quot;&quot;
+               (<a href="htmlprag.html#codefunc62806">html-&gt;shtml</a> &quot;&lt;?f?&gt;x&quot;)
+               `(,shtml-top-symbol (,shtml-pi-symbol f   &quot;&quot;)  &quot;x&quot;))
+   (test/equal &quot;&quot;
+               (<a href="htmlprag.html#codefunc62806">html-&gt;shtml</a> &quot;&lt;??&gt;x&quot;)
+               `(,shtml-top-symbol (,shtml-pi-symbol #f  &quot;&quot;)  &quot;x&quot;))
+   (test/equal &quot;&quot;
+               (<a href="htmlprag.html#codefunc62806">html-&gt;shtml</a> &quot;&lt;?&gt;x&quot;)
+               `(,shtml-top-symbol (,shtml-pi-symbol #f  &quot;&gt;x&quot;)))
+
+   (test/equal &quot;&quot;
+               (<a href="htmlprag.html#codefunc62806">html-&gt;shtml</a> &quot;&lt;foo bar=\&quot;baz\&quot;&gt;blort&quot;)
+               `(,shtml-top-symbol (foo (@ (bar &quot;baz&quot;)) &quot;blort&quot;)))
+   (test/equal &quot;&quot;
+               (<a href="htmlprag.html#codefunc62806">html-&gt;shtml</a> &quot;&lt;foo bar='baz'&gt;blort&quot;)
+               `(,shtml-top-symbol (foo (@ (bar &quot;baz&quot;)) &quot;blort&quot;)))
+   (test/equal &quot;&quot;
+               (<a href="htmlprag.html#codefunc62806">html-&gt;shtml</a> &quot;&lt;foo bar=\&quot;baz'&gt;blort&quot;)
+               `(,shtml-top-symbol (foo (@ (bar &quot;baz'&gt;blort&quot;)))))
+   (test/equal &quot;&quot;
+               (<a href="htmlprag.html#codefunc62806">html-&gt;shtml</a> &quot;&lt;foo bar='baz\&quot;&gt;blort&quot;)
+               `(,shtml-top-symbol (foo (@ (bar &quot;baz\&quot;&gt;blort&quot;)))))
+
+   (test/equal &quot;&quot;
+               (<a href="htmlprag.html#codefunc62806">html-&gt;shtml</a> (string-append &quot;&lt;p&gt;A&lt;/p&gt;&quot;
+                                           &quot;&lt;script&gt;line0 &lt;&quot; lf
+                                           &quot;line1&quot; lf
+                                           &quot;&lt;line2&gt;&lt;/script&gt;&quot;
+                                           &quot;&lt;p&gt;B&lt;/p&gt;&quot;))
+               `(,shtml-top-symbol (p &quot;A&quot;)
+                                   (script ,(string-append &quot;line0 &lt;&quot; lf)
+                                           ,(string-append &quot;line1&quot;   lf)
+                                           &quot;&lt;line2&gt;&quot;)
+                                   (p &quot;B&quot;)))
+
+   (test/equal &quot;&quot;
+               (<a href="htmlprag.html#codefunc62806">html-&gt;shtml</a> &quot;&lt;xmp&gt;a&lt;b&gt;c&lt;/XMP&gt;d&quot;)
+               `(,shtml-top-symbol (xmp &quot;a&lt;b&gt;c&quot;) &quot;d&quot;))
+   (test/equal &quot;&quot;
+               (<a href="htmlprag.html#codefunc62806">html-&gt;shtml</a> &quot;&lt;XMP&gt;a&lt;b&gt;c&lt;/xmp&gt;d&quot;)
+               `(,shtml-top-symbol (xmp &quot;a&lt;b&gt;c&quot;) &quot;d&quot;))
+   (test/equal &quot;&quot;
+               (<a href="htmlprag.html#codefunc62806">html-&gt;shtml</a> &quot;&lt;xmp&gt;a&lt;b&gt;c&lt;/foo:xmp&gt;d&quot;)
+               `(,shtml-top-symbol (xmp &quot;a&lt;b&gt;c&quot;) &quot;d&quot;))
+   (test/equal &quot;&quot;
+               (<a href="htmlprag.html#codefunc62806">html-&gt;shtml</a> &quot;&lt;foo:xmp&gt;a&lt;b&gt;c&lt;/xmp&gt;d&quot;)
+               `(,shtml-top-symbol (xmp &quot;a&lt;b&gt;c&quot;) &quot;d&quot;))
+   (test/equal &quot;&quot;
+               (<a href="htmlprag.html#codefunc62806">html-&gt;shtml</a> &quot;&lt;foo:xmp&gt;a&lt;b&gt;c&lt;/foo:xmp&gt;d&quot;)
+               `(,shtml-top-symbol (xmp &quot;a&lt;b&gt;c&quot;) &quot;d&quot;))
+   (test/equal &quot;&quot;
+               (<a href="htmlprag.html#codefunc62806">html-&gt;shtml</a> &quot;&lt;foo:xmp&gt;a&lt;b&gt;c&lt;/bar:xmp&gt;d&quot;)
+               `(,shtml-top-symbol (xmp &quot;a&lt;b&gt;c&quot;) &quot;d&quot;))
+
+   (test/equal &quot;&quot;
+               (<a href="htmlprag.html#codefunc62806">html-&gt;shtml</a> &quot;&lt;xmp&gt;a&lt;/b&gt;c&lt;/xmp&gt;d&quot;)
+               `(,shtml-top-symbol (xmp &quot;a&lt;/b&gt;c&quot;)     &quot;d&quot;))
+   (test/equal &quot;&quot;
+               (<a href="htmlprag.html#codefunc62806">html-&gt;shtml</a> &quot;&lt;xmp&gt;a&lt;/b &gt;c&lt;/xmp&gt;d&quot;)
+               `(,shtml-top-symbol (xmp &quot;a&lt;/b &gt;c&quot;)    &quot;d&quot;))
+   (test/equal &quot;&quot;
+               (<a href="htmlprag.html#codefunc62806">html-&gt;shtml</a> &quot;&lt;xmp&gt;a&lt;/ b&gt;c&lt;/xmp&gt;d&quot;)
+               `(,shtml-top-symbol (xmp &quot;a&lt;/ b&gt;c&quot;)    &quot;d&quot;))
+   (test/equal &quot;&quot;
+               (<a href="htmlprag.html#codefunc62806">html-&gt;shtml</a> &quot;&lt;xmp&gt;a&lt;/ b &gt;c&lt;/xmp&gt;d&quot;)
+               `(,shtml-top-symbol (xmp &quot;a&lt;/ b &gt;c&quot;)   &quot;d&quot;))
+   (test/equal &quot;&quot;
+               (<a href="htmlprag.html#codefunc62806">html-&gt;shtml</a> &quot;&lt;xmp&gt;a&lt;/b:x&gt;c&lt;/xmp&gt;d&quot;)
+               `(,shtml-top-symbol (xmp &quot;a&lt;/b:x&gt;c&quot;)   &quot;d&quot;))
+   (test/equal &quot;&quot;
+               (<a href="htmlprag.html#codefunc62806">html-&gt;shtml</a> &quot;&lt;xmp&gt;a&lt;/b::x&gt;c&lt;/xmp&gt;d&quot;)
+               `(,shtml-top-symbol (xmp &quot;a&lt;/b::x&gt;c&quot;)  &quot;d&quot;))
+   (test/equal &quot;&quot;
+               (<a href="htmlprag.html#codefunc62806">html-&gt;shtml</a> &quot;&lt;xmp&gt;a&lt;/b:::x&gt;c&lt;/xmp&gt;d&quot;)
+               `(,shtml-top-symbol (xmp &quot;a&lt;/b:::x&gt;c&quot;) &quot;d&quot;))
+   (test/equal &quot;&quot;
+               (<a href="htmlprag.html#codefunc62806">html-&gt;shtml</a> &quot;&lt;xmp&gt;a&lt;/b:&gt;c&lt;/xmp&gt;d&quot;)
+               `(,shtml-top-symbol (xmp &quot;a&lt;/b:&gt;c&quot;)    &quot;d&quot;))
+   (test/equal &quot;&quot;
+               (<a href="htmlprag.html#codefunc62806">html-&gt;shtml</a> &quot;&lt;xmp&gt;a&lt;/b::&gt;c&lt;/xmp&gt;d&quot;)
+               `(,shtml-top-symbol (xmp &quot;a&lt;/b::&gt;c&quot;)   &quot;d&quot;))
+   (test/equal &quot;&quot;
+               (<a href="htmlprag.html#codefunc62806">html-&gt;shtml</a> &quot;&lt;xmp&gt;a&lt;/xmp:b&gt;c&lt;/xmp&gt;d&quot;)
+               `(,shtml-top-symbol (xmp &quot;a&lt;/xmp:b&gt;c&quot;) &quot;d&quot;))
+
+   (test-define &quot;expected output for next two tests&quot;
+                expected
+                `(,shtml-top-symbol (p &quot;real1&quot;)
+                                    ,lf
+                                    (xmp ,lf
+                                         ,(string-append &quot;alpha&quot;       lf)
+                                         ,(string-append &quot;&lt;P&gt;fake&lt;/P&gt;&quot; lf)
+                                         ,(string-append &quot;bravo&quot;       lf))
+                                    (p &quot;real2&quot;)))
+
+   (test/equal &quot;&quot;
+               (<a href="htmlprag.html#codefunc62806">html-&gt;shtml</a> (string-append &quot;&lt;P&gt;real1&lt;/P&gt;&quot; lf
+                                           &quot;&lt;XMP&gt;&quot;        lf
+                                           &quot;alpha&quot;        lf
+                                           &quot;&lt;P&gt;fake&lt;/P&gt;&quot;  lf
+                                           &quot;bravo&quot;        lf
+                                           &quot;&lt;/XMP &quot;       lf
+                                           &quot;&lt;P&gt;real2&lt;/P&gt;&quot;))
+               expected)
+
+   (test/equal &quot;&quot;
+               (<a href="htmlprag.html#codefunc62806">html-&gt;shtml</a> (string-append &quot;&lt;P&gt;real1&lt;/P&gt;&quot; lf
+                                           &quot;&lt;XMP&gt;&quot;        lf
+                                           &quot;alpha&quot;        lf
+                                           &quot;&lt;P&gt;fake&lt;/P&gt;&quot;  lf
+                                           &quot;bravo&quot;        lf
+                                           &quot;&lt;/XMP&quot;        lf
+                                           &quot;&lt;P&gt;real2&lt;/P&gt;&quot;))
+               expected)
+
+   (test/equal &quot;&quot;
+               (<a href="htmlprag.html#codefunc62806">html-&gt;shtml</a> &quot;&lt;xmp&gt;a&lt;/xmp&gt;x&quot;)
+               `(,shtml-top-symbol (xmp &quot;a&quot;)   &quot;x&quot;))
+   (test/equal &quot;&quot;
+               (<a href="htmlprag.html#codefunc62806">html-&gt;shtml</a> (string-append &quot;&lt;xmp&gt;a&quot; lf &quot;&lt;/xmp&gt;x&quot;))
+               `(,shtml-top-symbol (xmp ,(string-append &quot;a&quot; lf)) &quot;x&quot;))
+   (test/equal &quot;&quot;
+               (<a href="htmlprag.html#codefunc62806">html-&gt;shtml</a> &quot;&lt;xmp&gt;&lt;/xmp&gt;x&quot;)
+               `(,shtml-top-symbol (xmp)       &quot;x&quot;))
+
+   (test/equal &quot;&quot;
+               (<a href="htmlprag.html#codefunc62806">html-&gt;shtml</a> &quot;&lt;xmp&gt;a&lt;/xmp&quot;) `(,shtml-top-symbol (xmp &quot;a&quot;)))
+   (test/equal &quot;&quot;
+               (<a href="htmlprag.html#codefunc62806">html-&gt;shtml</a> &quot;&lt;xmp&gt;a&lt;/xm&quot;)  `(,shtml-top-symbol (xmp &quot;a&lt;/xm&quot;)))
+   (test/equal &quot;&quot;
+               (<a href="htmlprag.html#codefunc62806">html-&gt;shtml</a> &quot;&lt;xmp&gt;a&lt;/x&quot;)   `(,shtml-top-symbol (xmp &quot;a&lt;/x&quot;)))
+   (test/equal &quot;&quot;
+               (<a href="htmlprag.html#codefunc62806">html-&gt;shtml</a> &quot;&lt;xmp&gt;a&lt;/&quot;)    `(,shtml-top-symbol (xmp &quot;a&lt;/&quot;)))
+   (test/equal &quot;&quot;
+               (<a href="htmlprag.html#codefunc62806">html-&gt;shtml</a> &quot;&lt;xmp&gt;a&lt;&quot;)     `(,shtml-top-symbol (xmp &quot;a&lt;&quot;)))
+   (test/equal &quot;&quot;
+               (<a href="htmlprag.html#codefunc62806">html-&gt;shtml</a> &quot;&lt;xmp&gt;a&quot;)      `(,shtml-top-symbol (xmp &quot;a&quot;)))
+   (test/equal &quot;&quot;
+               (<a href="htmlprag.html#codefunc62806">html-&gt;shtml</a> &quot;&lt;xmp&gt;&quot;)       `(,shtml-top-symbol (xmp)))
+   (test/equal &quot;&quot;
+               (<a href="htmlprag.html#codefunc62806">html-&gt;shtml</a> &quot;&lt;xmp&quot;)        `(,shtml-top-symbol (xmp)))
+
+   (test/equal &quot;&quot;
+               (<a href="htmlprag.html#codefunc62806">html-&gt;shtml</a> &quot;&lt;xmp x=42 &quot;)
+               `(,shtml-top-symbol (xmp (@ (x &quot;42&quot;)))))
+   (test/equal &quot;&quot;
+               (<a href="htmlprag.html#codefunc62806">html-&gt;shtml</a> &quot;&lt;xmp x= &quot;)   `(,shtml-top-symbol (xmp (@ (x)))))
+   (test/equal &quot;&quot;
+               (<a href="htmlprag.html#codefunc62806">html-&gt;shtml</a> &quot;&lt;xmp x &quot;)    `(,shtml-top-symbol (xmp (@ (x)))))
+   (test/equal &quot;&quot;
+               (<a href="htmlprag.html#codefunc62806">html-&gt;shtml</a> &quot;&lt;xmp x&quot;)     `(,shtml-top-symbol (xmp (@ (x)))))
+
+   (test/equal &quot;&quot;
+               (<a href="htmlprag.html#codefunc62806">html-&gt;shtml</a> &quot;&lt;script&gt;xxx&quot;)
+               `(,shtml-top-symbol (script &quot;xxx&quot;)))
+   (test/equal &quot;&quot;
+               (<a href="htmlprag.html#codefunc62806">html-&gt;shtml</a> &quot;&lt;script/&gt;xxx&quot;)
+               `(,shtml-top-symbol (script) &quot;xxx&quot;))
+
+   (test/equal &quot;&quot;
+               (<a href="htmlprag.html#codefunc62806">html-&gt;shtml</a> &quot;&lt;html xml:lang=\&quot;en\&quot; lang=\&quot;en\&quot;&gt;&quot;)
+               `(,shtml-top-symbol (html (@ (xml:lang &quot;en&quot;) (lang &quot;en&quot;)))))
+
+   (test/equal &quot;&quot;
+               (<a href="htmlprag.html#codefunc62806">html-&gt;shtml</a> &quot;&lt;a href=/foo.html&gt;&quot;)
+               `(,shtml-top-symbol (a (@ (href &quot;/foo.html&quot;)))))
+   (test/equal &quot;&quot;
+               (<a href="htmlprag.html#codefunc62806">html-&gt;shtml</a> &quot;&lt;a href=/&gt;foo.html&quot;)
+               `(,shtml-top-symbol (a (@ (href &quot;/&quot;)) &quot;foo.html&quot;)))
+
+   ;; TODO: Add verbatim-pair cases with attributes in the end tag.
+
+   (test/equal &quot;&quot;
+               (<a href="htmlprag.html#codefunc55666">shtml-&gt;html</a> '(p))            &quot;&lt;p&gt;&lt;/p&gt;&quot;)
+   (test/equal &quot;&quot;
+               (<a href="htmlprag.html#codefunc55666">shtml-&gt;html</a> '(p &quot;CONTENT&quot;))  &quot;&lt;p&gt;CONTENT&lt;/p&gt;&quot;)
+   (test/equal &quot;&quot;
+               (<a href="htmlprag.html#codefunc55666">shtml-&gt;html</a> '(br))           &quot;&lt;br /&gt;&quot;)
+   (test/equal &quot;&quot;
+               (<a href="htmlprag.html#codefunc55666">shtml-&gt;html</a> '(br &quot;CONTENT&quot;)) &quot;&lt;br /&gt;&quot;)
+
+   (test/equal &quot;&quot;
+               (<a href="htmlprag.html#codefunc55666">shtml-&gt;html</a> `(hr (@ (clear &quot;all&quot;))))
+               &quot;&lt;hr clear=\&quot;all\&quot; /&gt;&quot;)
+
+   (test/equal &quot;&quot;
+               (<a href="htmlprag.html#codefunc55666">shtml-&gt;html</a> `(hr (@ (noshade))))
+               &quot;&lt;hr noshade /&gt;&quot;)
+   (test/equal &quot;&quot;
+               (<a href="htmlprag.html#codefunc55666">shtml-&gt;html</a> `(hr (@ (noshade #t))))
+               &quot;&lt;hr noshade /&gt;&quot;) ;; TODO: Maybe lose this test.
+   (test/equal &quot;&quot;
+               (<a href="htmlprag.html#codefunc55666">shtml-&gt;html</a> `(hr (@ (noshade &quot;noshade&quot;))))
+               &quot;&lt;hr noshade=\&quot;noshade\&quot; /&gt;&quot;)
+
+   (test/equal &quot;&quot;
+               (<a href="htmlprag.html#codefunc55666">shtml-&gt;html</a> `(hr (@ (aaa &quot;bbbccc&quot;))))
+               &quot;&lt;hr aaa=\&quot;bbbccc\&quot; /&gt;&quot;)
+   (test/equal &quot;&quot;
+               (<a href="htmlprag.html#codefunc55666">shtml-&gt;html</a> `(hr (@ (aaa &quot;bbb'ccc&quot;))))
+               &quot;&lt;hr aaa=\&quot;bbb'ccc\&quot; /&gt;&quot;)
+   (test/equal &quot;&quot;
+               (<a href="htmlprag.html#codefunc55666">shtml-&gt;html</a> `(hr (@ (aaa &quot;bbb\&quot;ccc&quot;))))
+               &quot;&lt;hr aaa='bbb\&quot;ccc' /&gt;&quot;)
+   (test/equal &quot;&quot;
+               (<a href="htmlprag.html#codefunc55666">shtml-&gt;html</a> `(hr (@ (aaa &quot;bbb\&quot;ccc'ddd&quot;))))
+               &quot;&lt;hr aaa=\&quot;bbb&amp;quot;ccc'ddd\&quot; /&gt;&quot;)
+
+   (test/equal &quot;&quot; (<a href="htmlprag.html#codefunc55666">shtml-&gt;html</a> '(&amp; &quot;copy&quot;))                   &quot;&amp;copy;&quot;)
+   (test/equal &quot;&quot; (<a href="htmlprag.html#codefunc55666">shtml-&gt;html</a> '(&amp; &quot;rArr&quot;))                   &quot;&amp;rArr;&quot;)
+   (test/equal &quot;&quot; (<a href="htmlprag.html#codefunc55666">shtml-&gt;html</a> `(&amp; ,(string-&gt;symbol &quot;rArr&quot;))) &quot;&amp;rArr;&quot;)
+   (test/equal &quot;&quot; (<a href="htmlprag.html#codefunc55666">shtml-&gt;html</a> '(&amp; 151))                      &quot;&amp;#151;&quot;)
+
+   (test/equal &quot;&quot;
+               (<a href="htmlprag.html#codefunc62806">html-&gt;shtml</a> &quot;&amp;copy;&quot;)
+               `(,shtml-top-symbol (&amp; ,(string-&gt;symbol &quot;copy&quot;))))
+   (test/equal &quot;&quot;
+               (<a href="htmlprag.html#codefunc62806">html-&gt;shtml</a> &quot;&amp;rArr;&quot;)
+               `(,shtml-top-symbol (&amp; ,(string-&gt;symbol &quot;rArr&quot;))))
+   (test/equal &quot;&quot;
+               (<a href="htmlprag.html#codefunc62806">html-&gt;shtml</a> &quot;&amp;#151;&quot;)
+               `(,shtml-top-symbol ,(string (<a href="htmlprag.html#codefunc5284">%htmlprag:a2c</a> 151))))
+
+   (test/equal &quot;&quot;
+               (<a href="htmlprag.html#codefunc62806">html-&gt;shtml</a> &quot;&amp;#999;&quot;)
+               `(,shtml-top-symbol (&amp; 999)))
+
+   (test/equal &quot;&quot;
+               (<a href="htmlprag.html#codefunc55666">shtml-&gt;html</a>
+                `(,shtml-pi-symbol xml &quot;version=\&quot;1.0\&quot; encoding=\&quot;UTF-8\&quot;&quot;))
+               &quot;&lt;?xml version=\&quot;1.0\&quot; encoding=\&quot;UTF-8\&quot;?&gt;&quot;)
+
+   (test/equal &quot;&quot;
+               (<a href="htmlprag.html#codefunc55666">shtml-&gt;html</a>
+                `(,shtml-decl-symbol
+                  ,(string-&gt;symbol &quot;DOCTYPE&quot;)
+                  html
+                  ,(string-&gt;symbol &quot;PUBLIC&quot;)
+                  &quot;-//W3C//DTD XHTML 1.0 Strict//EN&quot;
+                  &quot;http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd&quot;))
+               (string-append
+                &quot;&lt;!DOCTYPE html PUBLIC \&quot;-//W3C//DTD XHTML 1.0 Strict//EN\&quot;&quot;
+                &quot; \&quot;http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd\&quot;&gt;&quot;))
+
+   (test/equal &quot;&quot;
+               (<a href="htmlprag.html#codefunc40102">shtml-entity-value</a> '(*ENTITY* &quot;shtml-named-char&quot; &quot;rArr&quot;))
+               (string-&gt;symbol &quot;rArr&quot;))
+
+   (test/equal &quot;&quot;
+               (<a href="htmlprag.html#codefunc40102">shtml-entity-value</a> '(&amp; &quot;rArr&quot;))
+               (string-&gt;symbol &quot;rArr&quot;))
+
+   (test/equal &quot;&quot;
+               (<a href="htmlprag.html#codefunc40102">shtml-entity-value</a> `(&amp; ,(string-&gt;symbol &quot;rArr&quot;)))
+               (string-&gt;symbol &quot;rArr&quot;))
+
+   ;; TODO: Write more test cases for HTML encoding.
+
+   ;; TODO: Write test cases for foreign-filter of HTML writing.
+
+   ;; TODO: Write test cases for attribute values that aren't simple strings.
+
+   ;; TODO: Document this.
+   ;;
+   ;; (define html-1 &quot;&lt;myelem myattr=\&quot;&amp;\&quot;&gt;&quot;)
+   ;; (define shtml   (<a href="htmlprag.html#codefunc62806">html-&gt;shtml</a> html-1))
+   ;; shtml
+   ;; (define html-2 (<a href="htmlprag.html#codefunc55666">shtml-&gt;html</a> shtml))
+   ;; html-2
+
+   ))
+</pre></body></html>

@@ -1,0 +1,102 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN""http://www.w3.org/TR/html401/loose.dtd"><html><head><meta name="GENERATOR" content="Mole: The Scheme Source Code Digger"><title>Module: char-encoding</title><meta name='keywords' content=''></head><body bgcolor='#ffffff' text='#384412'  link='#11af05' vlink='#728b09'>
+<center><h1>Module: char-encoding</h1></center>
+<p><br>
+<!-- Table of content -->
+<p><dl>
+
+f:  <a name='tocfunc7638' href='#docfunc7638' style='text-decoration:none'>ucscode->char</a><br>
+
+f:  <a name='tocfunc13371' href='#docfunc13371' style='text-decoration:none'>char-return</a><br>
+
+f:  <a name='tocfunc45395' href='#docfunc45395' style='text-decoration:none'>char-tab</a><br>
+
+f:  <a name='tocfunc36658' href='#docfunc36658' style='text-decoration:none'>char-newline</a><br>
+
+f:  <a name='tocfunc5318' href='#docfunc5318' style='text-decoration:none'>char-space</a><br>
+</dl>
+
+<h4><a name='docfunc7638' href='#tocfunc7638'>ucscode->char</a></h4>
+(define (ucscode-&gt;char code)<i><br> ... <a href='#codefunc7638'>Full Code</a> ... )</i>
+<pre> Return a character whose UCS (ISO/IEC 10646) code is INT
+ Note
+ This function is required for processing of XML character entities:
+ According to Section &quot;4.1 Character and Entity References&quot;
+ of the XML Recommendation:
+  &quot;[Definition: A character reference refers to a specific character
+   in the ISO/IEC 10646 character set, for example one not directly
+   accessible from available input devices.]&quot;
+</pre><p><br>
+
+<h4><a name='docfunc13371' href='#tocfunc13371'>char-return</a></h4>
+(define char-return <i><br> ... <a href='#codefunc13371'>Full Code</a> ... )</i>
+<pre> Commonly used control characters
+</pre><p><br>
+
+<h4><a name='docfunc45395' href='#tocfunc45395'>char-tab</a></h4>
+(define char-tab <i><br> ... <a href='#codefunc45395'>Full Code</a> ... )</i><p><br>
+
+<h4><a name='docfunc36658' href='#tocfunc36658'>char-newline</a></h4>
+(define char-newline <i><br> ... <a href='#codefunc36658'>Full Code</a> ... )</i><p><br>
+
+<h4><a name='docfunc5318' href='#tocfunc5318'>char-space</a></h4>
+(define char-space <i><br> ... <a href='#codefunc5318'>Full Code</a> ... )</i><p><br>
+<center><h1>Code</h1></center>
+
+<h5><a name='codeapp6205' href='#docapp6205'>cond-expand</a></h5>
+<i><a href='#tocapp6205'>Index</a></i><br>
+
+<pre> return a character whose ASCII code is INT
+ Note, because ascii-&gt;char is injective (there are more characters than
+ ASCII characters), the inverse transformation is not defined.
+</pre>
+<pre>(cond-expand
+  (scheme48  #f)		; ascii-&gt;char is built into Scheme48
+  (scsh #f)			; ascii-&gt;char is built into Scheme48
+  (else
+    (define ascii-&gt;char integer-&gt;char)
+  )
+)
+</pre>
+<h4><a name='codefunc7638' href='#docfunc7638'>ucscode->char</a></h4>
+<i><a href='#tocfunc7638'>Index</a></i><br>
+
+<pre> Return a character whose UCS (ISO/IEC 10646) code is INT
+ Note
+ This function is required for processing of XML character entities:
+ According to Section &quot;4.1 Character and Entity References&quot;
+ of the XML Recommendation:
+  &quot;[Definition: A character reference refers to a specific character
+   in the ISO/IEC 10646 character set, for example one not directly
+   accessible from available input devices.]&quot;
+</pre>
+<pre>(define (<a href="char-encoding.html#codefunc7638">ucscode-&gt;char</a> code)
+  (<a href="myenv.html#codemacro6205">cond-expand</a>
+    (bigloo
+      (ucs2-&gt;char (integer-&gt;ucs2 code)))
+    ((or scheme48 scsh)			; Scheme48 has no support for UCS
+      (ascii-&gt;char code))
+    (else
+      (integer-&gt;char code))))
+</pre>
+<h4><a name='codefunc13371' href='#docfunc13371'>char-return</a></h4>
+<i><a href='#tocfunc13371'>Index</a></i><br>
+
+<pre> Commonly used control characters
+</pre>
+<pre>(define <a href="char-encoding.html#codefunc13371">char-return</a> (ascii-&gt;char 13))
+</pre>
+<h4><a name='codefunc45395' href='#docfunc45395'>char-tab</a></h4>
+<i><a href='#tocfunc45395'>Index</a></i><br>
+
+<pre>(define <a href="char-encoding.html#codefunc45395">char-tab</a>    (ascii-&gt;char 9))
+</pre>
+<h4><a name='codefunc36658' href='#docfunc36658'>char-newline</a></h4>
+<i><a href='#tocfunc36658'>Index</a></i><br>
+
+<pre>(define <a href="char-encoding.html#codefunc36658">char-newline</a> (ascii-&gt;char 10)) ; a.k.a. #\newline, per R5RS
+</pre>
+<h4><a name='codefunc5318' href='#docfunc5318'>char-space</a></h4>
+<i><a href='#tocfunc5318'>Index</a></i><br>
+
+<pre>(define <a href="char-encoding.html#codefunc5318">char-space</a> (ascii-&gt;char 32))
+</pre></body></html>

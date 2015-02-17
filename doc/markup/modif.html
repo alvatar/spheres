@@ -1,0 +1,1193 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN""http://www.w3.org/TR/html401/loose.dtd"><html><head><meta name="GENERATOR" content="Mole: The Scheme Source Code Digger"><title>Module: modif</title><meta name='keywords' content=''></head><body bgcolor='#ffffff' text='#384412'  link='#11af05' vlink='#728b09'>
+<center><h1>Module: modif</h1></center>
+
+<pre> A tool for making functional-style modifications to SXML documents
+
+ This software is in Public Domain.
+ IT IS PROVIDED &quot;AS IS&quot;, WITHOUT WARRANTY OF ANY KIND.
+
+ Please send bug reports and comments to:
+   lizorkin@hotbox.ru    Dmitry Lizorkin
+
+ The basics of modification language design was inspired by Patrick Lehti
+ and his data manipulation processor for XML Query Language:
+  http://www.ipsi.fraunhofer.de/~lehti/
+ However, with functional techniques we can do this better...
+</pre><p><br>
+<!-- Table of content -->
+<p><dl>
+<p><dt><a name='tocchapt20820' href='#chapt20820'><b>Modification core</b></a><dd>
+
+f:  <a name='tocfunc29664' href='#docfunc29664' style='text-decoration:none'>sxml:modification-error</a><br>
+
+f:  <a name='tocfunc47752' href='#docfunc47752' style='text-decoration:none'>sxml:separate-list</a><br>
+
+<dl><dt><a name='tocsect56976' href='#sect56976'><b>Miscellaneous helpers</b></a><dd>
+
+f:  <a name='tocfunc51352' href='#docfunc51352' style='text-decoration:none'>sxml:assert-proper-attribute</a><br>
+
+f:  <a name='tocfunc37562' href='#docfunc37562' style='text-decoration:none'>sxml:unite-annot-attributes-lists</a><br>
+</dl>
+
+<dl><dt><a name='tocsect46752' href='#sect46752'><b>The core function of document transformation into a new document</b></a><dd>
+
+f:  <a name='tocfunc52539' href='#docfunc52539' style='text-decoration:none'>sxml:tree-trans</a><br>
+
+f:  <a name='tocfunc44736' href='#docfunc44736' style='text-decoration:none'>sxml:transform-document</a><br>
+</dl>
+<p><dt><a name='tocchapt43132' href='#chapt43132'><b>Processing update-specifiers</b></a><dd>
+
+f:  <a name='tocfunc31386' href='#docfunc31386' style='text-decoration:none'>sxml:lambdas-upd-specifiers->targets</a><br>
+
+f:  <a name='tocfunc55118' href='#docfunc55118' style='text-decoration:none'>sxml:update-specifiers->lambdas</a><br>
+<p><dt><a name='tocchapt21021' href='#chapt21021'><b>Several popular handlers</b></a><dd>
+
+f:  <a name='tocfunc28278' href='#docfunc28278' style='text-decoration:none'>modif:insert-following</a><br>
+
+f:  <a name='tocfunc26461' href='#docfunc26461' style='text-decoration:none'>modif:insert-preceding</a><br>
+
+f:  <a name='tocfunc14738' href='#docfunc14738' style='text-decoration:none'>modif:insert-into</a><br>
+
+f:  <a name='tocfunc16262' href='#docfunc16262' style='text-decoration:none'>modif:rename</a><br>
+
+f:  <a name='tocfunc17277' href='#docfunc17277' style='text-decoration:none'>modif:delete</a><br>
+
+f:  <a name='tocfunc33518' href='#docfunc33518' style='text-decoration:none'>modif:delete-undeep</a><br>
+<p><dt><a name='tocchapt32539' href='#chapt32539'><b>Highest-level API function</b></a><dd>
+
+f:  <a name='tocfunc7533' href='#docfunc7533' style='text-decoration:none'>sxml:modify</a><br>
+<p><dt><a name='tocchapt54862' href='#chapt54862'><b>Destructive modifications</b></a><dd>
+
+<dl><dt><a name='tocsect64436' href='#sect64436'><b>Helper cloning facilities</b></a><dd>
+
+f:  <a name='tocfunc7414' href='#docfunc7414' style='text-decoration:none'>sxml:clone</a><br>
+
+f:  <a name='tocfunc28740' href='#docfunc28740' style='text-decoration:none'>sxml:clone-nset-except</a><br>
+</dl>
+
+<dl><dt><a name='tocsect44878' href='#sect44878'><b>Facilities for mutation</b></a><dd>
+
+f:  <a name='tocfunc21765' href='#docfunc21765' style='text-decoration:none'>sxml:replace-next-with-lst!</a><br>
+
+f:  <a name='tocfunc63774' href='#docfunc63774' style='text-decoration:none'>sxml:mutate-doc!</a><br>
+</dl>
+
+<dl><dt><a name='tocsect0' href='#sect0'><b></b></a><dd>
+
+f:  <a name='tocfunc2275' href='#docfunc2275' style='text-decoration:none'>sxml:nodes-to-mutate</a><br>
+
+f:  <a name='tocfunc15981' href='#docfunc15981' style='text-decoration:none'>sxml:modify!</a><br>
+</dl>
+</dl>
+<hr height='5'><center><h3><a name='chapt20820' href='#tocchapt20820'>Modification core</a></h3></center>
+
+<pre></pre>
+<h4><a name='docfunc29664' href='#tocfunc29664'>sxml:modification-error</a></h4>
+(define (sxml:modification-error . text)<i><br> ... <a href='#codefunc29664'>Full Code</a> ... )</i>
+<pre> Displays an error to stderr and returns #f
+</pre><p><br>
+
+<h4><a name='docfunc47752' href='#tocfunc47752'>sxml:separate-list</a></h4>
+(define (sxml:separate-list pred? lst)<i><br> ... <a href='#codefunc47752'>Full Code</a> ... )</i>
+<pre>  Separates the list into two lists with respect to the predicate
+  Returns:  (values  res-lst1  res-lst2)
+ res-lst1 - contains all members from the input lst that satisfy the pred?
+ res-lst2 - contains the remaining members of the input lst
+</pre><p><br>
+
+<hr width='40%' align='center'><center><h3><a name='sect56976' href='#tocsect56976'>Miscellaneous helpers</a></h3></center>
+
+<pre></pre>
+<h4><a name='docfunc51352' href='#tocfunc51352'>sxml:assert-proper-attribute</a></h4>
+(define (sxml:assert-proper-attribute obj)<i><br> ... <a href='#codefunc51352'>Full Code</a> ... )</i>
+<pre> Asserts that the given obj is a proper attribute node.
+ If this is the case, returns #t. Otherwise, calls sxml:modification-error
+ with the appropriate error message.
+ Handles singular attributes correctly. In accordance with SXML 3.0, accepts
+ aux lists as attribute nodes
+</pre><p><br>
+
+<h4><a name='docfunc37562' href='#tocfunc37562'>sxml:unite-annot-attributes-lists</a></h4>
+(define (sxml:unite-annot-attributes-lists . annot-attributes-lst)<i><br> ... <a href='#codefunc37562'>Full Code</a> ... )</i>
+<pre>  Unites a list of annot-attributes into a single annot-attributes.
+  Ensures that every attribute is a proper one, and that there is no duplicate
+  attributes
+ annot-attributes-lst ::= (listof  annot-attributes)
+ In accordance with SXML specification, version 3.0:
+ [3]  &lt;annot-attributes&gt; ::=  (@ &lt;attribute&gt;* &lt;annotations&gt;? )
+  In case of an error, returns #f.
+  In the correct case, returns:  annot-attributes
+</pre><p><br>
+
+<hr width='40%' align='center'><center><h3><a name='sect46752' href='#tocsect46752'>The core function of document transformation into a new document</a></h3></center>
+
+<pre></pre>
+<h4><a name='docfunc52539' href='#tocfunc52539'>sxml:tree-trans</a></h4>
+(define (sxml:tree-trans curr-node targets-alist)<i><br> ... <a href='#codefunc52539'>Full Code</a> ... )</i>
+<pre> Recursive SXML tree transformation
+ curr-node - the node to be transformed
+ targets-alist ::= (listof  (cons  node-chain  update-target))
+ node-chain ::= (listof node)
+ node-chain - the chain of nodes, starting from the `curr-node' and proceeding
+  with its decsednants until the update target
+ Returns the transformed node
+</pre><p><br>
+
+<h4><a name='docfunc44736' href='#tocfunc44736'>sxml:transform-document</a></h4>
+(define (sxml:transform-document doc update-targets)<i><br> ... <a href='#codefunc44736'>Full Code</a> ... )</i>
+<pre> doc - a source SXML document
+ update-targets ::= (listof  update-target)
+ update-target ::= (list  context  handler  base-node)
+ context - context of the node selected by the location path
+ handler ::= (lambda (node context base-node) ...)
+ handler - specifies the required transformation over the node selected
+ base-node - the node with respect to which the location path was evaluated
+
+  Returns the new document. In case of a transformation that results to a
+  non-well-formed document, returns #f and the error message is displayed to
+  stderr as a side effect
+</pre><p><br>
+<hr height='5'><center><h3><a name='chapt43132' href='#tocchapt43132'>Processing update-specifiers</a></h3></center>
+
+<pre></pre>
+<h4><a name='docfunc31386' href='#tocfunc31386'>sxml:lambdas-upd-specifiers->targets</a></h4>
+(define (sxml:lambdas-upd-specifiers-&gt;targets doc lambdas-upd-specifiers)<i><br> ... <a href='#codefunc31386'>Full Code</a> ... )</i>
+<pre>  Evaluates lambda-upd-specifiers for the SXML document doc
+  Returns:
+ update-targets ::= (listof  update-target)
+ update-target ::= (list  context  handler  base-node)
+ context - context of the node selected by the location path
+ handler ::= (lambda (node context base-node) ...)
+ handler - specifies the required transformation over the node selected
+ base-node - the node with respect to which the location path was evaluated
+</pre><p><br>
+
+<h4><a name='docfunc55118' href='#tocfunc55118'>sxml:update-specifiers->lambdas</a></h4>
+(define (sxml:update-specifiers-&gt;lambdas update-specifiers)<i><br> ... <a href='#codefunc55118'>Full Code</a> ... )</i>
+<pre>  &quot;Precompiles&quot; each of update-specifiers, by transforming location paths and
+  update actions into lambdas.
+  Returns:
+ lambdas-upd-specifiers ::= (listof  lambdas-upd-specifier)
+ lambdas-upd-specifier ::= (list  txpath-lambda  relative?  handler)
+ txpath-lambda ::= (lambda (nodeset position+size var-binding) ...)
+ txpath-lambda - full-argument implementation of a location path
+ relative? - whether the txpath lambda is to be evaluated relatively to the
+  node selected by the previous lambdas-upd-specifier, or with respect to
+  the root of the document. For relative?=#t the base-node is the node
+  selected by the previous lambdas-upd-specifier, otherwise the base node is
+  the root of the document being transformed
+ handler ::= (lambda (node context base-node) ...)
+</pre><p><br>
+<hr height='5'><center><h3><a name='chapt21021' href='#tocchapt21021'>Several popular handlers</a></h3></center>
+
+<pre></pre>
+<h4><a name='docfunc28278' href='#tocfunc28278'>modif:insert-following</a></h4>
+(define (modif:insert-following node-specifier)<i><br> ... <a href='#codefunc28278'>Full Code</a> ... )</i>
+<pre> Node insertion
+  node-specifier ::= (lambda (context base-node) ...)
+ The lambda specifies the node to be inserted
+</pre><p><br>
+
+<h4><a name='docfunc26461' href='#tocfunc26461'>modif:insert-preceding</a></h4>
+(define (modif:insert-preceding node-specifier)<i><br> ... <a href='#codefunc26461'>Full Code</a> ... )</i><p><br>
+
+<h4><a name='docfunc14738' href='#tocfunc14738'>modif:insert-into</a></h4>
+(define (modif:insert-into node-specifier)<i><br> ... <a href='#codefunc14738'>Full Code</a> ... )</i><p><br>
+
+<h4><a name='docfunc16262' href='#tocfunc16262'>modif:rename</a></h4>
+(define (modif:rename new-name)<i><br> ... <a href='#codefunc16262'>Full Code</a> ... )</i>
+<pre> Rename
+</pre><p><br>
+
+<h4><a name='docfunc17277' href='#tocfunc17277'>modif:delete</a></h4>
+(define modif:delete (lambda (node context base-node)<i><br> ... <a href='#codefunc17277'>Full Code</a> ... )</i>
+<pre> Delete
+</pre><p><br>
+
+<h4><a name='docfunc33518' href='#tocfunc33518'>modif:delete-undeep</a></h4>
+(define modif:delete-undeep <i><br> ... <a href='#codefunc33518'>Full Code</a> ... )</i><p><br>
+<hr height='5'><center><h3><a name='chapt32539' href='#tocchapt32539'>Highest-level API function</a></h3></center>
+
+<pre></pre>
+<h4><a name='docfunc7533' href='#tocfunc7533'>sxml:modify</a></h4>
+(define (sxml:modify . update-specifiers)<i><br> ... <a href='#codefunc7533'>Full Code</a> ... )</i>
+<pre> update-specifiers ::= (listof  update-specifier)
+ update-specifier ::= (list  xpath-location-path  action  [action-parametes])
+ xpath-location-path - addresses the node(s) to be transformed, in the form of
+  XPath location path. If the location path is absolute, it addresses the
+  node(s) with respect to the root of the document being transformed. If the
+  location path is relative, it addresses the node(s) with respect to the
+  node selected by the previous update-specifier. The location path in the
+  first update-specifier always addresses the node(s) with respect to the
+  root of the document. We'll further refer to the node with respect of which
+  the location path is evaluated as to the base-node for this location path.
+ action - specifies the modification to be made over each of the node(s)
+  addressed by the location path. Possible actions are described below.
+ action-parameters - additional parameters supplied for the action. The number
+  of parameters and their semantics depend on the definite action.
+
+ action ::= 'delete | 'delete-undeep |
+            'insert-into | 'insert-following | 'insert-preceding |
+            'replace |
+            'move-into | 'move-following | 'move-preceding |
+            handler
+ 'delete - deletes the node. Expects no action-parameters
+ 'delete-undeep - deletes the node, but keeps all its content (which thus
+   moves to one level upwards in the document tree). Expects no
+   action-parameters
+ 'insert-into - inserts the new node(s) as the last children of the given
+   node. The new node(s) are specified in SXML as action-parameters
+ 'insert-following, 'insert-preceding - inserts the new node(s) after (before)
+   the given node. Action-parameters are the same as for 'insert-into
+ 'replace - replaces the given node with the new node(s). Action-parameters
+   are the same as for 'insert-into
+ 'rename - renames the given node. The node to be renamed must be a pair (i.e.
+   not a text node). A single action-parameter is expected, which is to be
+   a Scheme symbol to specify the new name of the given node
+ 'move-into - moves the given node to a new location. The single
+   action-parameter is the location path, which addresses the new location
+   with respect to the given node as the base node. The given node becomes
+   the last child of the node selected by the parameter location path.
+ 'move-following, 'move-preceding - the given node is moved to the location
+   respectively after (before) the node selected by the parameter location
+   path
+ handler ::= (lambda (node context base-node) ...)
+ handler - specifies the required transformation. It is an arbitrary lambda
+  that consumes the node and its context (the latter can be used for addressing
+  the other node of the source document relative to the given node). The hander
+  can return one of the following 2 things: a node or a nodeset.
+   1. If a node is returned, than it replaces the source node in the result
+  document
+   2. If a nodeset is returned, than the source node is replaced by (multiple)
+  nodes from this nodeset, in the same order in which they appear in the
+  nodeset. In particular, if the empty nodeset is returned by the handler, the
+  source node is removed from the result document and nothing is inserted
+  instead.
+
+  Returns either (lambda (doc) ...) or #f
+  The latter signals of an error, an the error message is printed into stderr
+  as a side effect. In the former case, the lambda can be applied to an SXML
+  document and produces the new SXML document being the result of the
+  modification specified.
+</pre><p><br>
+<hr height='5'><center><h3><a name='chapt54862' href='#tocchapt54862'>Destructive modifications</a></h3></center>
+
+<pre></pre>
+<hr width='40%' align='center'><center><h3><a name='sect64436' href='#tocsect64436'>Helper cloning facilities</a></h3></center>
+
+<pre> These are required to avoid circular structures and such as the result of
+ destructive modifications
+</pre>
+<h4><a name='docfunc7414' href='#tocfunc7414'>sxml:clone</a></h4>
+(define (sxml:clone node)<i><br> ... <a href='#codefunc7414'>Full Code</a> ... )</i>
+<pre> Clones the given SXML node
+</pre><p><br>
+
+<h4><a name='docfunc28740' href='#tocfunc28740'>sxml:clone-nset-except</a></h4>
+(define (sxml:clone-nset-except nodeset node)<i><br> ... <a href='#codefunc28740'>Full Code</a> ... )</i>
+<pre> Clones all members of the `nodeset', except for the `node', which is not
+ cloned
+</pre><p><br>
+
+<hr width='40%' align='center'><center><h3><a name='sect44878' href='#tocsect44878'>Facilities for mutation</a></h3></center>
+
+<pre></pre>
+<h4><a name='docfunc21765' href='#tocfunc21765'>sxml:replace-next-with-lst!</a></h4>
+(define (sxml:replace-next-with-lst! prev lst)<i><br> ... <a href='#codefunc21765'>Full Code</a> ... )</i>
+<pre> Destructively replaces the next list member for `prev' with the new `lst'
+</pre><p><br>
+
+<h4><a name='docfunc63774' href='#tocfunc63774'>sxml:mutate-doc!</a></h4>
+(define (sxml:mutate-doc! doc mutation-lst)<i><br> ... <a href='#codefunc63774'>Full Code</a> ... )</i>
+<pre> Destructively updates the SXML document
+ Returns the modified doc
+  mutation-lst ::= (listof (cons context new-value)),
+  new-value - a nodeset: the new value to be set to the node
+</pre><p><br>
+
+<hr width='40%' align='center'><center><h3><a name='sect0' href='#tocsect0'></a></h3></center>
+
+<pre> Selects the nodes to be mutated (by a subsequent destructive modification)
+ This function is the close analog of `sxml:transform-document'
+
+ Returns:
+  mutation-lst ::= (listof (cons context new-value)),
+  new-value - a nodeset: the new value to be set to the node;
+ or #f in case of semantic error during tree processing (e.g. not a
+ well-formed document after modification)
+
+ doc - a source SXML document
+ update-targets ::= (listof  update-target)
+ update-target ::= (list  context  handler  base-node)
+ context - context of the node selected by the location path
+ handler ::= (lambda (node context base-node) ...)
+ handler - specifies the required transformation over the node selected
+ base-node - the node with respect to which the location path was evaluated
+</pre>
+<h4><a name='docfunc2275' href='#tocfunc2275'>sxml:nodes-to-mutate</a></h4>
+(define (sxml:nodes-to-mutate doc update-targets)<i><br> ... <a href='#codefunc2275'>Full Code</a> ... )</i><p><br>
+
+<h4><a name='docfunc15981' href='#tocfunc15981'>sxml:modify!</a></h4>
+(define (sxml:modify! . update-specifiers)<i><br> ... <a href='#codefunc15981'>Full Code</a> ... )</i>
+<pre> A highest-level function
+</pre><p><br>
+<center><h1>Code</h1></center>
+
+<h4><a name='codefunc29664' href='#docfunc29664'>sxml:modification-error</a></h4>
+<i><a href='#tocfunc29664'>Index</a></i><br>
+
+<pre> Displays an error to stderr and returns #f
+</pre>
+<pre>(define (<a href="modif.html#codefunc29664">sxml:modification-error</a> . text)
+  (<a href="myenv.html#codefunc55253">cerr</a> &quot;Modification error: &quot;)
+  (apply <a href="myenv.html#codefunc55253">cerr</a> text)
+  (<a href="myenv.html#codefunc55253">cerr</a> <a href="myenv.html#codefunc27758">nl</a>)
+  #f)
+</pre>
+<h4><a name='codefunc47752' href='#docfunc47752'>sxml:separate-list</a></h4>
+<i><a href='#tocfunc47752'>Index</a></i><br>
+
+<pre>  Separates the list into two lists with respect to the predicate
+  Returns:  (values  res-lst1  res-lst2)
+ res-lst1 - contains all members from the input lst that satisfy the pred?
+ res-lst2 - contains the remaining members of the input lst
+</pre>
+<pre>(define (<a href="modif.html#codefunc47752">sxml:separate-list</a> pred? lst)
+  (let loop ((lst lst)
+             (satisfy '())
+             (rest '()))
+    (cond
+      ((null? lst)
+       (values (reverse satisfy) (reverse rest)))
+      ((pred? (car lst))   ; the first member satisfies the predicate
+       (loop (cdr lst)
+             (cons (car lst) satisfy) rest))
+      (else
+       (loop (cdr lst)
+             satisfy (cons (car lst) rest))))))
+</pre>
+<h4><a name='codefunc31386' href='#docfunc31386'>sxml:lambdas-upd-specifiers->targets</a></h4>
+<i><a href='#tocfunc31386'>Index</a></i><br>
+
+<pre>  Evaluates lambda-upd-specifiers for the SXML document doc
+  Returns:
+ update-targets ::= (listof  update-target)
+ update-target ::= (list  context  handler  base-node)
+ context - context of the node selected by the location path
+ handler ::= (lambda (node context base-node) ...)
+ handler - specifies the required transformation over the node selected
+ base-node - the node with respect to which the location path was evaluated
+</pre>
+<pre>(define (<a href="modif.html#codefunc31386">sxml:lambdas-upd-specifiers-&gt;targets</a> doc lambdas-upd-specifiers)
+  (let ((doc-list (list doc)))
+    (letrec
+        ((construct-targets
+          ; base-cntxtset - base context set for the current upd-specifier
+          ; lambdas-upd-specifiers - is assumed to be non-null?
+          (lambda (base-cntxtset lambdas-upd-specifiers)
+            (let ((triple (car lambdas-upd-specifiers)))
+              ; Iterates members of the base context-set
+              ; new-base ::= (listof context-set)
+              ; Each context-set is obtained by applying the txpath-lambda
+              ; to the each member of base-cntxtset
+              (let iter-base ((base-cntxtset base-cntxtset)
+                              (res '())
+                              (new-base '()))
+                (if
+                 (null? base-cntxtset)  ; finished scanning base context-set
+                 (if
+                  (null? (cdr lambdas-upd-specifiers))  ; no more members
+                  res
+                  (append
+                   res
+                   (construct-targets
+                    (if
+                     (cadadr lambdas-upd-specifiers)  ; following is relative
+                     (apply <a href="ddo-txpath.html#codefunc599">ddo:unite-multiple-context-sets</a> new-base)
+                     doc-list)
+                    (cdr lambdas-upd-specifiers))))
+                 (let* ((curr-base-context (car base-cntxtset))
+                        (context-set ((car triple)
+                                      (list curr-base-context)
+                                      (cons 1 1)
+                                      '()  ; dummy var-binding
+                                      )))
+                   (iter-base
+                    (cdr base-cntxtset)
+                    (append res
+                            (map
+                             (lambda (context)
+                               (list context
+                                     (caddr triple)  ; handler
+                                     (<a href="xpath-context.html#codefunc41847">sxml:context-&gt;node</a> curr-base-context)))
+                             context-set))
+                    (cons context-set new-base)))))))))
+    (if
+     (null? lambdas-upd-specifiers)  ; no transformation rules
+     '()
+     (construct-targets doc-list lambdas-upd-specifiers)))))
+</pre>
+<h4><a name='codefunc55118' href='#docfunc55118'>sxml:update-specifiers->lambdas</a></h4>
+<i><a href='#tocfunc55118'>Index</a></i><br>
+
+<pre>  &quot;Precompiles&quot; each of update-specifiers, by transforming location paths and
+  update actions into lambdas.
+  Returns:
+ lambdas-upd-specifiers ::= (listof  lambdas-upd-specifier)
+ lambdas-upd-specifier ::= (list  txpath-lambda  relative?  handler)
+ txpath-lambda ::= (lambda (nodeset position+size var-binding) ...)
+ txpath-lambda - full-argument implementation of a location path
+ relative? - whether the txpath lambda is to be evaluated relatively to the
+  node selected by the previous lambdas-upd-specifier, or with respect to
+  the root of the document. For relative?=#t the base-node is the node
+  selected by the previous lambdas-upd-specifier, otherwise the base node is
+  the root of the document being transformed
+ handler ::= (lambda (node context base-node) ...)
+</pre>
+<pre>(define (<a href="modif.html#codefunc55118">sxml:update-specifiers-&gt;lambdas</a> update-specifiers)
+  (let iter ((src update-specifiers)
+             (res '()))
+    (if
+     (null? src)  ; every specifier processed
+     (reverse res)
+     (let ((curr (car src)))
+       (if
+        (or (not (list? curr))
+            (null? (cdr curr)))
+        (<a href="modif.html#codefunc29664">sxml:modification-error</a> &quot;improper update-specifier: &quot; curr)
+        (and-let*
+         ; Convert Location path to XPath AST
+         ((ast (<a href="xpath-ast.html#codefunc39640">txp:xpath-&gt;ast</a> (car curr))))
+         (call-with-values
+          (lambda ()
+            (if
+             (eq? (car ast) 'absolute-location-path)
+             (values
+              (<a href="ddo-txpath.html#codefunc32813">ddo:ast-relative-location-path</a>
+               (cons 'relative-location-path (cdr ast))
+               #f  ; keep all ancestors
+               #t  ; on a single level, since a single node
+               0   ; zero predicate nesting
+               '(0)  ; initial var-mapping
+               )
+              #f)
+             (values
+              (<a href="ddo-txpath.html#codefunc32813">ddo:ast-relative-location-path</a> ast #f #t 0 '(0))
+              (not (null? res))   ; absolute for the first rule
+              )))
+          (lambda (txpath-pair relative?)
+            (if
+             (not txpath-pair)  ; semantic error
+             txpath-pair  ; propagate the error
+             (let ((txpath-lambda (car txpath-pair))
+                   (action (cadr curr)))
+               (if
+                (procedure? action)  ; user-supplied handler
+                (iter (cdr src)
+                      (cons
+                       (list txpath-lambda relative? action)
+                       res))
+                (case action
+                  ((delete delete-undeep)
+                   (iter (cdr src)
+                         (cons
+                          (list
+                           txpath-lambda
+                           relative?
+                           (cdr
+                            (assq action
+                                  `((delete . ,modif:delete)
+                                    (delete-undeep . ,modif:delete-undeep)))))
+                          res)))
+                  ((insert-into insert-following insert-preceding)
+                   (let ((params (cddr curr)))
+                     (iter (cdr src)
+                           (cons
+                            (list
+                             txpath-lambda
+                             relative?
+                             ((cdr
+                               (assq
+                                action
+                                `((insert-into . ,modif:insert-into)
+                                  (insert-following . ,modif:insert-following)
+                                  (insert-preceding . ,modif:insert-preceding))))
+                              (lambda (context base-node) params)))
+                            res))))
+                  ((replace)
+                   (let ((params (cddr curr)))
+                     (iter (cdr src)
+                           (cons
+                            (list txpath-lambda relative?
+                                  (lambda (node context base-node) params))
+                            res))))
+                  ((rename)
+                   (if
+                    (or (null? (cddr curr))  ; no parameter supplied
+                        (not (symbol? (caddr curr))))
+                    (<a href="modif.html#codefunc29664">sxml:modification-error</a>
+                     &quot;improper new name for the node to be renamed: &quot;
+                     curr)                  
+                    (iter
+                     (cdr src)
+                     (cons
+                      (let ((new-name (caddr curr)))
+                        (list txpath-lambda relative? (<a href="modif.html#codefunc16262">modif:rename</a> new-name)))
+                      res))))
+                  ((move-into move-following move-preceding)
+                   (if
+                    (or (null? (cddr curr))  ; no lpath supplied
+                        (not (string? (caddr curr))))
+                    (<a href="modif.html#codefunc29664">sxml:modification-error</a>
+                     &quot;improper destination location path for move action: &quot;
+                     curr)
+                    (and-let*
+                     ((ast (<a href="xpath-ast.html#codefunc39640">txp:xpath-&gt;ast</a> (caddr curr)))
+                      (txpath-pair (<a href="ddo-txpath.html#codefunc52563">ddo:ast-location-path</a> ast #f #t 0 '(0))))
+                     (iter (cdr src)
+                           (cons
+                            (list
+                             (car txpath-pair)
+                             #t
+                             ((cdr
+                               (assq
+                                action
+                                `((move-into . ,modif:insert-into)
+                                  (move-following . ,modif:insert-following)
+                                  (move-preceding . ,modif:insert-preceding))))
+                              (lambda (context base-node) base-node)))
+                            (cons                                
+                             (list txpath-lambda relative? <a href="modif.html#codefunc17277">modif:delete</a>)
+                             res))))))
+                  (else
+                   (<a href="modif.html#codefunc29664">sxml:modification-error</a> &quot;unknown action: &quot; curr))))))))))))))
+</pre>
+<h4><a name='codefunc28278' href='#docfunc28278'>modif:insert-following</a></h4>
+<i><a href='#tocfunc28278'>Index</a></i><br>
+
+<pre> Node insertion
+  node-specifier ::= (lambda (context base-node) ...)
+ The lambda specifies the node to be inserted
+</pre>
+<pre>(define (<a href="modif.html#codefunc28278">modif:insert-following</a> node-specifier)
+  (lambda (node context base-node)
+    ((if (<a href="sxpathlib.html#codefunc31162">nodeset?</a> node) append cons)
+     node
+     (<a href="sxpathlib.html#codefunc11721">as-nodeset</a> (node-specifier context base-node)))))
+</pre>
+<h4><a name='codefunc26461' href='#docfunc26461'>modif:insert-preceding</a></h4>
+<i><a href='#tocfunc26461'>Index</a></i><br>
+
+<pre>(define (<a href="modif.html#codefunc26461">modif:insert-preceding</a> node-specifier)
+  (lambda (node context base-node)
+    (let ((new (node-specifier context base-node)))
+      ((if (<a href="sxpathlib.html#codefunc31162">nodeset?</a> new) append cons)
+       new
+       (<a href="sxpathlib.html#codefunc11721">as-nodeset</a> node)))))
+</pre>
+<h4><a name='codefunc14738' href='#docfunc14738'>modif:insert-into</a></h4>
+<i><a href='#tocfunc14738'>Index</a></i><br>
+
+<pre>(define (<a href="modif.html#codefunc14738">modif:insert-into</a> node-specifier)
+  (lambda (node context base-node)
+    (let* ((to-insert (<a href="sxpathlib.html#codefunc11721">as-nodeset</a> (node-specifier context base-node)))
+           (insert-into-single  ; inserts into single node
+            (lambda (node)
+              (if (not (pair? node))  ; can't insert into
+                  node
+                  (append node to-insert)))))
+      (if (<a href="sxpathlib.html#codefunc31162">nodeset?</a> node)
+          (map insert-into-single node)
+          (insert-into-single node)))))
+</pre>
+<h4><a name='codefunc16262' href='#docfunc16262'>modif:rename</a></h4>
+<i><a href='#tocfunc16262'>Index</a></i><br>
+
+<pre> Rename
+</pre>
+<pre>(define (<a href="modif.html#codefunc16262">modif:rename</a> new-name)
+  (let ((rename-single  ; renames a single node
+         (lambda (node)
+           (if (pair? node)  ; named node
+               (cons new-name (cdr node))
+               node))))
+    (lambda (node context base-node)
+      (if (<a href="sxpathlib.html#codefunc31162">nodeset?</a> node)
+          (map rename-single node)
+          (rename-single node)))))
+</pre>
+<h4><a name='codefunc17277' href='#docfunc17277'>modif:delete</a></h4>
+<i><a href='#tocfunc17277'>Index</a></i><br>
+
+<pre> Delete
+</pre>
+<pre>(define <a href="modif.html#codefunc17277">modif:delete</a>
+  (lambda (node context base-node) '()))
+</pre>
+<h4><a name='codefunc33518' href='#docfunc33518'>modif:delete-undeep</a></h4>
+<i><a href='#tocfunc33518'>Index</a></i><br>
+
+<pre>(define <a href="modif.html#codefunc33518">modif:delete-undeep</a>
+  (let ((delete-undeep-single
+         (lambda (node)
+           (if (pair? node) (cdr node) '()))))
+    (lambda (node context base-node)
+      (if (<a href="sxpathlib.html#codefunc31162">nodeset?</a> node)
+          (map delete-undeep-single node)
+          (delete-undeep-single node)))))
+</pre>
+<h4><a name='codefunc7533' href='#docfunc7533'>sxml:modify</a></h4>
+<i><a href='#tocfunc7533'>Index</a></i><br>
+
+<pre> update-specifiers ::= (listof  update-specifier)
+ update-specifier ::= (list  xpath-location-path  action  [action-parametes])
+ xpath-location-path - addresses the node(s) to be transformed, in the form of
+  XPath location path. If the location path is absolute, it addresses the
+  node(s) with respect to the root of the document being transformed. If the
+  location path is relative, it addresses the node(s) with respect to the
+  node selected by the previous update-specifier. The location path in the
+  first update-specifier always addresses the node(s) with respect to the
+  root of the document. We'll further refer to the node with respect of which
+  the location path is evaluated as to the base-node for this location path.
+ action - specifies the modification to be made over each of the node(s)
+  addressed by the location path. Possible actions are described below.
+ action-parameters - additional parameters supplied for the action. The number
+  of parameters and their semantics depend on the definite action.
+
+ action ::= 'delete | 'delete-undeep |
+            'insert-into | 'insert-following | 'insert-preceding |
+            'replace |
+            'move-into | 'move-following | 'move-preceding |
+            handler
+ 'delete - deletes the node. Expects no action-parameters
+ 'delete-undeep - deletes the node, but keeps all its content (which thus
+   moves to one level upwards in the document tree). Expects no
+   action-parameters
+ 'insert-into - inserts the new node(s) as the last children of the given
+   node. The new node(s) are specified in SXML as action-parameters
+ 'insert-following, 'insert-preceding - inserts the new node(s) after (before)
+   the given node. Action-parameters are the same as for 'insert-into
+ 'replace - replaces the given node with the new node(s). Action-parameters
+   are the same as for 'insert-into
+ 'rename - renames the given node. The node to be renamed must be a pair (i.e.
+   not a text node). A single action-parameter is expected, which is to be
+   a Scheme symbol to specify the new name of the given node
+ 'move-into - moves the given node to a new location. The single
+   action-parameter is the location path, which addresses the new location
+   with respect to the given node as the base node. The given node becomes
+   the last child of the node selected by the parameter location path.
+ 'move-following, 'move-preceding - the given node is moved to the location
+   respectively after (before) the node selected by the parameter location
+   path
+ handler ::= (lambda (node context base-node) ...)
+ handler - specifies the required transformation. It is an arbitrary lambda
+  that consumes the node and its context (the latter can be used for addressing
+  the other node of the source document relative to the given node). The hander
+  can return one of the following 2 things: a node or a nodeset.
+   1. If a node is returned, than it replaces the source node in the result
+  document
+   2. If a nodeset is returned, than the source node is replaced by (multiple)
+  nodes from this nodeset, in the same order in which they appear in the
+  nodeset. In particular, if the empty nodeset is returned by the handler, the
+  source node is removed from the result document and nothing is inserted
+  instead.
+
+  Returns either (lambda (doc) ...) or #f
+  The latter signals of an error, an the error message is printed into stderr
+  as a side effect. In the former case, the lambda can be applied to an SXML
+  document and produces the new SXML document being the result of the
+  modification specified.
+</pre>
+<pre>(define (<a href="modif.html#codefunc7533">sxml:modify</a> . update-specifiers)
+  (and-let*
+   ((lambdas-upd-specifiers
+     (<a href="modif.html#codefunc55118">sxml:update-specifiers-&gt;lambdas</a> update-specifiers)))
+   (lambda (doc)
+     (<a href="modif.html#codefunc44736">sxml:transform-document</a>
+      doc
+      (<a href="modif.html#codefunc31386">sxml:lambdas-upd-specifiers-&gt;targets</a> doc lambdas-upd-specifiers)))))
+</pre>
+<h4><a name='codefunc51352' href='#docfunc51352'>sxml:assert-proper-attribute</a></h4>
+<i><a href='#tocfunc51352'>Index</a></i><br>
+
+<pre> Asserts that the given obj is a proper attribute node.
+ If this is the case, returns #t. Otherwise, calls sxml:modification-error
+ with the appropriate error message.
+ Handles singular attributes correctly. In accordance with SXML 3.0, accepts
+ aux lists as attribute nodes
+</pre>
+<pre>(define (<a href="modif.html#codefunc51352">sxml:assert-proper-attribute</a> obj)
+  (if
+   (or (and (pair? obj)   ; aux node - any content is acceptable
+            (not (null? obj))
+            (eq? (car obj) '@))
+       (and (list? obj)   ; '() is not a list
+            (symbol? (car obj))
+            (or (null? (cdr obj))  ; singular attribute
+                (null? (cddr obj)))))
+   #t
+   (<a href="modif.html#codefunc29664">sxml:modification-error</a>
+    &quot;improper attribute node - &quot; obj)))
+</pre>
+<h4><a name='codefunc37562' href='#docfunc37562'>sxml:unite-annot-attributes-lists</a></h4>
+<i><a href='#tocfunc37562'>Index</a></i><br>
+
+<pre>  Unites a list of annot-attributes into a single annot-attributes.
+  Ensures that every attribute is a proper one, and that there is no duplicate
+  attributes
+ annot-attributes-lst ::= (listof  annot-attributes)
+ In accordance with SXML specification, version 3.0:
+ [3]  &lt;annot-attributes&gt; ::=  (@ &lt;attribute&gt;* &lt;annotations&gt;? )
+  In case of an error, returns #f.
+  In the correct case, returns:  annot-attributes
+</pre>
+<pre>(define (<a href="modif.html#codefunc37562">sxml:unite-annot-attributes-lists</a> . annot-attributes-lst)
+  (if
+   (null? annot-attributes-lst)  ; nothing to do
+   '()
+   (let iter-lst ((src annot-attributes-lst)
+                  (attrs '())
+                  (annotations '()))
+     (if
+      (null? src)  ; Recursion finished
+      (if (null? annotations)
+          (cons '@ (reverse attrs))
+          `(@ ,@(reverse attrs) (@ ,@annotations)))
+      (let iter-annot-attrs ((annot-attrs (cdar src))
+                             (attrs attrs)
+                             (annotations annotations))
+        (if
+         (null? annot-attrs)  ; proceed with the outer loop
+         (iter-lst (cdr src) attrs annotations)
+         (let ((curr (car annot-attrs)))
+           (cond       
+             ((and (pair? curr)
+                   (not (null? curr))
+                   (eq? (car curr) '@))
+              ; an annotation node
+              (iter-annot-attrs (cdr annot-attrs)
+                                attrs
+                                (append annotations (cdr curr))))
+             ((<a href="modif.html#codefunc51352">sxml:assert-proper-attribute</a> curr)
+              (if
+               (assq (car curr) attrs)  ; duplicate attribute detected
+               (<a href="modif.html#codefunc29664">sxml:modification-error</a>
+                &quot;duplicate attribute - &quot; (car curr))
+               (iter-annot-attrs (cdr annot-attrs)
+                                 (cons curr attrs)
+                                 annotations)))
+             (else  ; improper attribute
+              #f)))))))))
+</pre>
+<h4><a name='codefunc52539' href='#docfunc52539'>sxml:tree-trans</a></h4>
+<i><a href='#tocfunc52539'>Index</a></i><br>
+
+<pre> Recursive SXML tree transformation
+ curr-node - the node to be transformed
+ targets-alist ::= (listof  (cons  node-chain  update-target))
+ node-chain ::= (listof node)
+ node-chain - the chain of nodes, starting from the `curr-node' and proceeding
+  with its decsednants until the update target
+ Returns the transformed node
+</pre>
+<pre>(define (<a href="modif.html#codefunc52539">sxml:tree-trans</a> curr-node targets-alist)
+  (call-with-values
+   (lambda () (<a href="modif.html#codefunc47752">sxml:separate-list</a>
+               (lambda (pair) (null? (car pair)))
+               targets-alist))
+   (lambda (matched         ; handlers which match this node
+            targets-alist   ; the rest
+            )
+     (and-let*
+      ((after-subnodes  ; curr-node after its subnodes are processed
+        (if
+         (or (not (pair? curr-node))  ; leaf node
+             (null? targets-alist)  ; no more handlers
+             )
+         curr-node
+         (let process-attrs ((targets-alist targets-alist)
+                             (src-attrs (<a href="sxpathlib.html#codefunc50657">sxml:attr-list</a> curr-node))
+                             (res-attrs '()))
+           (if
+            (null? src-attrs)  ; all attributes processed
+            ; Go to proceed child elements
+            (if
+             (null? targets-alist)  ; children don't need to be processed
+             (cons  ; Constructing the result node
+              (car curr-node)  ; node name
+              ((lambda (kids)
+                 (if (null? res-attrs)  ; no attributes
+                     kids
+                     (cons (cons '@ (reverse res-attrs))
+                           kids)))
+               ((if (and (not (null? (cdr curr-node)))
+                         (pair? (cadr curr-node))
+                         (eq? (caadr curr-node) '@))
+                    cddr cdr)
+                curr-node)))
+             (let process-kids ((targets-alist targets-alist)
+                                (src-kids (cdr curr-node))
+                                (res-kids '()))
+               (cond
+                 ((null? src-kids)  ; all kids processed
+                  (call-with-values
+                   (lambda () (<a href="modif.html#codefunc47752">sxml:separate-list</a>
+                               (lambda (obj)
+                                 (and (pair? obj) (eq? (car obj) '@)))
+                               res-kids))
+                   (lambda (more-attrs kids)
+                     (if
+                      (and (null? res-attrs) (null? more-attrs))
+                      (cons  ; Constructing the result node
+                       (car curr-node)  ; node name
+                       kids)
+                      (and-let*
+                       ((overall-attrs
+                         (apply
+                          <a href="modif.html#codefunc37562">sxml:unite-annot-attributes-lists</a>
+                          (cons
+                           (cons '@ (reverse res-attrs))
+                           more-attrs))))
+                       (cons (car curr-node)  ; node name
+                             (cons overall-attrs kids)))))))
+                 ((and (pair? (car src-kids))
+                       (eq? (caar src-kids) '@))
+                  ; attribute node - already processed
+                  (process-kids
+                   targets-alist (cdr src-kids) res-kids))
+                 (else
+                  (let ((kid-templates
+                         (<a href="common.html#codefunc20536">filter</a>
+                          (lambda (pair)
+                            (eq? (caar pair) (car src-kids)))
+                          targets-alist)))
+                    (if
+                     (null? kid-templates)
+                     ; this child node remains as is
+                     (process-kids
+                      targets-alist
+                      (cdr src-kids)
+                      (append res-kids (list (car src-kids))))
+                     (and-let*
+                      ((new-kid
+                        (<a href="modif.html#codefunc52539">sxml:tree-trans</a>
+                         (car src-kids)
+                         (map
+                          (lambda (pair)
+                            (cons (cdar pair) (cdr pair)))
+                          kid-templates))))
+                      (process-kids
+                       (<a href="common.html#codefunc20536">filter</a>
+                        (lambda (pair)
+                          (not (eq? (caar pair) (car src-kids))))
+                        targets-alist)
+                       (cdr src-kids)
+                       (append
+                        res-kids
+                        (if (<a href="sxpathlib.html#codefunc31162">nodeset?</a> new-kid)
+                            new-kid
+                            (list new-kid)))))))))))
+            (let* ((curr-attr (car src-attrs))
+                   (attr-templates
+                    (<a href="common.html#codefunc20536">filter</a>
+                     (lambda (pair)
+                       (eq? (caar pair) curr-attr))
+                     targets-alist)))
+              (if
+               (null? attr-templates)
+               ; this attribute remains as is
+               (process-attrs targets-alist
+                              (cdr src-attrs)
+                              (cons curr-attr res-attrs))
+               (let ((new-attr  ; cannot produce error for attrs
+                      (<a href="modif.html#codefunc52539">sxml:tree-trans</a>
+                       curr-attr
+                       (map
+                        (lambda (pair)
+                          (cons (cdar pair) (cdr pair)))
+                        attr-templates))))
+                 (process-attrs
+                  (<a href="common.html#codefunc20536">filter</a>
+                   (lambda (pair)
+                     (not (eq? (caar pair) curr-attr)))
+                   targets-alist)
+                  (cdr src-attrs)
+                  (if (<a href="sxpathlib.html#codefunc31162">nodeset?</a> new-attr)
+                      (append (reverse new-attr) res-attrs)
+                      (cons new-attr res-attrs)))))))))))
+      (let process-this ((new-curr-node after-subnodes)
+                         (curr-handlers (map cdr matched)))
+        (if
+         (null? curr-handlers)
+         (if  ; all handlers processed
+          (not (pair? new-curr-node))         
+          new-curr-node  ; atomic node
+          (call-with-values  ; otherwise - unite attr lists
+           (lambda () (<a href="modif.html#codefunc47752">sxml:separate-list</a>
+                       (lambda (obj) (and (pair? obj) (eq? (car obj) '@)))
+                       (cdr new-curr-node)))
+           (lambda (attrs kids)
+             (if (null? attrs)
+                 new-curr-node  ; node remains unchanged
+                 (and-let*
+                  ((overall-attrs
+                    (apply <a href="modif.html#codefunc37562">sxml:unite-annot-attributes-lists</a> attrs)))
+                  (cons
+                   (car new-curr-node)  ; node name                
+                   (cons overall-attrs kids)))))))
+         (process-this
+          ((cadar curr-handlers)  ; lambda
+           new-curr-node
+           (caar curr-handlers)  ; context
+           (caddar curr-handlers)  ; base-node
+           )                      
+          (cdr curr-handlers))))))))
+</pre>
+<h4><a name='codefunc44736' href='#docfunc44736'>sxml:transform-document</a></h4>
+<i><a href='#tocfunc44736'>Index</a></i><br>
+
+<pre> doc - a source SXML document
+ update-targets ::= (listof  update-target)
+ update-target ::= (list  context  handler  base-node)
+ context - context of the node selected by the location path
+ handler ::= (lambda (node context base-node) ...)
+ handler - specifies the required transformation over the node selected
+ base-node - the node with respect to which the location path was evaluated
+
+  Returns the new document. In case of a transformation that results to a
+  non-well-formed document, returns #f and the error message is displayed to
+  stderr as a side effect
+</pre>
+<pre>(define (<a href="modif.html#codefunc44736">sxml:transform-document</a> doc update-targets)
+  (let ((targets-alist
+         (<a href="sxpathlib.html#codefunc27946">map-union</a>
+          (lambda (triple)
+            (let ((node-path (reverse (<a href="xpath-context.html#codefunc8528">sxml:context-&gt;content</a> (car triple)))))
+              (if
+               (eq? (car node-path) doc)
+               (list (cons (cdr node-path) triple))
+               '())))
+          update-targets)))
+    (if (null? targets-alist)  ; nothing to do
+        doc
+        (<a href="modif.html#codefunc52539">sxml:tree-trans</a> doc targets-alist))))
+</pre>
+<h4><a name='codefunc7414' href='#docfunc7414'>sxml:clone</a></h4>
+<i><a href='#tocfunc7414'>Index</a></i><br>
+
+<pre> Clones the given SXML node
+</pre>
+<pre>(define (<a href="modif.html#codefunc7414">sxml:clone</a> node)
+  (letrec
+      ((clone-nodeset  ; clones nodeset
+        (lambda (nset)
+          (if (null? nset)
+              nset
+              (cons (<a href="modif.html#codefunc7414">sxml:clone</a> (car nset)) (cdr nset))))))
+    (cond
+      ((pair? node)
+       (cons (car node) (clone-nodeset (cdr node))))
+      ; Atomic node
+      ((string? node)
+       (string-copy node))
+      ((number? node)
+       (string-&gt;number (number-&gt;string node)))
+      (else  ; unknown node type - do not clone it
+       node))))
+</pre>
+<h4><a name='codefunc28740' href='#docfunc28740'>sxml:clone-nset-except</a></h4>
+<i><a href='#tocfunc28740'>Index</a></i><br>
+
+<pre> Clones all members of the `nodeset', except for the `node', which is not
+ cloned
+</pre>
+<pre>(define (<a href="modif.html#codefunc28740">sxml:clone-nset-except</a> nodeset node)
+  (letrec
+      ((iter-nset
+        ; encountered? - a boolean value: whether `node' already encountered
+        ; in the head of the nodeset being processed
+        (lambda (nset encountered?)
+          (cond
+            ((null? nset) nset)
+            ((eq? (car nset) node)
+             (cons
+              (if encountered?  ; already encountered before
+                  (<a href="modif.html#codefunc7414">sxml:clone</a> (car nset))  ; is to be now cloned
+                  (car nset))
+              (iter-nset (cdr nset) #t)))
+            (else
+             (cons (<a href="modif.html#codefunc7414">sxml:clone</a> (car nset))
+                   (iter-nset (cdr nset) encountered?)))))))
+    (iter-nset nodeset #f)))
+</pre>
+<h4><a name='codefunc21765' href='#docfunc21765'>sxml:replace-next-with-lst!</a></h4>
+<i><a href='#tocfunc21765'>Index</a></i><br>
+
+<pre> Destructively replaces the next list member for `prev' with the new `lst'
+</pre>
+<pre>(define (<a href="modif.html#codefunc21765">sxml:replace-next-with-lst!</a> prev lst)
+  (let ((next (cddr prev)))
+    (if
+     (null? lst)  ; the member is to be just removed
+     (set-cdr! prev next)     
+     (begin
+       (set-cdr! prev lst)
+       (let loop ((lst lst))  ; the lst is non-null
+         (if
+          (null? (cdr lst))
+          (set-cdr! lst next)
+          (loop (cdr lst))))))))
+</pre>
+<h4><a name='codefunc63774' href='#docfunc63774'>sxml:mutate-doc!</a></h4>
+<i><a href='#tocfunc63774'>Index</a></i><br>
+
+<pre> Destructively updates the SXML document
+ Returns the modified doc
+  mutation-lst ::= (listof (cons context new-value)),
+  new-value - a nodeset: the new value to be set to the node
+</pre>
+<pre>(define (<a href="modif.html#codefunc63774">sxml:mutate-doc!</a> doc mutation-lst)
+  (letrec
+      ((tree-walk
+        (lambda (curr-node targets-alist)
+          (if
+           (not (pair? curr-node))  ; an atom
+           #t  ; nothing to do
+           ; Otherwise, the `curr-node' is a pair
+           (let loop ((lst curr-node)
+                      (targets targets-alist))
+             (if
+              (null? targets)
+              #t  ; nothing more to do
+              (begin
+                (if ((<a href="sxpathlib.html#codefunc9356">ntype??</a> '@) (car lst))  ; attribute node
+                    (tree-walk (car lst) targets-alist)
+                    #t  ; dummy else-branch
+                    )
+                (if
+                 (null? (cdr lst))  ; this is the last member
+                 #t  ; nothing more to be done
+                 (let ((next (cadr lst)))
+                   (call-with-values
+                    (lambda ()
+                      (<a href="modif.html#codefunc47752">sxml:separate-list</a>
+                       (lambda (pair) (eq? (caar pair) next))
+                       targets))
+                    (lambda (matched   ; handlers which match `next'
+                             targets   ; the rest
+                             )
+                      (if
+                       (null? matched)  ; nothing matched the next node
+                       (loop (cdr lst) targets)
+                       (let ((matched
+                              (map
+                               (lambda (pair) (cons (cdar pair) (cdr pair)))
+                               matched)))
+                         (cond
+                           ((assv '() matched)  ; the `next' is to be mutated
+                            =&gt; (lambda (pair)
+                                 (let ((k (length (cdr pair))))
+                                   (<a href="modif.html#codefunc21765">sxml:replace-next-with-lst!</a> lst (cdr pair))
+                                   (loop (list-tail lst k) targets))))
+                           (else
+                            (tree-walk next matched)
+                            (loop (cdr lst) targets))))))))))))))))
+  (let ((targets-alist
+           (<a href="sxpathlib.html#codefunc27946">map-union</a>
+            (lambda (pair)
+              (let ((node-path (reverse (<a href="xpath-context.html#codefunc8528">sxml:context-&gt;content</a> (car pair)))))
+                (if
+                 (eq? (car node-path) doc)
+                 (list (cons (cdr node-path) (cdr pair)))
+                 '())))
+            mutation-lst)))
+    (cond
+      ((null? targets-alist)  ; nothing to do
+       #t)
+      ((assv '() targets-alist)  ; assv is specified for empty lists
+       ; The root of the document itself is to be modified
+       =&gt; (lambda (pair)
+            (set! doc (cadr pair))))
+      (else
+       (tree-walk doc targets-alist)))
+    doc)))
+</pre>
+<h4><a name='codefunc2275' href='#docfunc2275'>sxml:nodes-to-mutate</a></h4>
+<i><a href='#tocfunc2275'>Index</a></i><br>
+
+<pre>(define (<a href="modif.html#codefunc2275">sxml:nodes-to-mutate</a> doc update-targets)  
+  (letrec
+      (; targets-alist ::= (listof  (cons  node-chain  update-target))
+       ; node-chain - the chain of nodes, starting from the current node
+       ; anc-upd? - whether an ancestor of the current node us updated
+       (tree-walk
+        (lambda (curr-node targets-alist)
+          (call-with-values
+           (lambda () (<a href="modif.html#codefunc47752">sxml:separate-list</a>
+                       (lambda (pair) (null? (car pair)))
+                       targets-alist))
+           (lambda (matched  ; handlers which match this node
+                    targets  ; the rest
+                    )
+             (if
+              ; No updates both on this level and on ancestor's level
+              (null? matched)
+              (let loop ((targets targets-alist)
+                         (subnodes (append (<a href="sxpathlib.html#codefunc50657">sxml:attr-list</a> curr-node)
+                                           ((<a href="sxpathlib.html#codefunc5616">sxml:child</a> <a href="sxpathlib.html#codefunc63215">sxml:node?</a>) curr-node)))
+                         (res '()))
+                (if
+                 (or (null? targets) (null? subnodes))
+                 res
+                 (call-with-values
+                  (lambda ()
+                    (<a href="modif.html#codefunc47752">sxml:separate-list</a>
+                     (lambda (pair) (eq? (caar pair) (car subnodes)))
+                     targets))
+                  (lambda (matched targets)
+                    (loop targets
+                          (cdr subnodes)
+                          (if
+                           (null? matched)
+                           res
+                           (append res
+                                   (tree-walk
+                                    (car subnodes)
+                                    (map
+                                     (lambda (pair) (cons (cdar pair) (cdr pair)))
+                                     matched)))))))))
+              (list
+               (cons (cadar matched)  ; context
+                     (<a href="modif.html#codefunc28740">sxml:clone-nset-except</a>
+                      (<a href="sxpathlib.html#codefunc11721">as-nodeset</a>
+                       (<a href="modif.html#codefunc52539">sxml:tree-trans</a> curr-node targets-alist))
+                      curr-node)))))))))
+    (let ((targets-alist
+           (<a href="sxpathlib.html#codefunc27946">map-union</a>
+            (lambda (triple)
+              (let ((node-path (reverse (<a href="xpath-context.html#codefunc8528">sxml:context-&gt;content</a> (car triple)))))
+                (if
+                 (eq? (car node-path) doc)
+                 (list (cons (cdr node-path) triple))
+                 '())))
+            update-targets)))
+      (if (null? targets-alist)  ; nothing to do
+          '()
+          (tree-walk doc targets-alist)))))
+</pre>
+<h4><a name='codefunc15981' href='#docfunc15981'>sxml:modify!</a></h4>
+<i><a href='#tocfunc15981'>Index</a></i><br>
+
+<pre> A highest-level function
+</pre>
+<pre>(define (<a href="modif.html#codefunc15981">sxml:modify!</a> . update-specifiers)
+  (and-let*
+   ((lambdas-upd-specifiers
+     (<a href="modif.html#codefunc55118">sxml:update-specifiers-&gt;lambdas</a> update-specifiers)))
+   (lambda (doc)
+     (<a href="modif.html#codefunc63774">sxml:mutate-doc!</a>
+      doc
+      (<a href="modif.html#codefunc2275">sxml:nodes-to-mutate</a>
+       doc
+       (<a href="modif.html#codefunc31386">sxml:lambdas-upd-specifiers-&gt;targets</a> doc lambdas-upd-specifiers))))))
+</pre></body></html>

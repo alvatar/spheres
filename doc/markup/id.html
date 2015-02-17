@@ -1,0 +1,909 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN""http://www.w3.org/TR/html401/loose.dtd"><html><head><meta name="GENERATOR" content="Mole: The Scheme Source Code Digger"><title>Module: id</title><meta name='keywords' content=''></head><body bgcolor='#ffffff' text='#384412'  link='#11af05' vlink='#728b09'>
+<center><h1>Module: id</h1></center>
+
+<pre> Creation and manipulation of the ID-index
+ Provides the DTD parser for extracting ID attribute declarations
+
+ This software is in Public Domain.
+ IT IS PROVIDED &quot;AS IS&quot;, WITHOUT WARRANTY OF ANY KIND.
+
+ Please send bug reports and comments to:
+   lizorkin@hotbox.ru    Dmitry Lizorkin
+
+ ID-index provides fast access to XML elements by their unique ID.
+ ID-index has the following structure:
+  id-index = ( (id . element) (id . element) ... )
+ i.e.
+  id-index = (list
+               (cons id element)
+               (cons id element)
+              ...)
+ where
+  id - (a string) element's unique ID
+  element - an SXML presentation of an element
+
+ Creation of an id-index generally consists of two steps.
+ On the first step, a document declaration (internal and external DTD)
+ is read and information of ID attributes is extracted.
+ This is presented in a following form:
+  id-attrs = ( (elem-name attr-name attr-name attr-name ...)
+               (elem-name attr-name attr-name attr-name ...) ... )
+ i.e.
+  id-attrs = (list
+               (cons
+                 elem-name
+                 (list attr-name attr-name attr-name ...)
+               (cons
+                 elem-name
+                 (list attr-name attr-name attr-name ...)
+               ...)
+ where
+  elem-name - (a symbol) a name of the element
+  attr-name - (a symbol) element's attribute having an ID type
+
+ On the second step, if an SXML presentation of the document is available,
+ 'id-attrs' are used for forming an 'id-index'.
+ If there is no SXML presentation for a document yet, both steps are
+ performed as a single function call - to a specialized SSAX parser.
+ This parser constructs an SXML presentation and an 'id-index'
+ in a single pass
+
+ ATTENTION:
+ 1. Only non-qualified 'elem-name' and 'attr-name' are correctly supported
+ 2. Parameter entity reference (PEReference) is NOT supported
+</pre><p><br>
+<!-- Table of content -->
+<p><dl>
+<p><dt><a name='tocchapt6103' href='#chapt6103'><b>Functions which read XML document declaration</b></a><dd>
+
+<dl><dt><a name='tocsect52148' href='#sect52148'><b>Trivial functions that ignore symbols</b></a><dd>
+
+f:  <a name='tocfunc36890' href='#docfunc36890' style='text-decoration:none'>id:process-s</a><br>
+
+f:  <a name='tocfunc46133' href='#docfunc46133' style='text-decoration:none'>id:ignore-until</a><br>
+</dl>
+
+<dl><dt><a name='tocsect39059' href='#sect39059'><b>These functions perform reading from a file</b></a><dd>
+
+f:  <a name='tocfunc26075' href='#docfunc26075' style='text-decoration:none'>id:read-n</a><br>
+
+f:  <a name='tocfunc11337' href='#docfunc11337' style='text-decoration:none'>id:read-name</a><br>
+
+f:  <a name='tocfunc56394' href='#docfunc56394' style='text-decoration:none'>id:process-literal</a><br>
+</dl>
+
+<dl><dt><a name='tocsect30179' href='#sect30179'><b>Miscellaneous</b></a><dd>
+
+f:  <a name='tocfunc57427' href='#docfunc57427' style='text-decoration:none'>id:to-small</a><br>
+
+f:  <a name='tocfunc9825' href='#docfunc9825' style='text-decoration:none'>id:unite-id-attrs</a><br>
+</dl>
+
+<dl><dt><a name='tocsect1593' href='#sect1593'><b>Parsing XML productions concerning document declaration</b></a><dd>
+
+f:  <a name='tocfunc9520' href='#docfunc9520' style='text-decoration:none'>id:ignore-PI</a><br>
+
+f:  <a name='tocfunc10122' href='#docfunc10122' style='text-decoration:none'>id:ignore-comment</a><br>
+
+f:  <a name='tocfunc33102' href='#docfunc33102' style='text-decoration:none'>id:AttType-ID?</a><br>
+
+f:  <a name='tocfunc33525' href='#docfunc33525' style='text-decoration:none'>id:process-DefaultDecl</a><br>
+
+f:  <a name='tocfunc14393' href='#docfunc14393' style='text-decoration:none'>id:process-AttDef</a><br>
+
+f:  <a name='tocfunc33302' href='#docfunc33302' style='text-decoration:none'>id:process-AttlistDecl</a><br>
+
+f:  <a name='tocfunc25641' href='#docfunc25641' style='text-decoration:none'>id:process-markupdecl*</a><br>
+
+f:  <a name='tocfunc62486' href='#docfunc62486' style='text-decoration:none'>id:process-ExternalID</a><br>
+
+f:  <a name='tocfunc38198' href='#docfunc38198' style='text-decoration:none'>id:process-doctypedecl</a><br>
+
+f:  <a name='tocfunc27744' href='#docfunc27744' style='text-decoration:none'>id:process-prolog</a><br>
+</dl>
+<p><dt><a name='tocchapt18676' href='#chapt18676'><b>Two-step id-index creation (user level functions)</b></a><dd>
+
+<dl><dt><a name='tocsect2201' href='#sect2201'><b>The first step - creating 'id-attrs'</b></a><dd>
+
+f:  <a name='tocfunc59068' href='#docfunc59068' style='text-decoration:none'>id:read-external-dtd</a><br>
+
+f:  <a name='tocfunc34406' href='#docfunc34406' style='text-decoration:none'>id:read-document-declaration</a><br>
+</dl>
+
+<dl><dt><a name='tocsect44547' href='#sect44547'><b>The second step - creating an 'id-index' using 'id-attrs'</b></a><dd>
+
+f:  <a name='tocfunc61693' href='#docfunc61693' style='text-decoration:none'>SXML->SXML+id</a><br>
+</dl>
+<p><dt><a name='tocchapt25539' href='#chapt25539'><b>Some stuff for a SSAX multi parser</b></a><dd>
+
+<dl><dt><a name='tocsect14203' href='#sect14203'><b>Id-related part of the seed</b></a><dd>
+
+f:  <a name='tocfunc13379' href='#docfunc13379' style='text-decoration:none'>id:make-seed</a><br>
+
+f:  <a name='tocfunc20918' href='#docfunc20918' style='text-decoration:none'>id:seed-attrs</a><br>
+
+f:  <a name='tocfunc16051' href='#docfunc16051' style='text-decoration:none'>id:seed-index</a><br>
+</dl>
+
+<dl><dt><a name='tocsect12007' href='#sect12007'><b>Handler units</b></a><dd>
+
+f:  <a name='tocfunc51885' href='#docfunc51885' style='text-decoration:none'>id:new-level-seed-handler</a><br>
+
+f:  <a name='tocfunc31544' href='#docfunc31544' style='text-decoration:none'>id:finish-element-handler</a><br>
+
+f:  <a name='tocfunc49232' href='#docfunc49232' style='text-decoration:none'>id:doctype-handler</a><br>
+
+f:  <a name='tocfunc1320' href='#docfunc1320' style='text-decoration:none'>id:ending-action</a><br>
+</dl>
+</dl>
+<hr height='5'><center><h3><a name='chapt6103' href='#tocchapt6103'>Functions which read XML document declaration</a></h3></center>
+
+<pre></pre>
+<hr width='40%' align='center'><center><h3><a name='sect52148' href='#tocsect52148'>Trivial functions that ignore symbols</a></h3></center>
+
+<pre></pre>
+<h4><a name='docfunc36890' href='#tocfunc36890'>id:process-s</a></h4>
+(define (id:process-s port)<i><br> ... <a href='#codefunc36890'>Full Code</a> ... )</i>
+<pre> Function reads a whitespace (S production)
+</pre><p><br>
+
+<h4><a name='docfunc46133' href='#tocfunc46133'>id:ignore-until</a></h4>
+(define (id:ignore-until templ-sym port)<i><br> ... <a href='#codefunc46133'>Full Code</a> ... )</i>
+<pre> Ignores all symbols until template-symbol
+</pre><p><br>
+
+<hr width='40%' align='center'><center><h3><a name='sect39059' href='#tocsect39059'>These functions perform reading from a file</a></h3></center>
+
+<pre></pre>
+<h4><a name='docfunc26075' href='#tocfunc26075'>id:read-n</a></h4>
+(define (id:read-n num port)<i><br> ... <a href='#codefunc26075'>Full Code</a> ... )</i>
+<pre> Read N symbols from a port
+</pre><p><br>
+
+<h4><a name='docfunc11337' href='#tocfunc11337'>id:read-name</a></h4>
+(define (id:read-name port)<i><br> ... <a href='#codefunc11337'>Full Code</a> ... )</i>
+<pre> This function reads a name - a sequence of characters ending with
+ a whitespace or '&lt;'. '&gt;', '(', ')', '[', ']', '|'
+</pre><p><br>
+
+<h4><a name='docfunc56394' href='#tocfunc56394'>id:process-literal</a></h4>
+(define (id:process-literal port)<i><br> ... <a href='#codefunc56394'>Full Code</a> ... )</i>
+<pre> This function reads a literal
+  literal   ::=    ('&quot;' [^&quot;]* '&quot;') | (&quot;'&quot; [^']* &quot;'&quot;)  
+ A string is returned 
+</pre><p><br>
+
+<hr width='40%' align='center'><center><h3><a name='sect30179' href='#tocsect30179'>Miscellaneous</a></h3></center>
+
+<pre></pre>
+<h4><a name='docfunc57427' href='#tocfunc57427'>id:to-small</a></h4>
+(define (id:to-small str)<i><br> ... <a href='#codefunc57427'>Full Code</a> ... )</i>
+<pre> Converts a string into small letters
+</pre><p><br>
+
+<h4><a name='docfunc9825' href='#tocfunc9825'>id:unite-id-attrs</a></h4>
+(define (id:unite-id-attrs id-attrs)<i><br> ... <a href='#codefunc9825'>Full Code</a> ... )</i>
+<pre> Takes an 'id-attrs' which can contain equal element names
+ Returns a new 'id-attrs' where all element names are unique
+</pre><p><br>
+
+<hr width='40%' align='center'><center><h3><a name='sect1593' href='#tocsect1593'>Parsing XML productions concerning document declaration</a></h3></center>
+
+<pre> These functions are not intendes for error detection, they assume that
+ the document is correct
+</pre>
+<h4><a name='docfunc9520' href='#tocfunc9520'>id:ignore-PI</a></h4>
+(define (id:ignore-PI port)<i><br> ... <a href='#codefunc9520'>Full Code</a> ... )</i>
+<pre> This function ignores information related to a PI production [16]
+ [16]    PI    ::=    '&lt;?' PITarget (S (Char* - (Char* '?&gt;' Char*)))? '?&gt;' 
+ It looks for an ending '?&gt;' template
+</pre><p><br>
+
+<h4><a name='docfunc10122' href='#tocfunc10122'>id:ignore-comment</a></h4>
+(define (id:ignore-comment port)<i><br> ... <a href='#codefunc10122'>Full Code</a> ... )</i>
+<pre> This function ignores information related to a Comment production [15]
+ [15]    Comment    ::=    '&lt;!--' ((Char - '-') | ('-' (Char - '-')))* '--&gt;' 
+ The starting '&lt;!' has been already processed
+ The function looks for an ending '--&gt;' template 
+</pre><p><br>
+
+<h4><a name='docfunc33102' href='#tocfunc33102'>id:AttType-ID?</a></h4>
+(define (id:AttType-ID? port)<i><br> ... <a href='#codefunc33102'>Full Code</a> ... )</i>
+<pre> This function processes AttType production ([54]-[59] in XML specification)
+ [54]  AttType    ::=    StringType | TokenizedType | EnumeratedType  
+ [55]  StringType    ::=    'CDATA' 
+ [56]  TokenizedType    ::=    'ID' | 'IDREF' | 'IDREFS' | 'ENTITY'
+                               | 'ENTITIES' | 'NMTOKEN' | 'NMTOKENS' 
+ [57]  EnumeratedType    ::=    NotationType | Enumeration  
+ [58]  NotationType    ::=  'NOTATION' S '(' S? Name (S? '|' S? Name)* S? ')'
+ [59]  Enumeration    ::=  '(' S? Nmtoken (S? '|' S? Nmtoken)* S? ')' 
+ The function returnd #t if the attribute has an ID type and #f otherwise
+</pre><p><br>
+
+<h4><a name='docfunc33525' href='#tocfunc33525'>id:process-DefaultDecl</a></h4>
+(define (id:process-DefaultDecl port)<i><br> ... <a href='#codefunc33525'>Full Code</a> ... )</i>
+<pre> This function processes DefaultDecl production ([60] in XML specification)
+ [60]    DefaultDecl    ::=    '#REQUIRED'
+                               | '#IMPLIED'
+                               | (('#FIXED' S)? AttValue)
+ The result is always #t
+</pre><p><br>
+
+<h4><a name='docfunc14393' href='#tocfunc14393'>id:process-AttDef</a></h4>
+(define (id:process-AttDef port)<i><br> ... <a href='#codefunc14393'>Full Code</a> ... )</i>
+<pre> This function processes AttDef production ([53] in XML specification)
+ [53]    AttDef    ::=    S Name S AttType S DefaultDecl
+ If an attribute has an ID type, (list attribule-name) is returned
+ (a list of one element). Otherwise, function returns an empty list
+</pre><p><br>
+
+<h4><a name='docfunc33302' href='#tocfunc33302'>id:process-AttlistDecl</a></h4>
+(define (id:process-AttlistDecl port)<i><br> ... <a href='#codefunc33302'>Full Code</a> ... )</i>
+<pre> The function processes AttlistDecl production ([52] in XML specification)
+ [52]    AttlistDecl    ::=    '&lt;!ATTLIST' S Name AttDef* S? '&gt;'
+ The starting '&lt;!ATTLIST' has been already processed
+ 'id-attrs' are returned as a result
+</pre><p><br>
+
+<h4><a name='docfunc25641' href='#tocfunc25641'>id:process-markupdecl*</a></h4>
+(define (id:process-markupdecl* port)<i><br> ... <a href='#codefunc25641'>Full Code</a> ... )</i>
+<pre> This function processes a multiple markupdecl production [29]
+ [29]    markupdecl    ::=    elementdecl | AttlistDecl | EntityDecl 
+                              | NotationDecl | PI | Comment
+ 'id-attrs' are returned as a result
+</pre><p><br>
+
+<h4><a name='docfunc62486' href='#tocfunc62486'>id:process-ExternalID</a></h4>
+(define (id:process-ExternalID port)<i><br> ... <a href='#codefunc62486'>Full Code</a> ... )</i>
+<pre> This function processes a doctypedecl production ([75] in XML specification)
+ [75]    ExternalID    ::=    'SYSTEM' S SystemLiteral 
+                              | 'PUBLIC' S PubidLiteral S SystemLiteral
+ The function ignores a PubidLiteral
+ 'id-attrs' are returned as a result
+</pre><p><br>
+
+<h4><a name='docfunc38198' href='#tocfunc38198'>id:process-doctypedecl</a></h4>
+(define (id:process-doctypedecl port)<i><br> ... <a href='#codefunc38198'>Full Code</a> ... )</i>
+<pre> This function processes a doctypedecl production ([28] in XML specification)
+ [28]    doctypedecl    ::=    '&lt;!DOCTYPE' S Name (S ExternalID)? 
+                               S? ('[' (markupdecl | DeclSep)* ']' S?)? '&gt;'
+ The function doesn't process a DeclSep (this is a PEReference which 
+ this programme doesn't support)
+ The starting '&lt;!DOCTYPE' has been already processed
+ 'id-attrs' are returned as a result
+</pre><p><br>
+
+<h4><a name='docfunc27744' href='#tocfunc27744'>id:process-prolog</a></h4>
+(define (id:process-prolog port)<i><br> ... <a href='#codefunc27744'>Full Code</a> ... )</i>
+<pre> This function processes a prolog production ([22] in XML specification)
+ [1]    document    ::=    prolog element Misc*
+ [22]    prolog    ::=    XMLDecl? Misc* (doctypedecl Misc*)? 
+ [23]    XMLDecl    ::=    '&lt;?xml' VersionInfo EncodingDecl? SDDecl? S? '?&gt;'
+ [27]    Misc    ::=    Comment | PI | S 
+ 'id-attrs' are returned as a result
+</pre><p><br>
+<hr height='5'><center><h3><a name='chapt18676' href='#tocchapt18676'>Two-step id-index creation (user level functions)</a></h3></center>
+
+<pre> We use this variant when we already have an SXML presentation of the
+ document
+</pre>
+<hr width='40%' align='center'><center><h3><a name='sect2201' href='#tocsect2201'>The first step - creating 'id-attrs'</a></h3></center>
+
+<pre></pre>
+<h4><a name='docfunc59068' href='#tocfunc59068'>id:read-external-dtd</a></h4>
+(define (id:read-external-dtd uri-string)<i><br> ... <a href='#codefunc59068'>Full Code</a> ... )</i>
+<pre> Read the DTD
+  uri-string - a URI for the DTD location (a string) 
+ 'id-attrs' are returned as a result
+</pre><p><br>
+
+<h4><a name='docfunc34406' href='#tocfunc34406'>id:read-document-declaration</a></h4>
+(define (id:read-document-declaration uri-string)<i><br> ... <a href='#codefunc34406'>Full Code</a> ... )</i>
+<pre> Read the declaration from the document's prolog. 
+ If prolog contains a reference to an external DTD, it is processed either
+  uri-string - a URI for the document location (a string)
+ 'id-attrs' are returned as a result
+</pre><p><br>
+
+<hr width='40%' align='center'><center><h3><a name='sect44547' href='#tocsect44547'>The second step - creating an 'id-index' using 'id-attrs'</a></h3></center>
+
+<pre></pre>
+<h4><a name='docfunc61693' href='#tocfunc61693'>SXML->SXML+id</a></h4>
+(define (SXML-&gt;SXML+id document id-attrs)<i><br> ... <a href='#codefunc61693'>Full Code</a> ... )</i>
+<pre> This function forms an 'id-index' and inserts it in the document
+  document - a root node of the document (SXML presentation)
+  id-attrs - the result of the previous step
+ A new SXML document is returned. It contains an auxiliary list with an
+ 'id-index subtree. If the source document already contains such a
+ subtree, it will be replaced. Other subtrees in an auxiliary list will
+ remain unchanged.
+</pre><p><br>
+<hr height='5'><center><h3><a name='chapt25539' href='#tocchapt25539'>Some stuff for a SSAX multi parser</a></h3></center>
+
+<pre></pre>
+<hr width='40%' align='center'><center><h3><a name='sect14203' href='#tocsect14203'>Id-related part of the seed</a></h3></center>
+
+<pre>  id:seed = (list  id-attrs  id-index)
+  id-attrs, id-index - see a head comment
+</pre>
+<h4><a name='docfunc13379' href='#tocfunc13379'>id:make-seed</a></h4>
+(define (id:make-seed id-attrs id-index)<i><br> ... <a href='#codefunc13379'>Full Code</a> ... )</i>
+<pre> Mutator
+</pre><p><br>
+
+<h4><a name='docfunc20918' href='#tocfunc20918'>id:seed-attrs</a></h4>
+(define (id:seed-attrs id:seed)<i><br> ... <a href='#codefunc20918'>Full Code</a> ... )</i>
+<pre> Accessors
+</pre><p><br>
+
+<h4><a name='docfunc16051' href='#tocfunc16051'>id:seed-index</a></h4>
+(define (id:seed-index id:seed)<i><br> ... <a href='#codefunc16051'>Full Code</a> ... )</i><p><br>
+
+<hr width='40%' align='center'><center><h3><a name='sect12007' href='#tocsect12007'>Handler units</a></h3></center>
+
+<pre></pre>
+<h4><a name='docfunc51885' href='#tocfunc51885'>id:new-level-seed-handler</a></h4>
+(define (id:new-level-seed-handler id:seed)<i><br> ... <a href='#codefunc51885'>Full Code</a> ... )</i>
+<pre> This function is called by the NEW-LEVEL-SEED handler
+ A new 'id:seed' is returned
+</pre><p><br>
+
+<h4><a name='docfunc31544' href='#tocfunc31544'>id:finish-element-handler</a></h4>
+(define (id:finish-element-handler elem-gi attributes id:seed element)<i><br> ... <a href='#codefunc31544'>Full Code</a> ... )</i>
+<pre> This function is called by the FINISH-ELEMENT handler
+ A new 'id:seed' is returned
+</pre><p><br>
+
+<h4><a name='docfunc49232' href='#tocfunc49232'>id:doctype-handler</a></h4>
+(define (id:doctype-handler port systemid internal-subset?)<i><br> ... <a href='#codefunc49232'>Full Code</a> ... )</i>
+<pre> This function is called by the DOCTYPE handler
+ A new 'id:seed' is returned
+</pre><p><br>
+
+<h4><a name='docfunc1320' href='#tocfunc1320'>id:ending-action</a></h4>
+(define (id:ending-action id:seed)<i><br> ... <a href='#codefunc1320'>Full Code</a> ... )</i>
+<pre> This function constructs the member of an axuiliary list
+</pre><p><br>
+<center><h1>Code</h1></center>
+
+<h4><a name='codefunc36890' href='#docfunc36890'>id:process-s</a></h4>
+<i><a href='#tocfunc36890'>Index</a></i><br>
+
+<pre> Function reads a whitespace (S production)
+</pre>
+<pre>(define (<a href="id.html#codefunc36890">id:process-s</a> port)
+  (let ((symb (peek-char port)))
+    (cond((eof-object? symb) symb)
+         ((char=? symb #\space) (read-char port)
+                                (<a href="id.html#codefunc36890">id:process-s</a> port))
+         ((char=? symb #\return) (read-char port)
+                                 (<a href="id.html#codefunc36890">id:process-s</a> port))
+         ((char=? symb #\newline)(read-char port)
+                                 (<a href="id.html#codefunc36890">id:process-s</a> port))
+         ((char=? symb #\tab)(read-char port)
+                             (<a href="id.html#codefunc36890">id:process-s</a> port))
+         (else symb))))
+</pre>
+<h4><a name='codefunc46133' href='#docfunc46133'>id:ignore-until</a></h4>
+<i><a href='#tocfunc46133'>Index</a></i><br>
+
+<pre> Ignores all symbols until template-symbol
+</pre>
+<pre>(define (<a href="id.html#codefunc46133">id:ignore-until</a> templ-sym port)
+  (let loop ((symb (peek-char port)))
+    (cond((eof-object? symb) symb)
+         ((equal? symb templ-sym) (read-char port)
+                                  symb)
+         (else (read-char port)
+               (loop (peek-char port))))))
+</pre>
+<h4><a name='codefunc26075' href='#docfunc26075'>id:read-n</a></h4>
+<i><a href='#tocfunc26075'>Index</a></i><br>
+
+<pre> Read N symbols from a port
+</pre>
+<pre>(define (<a href="id.html#codefunc26075">id:read-n</a> num port)
+  (<a href="id.html#codefunc36890">id:process-s</a> port)
+  (let loop ((num num) (res '()))
+    (if(= num 0) 
+       (list-&gt;string (reverse res))
+       (let((symb (peek-char port)))
+         (cond((eof-object? symb) symb)
+              (else (read-char port)
+                    (loop (- num 1) (cons symb res))))))))
+</pre>
+<h4><a name='codefunc11337' href='#docfunc11337'>id:read-name</a></h4>
+<i><a href='#tocfunc11337'>Index</a></i><br>
+
+<pre> This function reads a name - a sequence of characters ending with
+ a whitespace or '&lt;'. '&gt;', '(', ')', '[', ']', '|'
+</pre>
+<pre>(define (<a href="id.html#codefunc11337">id:read-name</a> port)
+  (<a href="id.html#codefunc36890">id:process-s</a> port)
+  (let loop ((res &quot;&quot;))
+    (let ((symb (peek-char port)))
+      (cond((eof-object? symb) res)
+           ((member symb '(#\space #\tab #\return #\newline
+                           #\&lt; #\&gt; #\( #\) #\[ #\] #\|)) 
+                    res)
+           (else (loop (string-append res (string (read-char port)))))))))
+</pre>
+<h4><a name='codefunc56394' href='#docfunc56394'>id:process-literal</a></h4>
+<i><a href='#tocfunc56394'>Index</a></i><br>
+
+<pre> This function reads a literal
+  literal   ::=    ('&quot;' [^&quot;]* '&quot;') | (&quot;'&quot; [^']* &quot;'&quot;)  
+ A string is returned 
+</pre>
+<pre>(define (<a href="id.html#codefunc56394">id:process-literal</a> port)
+  (<a href="id.html#codefunc36890">id:process-s</a> port)
+  (let((quot (peek-char port)))
+    (if(eof-object? quot)  ; an incorrect situaltion
+       &quot;&quot;
+       (let((quot (if (char=? (read-char port) #\&quot;) #\&quot; #\')))
+         (let loop ((res '()))
+           (let((symb (peek-char port)))
+             (cond
+               ((eof-object? symb) (list-&gt;string (reverse res)))
+               ((char=? symb quot)  ; end of the string
+                (read-char port)
+                (list-&gt;string (reverse res)))
+               (else
+                (read-char port)
+                (loop (cons symb res))))))))))
+</pre>
+<h4><a name='codefunc57427' href='#docfunc57427'>id:to-small</a></h4>
+<i><a href='#tocfunc57427'>Index</a></i><br>
+
+<pre> Converts a string into small letters
+</pre>
+<pre>(define (<a href="id.html#codefunc57427">id:to-small</a> str)
+  (let loop ((arg (string-&gt;list str)) (res '()))
+    (cond((null? arg) (list-&gt;string (reverse res)))
+         ((char-upper-case? (car arg))
+           (loop (cdr arg) (cons (char-downcase (car arg)) res)))
+         (else (loop (cdr arg) (cons (car arg) res))))))
+</pre>
+<h4><a name='codefunc9825' href='#docfunc9825'>id:unite-id-attrs</a></h4>
+<i><a href='#tocfunc9825'>Index</a></i><br>
+
+<pre> Takes an 'id-attrs' which can contain equal element names
+ Returns a new 'id-attrs' where all element names are unique
+</pre>
+<pre>(define (<a href="id.html#codefunc9825">id:unite-id-attrs</a> id-attrs)
+  (let loop ((id-attrs id-attrs)
+             (new '()))
+    (if
+     (null? id-attrs)
+     new
+     (let rpt ((elem-name (caar id-attrs))
+               (atts (cdar id-attrs))
+               (rest (cdr id-attrs))
+               (id-attrs '()))
+       (cond
+         ((null? rest) 
+          (loop id-attrs (cons (cons elem-name atts) new)))
+         ((equal? (caar rest) elem-name)
+          (rpt elem-name 
+               (append atts (cdar rest))
+               (cdr rest)
+               id-attrs))
+         (else
+          (rpt elem-name atts (cdr rest) (cons (car rest) id-attrs))))))))
+</pre>
+<h4><a name='codefunc9520' href='#docfunc9520'>id:ignore-PI</a></h4>
+<i><a href='#tocfunc9520'>Index</a></i><br>
+
+<pre> This function ignores information related to a PI production [16]
+ [16]    PI    ::=    '&lt;?' PITarget (S (Char* - (Char* '?&gt;' Char*)))? '?&gt;' 
+ It looks for an ending '?&gt;' template
+</pre>
+<pre>(define (<a href="id.html#codefunc9520">id:ignore-PI</a> port)
+  (<a href="id.html#codefunc46133">id:ignore-until</a> #\? port)
+  (let ((symb (peek-char port)))
+    (cond((eof-object? symb) symb)
+         ((equal? symb #\&gt;) (read-char port)
+                            symb)
+         (else (<a href="id.html#codefunc9520">id:ignore-PI</a> port)))))
+</pre>
+<h4><a name='codefunc10122' href='#docfunc10122'>id:ignore-comment</a></h4>
+<i><a href='#tocfunc10122'>Index</a></i><br>
+
+<pre> This function ignores information related to a Comment production [15]
+ [15]    Comment    ::=    '&lt;!--' ((Char - '-') | ('-' (Char - '-')))* '--&gt;' 
+ The starting '&lt;!' has been already processed
+ The function looks for an ending '--&gt;' template 
+</pre>
+<pre>(define (<a href="id.html#codefunc10122">id:ignore-comment</a> port)
+  (read-char port)   ; it is '-'
+  (read-char port)   ; it is '-'
+  (<a href="id.html#codefunc46133">id:ignore-until</a> #\- port)
+  (let((sym1 (peek-char port)))
+    (cond((eof-object? sym1) sym1)
+         ((char=? sym1 #\-) (read-char port)
+                            (let((sym2 (read-char port)))  ; must be '&gt;'
+                              sym2))
+         (else (<a href="id.html#codefunc10122">id:ignore-comment</a> port)))))
+</pre>
+<h4><a name='codefunc33102' href='#docfunc33102'>id:AttType-ID?</a></h4>
+<i><a href='#tocfunc33102'>Index</a></i><br>
+
+<pre> This function processes AttType production ([54]-[59] in XML specification)
+ [54]  AttType    ::=    StringType | TokenizedType | EnumeratedType  
+ [55]  StringType    ::=    'CDATA' 
+ [56]  TokenizedType    ::=    'ID' | 'IDREF' | 'IDREFS' | 'ENTITY'
+                               | 'ENTITIES' | 'NMTOKEN' | 'NMTOKENS' 
+ [57]  EnumeratedType    ::=    NotationType | Enumeration  
+ [58]  NotationType    ::=  'NOTATION' S '(' S? Name (S? '|' S? Name)* S? ')'
+ [59]  Enumeration    ::=  '(' S? Nmtoken (S? '|' S? Nmtoken)* S? ')' 
+ The function returnd #t if the attribute has an ID type and #f otherwise
+</pre>
+<pre>(define (<a href="id.html#codefunc33102">id:AttType-ID?</a> port)
+  (let((type (<a href="id.html#codefunc57427">id:to-small</a> (<a href="id.html#codefunc11337">id:read-name</a> port))))
+    (cond((string=? type &quot;id&quot;) #t)
+         ((string=? type &quot;notation&quot;)
+           (<a href="id.html#codefunc36890">id:process-s</a> port)
+           (read-char port)  ; it is #\(
+           (<a href="id.html#codefunc46133">id:ignore-until</a> #\) port)
+           #f)
+         ((and (string=? type &quot;&quot;) (char=? (peek-char port) #\())   ; see [59]
+           (<a href="id.html#codefunc46133">id:ignore-until</a> #\) port)
+           #f)
+         (else #f))))
+</pre>
+<h4><a name='codefunc33525' href='#docfunc33525'>id:process-DefaultDecl</a></h4>
+<i><a href='#tocfunc33525'>Index</a></i><br>
+
+<pre> This function processes DefaultDecl production ([60] in XML specification)
+ [60]    DefaultDecl    ::=    '#REQUIRED'
+                               | '#IMPLIED'
+                               | (('#FIXED' S)? AttValue)
+ The result is always #t
+</pre>
+<pre>(define (<a href="id.html#codefunc33525">id:process-DefaultDecl</a> port)
+  (let((type (<a href="id.html#codefunc57427">id:to-small</a> (<a href="id.html#codefunc11337">id:read-name</a> port))))
+    (cond((string=? type &quot;#fixed&quot;)
+           (<a href="id.html#codefunc11337">id:read-name</a> port)   ; reads a default value
+           #t)  
+         (else #t))))
+</pre>
+<h4><a name='codefunc14393' href='#docfunc14393'>id:process-AttDef</a></h4>
+<i><a href='#tocfunc14393'>Index</a></i><br>
+
+<pre> This function processes AttDef production ([53] in XML specification)
+ [53]    AttDef    ::=    S Name S AttType S DefaultDecl
+ If an attribute has an ID type, (list attribule-name) is returned
+ (a list of one element). Otherwise, function returns an empty list
+</pre>
+<pre>(define (<a href="id.html#codefunc14393">id:process-AttDef</a> port)
+  (let((att-name (string-&gt;symbol (<a href="id.html#codefunc11337">id:read-name</a> port))))
+    (let((bool (<a href="id.html#codefunc33102">id:AttType-ID?</a> port)))
+      (<a href="id.html#codefunc33525">id:process-DefaultDecl</a> port)
+      (if bool (list att-name) '()))))
+</pre>
+<h4><a name='codefunc33302' href='#docfunc33302'>id:process-AttlistDecl</a></h4>
+<i><a href='#tocfunc33302'>Index</a></i><br>
+
+<pre> The function processes AttlistDecl production ([52] in XML specification)
+ [52]    AttlistDecl    ::=    '&lt;!ATTLIST' S Name AttDef* S? '&gt;'
+ The starting '&lt;!ATTLIST' has been already processed
+ 'id-attrs' are returned as a result
+</pre>
+<pre>(define (<a href="id.html#codefunc33302">id:process-AttlistDecl</a> port)
+  (let((element-name (string-&gt;symbol (<a href="id.html#codefunc11337">id:read-name</a> port))))
+    (let loop ((atts '()))
+      (<a href="id.html#codefunc36890">id:process-s</a> port)
+      (cond((char=? (peek-char port) #\&gt;) ; no more attributes will be declared
+             (read-char port)
+             (if(null? atts)
+                '()
+                (list (cons element-name atts))))
+           (else
+             (loop (append (<a href="id.html#codefunc14393">id:process-AttDef</a> port) atts)))))))
+</pre>
+<h4><a name='codefunc25641' href='#docfunc25641'>id:process-markupdecl*</a></h4>
+<i><a href='#tocfunc25641'>Index</a></i><br>
+
+<pre> This function processes a multiple markupdecl production [29]
+ [29]    markupdecl    ::=    elementdecl | AttlistDecl | EntityDecl 
+                              | NotationDecl | PI | Comment
+ 'id-attrs' are returned as a result
+</pre>
+<pre>(define (<a href="id.html#codefunc25641">id:process-markupdecl*</a> port)
+  (let loop ((id-attrs '()))
+    (let((beg (<a href="id.html#codefunc26075">id:read-n</a> 2 port)))
+      (cond((eof-object? beg) id-attrs)   ; the file is over
+           ((string=? beg &quot;]&gt;&quot;) id-attrs)   ; the end of the markupdecl
+           ((string=? beg &quot;&lt;?&quot;)   ; processing instruction
+             (<a href="id.html#codefunc9520">id:ignore-PI</a> port)
+             (loop id-attrs))
+           ((and (string=? beg &quot;&lt;!&quot;) (char=? (peek-char port) #\-)) ; a comment
+             (<a href="id.html#codefunc10122">id:ignore-comment</a> port)
+             (loop id-attrs))
+           ((string=? beg &quot;&lt;!&quot;)   ; AttlistDecl or any other declarations
+             (let ((name (<a href="id.html#codefunc57427">id:to-small</a> (<a href="id.html#codefunc11337">id:read-name</a> port))))
+               (cond((string=? name &quot;attlist&quot;) 
+                      (loop (append (<a href="id.html#codefunc33302">id:process-AttlistDecl</a> port) id-attrs)))
+                    (else 
+                      (<a href="id.html#codefunc46133">id:ignore-until</a> #\&gt; port)
+                      (loop id-attrs)))))
+           (else   ; an error condition
+             (<a href="myenv.html#codefunc55253">cerr</a> &quot;Error in markupdecl production: unexpected &quot; beg <a href="myenv.html#codefunc27758">nl</a>)
+             (<a href="id.html#codefunc46133">id:ignore-until</a> #\&gt; port)
+             id-attrs)))))
+</pre>
+<h4><a name='codefunc62486' href='#docfunc62486'>id:process-ExternalID</a></h4>
+<i><a href='#tocfunc62486'>Index</a></i><br>
+
+<pre> This function processes a doctypedecl production ([75] in XML specification)
+ [75]    ExternalID    ::=    'SYSTEM' S SystemLiteral 
+                              | 'PUBLIC' S PubidLiteral S SystemLiteral
+ The function ignores a PubidLiteral
+ 'id-attrs' are returned as a result
+</pre>
+<pre>(define (<a href="id.html#codefunc62486">id:process-ExternalID</a> port)
+  (let((system-literal
+        (let((name (<a href="id.html#codefunc57427">id:to-small</a> (<a href="id.html#codefunc11337">id:read-name</a> port))))
+          (cond
+            ((string=? name &quot;system&quot;)
+             (<a href="id.html#codefunc56394">id:process-literal</a> port))
+            ((string=? name &quot;public&quot;)
+             (<a href="id.html#codefunc56394">id:process-literal</a> port)
+             (<a href="id.html#codefunc56394">id:process-literal</a> port))
+            (else #f)))))
+    (if(not system-literal)
+       '()  ; an incorrect situation
+       (let((external-port (<a href="access-remote.html#codefunc60351">open-input-resource</a> system-literal)))
+         (if(not external-port)
+            '()   ; a failure
+            (let((id-attrs (<a href="id.html#codefunc25641">id:process-markupdecl*</a> external-port)))
+              (close-input-port external-port)
+              id-attrs))))))
+</pre>
+<h4><a name='codefunc38198' href='#docfunc38198'>id:process-doctypedecl</a></h4>
+<i><a href='#tocfunc38198'>Index</a></i><br>
+
+<pre> This function processes a doctypedecl production ([28] in XML specification)
+ [28]    doctypedecl    ::=    '&lt;!DOCTYPE' S Name (S ExternalID)? 
+                               S? ('[' (markupdecl | DeclSep)* ']' S?)? '&gt;'
+ The function doesn't process a DeclSep (this is a PEReference which 
+ this programme doesn't support)
+ The starting '&lt;!DOCTYPE' has been already processed
+ 'id-attrs' are returned as a result
+</pre>
+<pre>(define (<a href="id.html#codefunc38198">id:process-doctypedecl</a> port)
+  (let((name (<a href="id.html#codefunc11337">id:read-name</a> port)))  ; root element's name
+    (<a href="id.html#codefunc36890">id:process-s</a> port)
+    (let((symb (peek-char port)))
+      (cond
+        ((eof-object? symb) '())  ; an incorrect situation
+        ((char=? symb #\[)
+         (read-char port)
+         (<a href="id.html#codefunc25641">id:process-markupdecl*</a> port))
+        (else
+         (let((id-attrs (<a href="id.html#codefunc62486">id:process-ExternalID</a> port)))
+           (<a href="id.html#codefunc36890">id:process-s</a> port)
+           (let((symb (peek-char port)))
+             (cond
+               ((eof-object? symb) id-attrs)  ; an incorrect situation
+               ((char=? symb #\[)
+                (read-char port)
+                (append id-attrs (<a href="id.html#codefunc25641">id:process-markupdecl*</a> port)))
+               (else  ; an incorrect situation
+                id-attrs)))))))))
+</pre>
+<h4><a name='codefunc27744' href='#docfunc27744'>id:process-prolog</a></h4>
+<i><a href='#tocfunc27744'>Index</a></i><br>
+
+<pre> This function processes a prolog production ([22] in XML specification)
+ [1]    document    ::=    prolog element Misc*
+ [22]    prolog    ::=    XMLDecl? Misc* (doctypedecl Misc*)? 
+ [23]    XMLDecl    ::=    '&lt;?xml' VersionInfo EncodingDecl? SDDecl? S? '?&gt;'
+ [27]    Misc    ::=    Comment | PI | S 
+ 'id-attrs' are returned as a result
+</pre>
+<pre>(define (<a href="id.html#codefunc27744">id:process-prolog</a> port)
+  (let((beg (<a href="id.html#codefunc26075">id:read-n</a> 2 port)))
+    (cond((eof-object? beg) '())  ; a file is over - strange...
+         ((string=? beg &quot;&lt;?&quot;)   ; PI or XMLDecl
+          (<a href="id.html#codefunc9520">id:ignore-PI</a> port)
+          (<a href="id.html#codefunc27744">id:process-prolog</a> port))
+         ((and (string=? beg &quot;&lt;!&quot;) (char=? (peek-char port) #\-))   ; a comment
+          (<a href="id.html#codefunc10122">id:ignore-comment</a> port)
+          (<a href="id.html#codefunc27744">id:process-prolog</a> port))
+         ((string=? beg &quot;&lt;!&quot;)   ; doctypedecl expected
+          (let ((name (<a href="id.html#codefunc57427">id:to-small</a> (<a href="id.html#codefunc11337">id:read-name</a> port))))
+            (cond((string=? name &quot;doctype&quot;) 
+                  (<a href="id.html#codefunc38198">id:process-doctypedecl</a> port))
+                 (else 
+                  (<a href="myenv.html#codefunc55253">cerr</a> &quot;doctypedecl production expected&quot; <a href="myenv.html#codefunc27758">nl</a>)
+                  '()))))
+         (else   ; element begins, there was no doctypedecl
+          '()))))
+</pre>
+<h4><a name='codefunc59068' href='#docfunc59068'>id:read-external-dtd</a></h4>
+<i><a href='#tocfunc59068'>Index</a></i><br>
+
+<pre> Read the DTD
+  uri-string - a URI for the DTD location (a string) 
+ 'id-attrs' are returned as a result
+</pre>
+<pre>(define (<a href="id.html#codefunc59068">id:read-external-dtd</a> uri-string)
+  (let((port (<a href="access-remote.html#codefunc60351">open-input-resource</a> uri-string)))
+    (if(not port)
+       '()  ; a situation of an error
+       (let((id-attrs (<a href="id.html#codefunc9825">id:unite-id-attrs</a> (<a href="id.html#codefunc25641">id:process-markupdecl*</a> port))))
+         (close-input-port port)
+         id-attrs))))
+</pre>
+<h4><a name='codefunc34406' href='#docfunc34406'>id:read-document-declaration</a></h4>
+<i><a href='#tocfunc34406'>Index</a></i><br>
+
+<pre> Read the declaration from the document's prolog. 
+ If prolog contains a reference to an external DTD, it is processed either
+  uri-string - a URI for the document location (a string)
+ 'id-attrs' are returned as a result
+</pre>
+<pre>(define (<a href="id.html#codefunc34406">id:read-document-declaration</a> uri-string)
+  (let((port (<a href="access-remote.html#codefunc60351">open-input-resource</a> uri-string)))
+    (if(not port)
+       '()  ; a situation of an error
+       (let((id-attrs (<a href="id.html#codefunc9825">id:unite-id-attrs</a> (<a href="id.html#codefunc27744">id:process-prolog</a> port))))
+         (close-input-port port)
+         id-attrs))))
+</pre>
+<h4><a name='codefunc61693' href='#docfunc61693'>SXML->SXML+id</a></h4>
+<i><a href='#tocfunc61693'>Index</a></i><br>
+
+<pre> This function forms an 'id-index' and inserts it in the document
+  document - a root node of the document (SXML presentation)
+  id-attrs - the result of the previous step
+ A new SXML document is returned. It contains an auxiliary list with an
+ 'id-index subtree. If the source document already contains such a
+ subtree, it will be replaced. Other subtrees in an auxiliary list will
+ remain unchanged.
+</pre>
+<pre>(define (<a href="id.html#codefunc61693">SXML-&gt;SXML+id</a> document id-attrs)
+  (let((aux-subtrees
+        (let((aux ((<a href="sxpathlib.html#codefunc3917">select-kids</a> (<a href="sxpathlib.html#codefunc9356">ntype??</a> '@@)) document)))
+          (if(null? aux)
+             '()
+             (let rpt ((res '())
+                       (to-see (cdar aux)))
+               (cond
+                 ((null? to-see) (reverse res))
+                 ((equal? (caar to-see) 'id-index) (rpt res (cdr to-see)))
+                 (else (rpt (cons (car to-see) res)
+                            (cdr to-see)))))))))
+    (let loop ((nodeset (list document))
+               (id-index '()))
+      (if(null? nodeset)
+         (let((kids ((<a href="sxpathlib.html#codefunc3917">select-kids</a>
+                      (lambda (node)
+                        (not (and (pair? node) (equal? (car node) '@@)))))
+                     document)))
+           (<a href="myenv.html#codefunc58107">cons*</a> '*TOP*
+                  (<a href="myenv.html#codefunc58107">cons*</a> '@@
+                         (cons 'id-index id-index)
+                         aux-subtrees)
+                  kids))         
+         (let((cur-node (car nodeset)))
+           (cond
+             ((not (pair? cur-node))  ; a text node
+              (loop (cdr nodeset) id-index))
+             ((assoc (car cur-node) id-attrs)
+              =&gt;
+              (lambda (lst)
+                (let((id-values
+                      ((<a href="sxpathlib.html#codefunc3917">select-kids</a> (lambda (x) #t))
+                       ((<a href="sxpathlib.html#codefunc7531">sxml:filter</a> (lambda (x) (member (car x) (cdr lst))))
+                        ((<a href="sxpathlib.html#codefunc3917">select-kids</a> (lambda (x) #t))
+                         ((<a href="sxpathlib.html#codefunc3917">select-kids</a> (<a href="sxpathlib.html#codefunc9356">ntype??</a> '@)) cur-node))))))
+                  (loop
+                   (append 
+                    ((<a href="sxpathlib.html#codefunc3917">select-kids</a> (<a href="sxpathlib.html#codefunc9356">ntype??</a> '*)) (car nodeset))
+                    (cdr nodeset))
+                   (append
+                    id-index
+                    (map
+                     (lambda (x) (cons x cur-node))
+                     id-values))))))
+             (else
+              (loop
+               (append ((<a href="sxpathlib.html#codefunc3917">select-kids</a> (<a href="sxpathlib.html#codefunc9356">ntype??</a> '*)) (car nodeset)) (cdr nodeset))
+               id-index))))))))
+</pre>
+<h4><a name='codefunc13379' href='#docfunc13379'>id:make-seed</a></h4>
+<i><a href='#tocfunc13379'>Index</a></i><br>
+
+<pre> Mutator
+</pre>
+<pre>(define (<a href="id.html#codefunc13379">id:make-seed</a> id-attrs id-index)
+  (list id-attrs id-index))
+</pre>
+<h4><a name='codefunc20918' href='#docfunc20918'>id:seed-attrs</a></h4>
+<i><a href='#tocfunc20918'>Index</a></i><br>
+
+<pre> Accessors
+</pre>
+<pre>(define (<a href="id.html#codefunc20918">id:seed-attrs</a> id:seed)
+  (car id:seed))
+</pre>
+<h4><a name='codefunc16051' href='#docfunc16051'>id:seed-index</a></h4>
+<i><a href='#tocfunc16051'>Index</a></i><br>
+
+<pre>(define (<a href="id.html#codefunc16051">id:seed-index</a> id:seed)
+  (cadr id:seed))
+</pre>
+<h4><a name='codefunc51885' href='#docfunc51885'>id:new-level-seed-handler</a></h4>
+<i><a href='#tocfunc51885'>Index</a></i><br>
+
+<pre> This function is called by the NEW-LEVEL-SEED handler
+ A new 'id:seed' is returned
+</pre>
+<pre>(define (<a href="id.html#codefunc51885">id:new-level-seed-handler</a> id:seed)
+  id:seed)
+</pre>
+<h4><a name='codefunc31544' href='#docfunc31544'>id:finish-element-handler</a></h4>
+<i><a href='#tocfunc31544'>Index</a></i><br>
+
+<pre> This function is called by the FINISH-ELEMENT handler
+ A new 'id:seed' is returned
+</pre>
+<pre>(define (<a href="id.html#codefunc31544">id:finish-element-handler</a> elem-gi attributes id:seed element)
+  (cond
+    ((assoc elem-gi (<a href="id.html#codefunc20918">id:seed-attrs</a> id:seed))
+     =&gt; 
+     (lambda (lst)
+       (let loop ((atts attributes)
+                  (id-index (<a href="id.html#codefunc16051">id:seed-index</a> id:seed)))
+         (if
+          (null? atts)
+          (<a href="id.html#codefunc13379">id:make-seed</a> (<a href="id.html#codefunc20918">id:seed-attrs</a> id:seed) id-index)
+          (let((att (car atts)))
+            (cond
+              ((pair? (car att))  ; namespace aware
+               (loop (cdr atts) id-index))
+              ((member (car att) (cdr lst))
+               (loop (cdr atts)
+                     (cons (cons (cdr att) element) id-index)))
+              (else
+               (loop (cdr atts) id-index))))))))
+    (else
+     id:seed)))
+</pre>
+<h4><a name='codefunc49232' href='#docfunc49232'>id:doctype-handler</a></h4>
+<i><a href='#tocfunc49232'>Index</a></i><br>
+
+<pre> This function is called by the DOCTYPE handler
+ A new 'id:seed' is returned
+</pre>
+<pre>(define (<a href="id.html#codefunc49232">id:doctype-handler</a> port systemid internal-subset?)
+  (let((id-attrs
+        (if
+         (not systemid)
+         '()   ; systemid not supplied
+         (let((external-port (<a href="access-remote.html#codefunc60351">open-input-resource</a> systemid)))
+           (if
+            (not external-port)
+            '()   ; a failure
+            (let((id-attrs (<a href="id.html#codefunc25641">id:process-markupdecl*</a> external-port)))
+              (close-input-port external-port)
+              id-attrs))))))
+    (let((id-attrs
+          (if
+           internal-subset?
+           (<a href="id.html#codefunc9825">id:unite-id-attrs</a> 
+            (append id-attrs (<a href="id.html#codefunc25641">id:process-markupdecl*</a> port)))
+           (<a href="id.html#codefunc9825">id:unite-id-attrs</a> id-attrs))))
+      (<a href="id.html#codefunc13379">id:make-seed</a> id-attrs '()))))
+</pre>
+<h4><a name='codefunc1320' href='#docfunc1320'>id:ending-action</a></h4>
+<i><a href='#tocfunc1320'>Index</a></i><br>
+
+<pre> This function constructs the member of an axuiliary list
+</pre>
+<pre>(define (<a href="id.html#codefunc1320">id:ending-action</a> id:seed)
+  (let((id-index (<a href="id.html#codefunc16051">id:seed-index</a> id:seed)))
+    (cons 'id-index id-index)))
+</pre></body></html>

@@ -1,0 +1,540 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN""http://www.w3.org/TR/html401/loose.dtd"><html><head><meta name="GENERATOR" content="Mole: The Scheme Source Code Digger"><title>Module: multi-parser</title><meta name='keywords' content=''></head><body bgcolor='#ffffff' text='#384412'  link='#11af05' vlink='#728b09'>
+<center><h1>Module: multi-parser</h1></center>
+
+<pre> SSAX multi parser
+ Provides ID-index creation, SXML parent pointers and XLink grammar parsing
+
+ This software is in Public Domain.
+ IT IS PROVIDED &quot;AS IS&quot;, WITHOUT WARRANTY OF ANY KIND.
+
+ Please send bug reports and comments to:
+   lisovsky@acm.org      Kirill Lisovsky
+   lizorkin@hotbox.ru    Dmitry Lizorkin
+
+ Primary features: 
+             '()
+             '(parent)
+             '(id)
+             '(parent id)
+             '(id xlink)
+             '(parent id xlink)
+</pre><p><br>
+<!-- Table of content -->
+<p><dl>
+<p><dt><a name='tocchapt5147' href='#chapt5147'><b>Parent seed</b></a><dd>
+
+<dl><dt><a name='tocsect3683' href='#sect3683'><b>Parent-related part of the seed</b></a><dd>
+
+f:  <a name='tocfunc41365' href='#docfunc41365' style='text-decoration:none'>parent:new-level-seed-handler</a><br>
+
+f:  <a name='tocfunc4026' href='#docfunc4026' style='text-decoration:none'>parent:construct-element</a><br>
+</dl>
+<p><dt><a name='tocchapt59929' href='#chapt59929'><b>A seed</b></a><dd>
+
+<dl><dt><a name='tocsect44794' href='#sect44794'><b>Accessors</b></a><dd>
+
+f:  <a name='tocfunc20659' href='#docfunc20659' style='text-decoration:none'>get-sxml-seed</a><br>
+
+f:  <a name='tocfunc15726' href='#docfunc15726' style='text-decoration:none'>bad-accessor</a><br>
+
+f:  <a name='tocfunc40911' href='#docfunc40911' style='text-decoration:none'>make-seed</a><br>
+</dl>
+<p><dt><a name='tocchapt12887' href='#chapt12887'><b>This is a multi parser constructor function</b></a><dd>
+
+f:  <a name='tocfunc30573' href='#docfunc30573' style='text-decoration:none'>ssax:multi-parser</a><br>
+</dl>
+<hr height='5'><center><h3><a name='chapt5147' href='#tocchapt5147'>Parent seed</a></h3></center>
+
+<pre></pre>
+<hr width='40%' align='center'><center><h3><a name='sect3683' href='#tocsect3683'>Parent-related part of the seed</a></h3></center>
+
+<pre>  It is a list of one element: 
+      a function of no arguments which returns a pointer to element's parent
+      or '*TOP-PTR* symbol for a root SXML element
+ Duuring an element construction it may be just a pointer to parents head,
+ because a parent itself may be under construction at the moment. 
+</pre>
+<h4><a name='docfunc41365' href='#tocfunc41365'>parent:new-level-seed-handler</a></h4>
+(define (parent:new-level-seed-handler elem-name)<i><br> ... <a href='#codefunc41365'>Full Code</a> ... )</i>
+<pre> This function is called by the NEW-LEVEL-SEED handler
+  elem-name = (if(symbol? elem-gi) elem-gi (RES-NAME-&gt;SXML elem-gi)
+ A new 'parent:seed' is returned
+</pre><p><br>
+
+<h4><a name='docfunc4026' href='#tocfunc4026'>parent:construct-element</a></h4>
+(define (parent:construct-element parent:parent-seed parent:seed attrs children)<i><br> ... <a href='#codefunc4026'>Full Code</a> ... )</i>
+<pre> A function which constructs an element from its attributes, children
+ and delayed parent information
+  parent:seed - contains a delayed pointer to element's parent
+  attrs - element's attributes
+  children - a list of child elements
+</pre><p><br>
+<hr height='5'><center><h3><a name='chapt59929' href='#tocchapt59929'>A seed</a></h3></center>
+
+<pre>  seed = (list  original-seed  parent:seed  id:seed  xlink:seed)
+  original-seed - the seed of the original 'SSAX:XML-&gt;SXML' function. It
+ contains an SXML tree being constructed.
+  parent:seed - parent-related part
+  id:seed - id-related part
+  xlink:seed - xlink-related part
+</pre>
+<hr width='40%' align='center'><center><h3><a name='sect44794' href='#tocsect44794'>Accessors</a></h3></center>
+
+<pre></pre>
+<h4><a name='docfunc20659' href='#tocfunc20659'>get-sxml-seed</a></h4>
+(define get-sxml-seed <i><br> ... <a href='#codefunc20659'>Full Code</a> ... )</i>
+<pre> (mul:seed-original seed)
+</pre><p><br>
+
+<h4><a name='docfunc15726' href='#tocfunc15726'>bad-accessor</a></h4>
+(define (bad-accessor type)<i><br> ... <a href='#codefunc15726'>Full Code</a> ... )</i>
+<pre> Renamed:
+ mul:seed-parent get-pptr-seed
+ mul:seed-id get-id-seed
+ mul:seed-xlink get-xlink-seed
+ Handler for attempts to access an absent seed.
+</pre><p><br>
+
+<h4><a name='docfunc40911' href='#tocfunc40911'>make-seed</a></h4>
+(define (make-seed . seeds)<i><br> ... <a href='#codefunc40911'>Full Code</a> ... )</i>
+<pre> Seed constructor. #f seeds will be omitted.
+</pre><p><br>
+<hr height='5'><center><h3><a name='chapt12887' href='#tocchapt12887'>This is a multi parser constructor function</a></h3></center>
+
+<pre></pre>
+<h4><a name='docfunc30573' href='#tocfunc30573'>ssax:multi-parser</a></h4>
+(define (ssax:multi-parser . req-features)<i><br> ... <a href='#codefunc30573'>Full Code</a> ... )</i>
+<pre>  parent, id, xlink - boolean parameters. #t means that we construct the
+ corresponding feature, #f - otherwise
+  ns - for future development. Is not used anywhere in the function
+</pre><p><br>
+<center><h1>Code</h1></center>
+
+<h4><a name='codefunc30573' href='#docfunc30573'>ssax:multi-parser</a></h4>
+<i><a href='#tocfunc30573'>Index</a></i><br>
+
+<pre>  parent, id, xlink - boolean parameters. #t means that we construct the
+ corresponding feature, #f - otherwise
+  ns - for future development. Is not used anywhere in the function
+</pre>
+<pre>(define (<a href="multi-parser.html#codefunc30573">ssax:multi-parser</a> . req-features)
+  (let ((ns-assig '()) 
+        (with-parent?  (memq 'parent req-features))
+        (with-id?      (memq 'id req-features))
+        (with-xlink?   (memq 'xlink req-features)))
+    (call-with-values
+     (lambda () (values 
+                 (if with-parent?  
+                     cadr (<a href="multi-parser.html#codefunc15726">bad-accessor</a> 'par))
+                 (if with-id?
+                     (if with-parent? caddr cadr)
+                     (<a href="multi-parser.html#codefunc15726">bad-accessor</a> 'id))
+                 (if with-xlink?
+                     (cond 
+                       ((and with-parent? with-id?)
+                        cadddr)
+                       ((or with-parent? with-id?)
+                        caddr)
+                       (else cadr))
+                     (<a href="multi-parser.html#codefunc15726">bad-accessor</a> 'xlink))))     
+     (lambda (get-pptr-seed get-id-seed get-xlink-seed)
+       (let ((initial-seed  ; Initial values for specialized seeds
+              (<a href="multi-parser.html#codefunc40911">make-seed</a>
+               '()
+               (and with-parent? (list '*TOP-PTR*))
+               (and with-id? (<a href="id.html#codefunc13379">id:make-seed</a> '() '()))
+               (and with-xlink?
+                    (<a href="xlink-parser.html#codefunc63011">xlink:make-small-seed</a> 'general '() '(1) '())))))
+         (letrec
+             (
+              ; Making a special function, which, if applyed to the final seed,
+              ; will construct a document
+              (ending-actions
+               (cond
+                 ((not (or with-id? with-xlink?))
+                  (lambda (seed)
+                    (let ((result (reverse (<a href="multi-parser.html#codefunc20659">get-sxml-seed</a> seed))))
+                      (cons '*TOP* result))))
+                 ((and with-id? (not with-xlink?))   ; with-id?
+                  (lambda (seed)
+                    (let((result (reverse (<a href="multi-parser.html#codefunc20659">get-sxml-seed</a> seed)))
+                         (aux (list (<a href="id.html#codefunc1320">id:ending-action</a> (get-id-seed seed)))))
+                      (<a href="myenv.html#codefunc58107">cons*</a> '*TOP*
+                             (cons '@@ aux)
+                             result))))
+                 ((and with-id? with-xlink?)   ; with-id, with-xlink
+                  (lambda (seed)
+                    (let((result (reverse (<a href="multi-parser.html#codefunc20659">get-sxml-seed</a> seed)))
+                         (aux (list (<a href="xlink-parser.html#codefunc39405">xlink:ending-action</a> (get-xlink-seed seed))
+                                    (<a href="id.html#codefunc1320">id:ending-action</a> (get-id-seed seed)))))
+                      (<a href="myenv.html#codefunc58107">cons*</a> '*TOP*
+                             (cons '@@ aux)
+                             result))))
+                 (else
+                  (<a href="myenv.html#codefunc55253">cerr</a> &quot;ending-actions NIY: &quot; with-parent? with-id? with-xlink? <a href="myenv.html#codefunc27758">nl</a>)
+                  (exit))))
+              
+              
+              ;------------------------------------
+              ; Some handlers
+              
+              ; A special function
+              ; When given an input port, it becomes a handler for a NEW-LEVEL-SEED
+              (new-level-seed-handler
+               (cond
+                 ((not (or with-parent? with-id? with-xlink?))
+                  (lambda(port)
+                    (lambda (elem-gi attributes namespaces expected-content seed)
+                      (list '()))))
+                 ((and with-parent? (not (or with-id? with-xlink?)))  ; with-parent
+                  (lambda(port)
+                    (lambda (elem-gi attributes namespaces expected-content seed)
+                      (<a href="multi-parser.html#codefunc40911">make-seed</a>
+                       '() 
+                       (and with-parent? 
+                            (<a href="multi-parser.html#codefunc41365">parent:new-level-seed-handler</a>
+                             (if (symbol? elem-gi)
+                                 elem-gi
+                                 (<a href="ssax-prim.html#codefunc56334">RES-NAME-&gt;SXML</a> elem-gi))))
+                       ))))
+                 ((and with-id? (not (or with-parent? with-xlink?)))  ; with-id
+                  (lambda(port)
+                    (lambda (elem-gi attributes namespaces expected-content seed)
+                      (list   ; <a href="multi-parser.html#codefunc40911">make-seed</a>
+                       '()
+                       (<a href="id.html#codefunc51885">id:new-level-seed-handler</a> (get-id-seed seed))))))
+                 ((and with-parent? with-id? (not with-xlink?))  ; parent, id
+                  (lambda(port)
+                    (lambda (elem-gi attributes namespaces expected-content seed)
+                      (list   ; <a href="multi-parser.html#codefunc40911">make-seed</a>
+                       '()
+                       (<a href="multi-parser.html#codefunc41365">parent:new-level-seed-handler</a>
+                        (if(symbol? elem-gi) elem-gi (<a href="ssax-prim.html#codefunc56334">RES-NAME-&gt;SXML</a> elem-gi)))
+                       (<a href="id.html#codefunc51885">id:new-level-seed-handler</a> (get-id-seed seed))))))
+                 ((and with-id? with-xlink? (not with-parent?))   ; id, xlink
+                  (lambda(port)
+                    (lambda (elem-gi attributes namespaces expected-content seed)
+                      (list   ; <a href="multi-parser.html#codefunc40911">make-seed</a>
+                       '()
+                       (<a href="id.html#codefunc51885">id:new-level-seed-handler</a> (get-id-seed seed))
+                       (<a href="xlink-parser.html#codefunc8115">xlink:new-level-seed-handler</a>
+                        port attributes namespaces (get-xlink-seed seed))))))
+                 ((and with-parent? with-id? with-xlink?)  ; parent, id, xlink
+                  (lambda(port)
+                    (lambda (elem-gi attributes namespaces expected-content seed)
+                      (list   ; <a href="multi-parser.html#codefunc40911">make-seed</a>
+                       '()
+                       (<a href="multi-parser.html#codefunc41365">parent:new-level-seed-handler</a>
+                        (if(symbol? elem-gi) elem-gi (<a href="ssax-prim.html#codefunc56334">RES-NAME-&gt;SXML</a> elem-gi)))
+                       (<a href="id.html#codefunc51885">id:new-level-seed-handler</a> (get-id-seed seed))
+                       (<a href="xlink-parser.html#codefunc8115">xlink:new-level-seed-handler</a>
+                        port attributes namespaces (get-xlink-seed seed))))))
+                 (else (<a href="myenv.html#codefunc55253">cerr</a> &quot;new-level NIY: &quot; with-parent? with-id? with-xlink? <a href="myenv.html#codefunc27758">nl</a>)
+                       (exit))))
+              
+              
+              ; A special handler function for a FINISH-ELEMENT
+              (finish-element-handler
+               (cond
+                 ((not (or with-parent? with-id? with-xlink?))
+                  (lambda (elem-gi attributes namespaces parent-seed seed)
+                    (let ((children (<a href="ssax-prim.html#codefunc54467">reverse-collect-str-drop-ws</a> (<a href="multi-parser.html#codefunc20659">get-sxml-seed</a> seed)))
+                          (attrs
+                           (<a href="SSAX-code.html#codefunc21894">attlist-fold</a>
+                            (lambda (attr accum)
+                              (cons (list 
+                                     (if (symbol? (car attr)) (car attr)
+                                         (<a href="ssax-prim.html#codefunc56334">RES-NAME-&gt;SXML</a> (car attr)))
+                                     (cdr attr)) accum))
+                            '() attributes)))
+                      (list ; <a href="multi-parser.html#codefunc40911">make-seed</a>
+                       (cons
+                        (cons 
+                         (if (symbol? elem-gi) elem-gi
+                             (<a href="ssax-prim.html#codefunc56334">RES-NAME-&gt;SXML</a> elem-gi))
+                         (if (null? attrs) children
+                             (cons (cons '@ attrs) children)))
+                        (<a href="multi-parser.html#codefunc20659">get-sxml-seed</a> parent-seed))))))
+                 ((and with-parent? (not (or with-id? with-xlink?)))  ; parent
+                  (lambda (elem-gi attributes namespaces parent-seed seed)
+                    (let((children (<a href="ssax-prim.html#codefunc54467">reverse-collect-str-drop-ws</a> (<a href="multi-parser.html#codefunc20659">get-sxml-seed</a> seed)))
+                         (attrs
+                          (<a href="SSAX-code.html#codefunc21894">attlist-fold</a>
+                           (lambda (attr accum)
+                             (cons (list 
+                                    (if (symbol? (car attr)) (car attr)
+                                        (<a href="ssax-prim.html#codefunc56334">RES-NAME-&gt;SXML</a> (car attr)))
+                                    (cdr attr)) accum))
+                           '() attributes)))
+                      (list ; <a href="multi-parser.html#codefunc40911">make-seed</a>
+                       (cons
+                        (<a href="multi-parser.html#codefunc4026">parent:construct-element</a>
+                         (get-pptr-seed parent-seed) 
+                         (get-pptr-seed seed)
+                         attrs children)
+                        (<a href="multi-parser.html#codefunc20659">get-sxml-seed</a> parent-seed))
+                       ; pptr- seed from parent seed is not modified:
+                       (get-pptr-seed parent-seed)
+                       ))))
+                 ((and with-id? (not (or with-parent? with-xlink?)))  ; id
+                  (lambda (elem-gi attributes namespaces parent-seed seed)
+                    (let((children (<a href="ssax-prim.html#codefunc54467">reverse-collect-str-drop-ws</a> (<a href="multi-parser.html#codefunc20659">get-sxml-seed</a> seed)))
+                         (attrs
+                          (<a href="SSAX-code.html#codefunc21894">attlist-fold</a>
+                           (lambda (attr accum)
+                             (cons (list 
+                                    (if (symbol? (car attr)) (car attr)
+                                        (<a href="ssax-prim.html#codefunc56334">RES-NAME-&gt;SXML</a> (car attr)))
+                                    (cdr attr)) accum))
+                           '() attributes)))
+                      (let((element 
+                            (cons 
+                             (if(symbol? elem-gi) 
+                                elem-gi
+                                (<a href="ssax-prim.html#codefunc56334">RES-NAME-&gt;SXML</a> elem-gi))
+                             (if(null? attrs) 
+                                children
+                                (cons (cons '@ attrs) children)))))
+                        (list ; <a href="multi-parser.html#codefunc40911">make-seed</a>
+                         (cons element (<a href="multi-parser.html#codefunc20659">get-sxml-seed</a> parent-seed))
+                         (<a href="id.html#codefunc31544">id:finish-element-handler</a>
+                          elem-gi attributes (get-id-seed seed) element))))))
+                 ((and with-parent? with-id? (not with-xlink?))  ; parent, id
+                  (lambda (elem-gi attributes namespaces parent-seed seed)
+                    (let((children (<a href="ssax-prim.html#codefunc54467">reverse-collect-str-drop-ws</a> (<a href="multi-parser.html#codefunc20659">get-sxml-seed</a> seed)))
+                         (attrs
+                          (<a href="SSAX-code.html#codefunc21894">attlist-fold</a>
+                           (lambda (attr accum)
+                             (cons (list 
+                                    (if (symbol? (car attr)) (car attr)
+                                        (<a href="ssax-prim.html#codefunc56334">RES-NAME-&gt;SXML</a> (car attr)))
+                                    (cdr attr)) accum))
+                           '() attributes)))
+                      (let((element
+                            (<a href="multi-parser.html#codefunc4026">parent:construct-element</a>
+                             (get-pptr-seed parent-seed) (get-pptr-seed seed)
+                             attrs children)))
+                        (list ; <a href="multi-parser.html#codefunc40911">make-seed</a>
+                         (cons element (<a href="multi-parser.html#codefunc20659">get-sxml-seed</a> parent-seed))
+                         ; pptr- seed from parent seed is not modified:
+                         (get-pptr-seed parent-seed)
+                         (<a href="id.html#codefunc31544">id:finish-element-handler</a>
+                          elem-gi attributes (get-id-seed seed) element))))))
+                 ((and with-id? with-xlink? (not with-parent?))  ; id, xlink
+                  (lambda (elem-gi attributes namespaces parent-seed seed)
+                    (let((children (<a href="ssax-prim.html#codefunc54467">reverse-collect-str-drop-ws</a> (<a href="multi-parser.html#codefunc20659">get-sxml-seed</a> seed)))
+                         (attrs
+                          (<a href="SSAX-code.html#codefunc21894">attlist-fold</a>
+                           (lambda (attr accum)
+                             (cons (list 
+                                    (if (symbol? (car attr)) (car attr)
+                                        (<a href="ssax-prim.html#codefunc56334">RES-NAME-&gt;SXML</a> (car attr)))
+                                    (cdr attr)) accum))
+                           '() attributes)))
+                      (let((element 
+                            (cons 
+                             (if(symbol? elem-gi) 
+                                elem-gi
+                                (<a href="ssax-prim.html#codefunc56334">RES-NAME-&gt;SXML</a> elem-gi))
+                             (if(null? attrs) 
+                                children
+                                (cons (cons '@ attrs) children)))))
+                        (list ; <a href="multi-parser.html#codefunc40911">make-seed</a>
+                         (cons element (<a href="multi-parser.html#codefunc20659">get-sxml-seed</a> parent-seed))
+(<a href="id.html#codefunc31544">id:finish-element-handler</a>
+                 elem-gi attributes (get-id-seed seed) element)
+                (<a href="xlink-parser.html#codefunc43619">xlink:finish-element-handler</a>
+                 (get-xlink-seed parent-seed)
+                 (get-xlink-seed seed) element))))))   
+          ((and with-parent? with-id? with-xlink?)  ; parent, id, xlink
+           (lambda (elem-gi attributes namespaces parent-seed seed)
+             (let((children (<a href="ssax-prim.html#codefunc54467">reverse-collect-str-drop-ws</a> (<a href="multi-parser.html#codefunc20659">get-sxml-seed</a> seed)))
+                  (attrs
+                   (<a href="SSAX-code.html#codefunc21894">attlist-fold</a>
+                    (lambda (attr accum)
+                      (cons (list 
+                             (if (symbol? (car attr)) (car attr)
+                                 (<a href="ssax-prim.html#codefunc56334">RES-NAME-&gt;SXML</a> (car attr)))
+                             (cdr attr)) accum))
+                    '() attributes)))
+               (let((element
+                     (<a href="multi-parser.html#codefunc4026">parent:construct-element</a>
+                      (get-pptr-seed parent-seed) (get-pptr-seed seed)
+                      attrs children)))
+               (list ; <a href="multi-parser.html#codefunc40911">make-seed</a>
+                (cons element (<a href="multi-parser.html#codefunc20659">get-sxml-seed</a> parent-seed))
+                ; pptr- seed from parent seed is not modified:
+                (get-pptr-seed parent-seed)
+                (<a href="id.html#codefunc31544">id:finish-element-handler</a>
+                 elem-gi attributes (get-id-seed seed) element)
+                (<a href="xlink-parser.html#codefunc43619">xlink:finish-element-handler</a>
+                 (get-xlink-seed parent-seed)
+                 (get-xlink-seed seed) element))))))
+	   (else (<a href="myenv.html#codefunc55253">cerr</a> &quot;finish-element: NIY&quot; <a href="myenv.html#codefunc27758">nl</a>) (exit))))
+      
+       
+       ; A special function
+       ; Given 'namespaces', it becomes a handler for a DOCTYPE
+       (doctype-handler
+        (if
+         (not with-id?)
+         (lambda (namespaces)
+           (lambda (port docname systemid internal-subset? seed)
+             (when internal-subset?
+               (<a href="parse-error.html#codefunc54750">ssax:warn</a> port
+                          &quot;Internal DTD subset is not currently handled &quot;)
+               (<a href="SSAX-code.html#codefunc27966">ssax:skip-internal-dtd</a> port))
+             (<a href="parse-error.html#codefunc54750">ssax:warn</a> port &quot;DOCTYPE DECL &quot; docname &quot; &quot;
+                        systemid &quot; found and skipped&quot;)
+             (values #f '() namespaces seed)))
+         (cond
+           ((not (or with-parent? with-xlink?))  ; with-id
+            (lambda (namespaces)
+              (lambda (port docname systemid internal-subset? seed)
+                (values 
+                 #f '() namespaces
+                 (list   ; <a href="multi-parser.html#codefunc40911">make-seed</a>
+                  (<a href="multi-parser.html#codefunc20659">get-sxml-seed</a> seed)
+                  (<a href="id.html#codefunc49232">id:doctype-handler</a> port systemid internal-subset?))))))
+           ((and with-parent? (not with-xlink?))    ; with-parent, with-id
+            (lambda (namespaces)
+              (lambda (port docname systemid internal-subset? seed)
+                (values 
+                 #f '() namespaces
+                 (list   ; <a href="multi-parser.html#codefunc40911">make-seed</a>
+                  (<a href="multi-parser.html#codefunc20659">get-sxml-seed</a> seed)
+                  (get-pptr-seed seed)
+                  (<a href="id.html#codefunc49232">id:doctype-handler</a> port systemid internal-subset?))))))
+           ((and (not with-parent?) with-xlink?)   ; with-id, with-xlink
+            (lambda (namespaces)
+              (lambda (port docname systemid internal-subset? seed)
+                (values 
+                 #f '() namespaces
+                 (list   ; <a href="multi-parser.html#codefunc40911">make-seed</a>
+                  (<a href="multi-parser.html#codefunc20659">get-sxml-seed</a> seed)
+                  (<a href="id.html#codefunc49232">id:doctype-handler</a> port systemid internal-subset?)
+                  (get-xlink-seed seed))))))
+           (else   ; with-parent, with-id, with-xlink
+            (lambda (namespaces)
+              (lambda (port docname systemid internal-subset? seed)
+                (values 
+                 #f '() namespaces
+                 (list   ; <a href="multi-parser.html#codefunc40911">make-seed</a>
+                  (<a href="multi-parser.html#codefunc20659">get-sxml-seed</a> seed)
+                  (get-pptr-seed seed)
+                  (<a href="id.html#codefunc49232">id:doctype-handler</a> port systemid internal-subset?)
+                  (get-xlink-seed seed)))))))))
+       
+       )  ; end of letrec
+  
+    ; Constructing a special parser function
+    (lambda (port)
+      (let
+       ((namespaces
+         (map (lambda (el)
+               (<a href="myenv.html#codefunc58107">cons*</a> #f (car el) (<a href="SSAX-code.html#codefunc40058">ssax:uri-string-&gt;symbol</a> (cdr el))))
+              ns-assig)))
+        (ending-actions
+         ((ssax:make-parser
+         
+           NEW-LEVEL-SEED 
+           (new-level-seed-handler port)
+             
+           FINISH-ELEMENT
+           finish-element-handler
+       
+           CHAR-DATA-HANDLER
+           (lambda (string1 string2 seed)
+             (cons
+              (if(string-null? string2) 
+                 (cons string1 (car seed))
+                 (<a href="myenv.html#codefunc58107">cons*</a> string2 string1 (car seed)))
+              (cdr seed)))
+         
+           DOCTYPE
+           (doctype-handler namespaces)
+             
+           UNDECL-ROOT
+           (lambda (elem-gi seed)
+             (values #f '() namespaces seed))
+         
+           PI
+           ((*DEFAULT* . (lambda (port pi-tag seed)
+                           (cons
+                            (cons
+                             (list '*PI* pi-tag 
+                                   (<a href="SSAX-code.html#codefunc4659">ssax:read-pi-body-as-string</a> port))
+                             (car seed))
+                            (cdr seed)))))
+           )
+          port
+          initial-seed))))))
+))))
+</pre>
+<h4><a name='codefunc41365' href='#docfunc41365'>parent:new-level-seed-handler</a></h4>
+<i><a href='#tocfunc41365'>Index</a></i><br>
+
+<pre> This function is called by the NEW-LEVEL-SEED handler
+  elem-name = (if(symbol? elem-gi) elem-gi (RES-NAME-&gt;SXML elem-gi)
+ A new 'parent:seed' is returned
+</pre>
+<pre>(define (<a href="multi-parser.html#codefunc41365">parent:new-level-seed-handler</a> elem-name)
+  (let
+    ((head (list elem-name)))
+    (list (lambda () head))))
+</pre>
+<h4><a name='codefunc4026' href='#docfunc4026'>parent:construct-element</a></h4>
+<i><a href='#tocfunc4026'>Index</a></i><br>
+
+<pre> A function which constructs an element from its attributes, children
+ and delayed parent information
+  parent:seed - contains a delayed pointer to element's parent
+  attrs - element's attributes
+  children - a list of child elements
+</pre>
+<pre>(define (<a href="multi-parser.html#codefunc4026">parent:construct-element</a> parent:parent-seed parent:seed
+                                  attrs children)
+  ; car gets the only element of parent seed - a pointer to a parent
+  (let((parent-ptr (car parent:parent-seed))
+       (head ((car parent:seed))))
+    (set-cdr!
+     head
+     (<a href="myenv.html#codefunc58107">cons*</a> (cons '@ attrs)
+            `(@@ (*PARENT* ,parent-ptr))
+            children))
+      head))
+</pre>
+<h4><a name='codefunc20659' href='#docfunc20659'>get-sxml-seed</a></h4>
+<i><a href='#tocfunc20659'>Index</a></i><br>
+
+<pre> (mul:seed-original seed)
+</pre>
+<pre>(define <a href="multi-parser.html#codefunc20659">get-sxml-seed</a> car)
+</pre>
+<h4><a name='codefunc15726' href='#docfunc15726'>bad-accessor</a></h4>
+<i><a href='#tocfunc15726'>Index</a></i><br>
+
+<pre> Renamed:
+ mul:seed-parent get-pptr-seed
+ mul:seed-id get-id-seed
+ mul:seed-xlink get-xlink-seed
+ Handler for attempts to access an absent seed.
+</pre>
+<pre>(define (<a href="multi-parser.html#codefunc15726">bad-accessor</a> type)
+  (lambda x
+  (<a href="myenv.html#codefunc55253">cerr</a> <a href="myenv.html#codefunc27758">nl</a> &quot;MURDER!!!  -&gt; &quot; type <a href="myenv.html#codefunc27758">nl</a> x <a href="myenv.html#codefunc27758">nl</a>) (exit -1)))
+</pre>
+<h4><a name='codefunc40911' href='#docfunc40911'>make-seed</a></h4>
+<i><a href='#tocfunc40911'>Index</a></i><br>
+
+<pre> Seed constructor. #f seeds will be omitted.
+</pre>
+<pre>(define (<a href="multi-parser.html#codefunc40911">make-seed</a> . seeds)
+   (let rpt 
+     ((s (cdr seeds)) (rzt (list (car seeds)))) 
+     (cond 
+       ((null? s) (reverse rzt))
+       ((car s) (rpt (cdr s) 
+		     (cons (car s) rzt)))
+       (else (rpt (cdr s) rzt)))))
+</pre></body></html>

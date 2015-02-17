@@ -1,0 +1,257 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN""http://www.w3.org/TR/html401/loose.dtd"><html><head><meta name="GENERATOR" content="Mole: The Scheme Source Code Digger"><title>Module: guides</title><meta name='keywords' content=''></head><body bgcolor='#ffffff' text='#384412'  link='#11af05' vlink='#728b09'>
+<center><h1>Module: guides</h1></center>
+
+<pre> $Id: guides.scm,v 2.4 2003/12/08 02:07:23 kl Exp kl $
+ DataGuide is a &quot;structural summary&quot; for semistructured data and may be 
+ considered as analog of traditional database schema in context of 
+ semistructured data management.
+</pre><p><br>
+<!-- Table of content -->
+<p><dl>
+<p><dt><a name='tocchapt9730' href='#chapt9730'><b>Auxilliary</b></a><dd>
+
+f:  <a name='tocfunc60055' href='#docfunc60055' style='text-decoration:none'>dgs:version</a><br>
+
+<dl><dt><a name='tocsect5465' href='#sect5465'><b>Customized versions of SRFI-1 functions</b></a><dd>
+
+f:  <a name='tocfunc30122' href='#docfunc30122' style='text-decoration:none'>dgs:fold</a><br>
+
+f:  <a name='tocfunc28588' href='#docfunc28588' style='text-decoration:none'>dgs:find</a><br>
+</dl>
+
+<dl><dt><a name='tocsect48877' href='#sect48877'><b>DataGuide management</b></a><dd>
+
+f:  <a name='tocfunc562' href='#docfunc562' style='text-decoration:none'>add-lp</a><br>
+</dl>
+<p><dt><a name='tocchapt12289' href='#chapt12289'><b>DataGuides for SXML tree (DOM-style)</b></a><dd>
+
+f:  <a name='tocfunc58101' href='#docfunc58101' style='text-decoration:none'>sxml-guide-flat</a><br>
+
+f:  <a name='tocfunc6888' href='#docfunc6888' style='text-decoration:none'>sxml-guide</a><br>
+<p><dt><a name='tocchapt13755' href='#chapt13755'><b>DataGuides (SSAX-style)</b></a><dd>
+
+f:  <a name='tocfunc33506' href='#docfunc33506' style='text-decoration:none'>xml-guide-flat</a><br>
+</dl>
+<hr height='5'><center><h3><a name='chapt9730' href='#tocchapt9730'>Auxilliary</a></h3></center>
+
+<pre></pre>
+<h4><a name='docfunc60055' href='#tocfunc60055'>dgs:version</a></h4>
+(define dgs:version <i><br> ... <a href='#codefunc60055'>Full Code</a> ... )</i><p><br>
+
+<hr width='40%' align='center'><center><h3><a name='sect5465' href='#tocsect5465'>Customized versions of SRFI-1 functions</a></h3></center>
+
+<pre></pre>
+<h4><a name='docfunc30122' href='#tocfunc30122'>dgs:fold</a></h4>
+(define (dgs:fold op init seq)<i><br> ... <a href='#codefunc30122'>Full Code</a> ... )</i>
+<pre> right fold 
+</pre><p><br>
+
+<h4><a name='docfunc28588' href='#tocfunc28588'>dgs:find</a></h4>
+(define (dgs:find pred seq)<i><br> ... <a href='#codefunc28588'>Full Code</a> ... )</i>
+<pre> find from SRFI-1 optimized for speed
+</pre><p><br>
+
+<hr width='40%' align='center'><center><h3><a name='sect48877' href='#tocsect48877'>DataGuide management</a></h3></center>
+
+<pre></pre>
+<h4><a name='docfunc562' href='#tocfunc562'>add-lp</a></h4>
+(define (add-lp tree lp)<i><br> ... <a href='#codefunc562'>Full Code</a> ... )</i>
+<pre> Add location path &lt;lp&gt; in &lt;tree&gt;
+ If location path is already present - then it is skipped.
+</pre><p><br>
+<hr height='5'><center><h3><a name='chapt12289' href='#tocchapt12289'>DataGuides for SXML tree (DOM-style)</a></h3></center>
+
+<pre> This functions build DataGuides for semistructured data represented
+ data represented as SXML tree.
+</pre>
+<h4><a name='docfunc58101' href='#tocfunc58101'>sxml-guide-flat</a></h4>
+(define (sxml-guide-flat obj . ignore)<i><br> ... <a href='#codefunc58101'>Full Code</a> ... )</i>
+<pre> Flat DataGuide for given node or nodeset &lt;obj&gt;
+ Flat DataGuide is a list of all the unique location paths found in the 
+ source data. It contains no location paths which are absent in the source
+ data.
+ Location paths with trailing @ (which are LPs of attributes-lists) are
+ excluded.
+</pre><p><br>
+
+<h4><a name='docfunc6888' href='#tocfunc6888'>sxml-guide</a></h4>
+(define (sxml-guide obj . ignore)<i><br> ... <a href='#codefunc6888'>Full Code</a> ... )</i>
+<pre> Strong DataGuide for given node or nodeset &lt;obj&gt;
+ Strong DataGuide is a tree which contains one instance of every location 
+ path found in the source data, and which contains no location paths which 
+ are absent in the source data
+</pre><p><br>
+<hr height='5'><center><h3><a name='chapt13755' href='#tocchapt13755'>DataGuides (SSAX-style)</a></h3></center>
+
+<pre> This functions build DataGuides for while parsing XML data.
+</pre>
+<h4><a name='docfunc33506' href='#tocfunc33506'>xml-guide-flat</a></h4>
+(define (xml-guide-flat xml-port)<i><br> ... <a href='#codefunc33506'>Full Code</a> ... )</i>
+<pre> Flat data guide
+ The seed is pair whose car is current location path (reversed) and 
+ whose cdr is DataGuide accumulated.
+</pre><p><br>
+<center><h1>Code</h1></center>
+
+<h4><a name='codefunc60055' href='#docfunc60055'>dgs:version</a></h4>
+<i><a href='#tocfunc60055'>Index</a></i><br>
+
+<pre>(define <a href="guides.html#codefunc60055">dgs:version</a> 
+  (string-append &quot; $Revision: 2.4 $&quot; <a href="myenv.html#codefunc27758">nl</a> &quot; $Date: 2003/12/08 02:07:23 $&quot;))
+</pre>
+<h4><a name='codefunc58101' href='#docfunc58101'>sxml-guide-flat</a></h4>
+<i><a href='#tocfunc58101'>Index</a></i><br>
+
+<pre> Flat DataGuide for given node or nodeset &lt;obj&gt;
+ Flat DataGuide is a list of all the unique location paths found in the 
+ source data. It contains no location paths which are absent in the source
+ data.
+ Location paths with trailing @ (which are LPs of attributes-lists) are
+ excluded.
+</pre>
+<pre>(define (<a href="guides.html#codefunc58101">sxml-guide-flat</a> obj . ignore)
+  (define (helper lp)
+  (lambda (x y)
+    (if (and (pair? x)
+	   (not (memq (car x) 
+                      (if (null? ignore) 
+			'(*PI* *COMMENT* *NAMESPACES* *ENTITY*)
+		      (car ignore))))) 
+      (let ((this-lp (cons (car x) lp)))
+ ;      (<a href="myenv.html#codefunc55253">cerr</a> <a href="myenv.html#codefunc27758">nl</a> y)
+	(<a href="guides.html#codefunc30122">dgs:fold</a> 
+	  (helper this-lp)
+		 (if (or (eq? '@ (car x)) ; excludes @-ended location paths
+			 (member this-lp y))
+		   y
+		   (cons this-lp y))
+		 (cdr x)))
+      y)))
+  (map reverse
+       (<a href="guides.html#codefunc30122">dgs:fold</a> (helper '()) '() obj)
+       ))
+</pre>
+<h4><a name='codefunc6888' href='#docfunc6888'>sxml-guide</a></h4>
+<i><a href='#tocfunc6888'>Index</a></i><br>
+
+<pre> Strong DataGuide for given node or nodeset &lt;obj&gt;
+ Strong DataGuide is a tree which contains one instance of every location 
+ path found in the source data, and which contains no location paths which 
+ are absent in the source data
+</pre>
+<pre>(define (<a href="guides.html#codefunc6888">sxml-guide</a> obj . ignore)
+  (define (helper lp)
+  (lambda (x y)
+    (if (and (pair? x)
+	   (not (memq (car x) 
+                      (if (null? ignore) 
+			'(*PI* *COMMENT* *NAMESPACES* *ENTITY*)
+		      (car ignore))))) 
+      (let ((this-lp (cons (car x) lp)))
+	(<a href="guides.html#codefunc30122">dgs:fold</a> (helper this-lp)
+		 (<a href="guides.html#codefunc562">add-lp</a> y (reverse this-lp))
+		 (cdr x)))
+      y)))
+  (<a href="guides.html#codefunc30122">dgs:fold</a> (helper '()) '() obj)
+  )
+</pre>
+<h4><a name='codefunc33506' href='#docfunc33506'>xml-guide-flat</a></h4>
+<i><a href='#tocfunc33506'>Index</a></i><br>
+
+<pre> Flat data guide
+ The seed is pair whose car is current location path (reversed) and 
+ whose cdr is DataGuide accumulated.
+</pre>
+<pre>(define (<a href="guides.html#codefunc33506">xml-guide-flat</a> xml-port)
+ (cdr 
+  (map reverse
+  ((ssax:make-parser
+	   NEW-LEVEL-SEED 
+	   (lambda (elem-gi attributes namespaces
+			      expected-content seed)
+	     (cons (cons elem-gi (car seed)) ; Add element name to current LP 
+		   (cdr seed)))
+   
+	     FINISH-ELEMENT
+	     (lambda (elem-gi attributes namespaces parent-seed seed)
+	       (let ((attr-lps (map
+				 (lambda(attr)
+				   `(,(car attr) @ ,@(car seed)))
+				 attributes))) 
+	       (cons (car parent-seed)    
+	             ; Add LP to DataGuide, if unique 	
+		     (if
+		       (member (car seed) (cdr seed))
+		     ; If elements LP is already in DG - then add its attributes
+		     ; which are not in DG already
+		       (append
+			 (<a href="common.html#codefunc20536">filter</a> 
+			   (lambda(lp) (not (member lp (cdr seed))))
+				 attr-lps)
+			 (cdr seed))
+	             ; If elements LP is unique - then add to DataGuide
+		     ;  it and all its attributes
+		     (append attr-lps (cons (car seed) (cdr seed)))
+		     ))))
+	     CHAR-DATA-HANDLER
+	     (lambda (string1 string2 seed)
+	       seed))
+
+	    xml-port 
+	    (cons '() '()) ; Initial seed
+	    ))))
+</pre>
+<h4><a name='codefunc30122' href='#docfunc30122'>dgs:fold</a></h4>
+<i><a href='#tocfunc30122'>Index</a></i><br>
+
+<pre> right fold 
+</pre>
+<pre>(define (<a href="guides.html#codefunc30122">dgs:fold</a> op init seq)
+  (if (null? seq)
+    init
+    (op (car seq)
+	(<a href="guides.html#codefunc30122">dgs:fold</a> op init (cdr seq)))))
+</pre>
+<h4><a name='codefunc28588' href='#docfunc28588'>dgs:find</a></h4>
+<i><a href='#tocfunc28588'>Index</a></i><br>
+
+<pre> find from SRFI-1 optimized for speed
+</pre>
+<pre>(define (<a href="guides.html#codefunc28588">dgs:find</a> pred seq)
+  (cond
+    ((let lp ((seq seq))
+    (and (pair? seq)
+	 (if (pred (car seq)) 
+	   seq
+	     (lp (cdr seq)))))
+     =&gt; car)
+    (else #f)))
+</pre>
+<h4><a name='codefunc562' href='#docfunc562'>add-lp</a></h4>
+<i><a href='#tocfunc562'>Index</a></i><br>
+
+<pre> Add location path &lt;lp&gt; in &lt;tree&gt;
+ If location path is already present - then it is skipped.
+</pre>
+<pre>(define (<a href="guides.html#codefunc562">add-lp</a> tree lp)
+    (cond
+      ; lp is empty : return the tree as it is
+      ((null? lp) tree)
+      ; lp is present in the tree: traverse the tree recursively
+      ((<a href="guides.html#codefunc28588">dgs:find</a> (lambda(x)
+	       (and (pair? x)
+		    (eq? (car lp) (car x)))) 
+	     tree) 
+       =&gt; (lambda(x)
+	    (<a href="guides.html#codefunc562">add-lp</a> x (cdr lp))
+	    tree))
+      ; lp is absent in the tree: add it and return modified tree
+      (else
+	(if (null? tree)
+	  ; if the tree is empty
+	  (set! tree (list lp))
+         (set-cdr! tree (cons lp (cdr tree))))
+	 tree
+	  ))  
+  )
+</pre></body></html>

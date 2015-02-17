@@ -1,0 +1,1708 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN""http://www.w3.org/TR/html401/loose.dtd"><html><head><meta name="GENERATOR" content="Mole: The Scheme Source Code Digger"><title>Module: xlink</title><meta name='keywords' content=''></head><body bgcolor='#ffffff' text='#384412'  link='#11af05' vlink='#728b09'>
+<center><h1>Module: xlink</h1></center>
+
+<pre> XLink implementation and the API for XLink processing in Scheme
+
+ This software is in Public Domain.
+ IT IS PROVIDED &quot;AS IS&quot;, WITHOUT WARRANTY OF ANY KIND.
+
+ Please send bug reports and comments to:
+   lisovsky@acm.org      Kirill Lisovsky
+   lizorkin@hotbox.ru    Dmitry Lizorkin
+
+ doc ::= '(*TOP*
+           (@@
+            (sxlink
+             (declared-here  &lt;sxlink-arc&gt;* )
+             (embedded)?
+             (outgoing
+              (node  &lt;sxlink-arc&gt;+ )*
+             )
+            )
+            ...   ; more aux list members
+           )
+          ...)
+</pre><p><br>
+<!-- Table of content -->
+<p><dl>
+<p><dt><a name='tocchapt25777' href='#chapt25777'><b>XLink-related node tests</b></a><dd>
+
+f:  <a name='tocfunc14809' href='#docfunc14809' style='text-decoration:none'>xlink:ntype??</a><br>
+
+f:  <a name='tocfunc56299' href='#docfunc56299' style='text-decoration:none'>xlink:elem-extended?</a><br>
+
+f:  <a name='tocfunc31620' href='#docfunc31620' style='text-decoration:none'>xlink:elem-simple?</a><br>
+
+f:  <a name='tocfunc42436' href='#docfunc42436' style='text-decoration:none'>xlink:elem-locator?</a><br>
+
+f:  <a name='tocfunc60657' href='#docfunc60657' style='text-decoration:none'>xlink:elem-resource?</a><br>
+
+f:  <a name='tocfunc46070' href='#docfunc46070' style='text-decoration:none'>xlink:elem-arc?</a><br>
+
+f:  <a name='tocfunc15706' href='#docfunc15706' style='text-decoration:none'>xlink:elem-title?</a><br>
+<p><dt><a name='tocchapt65052' href='#chapt65052'><b>Utility functions over document auxiliary information</b></a><dd>
+
+<dl><dt><a name='tocsect53277' href='#sect53277'><b>Document's URI</b></a><dd>
+
+f:  <a name='tocfunc6931' href='#docfunc6931' style='text-decoration:none'>xlink:set-uri</a><br>
+</dl>
+
+<dl><dt><a name='tocsect33102' href='#sect33102'><b>Id-index of the document</b></a><dd>
+
+f:  <a name='tocfunc49079' href='#docfunc49079' style='text-decoration:none'>xlink:id-index</a><br>
+</dl>
+
+<dl><dt><a name='tocsect45513' href='#sect45513'><b>SXLink members of the auxiliary list</b></a><dd>
+
+f:  <a name='tocfunc33218' href='#docfunc33218' style='text-decoration:none'>xlink:arcs-declared-here</a><br>
+
+f:  <a name='tocfunc52186' href='#docfunc52186' style='text-decoration:none'>xlink:arcs-embedded?</a><br>
+
+f:  <a name='tocfunc48364' href='#docfunc48364' style='text-decoration:none'>xlink:arcs-outgoing</a><br>
+</dl>
+<p><dt><a name='tocchapt14157' href='#chapt14157'><b>Get the document by its URI</b></a><dd>
+
+f:  <a name='tocfunc38241' href='#docfunc38241' style='text-decoration:none'>xlink:api-error</a><br>
+
+f:  <a name='tocfunc23701' href='#docfunc23701' style='text-decoration:none'>xlink:parser</a><br>
+
+f:  <a name='tocfunc26961' href='#docfunc26961' style='text-decoration:none'>xlink:get-document-by-uri</a><br>
+<p><dt><a name='tocchapt29585' href='#chapt29585'><b>Loading multiple documents by their URIs</b></a><dd>
+
+<dl><dt><a name='tocsect59788' href='#sect59788'><b>Helper accessors to SXLink arcs</b></a><dd>
+
+f:  <a name='tocfunc55844' href='#docfunc55844' style='text-decoration:none'>xlink:arcs-uris</a><br>
+
+f:  <a name='tocfunc48825' href='#docfunc48825' style='text-decoration:none'>xlink:arcs-linkbase-uris</a><br>
+</dl>
+
+<dl><dt><a name='tocsect58398' href='#sect58398'><b>Working on the set of SXML documents</b></a><dd>
+
+f:  <a name='tocfunc64299' href='#docfunc64299' style='text-decoration:none'>xlink:uris</a><br>
+
+f:  <a name='tocfunc39933' href='#docfunc39933' style='text-decoration:none'>xlink:remove-equal-duplicates</a><br>
+
+f:  <a name='tocfunc43710' href='#docfunc43710' style='text-decoration:none'>xlink:find-doc</a><br>
+</dl>
+
+<dl><dt><a name='tocsect1295' href='#sect1295'><b>Extending the set of documents with additional documents being referred to</b></a><dd>
+
+f:  <a name='tocfunc60542' href='#docfunc60542' style='text-decoration:none'>xlink:referenced-uris</a><br>
+
+f:  <a name='tocfunc53523' href='#docfunc53523' style='text-decoration:none'>xlink:referenced-linkbase-uris</a><br>
+
+f:  <a name='tocfunc56163' href='#docfunc56163' style='text-decoration:none'>xlink:add-documents-helper</a><br>
+
+f:  <a name='tocfunc41414' href='#docfunc41414' style='text-decoration:none'>xlink:add-linkbases-recursively</a><br>
+
+f:  <a name='tocfunc50361' href='#docfunc50361' style='text-decoration:none'>xlink:add-documents-recursively</a><br>
+</dl>
+
+<dl><dt><a name='tocsect48862' href='#sect48862'><b>Higher-level functions</b></a><dd>
+
+f:  <a name='tocfunc46734' href='#docfunc46734' style='text-decoration:none'>xlink:get-documents-with-params</a><br>
+
+f:  <a name='tocfunc11875' href='#docfunc11875' style='text-decoration:none'>xlink:get-documents+linkbases</a><br>
+</dl>
+<p><dt><a name='tocchapt30910' href='#chapt30910'><b>Working on the set of linked documents</b></a><dd>
+
+f:  <a name='tocfunc23637' href='#docfunc23637' style='text-decoration:none'>xlink:unite-duplicate-keys-in-alist</a><br>
+
+f:  <a name='tocfunc40123' href='#docfunc40123' style='text-decoration:none'>xlink:docs-exchange-arcs</a><br>
+
+<dl><dt><a name='tocsect52297' href='#sect52297'><b>Embedding XLink arcs into the document</b></a><dd>
+
+f:  <a name='tocfunc50412' href='#docfunc50412' style='text-decoration:none'>xlink:embed-arcs-into-document</a><br>
+
+f:  <a name='tocfunc36058' href='#docfunc36058' style='text-decoration:none'>xlink:arcs-embedded</a><br>
+</dl>
+<p><dt><a name='tocchapt64020' href='#chapt64020'><b>Load documents with respect to the other documents</b></a><dd>
+
+f:  <a name='tocfunc45573' href='#docfunc45573' style='text-decoration:none'>xlink:parameterized-load-with-respect-documents</a><br>
+
+f:  <a name='tocfunc44424' href='#docfunc44424' style='text-decoration:none'>xlink:get-docs-with-respect-to-loaded</a><br>
+<p><dt><a name='tocchapt59132' href='#chapt59132'><b>Excluding documents from linked-docs</b></a><dd>
+<p><dt><a name='tocchapt55017' href='#chapt55017'><b>High-level API functions</b></a><dd>
+
+f:  <a name='tocfunc34968' href='#docfunc34968' style='text-decoration:none'>xlink:load-linked-docs-with-params</a><br>
+
+f:  <a name='tocfunc54371' href='#docfunc54371' style='text-decoration:none'>xlink:documents</a><br>
+
+f:  <a name='tocfunc54415' href='#docfunc54415' style='text-decoration:none'>xlink:documents-embed</a><br>
+
+<dl><dt><a name='tocsect18526' href='#sect18526'><b>Convenient function for getting a document by its URI</b></a><dd>
+
+f:  <a name='tocfunc35033' href='#docfunc35033' style='text-decoration:none'>sxml:document</a><br>
+</dl>
+<p><dt><a name='tocchapt10349' href='#chapt10349'><b>SXPath-related stuff</b></a><dd>
+
+f:  <a name='tocfunc50961' href='#docfunc50961' style='text-decoration:none'>xlink:arc?</a><br>
+
+<dl><dt><a name='tocsect61166' href='#sect61166'><b>Working with the administrative variable '*docs*</b></a><dd>
+
+f:  <a name='tocfunc44756' href='#docfunc44756' style='text-decoration:none'>xlink:docs-variable</a><br>
+
+f:  <a name='tocfunc96' href='#docfunc96' style='text-decoration:none'>xlink:add-docs-to-vars</a><br>
+</dl>
+
+<dl><dt><a name='tocsect60076' href='#sect60076'><b>Accessors to SXLink arcs that start from the given SXML node</b></a><dd>
+
+f:  <a name='tocfunc36525' href='#docfunc36525' style='text-decoration:none'>xlink:node-embedded-arcs</a><br>
+
+f:  <a name='tocfunc12095' href='#docfunc12095' style='text-decoration:none'>xlink:node-arcs-on-top</a><br>
+
+f:  <a name='tocfunc44850' href='#docfunc44850' style='text-decoration:none'>xlink:node-arcs</a><br>
+</dl>
+
+<dl><dt><a name='tocsect16399' href='#sect16399'><b>Traversing SXLink arcs</b></a><dd>
+
+f:  <a name='tocfunc39694' href='#docfunc39694' style='text-decoration:none'>xlink:traverse-arcs</a><br>
+</dl>
+
+<dl><dt><a name='tocsect64219' href='#sect64219'><b>Additional XPath axes</b></a><dd>
+
+f:  <a name='tocfunc50615' href='#docfunc50615' style='text-decoration:none'>xlink:axis-arc</a><br>
+
+f:  <a name='tocfunc45061' href='#docfunc45061' style='text-decoration:none'>xlink:axis-traverse</a><br>
+
+f:  <a name='tocfunc20426' href='#docfunc20426' style='text-decoration:none'>xlink:axis-traverse-arc</a><br>
+</dl>
+</dl>
+<hr height='5'><center><h3><a name='chapt25777' href='#tocchapt25777'>XLink-related node tests</a></h3></center>
+
+<pre> They test whether an SXML node has a definite XLink type
+ ATTENTION:
+  1. A non-prefixed XLink namespace uri is used for these node tests. If
+ a prefix is used, these functions behave incorrectly.
+  2. These predicates should be used carefully - element's XLink-related
+ meaning depends not only on its xlink:type attribute, but also on its
+ position among other XLink element. For example, an element with an
+ xlink:type=&quot;arc&quot; attribute is not an arc element if it has anything other
+ then an extended-link element as a parent
+</pre>
+<h4><a name='docfunc14809' href='#tocfunc14809'>xlink:ntype??</a></h4>
+(define (xlink:ntype?? type)<i><br> ... <a href='#codefunc14809'>Full Code</a> ... )</i>
+<pre> Helper for predicates
+  type - a string, is supposed to have one of the following values:
+ &quot;extended&quot;, &quot;simple&quot;, &quot;locator&quot;, &quot;resource&quot;, &quot;arc&quot;, &quot;title&quot;.
+ A lambda is returned. When applied to an SXML node, it determines
+ whether the node's xlink:type attribute has a 'type' value.
+</pre><p><br>
+
+<h4><a name='docfunc56299' href='#tocfunc56299'>xlink:elem-extended?</a></h4>
+(define xlink:elem-extended? <i><br> ... <a href='#codefunc56299'>Full Code</a> ... )</i>
+<pre> Node tests for different XLink elements
+</pre><p><br>
+
+<h4><a name='docfunc31620' href='#tocfunc31620'>xlink:elem-simple?</a></h4>
+(define xlink:elem-simple? <i><br> ... <a href='#codefunc31620'>Full Code</a> ... )</i><p><br>
+
+<h4><a name='docfunc42436' href='#tocfunc42436'>xlink:elem-locator?</a></h4>
+(define xlink:elem-locator? <i><br> ... <a href='#codefunc42436'>Full Code</a> ... )</i><p><br>
+
+<h4><a name='docfunc60657' href='#tocfunc60657'>xlink:elem-resource?</a></h4>
+(define xlink:elem-resource? <i><br> ... <a href='#codefunc60657'>Full Code</a> ... )</i><p><br>
+
+<h4><a name='docfunc46070' href='#tocfunc46070'>xlink:elem-arc?</a></h4>
+(define xlink:elem-arc? <i><br> ... <a href='#codefunc46070'>Full Code</a> ... )</i><p><br>
+
+<h4><a name='docfunc15706' href='#tocfunc15706'>xlink:elem-title?</a></h4>
+(define xlink:elem-title? <i><br> ... <a href='#codefunc15706'>Full Code</a> ... )</i><p><br>
+<hr height='5'><center><h3><a name='chapt65052' href='#tocchapt65052'>Utility functions over document auxiliary information</a></h3></center>
+
+<pre></pre>
+<hr width='40%' align='center'><center><h3><a name='sect53277' href='#tocsect53277'>Document's URI</a></h3></center>
+
+<pre> The following functions moved to &quot;xlink-parser.scm&quot;
+  xlink:get-uri
+  xlink:set-uri-for-sxlink-arcs
+</pre>
+<h4><a name='docfunc6931' href='#tocfunc6931'>xlink:set-uri</a></h4>
+(define (xlink:set-uri uri doc)<i><br> ... <a href='#codefunc6931'>Full Code</a> ... )</i>
+<pre> Sets the URI for the SXML document
+</pre><p><br>
+
+<hr width='40%' align='center'><center><h3><a name='sect33102' href='#tocsect33102'>Id-index of the document</a></h3></center>
+
+<pre></pre>
+<h4><a name='docfunc49079' href='#tocfunc49079'>xlink:id-index</a></h4>
+(define (xlink:id-index doc)<i><br> ... <a href='#codefunc49079'>Full Code</a> ... )</i>
+<pre> Returns the id-index of the SXML document
+ #f is returned is there is no &quot;@@/id-index&quot; subtree in the document
+</pre><p><br>
+
+<hr width='40%' align='center'><center><h3><a name='sect45513' href='#tocsect45513'>SXLink members of the auxiliary list</a></h3></center>
+
+<pre></pre>
+<h4><a name='docfunc33218' href='#tocfunc33218'>xlink:arcs-declared-here</a></h4>
+(define (xlink:arcs-declared-here doc)<i><br> ... <a href='#codefunc33218'>Full Code</a> ... )</i>
+<pre> Returns (listof sxlink-arc) located in &quot;@@/sxlink/declared-here&quot;
+ These are SXLink arcs that are declared in this document
+</pre><p><br>
+
+<h4><a name='docfunc52186' href='#tocfunc52186'>xlink:arcs-embedded?</a></h4>
+(define (xlink:arcs-embedded? doc)<i><br> ... <a href='#codefunc52186'>Full Code</a> ... )</i>
+<pre> Whether outgoing SXLink arcs are embedded into the document.
+ This is denoted by the presense of &quot;@@/sxlink/embedded&quot; empty element.
+</pre><p><br>
+
+<h4><a name='docfunc48364' href='#tocfunc48364'>xlink:arcs-outgoing</a></h4>
+(define (xlink:arcs-outgoing doc)<i><br> ... <a href='#codefunc48364'>Full Code</a> ... )</i>
+<pre> Returns the content of &quot;@@/sxlink/outgoing&quot;
+ The result is the associative list between nodes of the document and
+ SXLink arcs that start from the corresponding node
+</pre><p><br>
+<hr height='5'><center><h3><a name='chapt14157' href='#tocchapt14157'>Get the document by its URI</a></h3></center>
+
+<pre></pre>
+<h4><a name='docfunc38241' href='#tocfunc38241'>xlink:api-error</a></h4>
+(define (xlink:api-error . text)<i><br> ... <a href='#codefunc38241'>Full Code</a> ... )</i>
+<pre> Handler for error messages
+</pre><p><br>
+
+<h4><a name='docfunc23701' href='#tocfunc23701'>xlink:parser</a></h4>
+(define xlink:parser <i><br> ... <a href='#codefunc23701'>Full Code</a> ... )</i>
+<pre> Id+XLink parser parameterized
+</pre><p><br>
+
+<h4><a name='docfunc26961' href='#tocfunc26961'>xlink:get-document-by-uri</a></h4>
+(define (xlink:get-document-by-uri req-uri)<i><br> ... <a href='#codefunc26961'>Full Code</a> ... )</i>
+<pre> Returns the SXML representation for the resource specified by REQ-URI.
+ Resource types supported: XML and HTML. XML is parsed into SXML with SSAX,
+ HTML is parsed with HTML Prag.
+ Additionally, linking information is parsed. For XML, linking information is
+ assumed to be specified with XLink. For HTML, &lt;a&gt; elements are treated as
+ simple links.
+ In case of an error (resource doesn't exist or its type is unsupported), an
+ error is signalled with 'xlink:api-error' and #f is returned.
+</pre><p><br>
+<hr height='5'><center><h3><a name='chapt29585' href='#tocchapt29585'>Loading multiple documents by their URIs</a></h3></center>
+
+<pre></pre>
+<hr width='40%' align='center'><center><h3><a name='sect59788' href='#tocsect59788'>Helper accessors to SXLink arcs</a></h3></center>
+
+<pre></pre>
+<h4><a name='docfunc55844' href='#tocfunc55844'>xlink:arcs-uris</a></h4>
+(define (xlink:arcs-uris sxlink-arcs)<i><br> ... <a href='#codefunc55844'>Full Code</a> ... )</i>
+<pre> Returns URIs of resources that participate in SXLink arcs
+  sxlink-arcs ::= (listof sxlink-arc)
+ Result: (listof string)
+ The result may contain duplicates
+</pre><p><br>
+
+<h4><a name='docfunc48825' href='#tocfunc48825'>xlink:arcs-linkbase-uris</a></h4>
+(define (xlink:arcs-linkbase-uris sxlink-arcs)<i><br> ... <a href='#codefunc48825'>Full Code</a> ... )</i>
+<pre> Returns URIs of all linkbases encountered among SXLink arcs
+ Result: (listof string)
+ The result may contain duplicates
+</pre><p><br>
+
+<hr width='40%' align='center'><center><h3><a name='sect58398' href='#tocsect58398'>Working on the set of SXML documents</a></h3></center>
+
+<pre>  doc-set ::= (listof document)
+</pre>
+<h4><a name='docfunc64299' href='#tocfunc64299'>xlink:uris</a></h4>
+(define (xlink:uris doc-set)<i><br> ... <a href='#codefunc64299'>Full Code</a> ... )</i>
+<pre> Returns the list of URIs of the documents in the doc-set
+</pre><p><br>
+
+<h4><a name='docfunc39933' href='#tocfunc39933'>xlink:remove-equal-duplicates</a></h4>
+(define (xlink:remove-equal-duplicates lst)<i><br> ... <a href='#codefunc39933'>Full Code</a> ... )</i>
+<pre> Removes equal duplicates from the list
+</pre><p><br>
+
+<h4><a name='docfunc43710' href='#tocfunc43710'>xlink:find-doc</a></h4>
+(define (xlink:find-doc uri-string doc-set)<i><br> ... <a href='#codefunc43710'>Full Code</a> ... )</i>
+<pre> procedure xlink:find-doc :: URI-STRING (listof SXML-TREE) -&gt; SXML-TREE
+
+ Finding a document in 'doc-set' by its 'uri-string'.
+ If there is no such document, #f is returned.
+  doc-set ::= (listof SXML-TREE)
+</pre><p><br>
+
+<hr width='40%' align='center'><center><h3><a name='sect1295' href='#tocsect1295'>Extending the set of documents with additional documents being referred to</a></h3></center>
+
+<pre></pre>
+<h4><a name='docfunc60542' href='#tocfunc60542'>xlink:referenced-uris</a></h4>
+(define (xlink:referenced-uris doc-set)<i><br> ... <a href='#codefunc60542'>Full Code</a> ... )</i>
+<pre> Returns a list of URIs which are refered by XLink markup
+ Result:  (listof string)
+ The list may contain duplicates.
+</pre><p><br>
+
+<h4><a name='docfunc53523' href='#tocfunc53523'>xlink:referenced-linkbase-uris</a></h4>
+(define (xlink:referenced-linkbase-uris doc-set)<i><br> ... <a href='#codefunc53523'>Full Code</a> ... )</i>
+<pre> Returns a list of linkbase URIs which are refered by XLink markup
+ Result:  (listof string)
+ The list may contain duplicates.
+</pre><p><br>
+
+<h4><a name='docfunc56163' href='#tocfunc56163'>xlink:add-documents-helper</a></h4>
+(define (xlink:add-documents-helper referenced-uris)<i><br> ... <a href='#codefunc56163'>Full Code</a> ... )</i>
+<pre> A helped low-level function for extending the doc-set with more documents
+ Is parameterized with
+  referenced-uris ::= (lambda (doc-set) ...)
+ that would return URIs refered by XLink markup in the doc-set
+ When parameterized, returns
+  (lambda (doc-set . max-steps) ...)
+  max-steps - maximal number of recursive steps
+  The lambda returns the expanded doc-set
+</pre><p><br>
+
+<h4><a name='docfunc41414' href='#tocfunc41414'>xlink:add-linkbases-recursively</a></h4>
+(define xlink:add-linkbases-recursively <i><br> ... <a href='#codefunc41414'>Full Code</a> ... )</i>
+<pre> Two most common parameterized functions. The first one recursively loads
+ linkbases. The second one recursively loads all refered documents
+</pre><p><br>
+
+<h4><a name='docfunc50361' href='#tocfunc50361'>xlink:add-documents-recursively</a></h4>
+(define xlink:add-documents-recursively <i><br> ... <a href='#codefunc50361'>Full Code</a> ... )</i><p><br>
+
+<hr width='40%' align='center'><center><h3><a name='sect48862' href='#tocsect48862'>Higher-level functions</a></h3></center>
+
+<pre></pre>
+<h4><a name='docfunc46734' href='#tocfunc46734'>xlink:get-documents-with-params</a></h4>
+(define (xlink:get-documents-with-params . options)<i><br> ... <a href='#codefunc46734'>Full Code</a> ... )</i>
+<pre> Parameterized with options, returns
+  (lambda (uri . uris) ...)
+ which is the lambda for getting documents by their URIs
+ Options include the following:
+  'linkbases - load linkbases recursively
+  '(linkbases  &lt;number&gt; ) - load linkbases recursively, with the maximal
+ number of recursive steps defined by the &lt;number&gt; supplied
+  'docs - load documents recursively
+  '(docs  &lt;number&gt; ) - load documents recursively, with the maximal number
+ of recursive steps defined by the &lt;number&gt; supplied
+</pre><p><br>
+
+<h4><a name='docfunc11875' href='#tocfunc11875'>xlink:get-documents+linkbases</a></h4>
+(define xlink:get-documents+linkbases <i><br> ... <a href='#codefunc11875'>Full Code</a> ... )</i>
+<pre> The most common parameterized case.
+ Loads documents and all linkbases
+</pre><p><br>
+<hr height='5'><center><h3><a name='chapt30910' href='#tocchapt30910'>Working on the set of linked documents</a></h3></center>
+
+<pre>  linked-docs ::= (listof document)
+</pre>
+<h4><a name='docfunc23637' href='#tocfunc23637'>xlink:unite-duplicate-keys-in-alist</a></h4>
+(define (xlink:unite-duplicate-keys-in-alist alist)<i><br> ... <a href='#codefunc23637'>Full Code</a> ... )</i>
+<pre>  alist ::= (listof
+             (cons key (listof item)))
+ For equal keys in the alist, the function unites the corresponding key values
+ Returns the new alist
+</pre><p><br>
+
+<h4><a name='docfunc40123' href='#tocfunc40123'>xlink:docs-exchange-arcs</a></h4>
+(define (xlink:docs-exchange-arcs doc-set . sxlink-arcs)<i><br> ... <a href='#codefunc40123'>Full Code</a> ... )</i>
+<pre> Documents exchange their SXLink arcs, such as each arc is moved to the
+ &quot;@@/sxlink/outgoing&quot; branch of the document where the arc's starting
+ resource is
+ Additional SXLink arcs may be specified in the optional argument.
+</pre><p><br>
+
+<hr width='40%' align='center'><center><h3><a name='sect52297' href='#tocsect52297'>Embedding XLink arcs into the document</a></h3></center>
+
+<pre> The element node with embedded XLink arcs looks as follows
+  element-node ::= (name
+                    (@ ...)
+                    (@@
+                     (sxlink  &lt;sxlink-arc&gt;+ )
+                     ...)  ; other members of the aux list
+                    ...)
+  attribute-node ::= (name &quot;value&quot;
+                           (@@
+                            (sxlink  &lt;sxlink-arc&gt;+ )
+                            ...)  ; other members of the aux list
+                          )
+</pre>
+<h4><a name='docfunc50412' href='#tocfunc50412'>xlink:embed-arcs-into-document</a></h4>
+(define (xlink:embed-arcs-into-document document)<i><br> ... <a href='#codefunc50412'>Full Code</a> ... )</i>
+<pre> Takes SXLink arcs outgoing from the document and embeds these arcs into
+ element and attribute nodes of the document.
+ The modified document is returned
+ The function doesn't make a copy of nodes that remain unchanged
+</pre><p><br>
+
+<h4><a name='docfunc36058' href='#tocfunc36058'>xlink:arcs-embedded</a></h4>
+(define (xlink:arcs-embedded doc)<i><br> ... <a href='#codefunc36058'>Full Code</a> ... )</i>
+<pre> Returns all embedded SXLink arcs in the document
+ Result: (listof sxlink-arc)
+</pre><p><br>
+<hr height='5'><center><h3><a name='chapt64020' href='#tocchapt64020'>Load documents with respect to the other documents</a></h3></center>
+
+<pre></pre>
+<h4><a name='docfunc45573' href='#tocfunc45573'>xlink:parameterized-load-with-respect-documents</a></h4>
+(define (xlink:parameterized-load-with-respect-documents . options)<i><br> ... <a href='#codefunc45573'>Full Code</a> ... )</i>
+<pre> Parameterized with options, returns
+  (lambda (linked-docs uri . uris) ...)
+ which is the lambda for getting more documents by their URIs
+ Options include the following:
+  'linkbases - load linkbases recursively
+  '(linkbases  &lt;number&gt; ) - load linkbases recursively, with the maximal
+                            number of recursive steps defined by the &lt;number&gt;
+                            supplied
+  'docs - load documents recursively
+  '(docs  &lt;number&gt; ) - load documents recursively, with the maximal number
+                       of recursive steps defined by the &lt;number&gt; supplied
+  'embed - embed SXLink arcs into nodes that are starting resources for that
+           arcs
+  'no-embed - don't embed SXLink arcs into documents loaded
+</pre><p><br>
+
+<h4><a name='docfunc44424' href='#tocfunc44424'>xlink:get-docs-with-respect-to-loaded</a></h4>
+(define xlink:get-docs-with-respect-to-loaded <i><br> ... <a href='#codefunc44424'>Full Code</a> ... )</i>
+<pre> The most common case of parametrization
+</pre><p><br>
+<hr height='5'><center><h3><a name='chapt59132' href='#tocchapt59132'>Excluding documents from linked-docs</a></h3></center>
+
+<pre> TODO: to be implemented later
+</pre><hr height='5'><center><h3><a name='chapt55017' href='#tocchapt55017'>High-level API functions</a></h3></center>
+
+<pre></pre>
+<h4><a name='docfunc34968' href='#tocfunc34968'>xlink:load-linked-docs-with-params</a></h4>
+(define (xlink:load-linked-docs-with-params . options)<i><br> ... <a href='#codefunc34968'>Full Code</a> ... )</i>
+<pre> Parameterized with options, returns
+  (lambda (uri . uris) ...)
+ which is the lambda for getting documents by their URIs
+ Options include the following:
+  'linkbases - load linkbases recursively
+  '(linkbases  &lt;number&gt; ) - load linkbases recursively, with the maximal
+                            number of recursive steps defined by the &lt;number&gt;
+                            supplied
+  'docs - load documents recursively
+  '(docs  &lt;number&gt; ) - load documents recursively, with the maximal number
+                       of recursive steps defined by the &lt;number&gt; supplied
+  'embed - embed SXLink arcs into nodes that are starting resources for that
+           arcs
+</pre><p><br>
+
+<h4><a name='docfunc54371' href='#tocfunc54371'>xlink:documents</a></h4>
+(define xlink:documents <i><br> ... <a href='#codefunc54371'>Full Code</a> ... )</i>
+<pre> procedure xlink:documents :: {REQ-URI}+  -&gt; (listof SXML-TREE)
+ procedure xlink:documents-embed :: {REQ-URI}+  -&gt; (listof SXML-TREE)
+
+ Both `xlink:documents' and `xlink:documents-embed' accept one or more
+ strings as their arguments. Each string supplied denotes the URI of the
+ requested document to be loaded. The requested document(s) are loaded
+ and are represented in SXML. All XLink links declared in these document(s)
+ are represented as a set of SXLink arcs. If any XLink links refer to XLink
+ linkbases [&lt;a href=&quot;http://www.w3.org/TR/xlink/#xlg&quot;&gt;XLink&lt;/a&gt;],
+ these linkbases are additionally loaded, for additional SXLink arcs
+ declared there.
+
+ The starting resource for each SXLink arc is determined:
+ 1. For each SXML document loaded, the function `xlink:document' adds all
+    SXLink arcs whose starting resource is located within this document, to
+    the auxiliary list of its document node (*TOP*).
+ 2. The function 'xlink:documents-embed' embeds each SXLink arc into its
+    starting resource-node, via auxiliary list of that node. For text nodes
+    serving for starting resources, their SXLink arcs are stored in the
+    auxiliary list of the document node (*TOP*), since SXML text nodes do
+    not support their own auxiliary lists.
+
+ Supported URI formats:
+  + local file
+  + http:// schema
+
+ Supported document formats: XML and HTML. In the case of HTML,
+ &lt;A&gt; hyperlinks are considered as XLink simple links.
+
+ Result: (listof SXML-TREE)
+ A particular SXML document can be located in this list using the
+ function `xlink:find-doc'.
+</pre><p><br>
+
+<h4><a name='docfunc54415' href='#tocfunc54415'>xlink:documents-embed</a></h4>
+(define xlink:documents-embed <i><br> ... <a href='#codefunc54415'>Full Code</a> ... )</i><p><br>
+
+<hr width='40%' align='center'><center><h3><a name='sect18526' href='#tocsect18526'>Convenient function for getting a document by its URI</a></h3></center>
+
+<pre></pre>
+<h4><a name='docfunc35033' href='#tocfunc35033'>sxml:document</a></h4>
+(define (sxml:document req-uri . namespace-prefix-assig)<i><br> ... <a href='#codefunc35033'>Full Code</a> ... )</i>
+<pre> procedure sxml:document :: REQ-URI [NAMESPACE-PREFIX-ASSIG] -&gt;
+                             -&gt; SXML-TREE
+
+ Obtain a [possibly, remote] document by its URI
+ Supported URI formats:  local file and HTTP schema
+ Supported document formats:  XML and HTML
+
+ REQ-URI - a string that contains the URI of the requested document
+ NAMESPACE-PREFIX-ASSIG - is passed as-is to the SSAX parser: there it is
+  used for assigning certain user prefixes to certain namespaces.
+  NAMESPACE-PREFIX-ASSIG is an optional argument and has an effect for an
+  XML resource only. For an HTML resource requested, NAMESPACE-PREFIX-ASSIG
+  is silently ignored.
+
+ Result: the SXML representation for the requested document
+</pre><p><br>
+<hr height='5'><center><h3><a name='chapt10349' href='#tocchapt10349'>SXPath-related stuff</a></h3></center>
+
+<pre></pre>
+<h4><a name='docfunc50961' href='#tocfunc50961'>xlink:arc?</a></h4>
+(define xlink:arc? <i><br> ... <a href='#codefunc50961'>Full Code</a> ... )</i>
+<pre> Whether an SXLink arc
+</pre><p><br>
+
+<hr width='40%' align='center'><center><h3><a name='sect61166' href='#tocsect61166'>Working with the administrative variable '*docs*</a></h3></center>
+
+<pre></pre>
+<h4><a name='docfunc44756' href='#tocfunc44756'>xlink:docs-variable</a></h4>
+(define (xlink:docs-variable var-binding)<i><br> ... <a href='#codefunc44756'>Full Code</a> ... )</i>
+<pre> Returns the value of the administrative SXPath variable '*docs*
+ This variable stores linked-docs
+</pre><p><br>
+
+<h4><a name='docfunc96' href='#tocfunc96'>xlink:add-docs-to-vars</a></h4>
+(define (xlink:add-docs-to-vars node var-binding)<i><br> ... <a href='#codefunc96'>Full Code</a> ... )</i>
+<pre> Extends var-bindings with administative information about linked-docs
+  node - a single node or a nodeset
+</pre><p><br>
+
+<hr width='40%' align='center'><center><h3><a name='sect60076' href='#tocsect60076'>Accessors to SXLink arcs that start from the given SXML node</a></h3></center>
+
+<pre></pre>
+<h4><a name='docfunc36525' href='#tocfunc36525'>xlink:node-embedded-arcs</a></h4>
+(define (xlink:node-embedded-arcs node)<i><br> ... <a href='#codefunc36525'>Full Code</a> ... )</i>
+<pre> Returns SXLink arcs that are embedded into the node as aux list members
+ Result: (listof sxlink-arc)
+</pre><p><br>
+
+<h4><a name='docfunc12095' href='#tocfunc12095'>xlink:node-arcs-on-top</a></h4>
+(define (xlink:node-arcs-on-top node document)<i><br> ... <a href='#codefunc12095'>Full Code</a> ... )</i>
+<pre> Returns SXLink arcs that are specified at the top-level of the document and
+ start from node
+</pre><p><br>
+
+<h4><a name='docfunc44850' href='#tocfunc44850'>xlink:node-arcs</a></h4>
+(define (xlink:node-arcs node document)<i><br> ... <a href='#codefunc44850'>Full Code</a> ... )</i>
+<pre> Returns all SXLink arcs (both embedded and specified at the top-level) that
+ start from ther node
+ The union of the two previous functions
+</pre><p><br>
+
+<hr width='40%' align='center'><center><h3><a name='sect16399' href='#tocsect16399'>Traversing SXLink arcs</a></h3></center>
+
+<pre></pre>
+<h4><a name='docfunc39694' href='#tocfunc39694'>xlink:traverse-arcs</a></h4>
+(define (xlink:traverse-arcs sxlink-arcs linked-docs num-ancestors)<i><br> ... <a href='#codefunc39694'>Full Code</a> ... )</i>
+<pre> Traverse all SXLink arcs to their ending resources
+  sxlink-arcs ::= (listof sxlink-arc)
+  linked-docs ::= (listof document)
+  num-ancestors - number of ancestors required for ending resources
+</pre><p><br>
+
+<hr width='40%' align='center'><center><h3><a name='sect64219' href='#tocsect64219'>Additional XPath axes</a></h3></center>
+
+<pre></pre>
+<h4><a name='docfunc50615' href='#tocfunc50615'>xlink:axis-arc</a></h4>
+(define (xlink:axis-arc test-pred? . num-ancestors)<i><br> ... <a href='#codefunc50615'>Full Code</a> ... )</i>
+<pre> XPath+XLink arc axis
+ This axis returns all SXLink arcs that start from the context node
+  num-ancestors is dummy here, since SXLink arcs don't have ancestors
+</pre><p><br>
+
+<h4><a name='docfunc45061' href='#tocfunc45061'>xlink:axis-traverse</a></h4>
+(define (xlink:axis-traverse test-pred? . num-ancestors)<i><br> ... <a href='#codefunc45061'>Full Code</a> ... )</i>
+<pre> XPath+XLink traverse axis
+ This axis traverses from the context node
+ The lambda produced additionally takes the var-binding. In var-binding, the
+ linked-docs can be stored in the administrative variable '*docs*
+</pre><p><br>
+
+<h4><a name='docfunc20426' href='#tocfunc20426'>xlink:axis-traverse-arc</a></h4>
+(define (xlink:axis-traverse-arc test-pred? . num-ancestors)<i><br> ... <a href='#codefunc20426'>Full Code</a> ... )</i>
+<pre> XPath+XLink traverse-arc axis
+ The axis traverses from the context node that is an SXLink arc
+ The lambda produced additionally takes the var-binding. In var-binding, the
+ linked-docs can be stored in the administrative variable '*docs*
+</pre><p><br>
+<center><h1>Code</h1></center>
+
+<h4><a name='codefunc14809' href='#docfunc14809'>xlink:ntype??</a></h4>
+<i><a href='#tocfunc14809'>Index</a></i><br>
+
+<pre> Helper for predicates
+  type - a string, is supposed to have one of the following values:
+ &quot;extended&quot;, &quot;simple&quot;, &quot;locator&quot;, &quot;resource&quot;, &quot;arc&quot;, &quot;title&quot;.
+ A lambda is returned. When applied to an SXML node, it determines
+ whether the node's xlink:type attribute has a 'type' value.
+</pre>
+<pre>(define (<a href="xlink.html#codefunc14809">xlink:ntype??</a> type)
+  (lambda (node)
+    (let ((attval
+           ((<a href="sxpathlib.html#codefunc3917">select-kids</a> (<a href="sxpathlib.html#codefunc9356">ntype??</a> '*text*))
+            ((<a href="sxpathlib.html#codefunc3917">select-kids</a> (<a href="sxpathlib.html#codefunc9356">ntype??</a> 'http://www.w3.org/1999/xlink:type))
+             ((<a href="sxpathlib.html#codefunc3917">select-kids</a> (<a href="sxpathlib.html#codefunc9356">ntype??</a> '@)) node)))))
+      (if (null? attval)  ; there is no xlink:type attribute
+          #f
+          (string=? (car attval) type)))))
+</pre>
+<h4><a name='codefunc56299' href='#docfunc56299'>xlink:elem-extended?</a></h4>
+<i><a href='#tocfunc56299'>Index</a></i><br>
+
+<pre> Node tests for different XLink elements
+</pre>
+<pre>(define <a href="xlink.html#codefunc56299">xlink:elem-extended?</a> (<a href="xlink.html#codefunc14809">xlink:ntype??</a> &quot;extended&quot;))
+</pre>
+<h4><a name='codefunc31620' href='#docfunc31620'>xlink:elem-simple?</a></h4>
+<i><a href='#tocfunc31620'>Index</a></i><br>
+
+<pre>(define <a href="xlink.html#codefunc31620">xlink:elem-simple?</a> (<a href="xlink.html#codefunc14809">xlink:ntype??</a> &quot;simple&quot;))
+</pre>
+<h4><a name='codefunc42436' href='#docfunc42436'>xlink:elem-locator?</a></h4>
+<i><a href='#tocfunc42436'>Index</a></i><br>
+
+<pre>(define <a href="xlink.html#codefunc42436">xlink:elem-locator?</a> (<a href="xlink.html#codefunc14809">xlink:ntype??</a> &quot;locator&quot;))
+</pre>
+<h4><a name='codefunc60657' href='#docfunc60657'>xlink:elem-resource?</a></h4>
+<i><a href='#tocfunc60657'>Index</a></i><br>
+
+<pre>(define <a href="xlink.html#codefunc60657">xlink:elem-resource?</a> (<a href="xlink.html#codefunc14809">xlink:ntype??</a> &quot;resource&quot;))
+</pre>
+<h4><a name='codefunc46070' href='#docfunc46070'>xlink:elem-arc?</a></h4>
+<i><a href='#tocfunc46070'>Index</a></i><br>
+
+<pre>(define <a href="xlink.html#codefunc46070">xlink:elem-arc?</a> (<a href="xlink.html#codefunc14809">xlink:ntype??</a> &quot;arc&quot;))
+</pre>
+<h4><a name='codefunc15706' href='#docfunc15706'>xlink:elem-title?</a></h4>
+<i><a href='#tocfunc15706'>Index</a></i><br>
+
+<pre>(define <a href="xlink.html#codefunc15706">xlink:elem-title?</a> (<a href="xlink.html#codefunc14809">xlink:ntype??</a> &quot;title&quot;))
+</pre>
+<h4><a name='codefunc38241' href='#docfunc38241'>xlink:api-error</a></h4>
+<i><a href='#tocfunc38241'>Index</a></i><br>
+
+<pre> Handler for error messages
+</pre>
+<pre>(define (<a href="xlink.html#codefunc38241">xlink:api-error</a> . text)
+  (<a href="myenv.html#codefunc55253">cerr</a> &quot;XLink API error: &quot;)
+  (apply <a href="myenv.html#codefunc55253">cerr</a> text)
+  (<a href="myenv.html#codefunc55253">cerr</a> <a href="myenv.html#codefunc27758">nl</a>))
+</pre>
+<h4><a name='codefunc23701' href='#docfunc23701'>xlink:parser</a></h4>
+<i><a href='#tocfunc23701'>Index</a></i><br>
+
+<pre> Id+XLink parser parameterized
+</pre>
+<pre>(define <a href="xlink.html#codefunc23701">xlink:parser</a> (<a href="multi-parser.html#codefunc30573">ssax:multi-parser</a> 'id 'xlink))
+</pre>
+<h4><a name='codefunc26961' href='#docfunc26961'>xlink:get-document-by-uri</a></h4>
+<i><a href='#tocfunc26961'>Index</a></i><br>
+
+<pre> Returns the SXML representation for the resource specified by REQ-URI.
+ Resource types supported: XML and HTML. XML is parsed into SXML with SSAX,
+ HTML is parsed with HTML Prag.
+ Additionally, linking information is parsed. For XML, linking information is
+ assumed to be specified with XLink. For HTML, &lt;a&gt; elements are treated as
+ simple links.
+ In case of an error (resource doesn't exist or its type is unsupported), an
+ error is signalled with 'xlink:api-error' and #f is returned.
+</pre>
+<pre>(define (<a href="xlink.html#codefunc26961">xlink:get-document-by-uri</a> req-uri)
+  (case (<a href="access-remote.html#codefunc15661">ar:resource-type</a> req-uri)
+    ((#f)  ; resource doesn't exist
+     (<a href="xlink.html#codefunc38241">xlink:api-error</a> &quot;resource doesn't exist: &quot; req-uri)
+     #f)
+    ((xml plain unknown)
+     (let* ((port (<a href="access-remote.html#codefunc60351">open-input-resource</a> req-uri))
+            (doc (<a href="xlink.html#codefunc23701">xlink:parser</a> port)))
+       (close-input-port port)
+       (<a href="xlink.html#codefunc6931">xlink:set-uri</a> req-uri doc)))
+    ((html)
+     (let* ((port (<a href="access-remote.html#codefunc60351">open-input-resource</a> req-uri))
+            (doc (<a href="htmlprag.html#codefunc996">html-&gt;sxml</a> port)))
+       (close-input-port port)
+       (<a href="xlink-parser.html#codefunc974">SHTML-&gt;SHTML+xlink</a>
+        (<a href="xlink.html#codefunc6931">xlink:set-uri</a> req-uri doc))))    
+    (else  ; unknown resource type
+     (<a href="xlink.html#codefunc38241">xlink:api-error</a> &quot;resource type not supported: &quot; req-uri)
+     #f)))
+</pre>
+<h4><a name='codefunc23637' href='#docfunc23637'>xlink:unite-duplicate-keys-in-alist</a></h4>
+<i><a href='#tocfunc23637'>Index</a></i><br>
+
+<pre>  alist ::= (listof
+             (cons key (listof item)))
+ For equal keys in the alist, the function unites the corresponding key values
+ Returns the new alist
+</pre>
+<pre>(define (<a href="xlink.html#codefunc23637">xlink:unite-duplicate-keys-in-alist</a> alist)
+  (let loop ((src alist)
+             (res '()))
+    (if
+     (null? src)
+     res
+     (let ((curr-key (caar src)))
+       (let rpt ((scan (cdr src))
+                 (content (cdar src))
+                 (other '()))
+         (cond
+           ((null? scan)
+            (loop other
+                  (cons (cons curr-key content)
+                        res)))
+           ((equal? (caar scan) curr-key)
+            (rpt (cdr scan)
+                 (append content (cdar scan))
+                 other))
+           (else  ; a different key
+            (rpt (cdr scan) content
+                 (cons (car scan) other)))))))))
+</pre>
+<h4><a name='codefunc40123' href='#docfunc40123'>xlink:docs-exchange-arcs</a></h4>
+<i><a href='#tocfunc40123'>Index</a></i><br>
+
+<pre> Documents exchange their SXLink arcs, such as each arc is moved to the
+ &quot;@@/sxlink/outgoing&quot; branch of the document where the arc's starting
+ resource is
+ Additional SXLink arcs may be specified in the optional argument.
+</pre>
+<pre>(define (<a href="xlink.html#codefunc40123">xlink:docs-exchange-arcs</a> doc-set . sxlink-arcs)
+  (let ((doc-set-uris (<a href="xlink.html#codefunc64299">xlink:uris</a> doc-set))
+        (sxlink-arcs (if (null? sxlink-arcs) '() (car sxlink-arcs))))
+    ; outgoing-alist ::= (listof
+    ;                     (cons uri
+    ;                           (listof (cons node (listof sxlink-arc)))))
+    ; declared-here-alist ::= (listof
+    ;                           (cons uri (listof sxlink-arc)))
+    (let loop ((outgoing-alist (map
+                                (lambda (doc)
+                                  (cons
+                                   (<a href="xlink-parser.html#codefunc6919">xlink:get-uri</a> doc)
+                                   (<a href="xlink.html#codefunc48364">xlink:arcs-outgoing</a> doc)))
+                                doc-set))
+               (declared-here-alist (map list doc-set-uris))
+               (arcs-to-scan
+                (append sxlink-arcs
+                        (apply append
+                               (map <a href="xlink.html#codefunc33218">xlink:arcs-declared-here</a> doc-set)))))
+      (if
+       (null? arcs-to-scan)  ; all arcs processed
+       (let ((outgoing-alist
+              (<a href="xlink.html#codefunc23637">xlink:unite-duplicate-keys-in-alist</a> outgoing-alist))
+             (declared-here-alist
+              (<a href="xlink.html#codefunc23637">xlink:unite-duplicate-keys-in-alist</a> declared-here-alist)))
+         (map
+          (lambda (doc)
+            (let ((uri (<a href="xlink-parser.html#codefunc6919">xlink:get-uri</a> doc)))
+              (<a href="xlink-parser.html#codefunc49437">xlink:replace-branch</a>               
+                doc
+                '(@@ sxlink)
+                `((declared-here
+                   ,@(cdr (assoc uri declared-here-alist)))
+                  ,@(if (<a href="xlink.html#codefunc52186">xlink:arcs-embedded?</a> doc) '((embedded)) '())
+                  (outgoing
+                   ,@(<a href="xlink.html#codefunc23637">xlink:unite-duplicate-keys-in-alist</a>
+                      (cdr (assoc uri outgoing-alist))))))))
+            doc-set))
+       (let* ((curr-arc (car arcs-to-scan))
+              (uri-from (car  ; URI must be presented
+                         ((<a href="sxpathlib.html#codefunc3917">select-kids</a> (<a href="sxpathlib.html#codefunc9356">ntype??</a> '*text*))
+                          ((<a href="sxpathlib.html#codefunc3917">select-kids</a> (<a href="sxpathlib.html#codefunc9356">ntype??</a> 'uri))
+                           ((<a href="sxpathlib.html#codefunc3917">select-kids</a> (<a href="sxpathlib.html#codefunc9356">ntype??</a> 'from))
+                            curr-arc)))))
+              (uri-decl (car  ; URI must be presented
+                         ((<a href="sxpathlib.html#codefunc3917">select-kids</a> (<a href="sxpathlib.html#codefunc9356">ntype??</a> '*text*))
+                          ((<a href="sxpathlib.html#codefunc3917">select-kids</a> (<a href="sxpathlib.html#codefunc9356">ntype??</a> 'uri))
+                           ((<a href="sxpathlib.html#codefunc3917">select-kids</a> (<a href="sxpathlib.html#codefunc9356">ntype??</a> 'declaration))
+                            curr-arc))))))
+         (if
+          (not (member uri-from doc-set-uris))
+          ; This arc starts from none of the documents from doc-set
+          (loop outgoing-alist
+                (cons (list uri-decl curr-arc) declared-here-alist)
+                (cdr arcs-to-scan))
+          (let ((nodes  ; nodes that are the starting resource
+                 (let ((nodes-nset
+                        ((<a href="sxpathlib.html#codefunc3917">select-kids</a> (<a href="sxpathlib.html#codefunc9356">ntype??</a> 'nodes))
+                         ((<a href="sxpathlib.html#codefunc3917">select-kids</a> (<a href="sxpathlib.html#codefunc9356">ntype??</a> 'from))
+                          curr-arc))))
+                   (if
+                    (not (null? nodes-nset))
+                    (cdar nodes-nset)
+                    (let ((xpointer-nset
+                           ((<a href="sxpathlib.html#codefunc3917">select-kids</a> (<a href="sxpathlib.html#codefunc9356">ntype??</a> 'xpointer))
+                            ((<a href="sxpathlib.html#codefunc3917">select-kids</a> (<a href="sxpathlib.html#codefunc9356">ntype??</a> 'from)) curr-arc)))
+                          (starting-doc (<a href="xlink.html#codefunc43710">xlink:find-doc</a> uri-from doc-set)))
+                      (if
+                       (null? xpointer-nset)  ; no XPointer
+                       ((<a href="sxpathlib.html#codefunc3917">select-kids</a> (<a href="sxpathlib.html#codefunc9356">ntype??</a> '*))  ; document element
+                        starting-doc)
+                       (let ((func (<a href="txpath.html#codefunc41179">sxml:xpointer</a> (cadar xpointer-nset))))
+                         (if
+                          (not func)  ; parser error
+                          #f
+                          (let ((starting-nset (func starting-doc)))
+                            (if
+                             (<a href="sxpathlib.html#codefunc31162">nodeset?</a> starting-nset)
+                             starting-nset
+                             #f))))))))))
+            (if
+              nodes   ; starting resource selects some nodes
+              (loop               
+               (cons (cons uri-from
+                           (map
+                            (lambda (node) (list node curr-arc))
+                            nodes))
+                     outgoing-alist)
+               declared-here-alist
+               (cdr arcs-to-scan))
+              (loop outgoing-alist
+                    (cons (list uri-decl curr-arc) declared-here-alist)
+                    (cdr arcs-to-scan))))))))))
+</pre>
+<h4><a name='codefunc45573' href='#docfunc45573'>xlink:parameterized-load-with-respect-documents</a></h4>
+<i><a href='#tocfunc45573'>Index</a></i><br>
+
+<pre> Parameterized with options, returns
+  (lambda (linked-docs uri . uris) ...)
+ which is the lambda for getting more documents by their URIs
+ Options include the following:
+  'linkbases - load linkbases recursively
+  '(linkbases  &lt;number&gt; ) - load linkbases recursively, with the maximal
+                            number of recursive steps defined by the &lt;number&gt;
+                            supplied
+  'docs - load documents recursively
+  '(docs  &lt;number&gt; ) - load documents recursively, with the maximal number
+                       of recursive steps defined by the &lt;number&gt; supplied
+  'embed - embed SXLink arcs into nodes that are starting resources for that
+           arcs
+  'no-embed - don't embed SXLink arcs into documents loaded
+</pre>
+<pre>(define (<a href="xlink.html#codefunc45573">xlink:parameterized-load-with-respect-documents</a> . options)
+  (let ((doc-getter (apply <a href="xlink.html#codefunc46734">xlink:get-documents-with-params</a> options))
+        (embed? (memq 'embed options))
+        (no-embed? (memq 'no-embed options)))
+    (lambda (linked-docs . uris)
+      (let* ((loaded-uris (<a href="xlink.html#codefunc64299">xlink:uris</a> linked-docs))
+             (req-docs
+              (<a href="xlink.html#codefunc40123">xlink:docs-exchange-arcs</a>
+               (<a href="common.html#codefunc20536">filter</a>
+                (lambda (x) x)
+                (map
+                 (lambda (uri)
+                   (if
+                    (member uri loaded-uris)  ; document already loaded
+                    (<a href="xlink.html#codefunc43710">xlink:find-doc</a> uri linked-docs)
+                    (<a href="xlink.html#codefunc26961">xlink:get-document-by-uri</a> uri)))
+                 (<a href="xlink.html#codefunc39933">xlink:remove-equal-duplicates</a> uris)))
+               (apply append (map <a href="xlink.html#codefunc33218">xlink:arcs-declared-here</a> linked-docs)))))
+        (cond
+          (no-embed? req-docs)
+          ((or embed?  ; embed arcs
+               (member #t (map <a href="xlink.html#codefunc52186">xlink:arcs-embedded?</a> linked-docs)))
+           (map <a href="xlink.html#codefunc50412">xlink:embed-arcs-into-document</a> req-docs))
+          (else req-docs))))))
+</pre>
+<h4><a name='codefunc44424' href='#docfunc44424'>xlink:get-docs-with-respect-to-loaded</a></h4>
+<i><a href='#tocfunc44424'>Index</a></i><br>
+
+<pre> The most common case of parametrization
+</pre>
+<pre>(define <a href="xlink.html#codefunc44424">xlink:get-docs-with-respect-to-loaded</a>
+  (<a href="xlink.html#codefunc45573">xlink:parameterized-load-with-respect-documents</a> 'linkbase))
+</pre>
+<h4><a name='codefunc34968' href='#docfunc34968'>xlink:load-linked-docs-with-params</a></h4>
+<i><a href='#tocfunc34968'>Index</a></i><br>
+
+<pre> Parameterized with options, returns
+  (lambda (uri . uris) ...)
+ which is the lambda for getting documents by their URIs
+ Options include the following:
+  'linkbases - load linkbases recursively
+  '(linkbases  &lt;number&gt; ) - load linkbases recursively, with the maximal
+                            number of recursive steps defined by the &lt;number&gt;
+                            supplied
+  'docs - load documents recursively
+  '(docs  &lt;number&gt; ) - load documents recursively, with the maximal number
+                       of recursive steps defined by the &lt;number&gt; supplied
+  'embed - embed SXLink arcs into nodes that are starting resources for that
+           arcs
+</pre>
+<pre>(define (<a href="xlink.html#codefunc34968">xlink:load-linked-docs-with-params</a> . options)
+  (let ((doc-getter (apply <a href="xlink.html#codefunc46734">xlink:get-documents-with-params</a> options)))
+    (if
+     (memq 'embed options)  ; embed
+     (lambda (uri . uris)
+       (map
+        <a href="xlink.html#codefunc50412">xlink:embed-arcs-into-document</a>
+        (<a href="xlink.html#codefunc40123">xlink:docs-exchange-arcs</a> (apply doc-getter (cons uri uris)))))
+     (lambda (uri . uris)
+       (<a href="xlink.html#codefunc40123">xlink:docs-exchange-arcs</a> (apply doc-getter (cons uri uris)))))))
+</pre>
+<h4><a name='codefunc54371' href='#docfunc54371'>xlink:documents</a></h4>
+<i><a href='#tocfunc54371'>Index</a></i><br>
+
+<pre> procedure xlink:documents :: {REQ-URI}+  -&gt; (listof SXML-TREE)
+ procedure xlink:documents-embed :: {REQ-URI}+  -&gt; (listof SXML-TREE)
+
+ Both `xlink:documents' and `xlink:documents-embed' accept one or more
+ strings as their arguments. Each string supplied denotes the URI of the
+ requested document to be loaded. The requested document(s) are loaded
+ and are represented in SXML. All XLink links declared in these document(s)
+ are represented as a set of SXLink arcs. If any XLink links refer to XLink
+ linkbases [&lt;a href=&quot;http://www.w3.org/TR/xlink/#xlg&quot;&gt;XLink&lt;/a&gt;],
+ these linkbases are additionally loaded, for additional SXLink arcs
+ declared there.
+
+ The starting resource for each SXLink arc is determined:
+ 1. For each SXML document loaded, the function `xlink:document' adds all
+    SXLink arcs whose starting resource is located within this document, to
+    the auxiliary list of its document node (*TOP*).
+ 2. The function 'xlink:documents-embed' embeds each SXLink arc into its
+    starting resource-node, via auxiliary list of that node. For text nodes
+    serving for starting resources, their SXLink arcs are stored in the
+    auxiliary list of the document node (*TOP*), since SXML text nodes do
+    not support their own auxiliary lists.
+
+ Supported URI formats:
+  + local file
+  + http:// schema
+
+ Supported document formats: XML and HTML. In the case of HTML,
+ &lt;A&gt; hyperlinks are considered as XLink simple links.
+
+ Result: (listof SXML-TREE)
+ A particular SXML document can be located in this list using the
+ function `xlink:find-doc'.
+</pre>
+<pre>(define <a href="xlink.html#codefunc54371">xlink:documents</a>
+  (<a href="xlink.html#codefunc34968">xlink:load-linked-docs-with-params</a> 'linkbases))
+</pre>
+<h4><a name='codefunc54415' href='#docfunc54415'>xlink:documents-embed</a></h4>
+<i><a href='#tocfunc54415'>Index</a></i><br>
+
+<pre>(define <a href="xlink.html#codefunc54415">xlink:documents-embed</a>
+  (<a href="xlink.html#codefunc34968">xlink:load-linked-docs-with-params</a> 'linkbases 'embed))
+</pre>
+<h4><a name='codefunc50961' href='#docfunc50961'>xlink:arc?</a></h4>
+<i><a href='#tocfunc50961'>Index</a></i><br>
+
+<pre> Whether an SXLink arc
+</pre>
+<pre>(define <a href="xlink.html#codefunc50961">xlink:arc?</a>
+  (<a href="sxpathlib.html#codefunc6363">ntype-names??</a>
+   '(linkbase simple outbound inbound third-party local-to-local)))
+</pre>
+<h4><a name='codefunc6931' href='#docfunc6931'>xlink:set-uri</a></h4>
+<i><a href='#tocfunc6931'>Index</a></i><br>
+
+<pre> Sets the URI for the SXML document
+</pre>
+<pre>(define (<a href="xlink.html#codefunc6931">xlink:set-uri</a> uri doc)
+  (let ((aux-nset ((<a href="sxpathlib.html#codefunc3917">select-kids</a> (<a href="sxpathlib.html#codefunc9356">ntype??</a> '@@)) doc)))
+    (if
+     (or (null? aux-nset)  ; no aux node at all yet
+         ; no sxlink/declared-here subnode
+         (null? ((<a href="sxpathlib.html#codefunc3917">select-kids</a> (<a href="sxpathlib.html#codefunc9356">ntype??</a> 'declared-here))
+                 ((<a href="sxpathlib.html#codefunc3917">select-kids</a> (<a href="sxpathlib.html#codefunc9356">ntype??</a> 'sxlink)) (car aux-nset)))))
+     (<a href="xlink-parser.html#codefunc49437">xlink:replace-branch</a>  ; inserts the @@/uri node in the document
+      doc '(@@ uri) (list uri))
+     (<a href="xlink-parser.html#codefunc49437">xlink:replace-branch</a>
+      doc
+      '(@@)
+      (cdr
+       ((<a href="xlink-parser.html#codefunc39145">xlink:branch-helper</a>  ; inserts URI to sxlink-arcs
+         (lambda (declared-here-node dummy)
+           (cons
+            (car declared-here-node)
+            (<a href="xlink-parser.html#codefunc63308">xlink:set-uri-for-sxlink-arcs</a>
+             uri (cdr declared-here-node)))))
+        (<a href="xlink-parser.html#codefunc49437">xlink:replace-branch</a>  ; inserts (modified) URI
+         (car aux-nset) '(uri) (list uri))
+        '(sxlink declared-here)
+        '()  ; dummy
+        ))))))
+</pre>
+<h4><a name='codefunc49079' href='#docfunc49079'>xlink:id-index</a></h4>
+<i><a href='#tocfunc49079'>Index</a></i><br>
+
+<pre> Returns the id-index of the SXML document
+ #f is returned is there is no &quot;@@/id-index&quot; subtree in the document
+</pre>
+<pre>(define (<a href="xlink.html#codefunc49079">xlink:id-index</a> doc)
+  (let ((nodeset ((<a href="sxpathlib.html#codefunc3917">select-kids</a> (<a href="sxpathlib.html#codefunc9356">ntype??</a> 'id-index))
+                  ((<a href="sxpathlib.html#codefunc3917">select-kids</a> (<a href="sxpathlib.html#codefunc9356">ntype??</a> '@@)) doc))))
+    (if (null? nodeset)  ; there is no &quot;@@/id-index&quot; subtree
+        #f
+        (cdar nodeset))))
+</pre>
+<h4><a name='codefunc33218' href='#docfunc33218'>xlink:arcs-declared-here</a></h4>
+<i><a href='#tocfunc33218'>Index</a></i><br>
+
+<pre> Returns (listof sxlink-arc) located in &quot;@@/sxlink/declared-here&quot;
+ These are SXLink arcs that are declared in this document
+</pre>
+<pre>(define (<a href="xlink.html#codefunc33218">xlink:arcs-declared-here</a> doc)
+  ((<a href="sxpathlib.html#codefunc3917">select-kids</a> (<a href="sxpathlib.html#codefunc9356">ntype??</a> '*any*))
+   ((<a href="sxpathlib.html#codefunc3917">select-kids</a> (<a href="sxpathlib.html#codefunc9356">ntype??</a> 'declared-here))
+    ((<a href="sxpathlib.html#codefunc3917">select-kids</a> (<a href="sxpathlib.html#codefunc9356">ntype??</a> 'sxlink))
+     ((<a href="sxpathlib.html#codefunc3917">select-kids</a> (<a href="sxpathlib.html#codefunc9356">ntype??</a> '@@)) doc)))))
+</pre>
+<h4><a name='codefunc52186' href='#docfunc52186'>xlink:arcs-embedded?</a></h4>
+<i><a href='#tocfunc52186'>Index</a></i><br>
+
+<pre> Whether outgoing SXLink arcs are embedded into the document.
+ This is denoted by the presense of &quot;@@/sxlink/embedded&quot; empty element.
+</pre>
+<pre>(define (<a href="xlink.html#codefunc52186">xlink:arcs-embedded?</a> doc)
+  (not (null? ((<a href="sxpathlib.html#codefunc3917">select-kids</a> (<a href="sxpathlib.html#codefunc9356">ntype??</a> 'embedded))
+               ((<a href="sxpathlib.html#codefunc3917">select-kids</a> (<a href="sxpathlib.html#codefunc9356">ntype??</a> 'sxlink))
+                ((<a href="sxpathlib.html#codefunc3917">select-kids</a> (<a href="sxpathlib.html#codefunc9356">ntype??</a> '@@)) doc))))))
+</pre>
+<h4><a name='codefunc48364' href='#docfunc48364'>xlink:arcs-outgoing</a></h4>
+<i><a href='#tocfunc48364'>Index</a></i><br>
+
+<pre> Returns the content of &quot;@@/sxlink/outgoing&quot;
+ The result is the associative list between nodes of the document and
+ SXLink arcs that start from the corresponding node
+</pre>
+<pre>(define (<a href="xlink.html#codefunc48364">xlink:arcs-outgoing</a> doc)
+  ((<a href="sxpathlib.html#codefunc3917">select-kids</a> (<a href="sxpathlib.html#codefunc9356">ntype??</a> '*any*))
+   ((<a href="sxpathlib.html#codefunc3917">select-kids</a> (<a href="sxpathlib.html#codefunc9356">ntype??</a> 'outgoing))
+    ((<a href="sxpathlib.html#codefunc3917">select-kids</a> (<a href="sxpathlib.html#codefunc9356">ntype??</a> 'sxlink))
+     ((<a href="sxpathlib.html#codefunc3917">select-kids</a> (<a href="sxpathlib.html#codefunc9356">ntype??</a> '@@)) doc)))))
+</pre>
+<h4><a name='codefunc55844' href='#docfunc55844'>xlink:arcs-uris</a></h4>
+<i><a href='#tocfunc55844'>Index</a></i><br>
+
+<pre> Returns URIs of resources that participate in SXLink arcs
+  sxlink-arcs ::= (listof sxlink-arc)
+ Result: (listof string)
+ The result may contain duplicates
+</pre>
+<pre>(define (<a href="xlink.html#codefunc55844">xlink:arcs-uris</a> sxlink-arcs)
+  ((<a href="sxpathlib.html#codefunc3917">select-kids</a> (<a href="sxpathlib.html#codefunc9356">ntype??</a> '*text*))
+   ((<a href="sxpathlib.html#codefunc3917">select-kids</a> (<a href="sxpathlib.html#codefunc9356">ntype??</a> 'uri))
+    ((<a href="sxpathlib.html#codefunc3917">select-kids</a> (<a href="sxpathlib.html#codefunc6363">ntype-names??</a> '(from to))) sxlink-arcs))))
+</pre>
+<h4><a name='codefunc48825' href='#docfunc48825'>xlink:arcs-linkbase-uris</a></h4>
+<i><a href='#tocfunc48825'>Index</a></i><br>
+
+<pre> Returns URIs of all linkbases encountered among SXLink arcs
+ Result: (listof string)
+ The result may contain duplicates
+</pre>
+<pre>(define (<a href="xlink.html#codefunc48825">xlink:arcs-linkbase-uris</a> sxlink-arcs)
+  ((<a href="sxpathlib.html#codefunc3917">select-kids</a> (<a href="sxpathlib.html#codefunc9356">ntype??</a> '*text*))
+   ((<a href="sxpathlib.html#codefunc3917">select-kids</a> (<a href="sxpathlib.html#codefunc9356">ntype??</a> 'uri))
+    ((<a href="sxpathlib.html#codefunc3917">select-kids</a> (<a href="sxpathlib.html#codefunc9356">ntype??</a> 'to))
+     (<a href="common.html#codefunc20536">filter</a> (<a href="sxpathlib.html#codefunc9356">ntype??</a> 'linkbase) sxlink-arcs)))))
+</pre>
+<h4><a name='codefunc64299' href='#docfunc64299'>xlink:uris</a></h4>
+<i><a href='#tocfunc64299'>Index</a></i><br>
+
+<pre> Returns the list of URIs of the documents in the doc-set
+</pre>
+<pre>(define (<a href="xlink.html#codefunc64299">xlink:uris</a> doc-set)
+  (<a href="common.html#codefunc20536">filter</a>
+   (lambda (x) x)
+   (map <a href="xlink-parser.html#codefunc6919">xlink:get-uri</a> doc-set)))
+</pre>
+<h4><a name='codefunc39933' href='#docfunc39933'>xlink:remove-equal-duplicates</a></h4>
+<i><a href='#tocfunc39933'>Index</a></i><br>
+
+<pre> Removes equal duplicates from the list
+</pre>
+<pre>(define (<a href="xlink.html#codefunc39933">xlink:remove-equal-duplicates</a> lst)
+  (cond
+    ((null? lst) lst)
+    ((member (car lst) (cdr lst))
+     (<a href="xlink.html#codefunc39933">xlink:remove-equal-duplicates</a> (cdr lst)))
+    (else
+     (cons (car lst) (<a href="xlink.html#codefunc39933">xlink:remove-equal-duplicates</a> (cdr lst))))))
+</pre>
+<h4><a name='codefunc43710' href='#docfunc43710'>xlink:find-doc</a></h4>
+<i><a href='#tocfunc43710'>Index</a></i><br>
+
+<pre> procedure xlink:find-doc :: URI-STRING (listof SXML-TREE) -&gt; SXML-TREE
+
+ Finding a document in 'doc-set' by its 'uri-string'.
+ If there is no such document, #f is returned.
+  doc-set ::= (listof SXML-TREE)
+</pre>
+<pre>(define (<a href="xlink.html#codefunc43710">xlink:find-doc</a> uri-string doc-set)
+  (let loop ((doc-set doc-set))
+    (cond
+      ((null? doc-set) #f)
+      ((equal? (<a href="xlink-parser.html#codefunc6919">xlink:get-uri</a> (car doc-set)) uri-string)
+       (car doc-set))
+      (else (loop (cdr doc-set))))))
+</pre>
+<h4><a name='codefunc60542' href='#docfunc60542'>xlink:referenced-uris</a></h4>
+<i><a href='#tocfunc60542'>Index</a></i><br>
+
+<pre> Returns a list of URIs which are refered by XLink markup
+ Result:  (listof string)
+ The list may contain duplicates.
+</pre>
+<pre>(define (<a href="xlink.html#codefunc60542">xlink:referenced-uris</a> doc-set)
+  (apply append
+         (map
+          (lambda (doc)
+            (<a href="xlink.html#codefunc55844">xlink:arcs-uris</a> (<a href="xlink.html#codefunc33218">xlink:arcs-declared-here</a> doc)))
+          doc-set)))
+</pre>
+<h4><a name='codefunc53523' href='#docfunc53523'>xlink:referenced-linkbase-uris</a></h4>
+<i><a href='#tocfunc53523'>Index</a></i><br>
+
+<pre> Returns a list of linkbase URIs which are refered by XLink markup
+ Result:  (listof string)
+ The list may contain duplicates.
+</pre>
+<pre>(define (<a href="xlink.html#codefunc53523">xlink:referenced-linkbase-uris</a> doc-set)
+  (apply append
+         (map
+          (lambda (doc)
+            (<a href="xlink.html#codefunc48825">xlink:arcs-linkbase-uris</a> (<a href="xlink.html#codefunc33218">xlink:arcs-declared-here</a> doc)))
+          doc-set)))
+</pre>
+<h4><a name='codefunc56163' href='#docfunc56163'>xlink:add-documents-helper</a></h4>
+<i><a href='#tocfunc56163'>Index</a></i><br>
+
+<pre> A helped low-level function for extending the doc-set with more documents
+ Is parameterized with
+  referenced-uris ::= (lambda (doc-set) ...)
+ that would return URIs refered by XLink markup in the doc-set
+ When parameterized, returns
+  (lambda (doc-set . max-steps) ...)
+  max-steps - maximal number of recursive steps
+  The lambda returns the expanded doc-set
+</pre>
+<pre>(define (<a href="xlink.html#codefunc56163">xlink:add-documents-helper</a> referenced-uris)
+  (lambda (doc-set . max-steps)
+    (let ((max-steps (if (null? max-steps) -1 (car max-steps))))
+      (let loop ((doc-set doc-set)
+                 (loaded-uris (<a href="xlink.html#codefunc64299">xlink:uris</a> doc-set))
+                 (to-load (referenced-uris doc-set))
+                 (step 0))
+        (if
+         (or (null? to-load) (= step max-steps))
+         doc-set
+         (let rpt ((loaded-uris loaded-uris)
+                   (to-load to-load)
+                   (added-docs '()))
+           (cond
+             ((null? to-load)
+              (loop (append added-docs doc-set)
+                    loaded-uris
+                    (referenced-uris added-docs)
+                    (+ step 1)))
+             ((member (car to-load) loaded-uris)
+              (rpt loaded-uris
+                   (cdr to-load)
+                   added-docs))
+             (else   ; we load the linkbase
+              (let ((doc (<a href="xlink.html#codefunc26961">xlink:get-document-by-uri</a> (car to-load))))
+                (rpt (cons (car to-load) loaded-uris)
+                     (cdr to-load)
+                     (if doc (cons doc added-docs) added-docs)))))))))))
+</pre>
+<h4><a name='codefunc41414' href='#docfunc41414'>xlink:add-linkbases-recursively</a></h4>
+<i><a href='#tocfunc41414'>Index</a></i><br>
+
+<pre> Two most common parameterized functions. The first one recursively loads
+ linkbases. The second one recursively loads all refered documents
+</pre>
+<pre>(define <a href="xlink.html#codefunc41414">xlink:add-linkbases-recursively</a>
+  (<a href="xlink.html#codefunc56163">xlink:add-documents-helper</a> <a href="xlink.html#codefunc53523">xlink:referenced-linkbase-uris</a>))
+</pre>
+<h4><a name='codefunc50361' href='#docfunc50361'>xlink:add-documents-recursively</a></h4>
+<i><a href='#tocfunc50361'>Index</a></i><br>
+
+<pre>(define <a href="xlink.html#codefunc50361">xlink:add-documents-recursively</a>
+  (<a href="xlink.html#codefunc56163">xlink:add-documents-helper</a> <a href="xlink.html#codefunc60542">xlink:referenced-uris</a>))
+</pre>
+<h4><a name='codefunc46734' href='#docfunc46734'>xlink:get-documents-with-params</a></h4>
+<i><a href='#tocfunc46734'>Index</a></i><br>
+
+<pre> Parameterized with options, returns
+  (lambda (uri . uris) ...)
+ which is the lambda for getting documents by their URIs
+ Options include the following:
+  'linkbases - load linkbases recursively
+  '(linkbases  &lt;number&gt; ) - load linkbases recursively, with the maximal
+ number of recursive steps defined by the &lt;number&gt; supplied
+  'docs - load documents recursively
+  '(docs  &lt;number&gt; ) - load documents recursively, with the maximal number
+ of recursive steps defined by the &lt;number&gt; supplied
+</pre>
+<pre>(define (<a href="xlink.html#codefunc46734">xlink:get-documents-with-params</a> . options)
+  (let ((get-initial-docs  ; Returns documents by their URIs
+         (lambda (uris)
+           (<a href="common.html#codefunc20536">filter</a>  ; keeps only correctly loaded documents
+            (lambda (x) x)
+            (map <a href="xlink.html#codefunc26961">xlink:get-document-by-uri</a>
+                 (<a href="xlink.html#codefunc39933">xlink:remove-equal-duplicates</a> uris)))))
+        (linkbases-pairs
+         (<a href="common.html#codefunc20536">filter</a>
+          (lambda (option) (and (pair? option) (eq? (car option) 'linkbases)))
+          options))
+        (docs-pairs
+         (<a href="common.html#codefunc20536">filter</a>
+          (lambda (option) (and (pair? option) (eq? (car option) 'docs)))
+          options)))
+    (let ((linkbases? (or (memq 'linkbases options)
+                          (not (null? linkbases-pairs))))
+          (max-steps-linkbases (if (null? linkbases-pairs)
+                                   -1
+                                   (cadar linkbases-pairs)))
+          (documents? (or (memq 'docs options)
+                          (not (null? docs-pairs))))
+          (max-steps-documents (if (null? docs-pairs)
+                                   -1
+                                   (cadar docs-pairs))))
+      (cond
+        ((and linkbases? documents?)
+         (lambda (uri . uris)
+           (<a href="xlink.html#codefunc41414">xlink:add-linkbases-recursively</a>
+            (<a href="xlink.html#codefunc50361">xlink:add-documents-recursively</a>
+             (get-initial-docs (cons uri uris))
+             max-steps-documents)
+            max-steps-linkbases)))
+        (linkbases?
+         (lambda (uri . uris)
+           (<a href="xlink.html#codefunc41414">xlink:add-linkbases-recursively</a>            
+            (get-initial-docs (cons uri uris))            
+            max-steps-linkbases)))
+        (documents?
+         (lambda (uri . uris)           
+           (<a href="xlink.html#codefunc50361">xlink:add-documents-recursively</a>
+            (get-initial-docs (cons uri uris))
+            max-steps-documents)))
+        (else  ; nothing extra to be loaded
+         (lambda (uri . uris) (get-initial-docs (cons uri uris))))))))
+</pre>
+<h4><a name='codefunc11875' href='#docfunc11875'>xlink:get-documents+linkbases</a></h4>
+<i><a href='#tocfunc11875'>Index</a></i><br>
+
+<pre> The most common parameterized case.
+ Loads documents and all linkbases
+</pre>
+<pre>(define <a href="xlink.html#codefunc11875">xlink:get-documents+linkbases</a>
+  (<a href="xlink.html#codefunc46734">xlink:get-documents-with-params</a> 'linkbases))
+</pre>
+<h4><a name='codefunc50412' href='#docfunc50412'>xlink:embed-arcs-into-document</a></h4>
+<i><a href='#tocfunc50412'>Index</a></i><br>
+
+<pre> Takes SXLink arcs outgoing from the document and embeds these arcs into
+ element and attribute nodes of the document.
+ The modified document is returned
+ The function doesn't make a copy of nodes that remain unchanged
+</pre>
+<pre>(define (<a href="xlink.html#codefunc50412">xlink:embed-arcs-into-document</a> document)
+  (letrec
+      (; These helper functions return
+       ; (values node outgoing-alist changed?)
+       ;  node - the (modified) node
+       ;  outgoing-alist ::= (listof (cons node (listof sxlink-arc)))
+       ;  changed? - whether the node was changed      
+       (process-element-node
+        (lambda (node outgoing-alist)
+          (cond
+            ((or (not (pair? node))
+                 (eq? (car node) '@@))
+             ; Text node or aux node
+             (values node outgoing-alist #f))
+            ((eq? (car node) '@)
+             (call-with-values
+              (lambda ()
+                ((process-nodeset process-attribute-node)
+                 (cdr node) outgoing-alist))
+              (lambda (content new-out-alist changed?)
+                (if changed?
+                    (values (cons '@ content)
+                            new-out-alist
+                            changed?)
+                    (values node outgoing-alist changed?)))))
+            (else  ; this is the element node
+             (call-with-values
+              (lambda ()
+                (cond
+                  ((assq node outgoing-alist)
+                   =&gt; (lambda (alist-member)
+                        (values
+                         (cdr alist-member)
+                         (<a href="common.html#codefunc20536">filter</a>
+                          (lambda (memb) (not (eq? memb alist-member)))
+                          outgoing-alist))))
+                  (else  ; the node is not the starting resource
+                   (values #f outgoing-alist))))
+              (lambda (outgoing-arcs new-out-alist)
+                (call-with-values
+                 (lambda () ((process-nodeset process-element-node)
+                             (cdr node) new-out-alist))
+                 (lambda (content new-out-alist changed?)
+                   (cond
+                     ((not (or outgoing-arcs changed?))
+                      ; node remains unchanged                    
+                      (values node outgoing-alist changed?))
+                     ((not outgoing-arcs)  ; no arcs from that node
+                      (values (cons (car node) content)
+                              new-out-alist
+                              changed?))
+                     (else  ; the node is the starting resource
+                      (let ((new-content
+                             (if changed? content (cdr node))))
+                        (values
+                         (cond
+                           ((not (null?  ; aux list presented
+                                  ((<a href="sxpathlib.html#codefunc3917">select-kids</a> (<a href="sxpathlib.html#codefunc9356">ntype??</a> '@@)) new-content)))
+                            (<a href="xlink-parser.html#codefunc30467">xlink:append-branch</a>
+                             (cons (car node) new-content)
+                             '(@@ sxlink) outgoing-arcs))
+                           (((<a href="sxpathlib.html#codefunc9356">ntype??</a> '@)  ; attribute node presented                         
+                             (car new-content))
+                            `(,(car node)
+                              ,(car content)  ; attribute node
+                              (@@ (sxlink ,@outgoing-arcs))
+                              ,@(cdr content)))
+                           (else  ; no attribute node
+                            `(,(car node)
+                              (@)
+                              (@@ (sxlink ,@outgoing-arcs))
+                              ,@content)))
+                         new-out-alist
+                         #t))))))))))))
+       (process-attribute-node
+        (lambda (node outgoing-alist)
+          (cond
+            ((assq node outgoing-alist)
+             =&gt; (lambda (alist-member)
+                  (values
+                   (if
+                    (null?  ; no aux node in the attribute
+                     ((<a href="sxpathlib.html#codefunc3917">select-kids</a> (<a href="sxpathlib.html#codefunc9356">ntype??</a> '@@)) node))
+                    (append node
+                            `((@@
+                               (sxlink ,@(cdr alist-member)))))
+                    (<a href="xlink-parser.html#codefunc30467">xlink:append-branch</a>
+                     node '(@@ sxlink) (cdr alist-member)))
+                   (<a href="common.html#codefunc20536">filter</a>
+                    (lambda (memb) (not (eq? memb alist-member)))
+                    outgoing-alist)
+                   #t)))
+            (else   ; the attribute node is not a starting resource
+             (values node outgoing-alist #f)))))
+       ; Is parameterized with one of the previous functions and
+       ; processes the nodeset
+       (process-nodeset
+        (lambda (processing-func)
+          (lambda (nodeset outgoing-alist)
+            (let loop ((nset nodeset)
+                       (out-alist outgoing-alist)
+                       (changed? #f)
+                       (res '()))
+              (if
+               (null? nset)  ; nodeset processed
+               (values (reverse res)
+                       out-alist
+                       changed?)
+               (call-with-values
+                (lambda () (processing-func (car nset) out-alist))
+                (lambda (new-node new-out-alist ch?)
+                  (loop (cdr nset)
+                        new-out-alist
+                        (or changed? ch?)
+                        (cons new-node res))))))))))
+    (call-with-values
+     (lambda () ((process-nodeset process-element-node)
+                 (cdr document)
+                 (<a href="xlink.html#codefunc48364">xlink:arcs-outgoing</a> document)))
+     (lambda (content new-out-alist changed?)
+       (if (not changed?)  ; the document remains unchanged
+           (<a href="xlink-parser.html#codefunc49437">xlink:replace-branch</a>
+            document '(@@ sxlink embedded) '())
+           (<a href="xlink-parser.html#codefunc49437">xlink:replace-branch</a>
+            (cons '*TOP* content)
+            '(@@ sxlink)
+            `((declared-here ,@(<a href="xlink.html#codefunc33218">xlink:arcs-declared-here</a> document))
+              (embedded)
+              (outgoing ,@new-out-alist))))))))
+</pre>
+<h4><a name='codefunc36058' href='#docfunc36058'>xlink:arcs-embedded</a></h4>
+<i><a href='#tocfunc36058'>Index</a></i><br>
+
+<pre> Returns all embedded SXLink arcs in the document
+ Result: (listof sxlink-arc)
+</pre>
+<pre>(define (<a href="xlink.html#codefunc36058">xlink:arcs-embedded</a> doc)
+  (let ((get-kids
+         (<a href="sxpathlib.html#codefunc3917">select-kids</a>
+          (lambda (node) (and (pair? node) (not (eq? '@@ (car node))))))))
+    (let loop ((nodes-to-scan (get-kids doc))
+               (res '()))
+      (if
+       (null? nodes-to-scan)  ; everyone processed
+       (<a href="xpath-context.html#codefunc3380">draft:remove-eq-duplicates</a> res)
+       (loop
+        (append (get-kids (car nodes-to-scan)) (cdr nodes-to-scan))
+        (append
+         ((<a href="sxpathlib.html#codefunc3917">select-kids</a> (<a href="sxpathlib.html#codefunc9356">ntype??</a> '*any*))
+          ((<a href="sxpathlib.html#codefunc3917">select-kids</a> (<a href="sxpathlib.html#codefunc9356">ntype??</a> 'sxlink))
+           ((<a href="sxpathlib.html#codefunc3917">select-kids</a> (<a href="sxpathlib.html#codefunc9356">ntype??</a> '@@)) (car nodes-to-scan))))
+         res))))))
+</pre>
+<h4><a name='codefunc35033' href='#docfunc35033'>sxml:document</a></h4>
+<i><a href='#tocfunc35033'>Index</a></i><br>
+
+<pre> procedure sxml:document :: REQ-URI [NAMESPACE-PREFIX-ASSIG] -&gt;
+                             -&gt; SXML-TREE
+
+ Obtain a [possibly, remote] document by its URI
+ Supported URI formats:  local file and HTTP schema
+ Supported document formats:  XML and HTML
+
+ REQ-URI - a string that contains the URI of the requested document
+ NAMESPACE-PREFIX-ASSIG - is passed as-is to the SSAX parser: there it is
+  used for assigning certain user prefixes to certain namespaces.
+  NAMESPACE-PREFIX-ASSIG is an optional argument and has an effect for an
+  XML resource only. For an HTML resource requested, NAMESPACE-PREFIX-ASSIG
+  is silently ignored.
+
+ Result: the SXML representation for the requested document
+</pre>
+<pre>(define (<a href="xlink.html#codefunc35033">sxml:document</a> req-uri . namespace-prefix-assig)
+  (if
+   (string? req-uri)
+   (case (<a href="access-remote.html#codefunc15661">ar:resource-type</a> req-uri)
+     ((#f)  ; resource doesn't exist
+      (<a href="xlink.html#codefunc38241">xlink:api-error</a> &quot;resource doesn't exist: &quot; req-uri)
+      #f)
+     ((xml plain unknown)
+      (let* ((port (<a href="access-remote.html#codefunc60351">open-input-resource</a> req-uri))
+             (doc (<a href="SSAX-code.html#codefunc62346">ssax:xml-&gt;sxml</a>
+                   port
+                   (if (null? namespace-prefix-assig)
+                       namespace-prefix-assig
+                       (car namespace-prefix-assig)))))
+        (close-input-port port)
+        doc   ; DL: can also add URI: (<a href="xlink.html#codefunc6931">xlink:set-uri</a> req-uri doc)
+        ))
+     ((html)
+      (let* ((port (<a href="access-remote.html#codefunc60351">open-input-resource</a> req-uri))
+             (doc (<a href="htmlprag.html#codefunc996">html-&gt;sxml</a> port)))
+        (close-input-port port)
+        doc   ; DL: can also add URI: (<a href="xlink.html#codefunc6931">xlink:set-uri</a> req-uri doc)
+        ))
+     (else  ; unknown resource type
+      (<a href="xlink.html#codefunc38241">xlink:api-error</a> &quot;resource type not supported: &quot; req-uri)
+      #f))
+   ; Otherwise: REQ-URI is not a string - producing an exception
+   (exc:signal  ; relies on SRFI-12
+    (<a href="srfi-12.html#codefunc26087">make-property-condition</a>
+     'exn
+     'message
+     &quot;sxml:document: expects type &lt;string&gt; as 1st argument&quot;))))
+</pre>
+<h4><a name='codefunc44756' href='#docfunc44756'>xlink:docs-variable</a></h4>
+<i><a href='#tocfunc44756'>Index</a></i><br>
+
+<pre> Returns the value of the administrative SXPath variable '*docs*
+ This variable stores linked-docs
+</pre>
+<pre>(define (<a href="xlink.html#codefunc44756">xlink:docs-variable</a> var-binding)
+  (cond
+    ((assq '*docs* var-binding)
+     =&gt; cdr)
+    (else '())))
+</pre>
+<h4><a name='codefunc96' href='#docfunc96'>xlink:add-docs-to-vars</a></h4>
+<i><a href='#tocfunc96'>Index</a></i><br>
+
+<pre> Extends var-bindings with administative information about linked-docs
+  node - a single node or a nodeset
+</pre>
+<pre>(define (<a href="xlink.html#codefunc96">xlink:add-docs-to-vars</a> node var-binding)
+  (if (assq '*docs* var-binding)  ; variable already exists
+      var-binding
+      (cons
+       (cons '*docs*
+             (<a href="common.html#codefunc20536">filter</a>
+              (lambda (doc)
+                (and (<a href="xpath-context.html#codefunc49694">draft:top?</a> doc) (<a href="xlink-parser.html#codefunc6919">xlink:get-uri</a> doc)))
+              (<a href="xpath-context.html#codefunc60759">draft:reach-root</a> (<a href="sxpathlib.html#codefunc11721">as-nodeset</a> node))))
+       var-binding)))  
+</pre>
+<h4><a name='codefunc36525' href='#docfunc36525'>xlink:node-embedded-arcs</a></h4>
+<i><a href='#tocfunc36525'>Index</a></i><br>
+
+<pre> Returns SXLink arcs that are embedded into the node as aux list members
+ Result: (listof sxlink-arc)
+</pre>
+<pre>(define (<a href="xlink.html#codefunc36525">xlink:node-embedded-arcs</a> node)
+  (if (<a href="xpath-context.html#codefunc49694">draft:top?</a> node)  ; the root node
+      '()  ; no embedded arcs
+      ((<a href="sxpathlib.html#codefunc3917">select-kids</a> (<a href="sxpathlib.html#codefunc9356">ntype??</a> '*any*))
+       ((<a href="sxpathlib.html#codefunc3917">select-kids</a> (<a href="sxpathlib.html#codefunc9356">ntype??</a> 'sxlink))
+        ((<a href="sxpathlib.html#codefunc3917">select-kids</a> (<a href="sxpathlib.html#codefunc9356">ntype??</a> '@@)) node)))))
+</pre>
+<h4><a name='codefunc12095' href='#docfunc12095'>xlink:node-arcs-on-top</a></h4>
+<i><a href='#tocfunc12095'>Index</a></i><br>
+
+<pre> Returns SXLink arcs that are specified at the top-level of the document and
+ start from node
+</pre>
+<pre>(define (<a href="xlink.html#codefunc12095">xlink:node-arcs-on-top</a> node document)
+  (cond
+    ((assq node (<a href="xlink.html#codefunc48364">xlink:arcs-outgoing</a> document))
+     =&gt; cdr)
+    (else '())))
+</pre>
+<h4><a name='codefunc44850' href='#docfunc44850'>xlink:node-arcs</a></h4>
+<i><a href='#tocfunc44850'>Index</a></i><br>
+
+<pre> Returns all SXLink arcs (both embedded and specified at the top-level) that
+ start from ther node
+ The union of the two previous functions
+</pre>
+<pre>(define (<a href="xlink.html#codefunc44850">xlink:node-arcs</a> node document)
+  (append (<a href="xlink.html#codefunc36525">xlink:node-embedded-arcs</a> node)
+          (<a href="xlink.html#codefunc12095">xlink:node-arcs-on-top</a> node document)))
+</pre>
+<h4><a name='codefunc39694' href='#docfunc39694'>xlink:traverse-arcs</a></h4>
+<i><a href='#tocfunc39694'>Index</a></i><br>
+
+<pre> Traverse all SXLink arcs to their ending resources
+  sxlink-arcs ::= (listof sxlink-arc)
+  linked-docs ::= (listof document)
+  num-ancestors - number of ancestors required for ending resources
+</pre>
+<pre>(define (<a href="xlink.html#codefunc39694">xlink:traverse-arcs</a> sxlink-arcs linked-docs num-ancestors)
+  (let* ((arcs-to
+          ((<a href="sxpathlib.html#codefunc3917">select-kids</a> (<a href="sxpathlib.html#codefunc9356">ntype??</a> 'to)) sxlink-arcs))
+         (req-docs
+          (apply
+           <a href="xlink.html#codefunc44424">xlink:get-docs-with-respect-to-loaded</a>
+           (cons
+            linked-docs
+            (if
+             (and num-ancestors (zero? num-ancestors))
+             ((<a href="sxpathlib.html#codefunc3917">select-kids</a> (<a href="sxpathlib.html#codefunc9356">ntype??</a> '*text*))
+              ((<a href="sxpathlib.html#codefunc3917">select-kids</a> (<a href="sxpathlib.html#codefunc9356">ntype??</a> 'uri))
+               (<a href="common.html#codefunc20536">filter</a>  ; elements that have a &lt;nodes&gt; subelement
+                (lambda (arc-to)
+                  (null? ((<a href="sxpathlib.html#codefunc3917">select-kids</a> (<a href="sxpathlib.html#codefunc9356">ntype??</a> 'nodes)) arc-to)))
+                arcs-to)))
+            ((<a href="sxpathlib.html#codefunc3917">select-kids</a> (<a href="sxpathlib.html#codefunc9356">ntype??</a> '*text*))
+             ((<a href="sxpathlib.html#codefunc3917">select-kids</a> (<a href="sxpathlib.html#codefunc9356">ntype??</a> 'uri)) arcs-to)))))))
+    ;(pp req-docs)
+    (<a href="sxpathlib.html#codefunc27946">map-union</a>
+     (lambda (arc-to)
+       (let ((nodes-nset
+              ((<a href="sxpathlib.html#codefunc3917">select-kids</a> (<a href="sxpathlib.html#codefunc9356">ntype??</a> 'nodes)) arc-to)))
+         (if
+          (and num-ancestors (zero? num-ancestors)
+               (not (null? nodes-nset)))
+          (cadar nodes-nset)
+          ; otherwise we need the document and the XPointer node
+          (let ((doc (<a href="xlink.html#codefunc43710">xlink:find-doc</a>
+                      (car ((<a href="sxpathlib.html#codefunc3917">select-kids</a> (<a href="sxpathlib.html#codefunc9356">ntype??</a> '*text*))
+                            ((<a href="sxpathlib.html#codefunc3917">select-kids</a> (<a href="sxpathlib.html#codefunc9356">ntype??</a> 'uri)) arc-to)))
+                      req-docs))
+                (xpointer-nset
+                 ((<a href="sxpathlib.html#codefunc3917">select-kids</a> (<a href="sxpathlib.html#codefunc9356">ntype??</a> '*text*))
+                  ((<a href="sxpathlib.html#codefunc3917">select-kids</a> (<a href="sxpathlib.html#codefunc9356">ntype??</a> 'xpointer)) arc-to))))
+            ;(pp doc)            
+            ;(display xpointer-nset)
+            ;(newline)
+            (cond
+              ((not doc)  ; document couldn't be loaded
+               '())
+              ((null? xpointer-nset)
+               ; no XPointer part =&gt; addresses the document element
+               ((<a href="xpath-context.html#codefunc59498">draft:child</a> (<a href="sxpathlib.html#codefunc9356">ntype??</a> '*) num-ancestors)
+                doc))
+              (else
+               (let ((impl
+                      (<a href="xpath-context.html#codefunc54261">draft:xpointer</a> (car xpointer-nset)
+                                      (if num-ancestors num-ancestors -1))))
+                 (if
+                  (not impl)  ; parser error
+                  '()
+                  (let ((res (impl doc)))
+                    (if
+                     (<a href="sxpathlib.html#codefunc31162">nodeset?</a> res)
+                     res
+                     (begin
+                       (<a href="xlink.html#codefunc38241">xlink:api-error</a>
+                        &quot;XPointer fragment identifier doesn't &quot;
+                        &quot;select any nodeset: &quot; (car xpointer-nset))
+                       '())))))))))))
+     arcs-to)))
+</pre>
+<h4><a name='codefunc50615' href='#docfunc50615'>xlink:axis-arc</a></h4>
+<i><a href='#tocfunc50615'>Index</a></i><br>
+
+<pre> XPath+XLink arc axis
+ This axis returns all SXLink arcs that start from the context node
+  num-ancestors is dummy here, since SXLink arcs don't have ancestors
+</pre>
+<pre>(define (<a href="xlink.html#codefunc50615">xlink:axis-arc</a> test-pred? . num-ancestors)
+  (let ((this-axis
+         (lambda (node)  ; not a nodeset
+           (let ((root-node
+                  (if (<a href="xpath-context.html#codefunc37046">sxml:context?</a> node)
+                      (<a href="xpath-context.html#codefunc53532">draft:list-last</a> (<a href="xpath-context.html#codefunc46900">sxml:context-&gt;ancestors-u</a> node))
+                      node)))
+             (if (<a href="xpath-context.html#codefunc49694">draft:top?</a> root-node)
+                 (<a href="xlink.html#codefunc44850">xlink:node-arcs</a> (<a href="xpath-context.html#codefunc41847">sxml:context-&gt;node</a> node) root-node)
+                 (<a href="xlink.html#codefunc36525">xlink:node-embedded-arcs</a> (<a href="xpath-context.html#codefunc41847">sxml:context-&gt;node</a> node)))))))
+    (lambda (node)   ; node or nodeset
+      (<a href="common.html#codefunc20536">filter</a> test-pred?
+              (if (<a href="sxpathlib.html#codefunc31162">nodeset?</a> node)
+                  (<a href="sxpathlib.html#codefunc27946">map-union</a> this-axis node)
+                  (this-axis node))))))
+</pre>
+<h4><a name='codefunc45061' href='#docfunc45061'>xlink:axis-traverse</a></h4>
+<i><a href='#tocfunc45061'>Index</a></i><br>
+
+<pre> XPath+XLink traverse axis
+ This axis traverses from the context node
+ The lambda produced additionally takes the var-binding. In var-binding, the
+ linked-docs can be stored in the administrative variable '*docs*
+</pre>
+<pre>(define (<a href="xlink.html#codefunc45061">xlink:axis-traverse</a> test-pred? . num-ancestors)
+  (let* ((num-anc (if (null? num-ancestors) 0 (car num-ancestors)))
+         (get-arcs  ; returns SXLink arcs that start from a given node
+          (lambda (node)  ; not a nodeset
+            (let ((root-node
+                   (if (<a href="xpath-context.html#codefunc37046">sxml:context?</a> node)
+                       (<a href="xpath-context.html#codefunc53532">draft:list-last</a> (<a href="xpath-context.html#codefunc46900">sxml:context-&gt;ancestors-u</a> node))
+                       node)))
+             (if (<a href="xpath-context.html#codefunc49694">draft:top?</a> root-node)
+                 (<a href="xlink.html#codefunc44850">xlink:node-arcs</a> (<a href="xpath-context.html#codefunc41847">sxml:context-&gt;node</a> node) root-node)
+                 (<a href="xlink.html#codefunc36525">xlink:node-embedded-arcs</a> (<a href="xpath-context.html#codefunc41847">sxml:context-&gt;node</a> node)))))))
+    ; node can be both a single node and a nodeset here
+    (lambda (node var-binding)
+      (<a href="common.html#codefunc20536">filter</a>
+       (lambda (node)
+         (test-pred? (<a href="xpath-context.html#codefunc41847">sxml:context-&gt;node</a> node)))       
+       (<a href="xlink.html#codefunc39694">xlink:traverse-arcs</a>
+        (if (<a href="sxpathlib.html#codefunc31162">nodeset?</a> node)
+            (<a href="sxpathlib.html#codefunc27946">map-union</a> get-arcs node)
+            (get-arcs node))
+        (<a href="xlink.html#codefunc44756">xlink:docs-variable</a> var-binding)
+        num-anc)))))
+</pre>
+<h4><a name='codefunc20426' href='#docfunc20426'>xlink:axis-traverse-arc</a></h4>
+<i><a href='#tocfunc20426'>Index</a></i><br>
+
+<pre> XPath+XLink traverse-arc axis
+ The axis traverses from the context node that is an SXLink arc
+ The lambda produced additionally takes the var-binding. In var-binding, the
+ linked-docs can be stored in the administrative variable '*docs*
+</pre>
+<pre>(define (<a href="xlink.html#codefunc20426">xlink:axis-traverse-arc</a> test-pred? . num-ancestors)
+  (let ((num-anc (if (null? num-ancestors) 0 (car num-ancestors))))
+    (lambda (node var-binding)
+      (<a href="common.html#codefunc20536">filter</a>
+       (lambda (node)
+         (test-pred? (<a href="xpath-context.html#codefunc41847">sxml:context-&gt;node</a> node)))       
+       (<a href="xlink.html#codefunc39694">xlink:traverse-arcs</a>
+        (<a href="common.html#codefunc20536">filter</a> <a href="xlink.html#codefunc50961">xlink:arc?</a>
+                (<a href="xpath-context.html#codefunc60759">draft:reach-root</a> (<a href="sxpathlib.html#codefunc11721">as-nodeset</a> node)))
+        (<a href="xlink.html#codefunc44756">xlink:docs-variable</a> var-binding)
+        num-anc)))))
+</pre></body></html>

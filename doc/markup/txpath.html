@@ -1,0 +1,1582 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN""http://www.w3.org/TR/html401/loose.dtd"><html><head><meta name="GENERATOR" content="Mole: The Scheme Source Code Digger"><title>Module: txpath</title><meta name='keywords' content=''></head><body bgcolor='#ffffff' text='#384412'  link='#11af05' vlink='#728b09'>
+<center><h1>Module: txpath</h1></center>
+
+<pre> Classic TXPath implementation based on sxpathlib, sxpath-ext and txp-parser
+
+ This software is in Public Domain.
+ IT IS PROVIDED &quot;AS IS&quot;, WITHOUT WARRANTY OF ANY KIND.
+
+ Please send bug reports and comments to:
+   lisovsky@acm.org      Kirill Lisovsky
+   lizorkin@hotbox.ru    Dmitry Lizorkin
+
+ XPointer's points and ranges are NOT implemented
+
+ Full XPath Core Function Library is supported. That is:
+ 4.1 Node Set Functions
+    number last()
+    number position()
+    number count(node-set)
+    node-set id(object)
+    string local-name(node-set?)
+    string namespace-uri(node-set?)
+    string name(node-set?)
+ 4.2 String Functions
+    string string(object?)
+    string concat(string, string, string*)
+    boolean starts-with(string, string)
+    boolean contains(string, string)
+    string substring-before(string, string)
+    string substring-after(string, string)
+    string substring(string, number, number?)
+    number string-length(string?)
+    string normalize-space(string?)
+    string translate(string, string, string)
+ 4.3 Boolean Functions
+    boolean boolean(object)
+    boolean not(boolean)
+    boolean true()
+    boolean false()
+    boolean lang(string)
+ 4.4 Number Functions
+    number number(object?)
+    number sum(node-set)
+    number floor(number)
+    number ceiling(number)
+    number round(number)
+</pre><p><br>
+<!-- Table of content -->
+<p><dl>
+<p><dt><a name='tocchapt9730' href='#chapt9730'><b>Auxilliary</b></a><dd>
+
+f:  <a name='tocfunc13525' href='#docfunc13525' style='text-decoration:none'>sxml:xpointer-runtime-error</a><br>
+
+<dl><dt><a name='tocsect29675' href='#sect29675'><b>Helper functions</b></a><dd>
+
+f:  <a name='tocfunc6629' href='#docfunc6629' style='text-decoration:none'>sxml:xpath-nodeset-filter</a><br>
+
+f:  <a name='tocfunc63245' href='#docfunc63245' style='text-decoration:none'>sxml:arithmetic-eval</a><br>
+</dl>
+<p><dt><a name='tocchapt49457' href='#chapt49457'><b>XPath Core Function Library</b></a><dd>
+
+<dl><dt><a name='tocsect63086' href='#sect63086'><b>4.1 Node Set Functions</b></a><dd>
+
+f:  <a name='tocfunc48591' href='#docfunc48591' style='text-decoration:none'>sxml:core-last</a><br>
+
+f:  <a name='tocfunc39095' href='#docfunc39095' style='text-decoration:none'>sxml:core-position</a><br>
+
+f:  <a name='tocfunc50748' href='#docfunc50748' style='text-decoration:none'>sxml:core-count</a><br>
+
+f:  <a name='tocfunc19545' href='#docfunc19545' style='text-decoration:none'>sxml:core-id</a><br>
+
+f:  <a name='tocfunc44295' href='#docfunc44295' style='text-decoration:none'>sxml:core-local-name</a><br>
+
+f:  <a name='tocfunc8932' href='#docfunc8932' style='text-decoration:none'>sxml:core-namespace-uri</a><br>
+
+f:  <a name='tocfunc44747' href='#docfunc44747' style='text-decoration:none'>sxml:core-name</a><br>
+</dl>
+
+<dl><dt><a name='tocsect40811' href='#sect40811'><b>4.2 String Functions</b></a><dd>
+
+f:  <a name='tocfunc11588' href='#docfunc11588' style='text-decoration:none'>sxml:core-string</a><br>
+
+f:  <a name='tocfunc12067' href='#docfunc12067' style='text-decoration:none'>sxml:core-concat</a><br>
+
+f:  <a name='tocfunc11832' href='#docfunc11832' style='text-decoration:none'>sxml:core-starts-with</a><br>
+
+f:  <a name='tocfunc43153' href='#docfunc43153' style='text-decoration:none'>sxml:core-contains</a><br>
+
+f:  <a name='tocfunc6470' href='#docfunc6470' style='text-decoration:none'>sxml:core-substring-before</a><br>
+
+f:  <a name='tocfunc43858' href='#docfunc43858' style='text-decoration:none'>sxml:core-substring-after</a><br>
+
+f:  <a name='tocfunc45578' href='#docfunc45578' style='text-decoration:none'>sxml:core-substring</a><br>
+
+f:  <a name='tocfunc31910' href='#docfunc31910' style='text-decoration:none'>sxml:core-string-length</a><br>
+
+f:  <a name='tocfunc44346' href='#docfunc44346' style='text-decoration:none'>sxml:core-normalize-space</a><br>
+
+f:  <a name='tocfunc43519' href='#docfunc43519' style='text-decoration:none'>sxml:core-translate</a><br>
+</dl>
+
+<dl><dt><a name='tocsect23800' href='#sect23800'><b>4.3 Boolean Functions</b></a><dd>
+
+f:  <a name='tocfunc9621' href='#docfunc9621' style='text-decoration:none'>sxml:core-boolean</a><br>
+
+f:  <a name='tocfunc22482' href='#docfunc22482' style='text-decoration:none'>sxml:core-not</a><br>
+
+f:  <a name='tocfunc49113' href='#docfunc49113' style='text-decoration:none'>sxml:core-true</a><br>
+
+f:  <a name='tocfunc48423' href='#docfunc48423' style='text-decoration:none'>sxml:core-false</a><br>
+
+f:  <a name='tocfunc45258' href='#docfunc45258' style='text-decoration:none'>sxml:core-lang</a><br>
+</dl>
+
+<dl><dt><a name='tocsect42074' href='#sect42074'><b>4.4 Number Functions</b></a><dd>
+
+f:  <a name='tocfunc12849' href='#docfunc12849' style='text-decoration:none'>sxml:core-number</a><br>
+
+f:  <a name='tocfunc24016' href='#docfunc24016' style='text-decoration:none'>sxml:core-sum</a><br>
+
+f:  <a name='tocfunc50231' href='#docfunc50231' style='text-decoration:none'>sxml:core-floor</a><br>
+
+f:  <a name='tocfunc10381' href='#docfunc10381' style='text-decoration:none'>sxml:core-ceiling</a><br>
+
+f:  <a name='tocfunc50747' href='#docfunc50747' style='text-decoration:none'>sxml:core-round</a><br>
+</dl>
+<p><dt><a name='tocchapt40271' href='#chapt40271'><b>Parameters for classic TXPath implementation</b></a><dd>
+
+f:  <a name='tocfunc53447' href='#docfunc53447' style='text-decoration:none'>sxml:classic-params</a><br>
+<p><dt><a name='tocchapt29326' href='#chapt29326'><b>Highest level API functions</b></a><dd>
+
+<dl><dt><a name='tocsect1962' href='#sect1962'><b>'sxml:xpath' and 'sxml:xpointer' functions</b></a><dd>
+
+f:  <a name='tocfunc6657' href='#docfunc6657' style='text-decoration:none'>sxml:api-helper0</a><br>
+
+f:  <a name='tocfunc26103' href='#docfunc26103' style='text-decoration:none'>sxml:classic-res</a><br>
+
+f:  <a name='tocfunc59904' href='#docfunc59904' style='text-decoration:none'>sxml:api-helper</a><br>
+
+f:  <a name='tocfunc9984' href='#docfunc9984' style='text-decoration:none'>sxml:xpath</a><br>
+
+f:  <a name='tocfunc41179' href='#docfunc41179' style='text-decoration:none'>sxml:xpointer</a><br>
+
+f:  <a name='tocfunc64791' href='#docfunc64791' style='text-decoration:none'>sxml:xpath-expr</a><br>
+
+f:  <a name='tocfunc2296' href='#docfunc2296' style='text-decoration:none'>sxml:xpath+root+vars</a><br>
+
+f:  <a name='tocfunc39101' href='#docfunc39101' style='text-decoration:none'>sxml:xpointer+root+vars</a><br>
+
+f:  <a name='tocfunc2319' href='#docfunc2319' style='text-decoration:none'>sxml:xpath+root</a><br>
+
+f:  <a name='tocfunc16985' href='#docfunc16985' style='text-decoration:none'>txpath</a><br>
+</dl>
+
+<dl><dt><a name='tocsect1590' href='#sect1590'><b>'sxml:xpath+index' and 'sxml:xpointer+index' functions</b></a><dd>
+
+f:  <a name='tocfunc12290' href='#docfunc12290' style='text-decoration:none'>sxml:api-index-helper</a><br>
+
+f:  <a name='tocfunc27903' href='#docfunc27903' style='text-decoration:none'>sxml:xpath+index</a><br>
+
+f:  <a name='tocfunc40993' href='#docfunc40993' style='text-decoration:none'>sxml:xpointer+index</a><br>
+</dl>
+</dl>
+<hr height='5'><center><h3><a name='chapt9730' href='#tocchapt9730'>Auxilliary</a></h3></center>
+
+<pre></pre>
+<h4><a name='docfunc13525' href='#tocfunc13525'>sxml:xpointer-runtime-error</a></h4>
+(define (sxml:xpointer-runtime-error . text)<i><br> ... <a href='#codefunc13525'>Full Code</a> ... )</i>
+<pre> Runtime errors handler (unbound variable, bad argument, etc).
+ It may be re-defined (say, like a warning) without 'exit',  and evaluation will 
+ be continued.
+ In this case, a default value (usually empty nodeset or 0) is returned by 
+ a sub-expression which caused an XPath/XPointer runtime error.
+</pre><p><br>
+
+<hr width='40%' align='center'><center><h3><a name='sect29675' href='#tocsect29675'>Helper functions</a></h3></center>
+
+<pre></pre>
+<h4><a name='docfunc6629' href='#tocfunc6629'>sxml:xpath-nodeset-filter</a></h4>
+(define (sxml:xpath-nodeset-filter preds-list nodeset root-node var-binding)<i><br> ... <a href='#codefunc6629'>Full Code</a> ... )</i>
+<pre> Filter nodeset using preds-list as described in XPath rec. 2.4
+ A helper for sxml:parse-step and sxml:parse-filter-expr
+</pre><p><br>
+
+<h4><a name='docfunc63245' href='#tocfunc63245'>sxml:arithmetic-eval</a></h4>
+(define (sxml:arithmetic-eval unary-expr-res-lst op-lst add-on)<i><br> ... <a href='#codefunc63245'>Full Code</a> ... )</i>
+<pre> A helper for arithmetic expressions
+   sxml:parse-additive-expr and sxml:parse-multiplicative-expr 
+</pre><p><br>
+<hr height='5'><center><h3><a name='chapt49457' href='#tocchapt49457'>XPath Core Function Library</a></h3></center>
+
+<pre></pre>
+<hr width='40%' align='center'><center><h3><a name='sect63086' href='#tocsect63086'>4.1 Node Set Functions</a></h3></center>
+
+<pre></pre>
+<h4><a name='docfunc48591' href='#tocfunc48591'>sxml:core-last</a></h4>
+(define (sxml:core-last)<i><br> ... <a href='#codefunc48591'>Full Code</a> ... )</i>
+<pre> last()
+</pre><p><br>
+
+<h4><a name='docfunc39095' href='#tocfunc39095'>sxml:core-position</a></h4>
+(define (sxml:core-position)<i><br> ... <a href='#codefunc39095'>Full Code</a> ... )</i>
+<pre> position()
+</pre><p><br>
+
+<h4><a name='docfunc50748' href='#tocfunc50748'>sxml:core-count</a></h4>
+(define (sxml:core-count arg-func)<i><br> ... <a href='#codefunc50748'>Full Code</a> ... )</i>
+<pre> count(node-set)
+</pre><p><br>
+
+<h4><a name='docfunc19545' href='#tocfunc19545'>sxml:core-id</a></h4>
+(define (sxml:core-id arg-func)<i><br> ... <a href='#codefunc19545'>Full Code</a> ... )</i>
+<pre> id(object)
+</pre><p><br>
+
+<h4><a name='docfunc44295' href='#tocfunc44295'>sxml:core-local-name</a></h4>
+(define (sxml:core-local-name . arg-func)<i><br> ... <a href='#codefunc44295'>Full Code</a> ... )</i>
+<pre> local-name(node-set?)
+</pre><p><br>
+
+<h4><a name='docfunc8932' href='#tocfunc8932'>sxml:core-namespace-uri</a></h4>
+(define (sxml:core-namespace-uri . arg-func)<i><br> ... <a href='#codefunc8932'>Full Code</a> ... )</i>
+<pre> namespace-uri(node-set?)
+</pre><p><br>
+
+<h4><a name='docfunc44747' href='#tocfunc44747'>sxml:core-name</a></h4>
+(define (sxml:core-name . arg-func)<i><br> ... <a href='#codefunc44747'>Full Code</a> ... )</i>
+<pre> name(node-set?)
+</pre><p><br>
+
+<hr width='40%' align='center'><center><h3><a name='sect40811' href='#tocsect40811'>4.2 String Functions</a></h3></center>
+
+<pre></pre>
+<h4><a name='docfunc11588' href='#tocfunc11588'>sxml:core-string</a></h4>
+(define (sxml:core-string . arg-func)<i><br> ... <a href='#codefunc11588'>Full Code</a> ... )</i>
+<pre> string(object?)
+</pre><p><br>
+
+<h4><a name='docfunc12067' href='#tocfunc12067'>sxml:core-concat</a></h4>
+(define (sxml:core-concat . arg-func-lst)<i><br> ... <a href='#codefunc12067'>Full Code</a> ... )</i>
+<pre> concat(string, string, string*)
+</pre><p><br>
+
+<h4><a name='docfunc11832' href='#tocfunc11832'>sxml:core-starts-with</a></h4>
+(define (sxml:core-starts-with arg-func1 arg-func2)<i><br> ... <a href='#codefunc11832'>Full Code</a> ... )</i>
+<pre> starts-with(string, string)
+</pre><p><br>
+
+<h4><a name='docfunc43153' href='#tocfunc43153'>sxml:core-contains</a></h4>
+(define (sxml:core-contains arg-func1 arg-func2)<i><br> ... <a href='#codefunc43153'>Full Code</a> ... )</i>
+<pre> contains(string, string)
+</pre><p><br>
+
+<h4><a name='docfunc6470' href='#tocfunc6470'>sxml:core-substring-before</a></h4>
+(define (sxml:core-substring-before arg-func1 arg-func2)<i><br> ... <a href='#codefunc6470'>Full Code</a> ... )</i>
+<pre> substring-before(string, string)
+</pre><p><br>
+
+<h4><a name='docfunc43858' href='#tocfunc43858'>sxml:core-substring-after</a></h4>
+(define (sxml:core-substring-after arg-func1 arg-func2)<i><br> ... <a href='#codefunc43858'>Full Code</a> ... )</i>
+<pre> substring-after(string, string)
+</pre><p><br>
+
+<h4><a name='docfunc45578' href='#tocfunc45578'>sxml:core-substring</a></h4>
+(define (sxml:core-substring arg-func1 arg-func2 . arg-func3)<i><br> ... <a href='#codefunc45578'>Full Code</a> ... )</i>
+<pre> substring(string, number, number?)
+</pre><p><br>
+
+<h4><a name='docfunc31910' href='#tocfunc31910'>sxml:core-string-length</a></h4>
+(define (sxml:core-string-length . arg-func)<i><br> ... <a href='#codefunc31910'>Full Code</a> ... )</i>
+<pre> string-length(string?)
+</pre><p><br>
+
+<h4><a name='docfunc44346' href='#tocfunc44346'>sxml:core-normalize-space</a></h4>
+(define (sxml:core-normalize-space . arg-func)<i><br> ... <a href='#codefunc44346'>Full Code</a> ... )</i>
+<pre> normalize-space(string?)
+</pre><p><br>
+
+<h4><a name='docfunc43519' href='#tocfunc43519'>sxml:core-translate</a></h4>
+(define (sxml:core-translate arg-func1 arg-func2 arg-func3)<i><br> ... <a href='#codefunc43519'>Full Code</a> ... )</i>
+<pre> translate(string, string, string)
+</pre><p><br>
+
+<hr width='40%' align='center'><center><h3><a name='sect23800' href='#tocsect23800'>4.3 Boolean Functions</a></h3></center>
+
+<pre></pre>
+<h4><a name='docfunc9621' href='#tocfunc9621'>sxml:core-boolean</a></h4>
+(define (sxml:core-boolean arg-func)<i><br> ... <a href='#codefunc9621'>Full Code</a> ... )</i>
+<pre> boolean(object)
+</pre><p><br>
+
+<h4><a name='docfunc22482' href='#tocfunc22482'>sxml:core-not</a></h4>
+(define (sxml:core-not arg-func)<i><br> ... <a href='#codefunc22482'>Full Code</a> ... )</i>
+<pre> not(boolean)
+</pre><p><br>
+
+<h4><a name='docfunc49113' href='#tocfunc49113'>sxml:core-true</a></h4>
+(define (sxml:core-true)<i><br> ... <a href='#codefunc49113'>Full Code</a> ... )</i>
+<pre> true()
+</pre><p><br>
+
+<h4><a name='docfunc48423' href='#tocfunc48423'>sxml:core-false</a></h4>
+(define (sxml:core-false)<i><br> ... <a href='#codefunc48423'>Full Code</a> ... )</i>
+<pre> false()
+</pre><p><br>
+
+<h4><a name='docfunc45258' href='#tocfunc45258'>sxml:core-lang</a></h4>
+(define (sxml:core-lang arg-func)<i><br> ... <a href='#codefunc45258'>Full Code</a> ... )</i>
+<pre> lang(string)
+</pre><p><br>
+
+<hr width='40%' align='center'><center><h3><a name='sect42074' href='#tocsect42074'>4.4 Number Functions</a></h3></center>
+
+<pre></pre>
+<h4><a name='docfunc12849' href='#tocfunc12849'>sxml:core-number</a></h4>
+(define (sxml:core-number . arg-func)<i><br> ... <a href='#codefunc12849'>Full Code</a> ... )</i>
+<pre> number(object?)
+</pre><p><br>
+
+<h4><a name='docfunc24016' href='#tocfunc24016'>sxml:core-sum</a></h4>
+(define (sxml:core-sum arg-func)<i><br> ... <a href='#codefunc24016'>Full Code</a> ... )</i>
+<pre> sum(node-set)
+</pre><p><br>
+
+<h4><a name='docfunc50231' href='#tocfunc50231'>sxml:core-floor</a></h4>
+(define (sxml:core-floor arg-func)<i><br> ... <a href='#codefunc50231'>Full Code</a> ... )</i>
+<pre> floor(number)
+</pre><p><br>
+
+<h4><a name='docfunc10381' href='#tocfunc10381'>sxml:core-ceiling</a></h4>
+(define (sxml:core-ceiling arg-func)<i><br> ... <a href='#codefunc10381'>Full Code</a> ... )</i>
+<pre> ceiling(number)
+</pre><p><br>
+
+<h4><a name='docfunc50747' href='#tocfunc50747'>sxml:core-round</a></h4>
+(define (sxml:core-round arg-func)<i><br> ... <a href='#codefunc50747'>Full Code</a> ... )</i>
+<pre> round(number)
+</pre><p><br>
+<hr height='5'><center><h3><a name='chapt40271' href='#tocchapt40271'>Parameters for classic TXPath implementation</a></h3></center>
+
+<pre></pre>
+<h4><a name='docfunc53447' href='#tocfunc53447'>sxml:classic-params</a></h4>
+(define sxml:classic-params <i><br> ... <a href='#codefunc53447'>Full Code</a> ... )</i><p><br>
+<hr height='5'><center><h3><a name='chapt29326' href='#tocchapt29326'>Highest level API functions</a></h3></center>
+
+<pre></pre>
+<hr width='40%' align='center'><center><h3><a name='sect1962' href='#tocsect1962'>'sxml:xpath' and 'sxml:xpointer' functions</a></h3></center>
+
+<pre>
+  xpath-string - an XPath location path (a string)
+  ns-binding - declared namespace prefixes (an optional argument)
+  ns-binding = (list  (prefix . uri)
+                      (prefix . uri)
+                      ...)
+  prefix - a symbol
+  uri - a string
+
+ The returned result:   (lambda (node . var-binding) ...)  
+                   or   #f
+  #f - signals of a parse error (error message is printed as a side effect
+ during parsing)
+  (lambda (node . var-binding) ...)  - an SXPath function
+  node - a node (or a node-set) of the SXML document
+  var-binding - XPath variable bindings (an optional argument)
+  var-binding = (list  (var-name . value)
+                       (var-name . value)
+                       ...)
+  var-name - (a symbol) a name of a variable
+  value - its value. The value can have the following type: boolean, number,
+ string, nodeset. NOTE: a node must be represented as a singleton nodeset
+ 
+ Administrative SXPath variables:
+  *root* - if presented in the 'var-binding', its value (a node or a nodeset)
+ specifies the root of the SXML document
+</pre>
+<h4><a name='docfunc6657' href='#tocfunc6657'>sxml:api-helper0</a></h4>
+(define (sxml:api-helper0 parse-proc)<i><br> ... <a href='#codefunc6657'>Full Code</a> ... )</i><p><br>
+
+<h4><a name='docfunc26103' href='#tocfunc26103'>sxml:classic-res</a></h4>
+(define sxml:classic-res <i><br> ... <a href='#codefunc26103'>Full Code</a> ... )</i><p><br>
+
+<h4><a name='docfunc59904' href='#tocfunc59904'>sxml:api-helper</a></h4>
+(define (sxml:api-helper parse-proc)<i><br> ... <a href='#codefunc59904'>Full Code</a> ... )</i><p><br>
+
+<h4><a name='docfunc9984' href='#tocfunc9984'>sxml:xpath</a></h4>
+(define sxml:xpath <i><br> ... <a href='#codefunc9984'>Full Code</a> ... )</i><p><br>
+
+<h4><a name='docfunc41179' href='#tocfunc41179'>sxml:xpointer</a></h4>
+(define sxml:xpointer <i><br> ... <a href='#codefunc41179'>Full Code</a> ... )</i><p><br>
+
+<h4><a name='docfunc64791' href='#tocfunc64791'>sxml:xpath-expr</a></h4>
+(define sxml:xpath-expr <i><br> ... <a href='#codefunc64791'>Full Code</a> ... )</i><p><br>
+
+<h4><a name='docfunc2296' href='#tocfunc2296'>sxml:xpath+root+vars</a></h4>
+(define sxml:xpath+root+vars <i><br> ... <a href='#codefunc2296'>Full Code</a> ... )</i>
+<pre> Some (deprecated!) aliases for backward compatibility
+ which will be eventually removed
+</pre><p><br>
+
+<h4><a name='docfunc39101' href='#tocfunc39101'>sxml:xpointer+root+vars</a></h4>
+(define sxml:xpointer+root+vars <i><br> ... <a href='#codefunc39101'>Full Code</a> ... )</i><p><br>
+
+<h4><a name='docfunc2319' href='#tocfunc2319'>sxml:xpath+root</a></h4>
+(define sxml:xpath+root <i><br> ... <a href='#codefunc2319'>Full Code</a> ... )</i><p><br>
+
+<h4><a name='docfunc16985' href='#tocfunc16985'>txpath</a></h4>
+(define txpath <i><br> ... <a href='#codefunc16985'>Full Code</a> ... )</i><p><br>
+
+<hr width='40%' align='center'><center><h3><a name='sect1590' href='#tocsect1590'>'sxml:xpath+index' and 'sxml:xpointer+index' functions</a></h3></center>
+
+<pre>
+ NOTE: THESE FUNCTIONS ARE JUST STUBS NOW, BECAUSE THEY ALWAYS RETURN #t
+ FOR 'index-required'. THESE FUNCTIONS ARE INCLUDED HERE FOR THE SAKE OF
+ BACKWARD COMPATIBILITY ONLY.
+
+  xpath-string - an XPath location path (a string)
+  ns-binding - declared namespace prefixes (an optional argument)
+  ns-binding = (list  (prefix . uri)
+                      (prefix . uri)
+                      ...)
+  prefix - a symbol
+  uri - a string
+
+ The returned result:   (cons (lambda (node . id-index) ...)  
+                              index-required )
+                   or   #f
+  #f - signals of a parse error (error message is printed as a side effect
+ during parsing)
+  (lambda (node) ...)  - an SXPath function
+  node - a root node of the SXML document
+  index-required - a boolean value: whether an id-index is required
+</pre>
+<h4><a name='docfunc12290' href='#tocfunc12290'>sxml:api-index-helper</a></h4>
+(define (sxml:api-index-helper parse-proc)<i><br> ... <a href='#codefunc12290'>Full Code</a> ... )</i><p><br>
+
+<h4><a name='docfunc27903' href='#tocfunc27903'>sxml:xpath+index</a></h4>
+(define sxml:xpath+index <i><br> ... <a href='#codefunc27903'>Full Code</a> ... )</i><p><br>
+
+<h4><a name='docfunc40993' href='#tocfunc40993'>sxml:xpointer+index</a></h4>
+(define sxml:xpointer+index <i><br> ... <a href='#codefunc40993'>Full Code</a> ... )</i><p><br>
+<center><h1>Code</h1></center>
+
+<h4><a name='codefunc13525' href='#docfunc13525'>sxml:xpointer-runtime-error</a></h4>
+<i><a href='#tocfunc13525'>Index</a></i><br>
+
+<pre> Runtime errors handler (unbound variable, bad argument, etc).
+ It may be re-defined (say, like a warning) without 'exit',  and evaluation will 
+ be continued.
+ In this case, a default value (usually empty nodeset or 0) is returned by 
+ a sub-expression which caused an XPath/XPointer runtime error.
+</pre>
+<pre>(define (<a href="txpath.html#codefunc13525">sxml:xpointer-runtime-error</a> . text)
+  (apply <a href="myenv.html#codefunc55253">cerr</a> (append (list &quot;XPath/XPointer runtime error: &quot;) text (list <a href="myenv.html#codefunc27758">nl</a>)))
+  (exit -1))
+</pre>
+<h4><a name='codefunc53447' href='#docfunc53447'>sxml:classic-params</a></h4>
+<i><a href='#tocfunc53447'>Index</a></i><br>
+
+<pre>(define <a href="txpath.html#codefunc53447">sxml:classic-params</a>
+  `(
+    ; For XPath axes, the result is returned in the form of the pair
+    ; (cons  (lambda ...)  root-node-required)  
+    ;  (lambda ...) - one of the axis functions
+    ;  root-node-required - a boolean value
+    ; If root-node-required = #t, lambda's signature is
+    ;  (lambda (test-pred?)
+    ;   (lambda (root-node)
+    ;    (lambda (nodeset) ... )))
+    ; otherwise
+    ;  (lambda (test-pred?)
+    ;   (lambda (nodeset) ... ))
+    (axis
+     ((ancestor
+       ,(lambda (add-on) (cons <a href="sxpath-ext.html#codefunc36053">sxml:ancestor</a> #t)))
+      (ancestor-or-self
+       ,(lambda (add-on) (cons <a href="sxpath-ext.html#codefunc3134">sxml:ancestor-or-self</a> #t)))
+      (attribute
+       ,(lambda (add-on) (cons <a href="sxpathlib.html#codefunc65240">sxml:attribute</a> #f)))
+      (child
+       ,(lambda (add-on) (cons <a href="sxpathlib.html#codefunc5616">sxml:child</a> #f)))
+      (descendant
+       ,(lambda (add-on) (cons <a href="sxpath-ext.html#codefunc62759">sxml:descendant</a> #f)))
+      (descendant-or-self
+       ,(lambda (add-on) (cons <a href="sxpath-ext.html#codefunc29840">sxml:descendant-or-self</a> #f)))
+      (following
+       ,(lambda (add-on) (cons <a href="sxpath-ext.html#codefunc63452">sxml:following</a> #t)))
+      (following-sibling
+       ,(lambda (add-on) (cons <a href="sxpath-ext.html#codefunc40526">sxml:following-sibling</a> #t)))
+      (namespace
+       ,(lambda (add-on) (cons <a href="sxpath-ext.html#codefunc64181">sxml:namespace</a> #f)))
+      (parent
+       ,(lambda (add-on) (cons <a href="sxpathlib.html#codefunc13910">sxml:parent</a> #t)))
+      (preceding
+       ,(lambda (add-on) (cons <a href="sxpath-ext.html#codefunc61635">sxml:preceding</a> #t)))
+      (preceding-sibling
+       ,(lambda (add-on) (cons <a href="sxpath-ext.html#codefunc38709">sxml:preceding-sibling</a> #t)))
+      (<a href="libmisc.html#codefunc52191">self</a>
+       ,(lambda (add-on) (cons <a href="sxpathlib.html#codefunc7531">sxml:filter</a> #f)))))
+    
+    ; For NodeTests, the result is
+    ;  (lambda (node) ...)  - a node test function
+    ; or 'txp:semantic-error (namely, for point and range)
+    (node-test
+     ((star
+       ,(lambda (add-on) (<a href="sxpathlib.html#codefunc9356">ntype??</a> '*)))
+      (uri+star
+       ,(lambda (uri add-on) (<a href="sxpathlib.html#codefunc32267">ntype-namespace-id??</a> uri)))
+      (qname
+       ,(lambda (uri local-name add-on)
+          (if (not uri)
+              (<a href="sxpathlib.html#codefunc9356">ntype??</a> (string-&gt;symbol local-name))
+              (<a href="sxpathlib.html#codefunc9356">ntype??</a> (string-&gt;symbol (string-append uri &quot;:&quot; local-name))))))
+      (comment
+       ,(lambda (add-on) (<a href="sxpathlib.html#codefunc9356">ntype??</a> '*COMMENT*)))
+      (text
+       ,(lambda (add-on) (<a href="sxpathlib.html#codefunc9356">ntype??</a> '*text*)))
+      (processing-instruction
+       ,(lambda (literal-string add-on)
+          (if (not literal-string)  ; no literal provided
+              (lambda (node)
+                (and (pair? node) (eq? (car node) '*PI*)))
+              (let ((literal (string-&gt;symbol literal-string)))
+                (lambda (node)
+                  (and (pair? node)
+                       (eq? (car node) '*PI*)
+                       (equal? (cadr node) literal)))))))
+      (node
+       ,(lambda (add-on) <a href="sxpathlib.html#codefunc63215">sxml:node?</a>))
+      (point
+       ,(lambda (add-on)
+          (<a href="xpath-parser.html#codefunc48950">txp:signal-semantic-error</a>
+           &quot;point() NodeTest is not supported by this implementation&quot;)))
+      (range
+       ,(lambda (add-on)
+          (<a href="xpath-parser.html#codefunc48950">txp:signal-semantic-error</a>
+           &quot;range() NodeTest is not supported by this implementation&quot;)))))
+    
+    ;-------------
+    ; The remaining parameter values return the following
+    ; (lambda (nodeset root-node context var-binding) - an SXPath-like
+    ; function (it transforms a nodeset into a new nodeset)
+    ;  nodeset - a current set of nodes
+    ;  root-node - the root of a document (a singleton nodeset)
+    ;  context - the context of the node; list of two elements - (position size)
+    ;  position - context position (a number)
+    ;  size - context size (a number)
+    
+    ; Parse step implementation
+    (step
+     ((common
+       ,(lambda (axis-res node-test-res predicate-res-lst add-on)
+          (let ((axis (car axis-res))
+                (root-node-required (cdr axis-res)))
+            (if
+             (null? predicate-res-lst)
+             (lambda (nodeset root-node context var-binding)
+               (if root-node-required
+                   (((axis node-test-res) root-node) nodeset)
+                   ((axis node-test-res) nodeset)))
+             (lambda (nodeset root-node context var-binding)
+               (<a href="sxpathlib.html#codefunc27946">map-union</a>
+                (lambda (node)
+                  (<a href="txpath.html#codefunc6629">sxml:xpath-nodeset-filter</a> 
+                   predicate-res-lst
+                   ((if root-node-required
+                        ((axis node-test-res) root-node)
+                        (axis node-test-res))
+                    node)
+                   root-node var-binding))
+                nodeset))))))
+      (range-to
+       ,(lambda (expr-res predicate-res-lst add-on)
+          (<a href="xpath-parser.html#codefunc48950">txp:signal-semantic-error</a> &quot;range-to function not implemented&quot;)))))
+    
+    ; Relative location path implementation
+    (relative-lpath
+     ,(lambda (step-res-lst add-on)
+        (if
+         (null? (cdr step-res-lst))  ; the only step
+         (car step-res-lst)
+         (lambda (nodeset root-node context var-binding)
+           (let rpt ((nset nodeset)
+                     (fs step-res-lst))
+             (if (null? fs)
+                 nset
+                 (rpt ((car fs) nset root-node context var-binding)
+                      (cdr fs))))))))
+    
+    ; Location path implementation
+    (location-path
+     ((bare-slash
+       ,(lambda (add-on)
+          (lambda (nodeset root-node context var-binding) root-node)))       
+      (slash
+       ,(lambda (relative-lpath-res add-on)
+          (lambda (nodeset root-node context var-binding)
+            (relative-lpath-res root-node root-node context var-binding))))
+      (double-slash
+       ,(lambda (relative-lpath-res add-on)
+          (lambda (nodeset root-node context var-binding)
+            (relative-lpath-res
+             ((<a href="sxpath-ext.html#codefunc29840">sxml:descendant-or-self</a> <a href="sxpathlib.html#codefunc63215">sxml:node?</a>) root-node)
+             root-node context var-binding))))))
+    
+    ; Predicate implementation
+    ; Note that (according to specification) a Predicate must return a number
+    ; or a boolean value. However, the return value type is not checked in this
+    ; function. This is performed in functions that use 'parse-predicate'
+    (predicate
+     ,(lambda (expr-res add-on) expr-res))  ; similar to identity function
+    
+    ; Variable reference implementation
+    (variable-ref
+     ,(lambda (var-name-string add-on)
+        (let ((name (string-&gt;symbol var-name-string)))
+          (lambda (nodeset root-node context var-binding)
+            (cond
+              ((assoc name var-binding)
+               =&gt; cdr)
+              (else
+               (<a href="txpath.html#codefunc13525">sxml:xpointer-runtime-error</a> &quot;unbound variable - &quot; name)
+               '()))))))
+    
+    ; Function call implementation
+    (function-call
+     ,(lambda (fun-name-string arg-res-lst add-on)
+        (let ((core-alist
+               ; (list fun-name min-num-args max-num-args impl)
+               `((last 0 0 ,sxml:core-last)
+                 (position 0 0 ,sxml:core-position)
+                 (count 1 1 ,sxml:core-count)
+                 (id 1 1 ,sxml:core-id)
+                 (local-name 0 1 ,sxml:core-local-name)
+                 (namespace-uri 0 1 ,sxml:core-namespace-uri)
+                 (name 0 1 ,sxml:core-name)
+                 (string 0 1 ,sxml:core-string)
+                 (concat 2 -1 ,sxml:core-concat)
+                 (starts-with 2 2 ,sxml:core-starts-with)
+                 (contains 2 2 ,sxml:core-contains)
+                 (substring-before 2 2 ,sxml:core-substring-before)
+                 (substring-after 2 2 ,sxml:core-substring-after)
+                 (substring 2 3 ,sxml:core-substring)
+                 (string-length 0 1 ,sxml:core-string-length)
+                 (normalize-space 0 1 ,sxml:core-normalize-space)
+                 (translate 3 3 ,sxml:core-translate)
+                 (boolean 1 1 ,sxml:core-boolean)
+                 (not 1 1 ,sxml:core-not)
+                 (true 0 0 ,sxml:core-true)
+                 (false 0 0 ,sxml:core-false)
+                 (lang 1 1 ,sxml:core-lang)
+                 (number 0 1 ,sxml:core-number)
+                 (sum 1 1 ,sxml:core-sum)
+                 (floor 1 1 ,sxml:core-floor)
+                 (ceiling 1 1 ,sxml:core-ceiling)
+                 (round 1 1 ,sxml:core-round))))
+          (cond
+           ((assq (string-&gt;symbol fun-name-string) core-alist)
+            =&gt; (lambda (quad)  ; Core function found
+                 (cond
+                   ((&lt; (length arg-res-lst) (cadr quad))
+                    (<a href="xpath-parser.html#codefunc48950">txp:signal-semantic-error</a>
+                     &quot;too few arguments for the Core Function call - &quot;
+                     fun-name-string))
+                   ((and (&gt; (caddr quad) 0)
+                         (&gt; (length arg-res-lst) (caddr quad)))
+                    (<a href="xpath-parser.html#codefunc48950">txp:signal-semantic-error</a>
+                     &quot;too many arguments for the Core Function call - &quot;
+                     fun-name-string))
+                   (else  ; correct number of arguments
+                    ; Producing a function implementation
+                    (apply (cadddr quad) arg-res-lst)))))
+           (else  ; function definition not found
+            (<a href="xpath-parser.html#codefunc48950">txp:signal-semantic-error</a>
+             &quot;function call to an unknown function - &quot; fun-name-string))))))
+    
+    ; Primary expression
+    (primary-expr
+     ((literal
+       ,(lambda (literal add-on)
+          (lambda (nodeset root-node context var-binding) literal)))
+      (number
+       ,(lambda (number add-on)
+          (lambda (nodeset root-node context var-binding) number)))))
+
+    ; Filter expression
+    (filter-expr
+     ,(lambda (primary-expr-res predicate-res-lst add-on)
+        (lambda (nodeset root-node context var-binding)
+          (let ((nodeset
+                 (primary-expr-res nodeset root-node context var-binding)))
+            (<a href="txpath.html#codefunc6629">sxml:xpath-nodeset-filter</a>
+             predicate-res-lst
+             (cond
+               ((<a href="sxpathlib.html#codefunc31162">nodeset?</a> nodeset) nodeset)
+               (else 
+                (<a href="txpath.html#codefunc13525">sxml:xpointer-runtime-error</a> 
+                 &quot;expected - nodeset instead of &quot; nodeset)
+                '()))
+             root-node var-binding)))))
+    
+    ; Path expression
+    (path-expr
+     ((slash
+       ,(lambda (filter-expr-res relative-lpath-res add-on)
+          (lambda (nodeset root-node context var-binding)
+            (let ((nset
+                   (filter-expr-res nodeset root-node context var-binding)))
+              (let ((nset 
+                     (cond
+                       ((<a href="sxpathlib.html#codefunc31162">nodeset?</a> nset) nset)
+                       (else 
+                        (<a href="txpath.html#codefunc13525">sxml:xpointer-runtime-error</a> 
+                         &quot;expected - nodeset instead of &quot; nset)
+                        '()))))
+                (relative-lpath-res nset root-node context var-binding))))))
+      (double-slash
+       ,(lambda (filter-expr-res relative-lpath-res add-on)
+          (lambda (nodeset root-node context var-binding)
+            (let ((nset
+                   (filter-expr-res nodeset root-node context var-binding)))
+              (let ((nset 
+                     (cond
+                       ((<a href="sxpathlib.html#codefunc31162">nodeset?</a> nset) nset)
+                       (else 
+                        (<a href="txpath.html#codefunc13525">sxml:xpointer-runtime-error</a> 
+                         &quot;expected - nodeset instead of &quot; nset)
+                        '()))))
+                (let ((nset ((<a href="sxpath-ext.html#codefunc29840">sxml:descendant-or-self</a> <a href="sxpathlib.html#codefunc63215">sxml:node?</a>) nset)))
+                  (relative-lpath-res
+                   nset root-node context var-binding)))))))))
+    
+    ; Union expression
+    (union-expr
+     ,(lambda (path-expr-res-lst add-on)
+        (lambda (nodeset root-node context var-binding)
+          (let rpt ((res '())
+                    (fs path-expr-res-lst))
+            (if
+             (null? fs)
+             res
+             (let ((nset ((car fs) nodeset root-node context var-binding)))
+               (rpt
+                (append 
+                 res
+                 (cond
+                   ((not (<a href="sxpathlib.html#codefunc31162">nodeset?</a> nset))
+                    (<a href="txpath.html#codefunc13525">sxml:xpointer-runtime-error</a> 
+                     &quot;expected - nodeset instead of &quot; nset)
+                    '())
+                   (else nset)))
+                (cdr fs))))))))
+    
+    ; Unary expression
+    (unary-expr
+     ,(lambda (union-expr-res num-minuses add-on)
+        (if (even? num-minuses)
+            (lambda (nodeset root-node context var-binding)
+              (<a href="sxpath-ext.html#codefunc9829">sxml:number</a>
+               (union-expr-res nodeset root-node context var-binding)))
+            (lambda (nodeset root-node context var-binding)
+              (- (<a href="sxpath-ext.html#codefunc9829">sxml:number</a>
+                  (union-expr-res nodeset root-node context var-binding)))))))
+    
+    ; Different operations
+    (operations
+     ((* ,(lambda (add-on) *))
+      (div ,(lambda (add-on) /))
+      (mod ,(lambda (add-on) remainder))
+      (+ ,(lambda (add-on) +))
+      (- ,(lambda (add-on) -))
+      (&lt; ,(lambda (add-on) (<a href="sxpath-ext.html#codefunc41977">sxml:relational-cmp</a> &lt;)))
+      (&gt; ,(lambda (add-on) (<a href="sxpath-ext.html#codefunc41977">sxml:relational-cmp</a> &gt;)))
+      (&lt;= ,(lambda (add-on) (<a href="sxpath-ext.html#codefunc41977">sxml:relational-cmp</a> &lt;=)))
+      (&gt;= ,(lambda (add-on) (<a href="sxpath-ext.html#codefunc41977">sxml:relational-cmp</a> &gt;=)))
+      (= ,(lambda (add-on) <a href="sxpath-ext.html#codefunc11309">sxml:equal?</a>))
+      (!= ,(lambda (add-on) <a href="sxpath-ext.html#codefunc3786">sxml:not-equal?</a>))))
+    
+    ; Additive and multiplicative expressions
+    (mul-expr ,sxml:arithmetic-eval)
+    (add-expr ,sxml:arithmetic-eval)
+    
+    ; Relational expression
+    (relational-expr
+     ,(lambda (additive-expr-res-lst cmp-op-lst add-on)
+        (lambda (nodeset root-node context var-binding)
+          (let rpt ((res ((car additive-expr-res-lst)
+                          nodeset root-node context var-binding))
+                    (fs (cdr additive-expr-res-lst))
+                    (ops cmp-op-lst))
+            (if (null? fs)
+                res
+                (rpt ((car ops)
+                      res
+                      ((car fs) nodeset root-node context var-binding))
+                     (cdr fs)
+                     (cdr ops)))))))        
+    
+    ; Equality expression
+    (equality-expr
+     ,(lambda (relational-expr-res-lst cmp-op-lst add-on)
+        (lambda (nodeset root-node context var-binding)
+          (let rpt ((res ((car relational-expr-res-lst)
+                          nodeset root-node context var-binding))
+                    (fs (cdr relational-expr-res-lst))
+                    (ops cmp-op-lst))
+            (if (null? fs)
+                res
+                (rpt ((car ops) 
+                      res 
+                      ((car fs) nodeset root-node context var-binding))
+                     (cdr fs)
+                     (cdr ops)))))))
+    
+    ; And-expression
+    ; Note that according to 3.4 in XPath specification, the right operand
+    ; is not evaluated if the left operand evaluates to false
+    (and-expr
+     ,(lambda (equality-expr-res-lst add-on)
+        (lambda (nodeset root-node context var-binding)
+          (let rpt ((fs equality-expr-res-lst))
+            (cond
+              ((null? fs) #t)
+              ((not (<a href="sxpath-ext.html#codefunc35416">sxml:boolean</a>
+                     ((car fs) nodeset root-node context var-binding))) #f)
+              (else (rpt (cdr fs))))))))
+    
+    ; Or-expression
+    (or-expr
+     ,(lambda (and-expr-res-lst add-on)    
+        (lambda (nodeset root-node context var-binding)
+          (let rpt ((fs and-expr-res-lst))
+            (cond
+              ((null? fs) #f)
+              ((<a href="sxpath-ext.html#codefunc35416">sxml:boolean</a>
+                ((car fs) nodeset root-node context var-binding)) #t)
+              (else (rpt (cdr fs))))))))
+    
+    ; Full XPointer
+    (full-xptr
+     ,(lambda (expr-res-lst add-on)
+        (lambda (nodeset root-node context var-binding)
+          (let rpt ((fs expr-res-lst))
+            (if (null? fs)
+                '()
+                (let ((nset ((car fs) nodeset root-node context var-binding)))
+                  (if (null? nset)
+                      (rpt (cdr fs))
+                      nset)))))))
+    
+    ; XPointer child sequence
+    (child-seq
+     ((with-name
+      ,(lambda (name-string number-lst add-on)
+         (let ((funcs
+                 (apply append
+                        (map
+                         (lambda (num)
+                           (list (<a href="sxpathlib.html#codefunc5616">sxml:child</a> (<a href="sxpathlib.html#codefunc9356">ntype??</a> '*)) (<a href="sxpathlib.html#codefunc47215">node-pos</a> num)))
+                         number-lst))))
+           (lambda (nodeset root-node context var-binding)
+             (let ((id-nset ((<a href="sxpathlib.html#codefunc5616">sxml:child</a> (<a href="sxpathlib.html#codefunc9356">ntype??</a> 'id-index))
+                             ((<a href="sxpathlib.html#codefunc5616">sxml:child</a> (<a href="sxpathlib.html#codefunc9356">ntype??</a> '@@)) root-node))))
+               (if
+                (null? id-nset)  ; no id-index
+                '()
+                (let ((nd (<a href="sxml-tools.html#codefunc13926">sxml:lookup</a> name-string (cdar id-nset))))
+                  (if (not nd)
+                      '()
+                      (let rpt ((nset (list nd))
+                                (fs funcs))
+                        (if (null? fs)
+                            nset
+                            (rpt ((car fs) nset) (cdr fs))))))))))))
+      (without-name
+       ,(lambda (number-lst add-on)
+          (let ((funcs
+                 (apply append
+                        (map
+                         (lambda (num)
+                           (list (<a href="sxpathlib.html#codefunc5616">sxml:child</a> (<a href="sxpathlib.html#codefunc9356">ntype??</a> '*)) (<a href="sxpathlib.html#codefunc47215">node-pos</a> num)))
+                         number-lst))))
+            (lambda (nodeset root-node context var-binding)
+              (if (<a href="sxpathlib.html#codefunc31162">nodeset?</a> nodeset)
+                  (let rpt ((nodeset nodeset) (res '()))
+                    (if (null? nodeset)
+                        res
+                        (let rpt2 ((nset (list (car nodeset))) 
+                                   (fs funcs))
+                          (if (null? fs)
+                              (rpt (cdr nodeset) (append res nset))
+                              (rpt2 ((car fs) nset) (cdr fs))))))
+                  (let rpt ((nodeset nodeset) (fs funcs))
+                    (if (null? fs)
+                        nodeset
+                        (rpt ((car fs) nodeset) (cdr fs)))))))))))                
+    ))
+</pre>
+<h4><a name='codefunc6629' href='#docfunc6629'>sxml:xpath-nodeset-filter</a></h4>
+<i><a href='#tocfunc6629'>Index</a></i><br>
+
+<pre> Filter nodeset using preds-list as described in XPath rec. 2.4
+ A helper for sxml:parse-step and sxml:parse-filter-expr
+</pre>
+<pre>(define (<a href="txpath.html#codefunc6629">sxml:xpath-nodeset-filter</a> preds-list nodeset root-node var-binding)
+  (let rpt ((nodeset nodeset)
+	    (ps preds-list))
+    (if (null? ps) 
+      nodeset
+      (let lab ((nset nodeset)
+		(res '())
+		(pos 1)) 
+	(if (null? nset)
+	  (rpt (reverse res) (cdr ps))
+	  (let* ((size (length nodeset))
+		 (val ((car ps) 
+		       (list (car nset)) 
+		       root-node 
+		       (cons pos size) 
+		       var-binding)))
+	    (lab (cdr nset)
+		 (if (if (number? val)
+		       (= val pos)
+		       (<a href="sxpath-ext.html#codefunc35416">sxml:boolean</a> val))
+		   (cons (car nset) res)
+		   res)
+		 (+ pos 1))))))))
+</pre>
+<h4><a name='codefunc63245' href='#docfunc63245'>sxml:arithmetic-eval</a></h4>
+<i><a href='#tocfunc63245'>Index</a></i><br>
+
+<pre> A helper for arithmetic expressions
+   sxml:parse-additive-expr and sxml:parse-multiplicative-expr 
+</pre>
+<pre>(define (<a href="txpath.html#codefunc63245">sxml:arithmetic-eval</a> unary-expr-res-lst op-lst add-on)
+  (lambda (nodeset root-node context var-binding)
+    (let rpt
+      ((res (<a href="sxpath-ext.html#codefunc9829">sxml:number</a>
+             ((car unary-expr-res-lst) nodeset root-node context var-binding)))
+       (fs (cdr unary-expr-res-lst))
+       (ops op-lst))
+    (if (null? fs)
+        res
+        (rpt ((car ops)
+              res
+              (<a href="sxpath-ext.html#codefunc9829">sxml:number</a> ((car fs) nodeset root-node context var-binding)))
+             (cdr fs)
+             (cdr ops))))))
+</pre>
+<h4><a name='codefunc48591' href='#docfunc48591'>sxml:core-last</a></h4>
+<i><a href='#tocfunc48591'>Index</a></i><br>
+
+<pre> last()
+</pre>
+<pre>(define (<a href="txpath.html#codefunc48591">sxml:core-last</a>)
+  (lambda (nodeset root-node context var-binding)
+    (cdr context)))
+</pre>
+<h4><a name='codefunc39095' href='#docfunc39095'>sxml:core-position</a></h4>
+<i><a href='#tocfunc39095'>Index</a></i><br>
+
+<pre> position()
+</pre>
+<pre>(define (<a href="txpath.html#codefunc39095">sxml:core-position</a>)
+  (lambda (nodeset root-node context var-binding)
+    (car context)))
+</pre>
+<h4><a name='codefunc50748' href='#docfunc50748'>sxml:core-count</a></h4>
+<i><a href='#tocfunc50748'>Index</a></i><br>
+
+<pre> count(node-set)
+</pre>
+<pre>(define (<a href="txpath.html#codefunc50748">sxml:core-count</a> arg-func)
+  (lambda (nodeset root-node context var-binding)
+    (let ((res (arg-func nodeset root-node context var-binding)))
+      (cond
+        ((<a href="sxpathlib.html#codefunc31162">nodeset?</a> res) (length res))
+        (else
+         (<a href="txpath.html#codefunc13525">sxml:xpointer-runtime-error</a>
+          &quot;count() function - an argument is not a nodeset&quot;)
+         0)))))
+</pre>
+<h4><a name='codefunc19545' href='#docfunc19545'>sxml:core-id</a></h4>
+<i><a href='#tocfunc19545'>Index</a></i><br>
+
+<pre> id(object)
+</pre>
+<pre>(define (<a href="txpath.html#codefunc19545">sxml:core-id</a> arg-func)
+  (lambda (nodeset root-node context var-binding)
+    (let* ((id-nset ((<a href="sxpathlib.html#codefunc5616">sxml:child</a> (<a href="sxpathlib.html#codefunc9356">ntype??</a> 'id-index))
+                     ((<a href="sxpathlib.html#codefunc5616">sxml:child</a> (<a href="sxpathlib.html#codefunc9356">ntype??</a> '@@)) root-node))))
+      (if
+       (null? id-nset)  ; no id-index
+       '()  ; ID function returns an empty nodeset
+       ((<a href="sxpath-ext.html#codefunc20095">sxml:id</a> (cdar id-nset))  ; implemented in &quot;sxpath-ext.scm&quot;
+        (arg-func nodeset root-node context var-binding))))))
+</pre>
+<h4><a name='codefunc44295' href='#docfunc44295'>sxml:core-local-name</a></h4>
+<i><a href='#tocfunc44295'>Index</a></i><br>
+
+<pre> local-name(node-set?)
+</pre>
+<pre>(define (<a href="txpath.html#codefunc44295">sxml:core-local-name</a> . arg-func)  ; optional argument
+  (if (null? arg-func)  ; no argument supplied
+      (lambda (nodeset root-node context var-binding)
+        (cond
+          ((null? nodeset) &quot;&quot;)
+          ((not (pair? (car nodeset))) &quot;&quot;)  ; no name
+          (else
+           (let ((name (symbol-&gt;string (caar nodeset))))
+             (cond
+               ((<a href="util.html#codefunc35783">string-rindex</a> name #\:)
+                =&gt; (lambda (pos)
+                     (substring name (+ pos 1) (string-length name))))
+               (else  ; a NCName
+                name))))))
+      (let ((func (car arg-func)))
+        (lambda (nodeset root-node context var-binding)
+          (let ((obj (func nodeset root-node context var-binding)))
+            (cond
+              ((null? obj) &quot;&quot;)  ; an empty nodeset
+              ((not (<a href="sxpathlib.html#codefunc31162">nodeset?</a> obj))
+               (<a href="txpath.html#codefunc13525">sxml:xpointer-runtime-error</a>
+                &quot;NAME function - an argument is not a nodeset&quot;)              
+               &quot;&quot;)
+              ((not (pair? (car obj))) &quot;&quot;)  ; no name
+              (else
+               (let ((name (symbol-&gt;string (caar obj))))
+                 (cond
+                   ((<a href="util.html#codefunc35783">string-rindex</a> name #\:)
+                    =&gt; (lambda (pos)
+                         (substring
+                          name (+ pos 1) (string-length name))))
+                   (else  ; a NCName
+                    name))))))))))
+</pre>
+<h4><a name='codefunc8932' href='#docfunc8932'>sxml:core-namespace-uri</a></h4>
+<i><a href='#tocfunc8932'>Index</a></i><br>
+
+<pre> namespace-uri(node-set?)
+</pre>
+<pre>(define (<a href="txpath.html#codefunc8932">sxml:core-namespace-uri</a> . arg-func)  ; optional argument
+  (if (null? arg-func)  ; no argument supplied
+      (lambda (nodeset root-node context var-binding)
+        (cond
+          ((null? nodeset) &quot;&quot;)
+          ((not (pair? (car nodeset))) &quot;&quot;)  ; no name
+          (else
+           (let ((name (symbol-&gt;string (caar nodeset))))
+             (cond
+               ((<a href="util.html#codefunc35783">string-rindex</a> name #\:)
+                =&gt; (lambda (pos)
+                     (substring name 0 pos)))
+               (else &quot;&quot;))))))  ; a NCName
+      (let ((func (car arg-func)))
+        (lambda (nodeset root-node context var-binding)
+          (let ((obj (func nodeset root-node context var-binding)))
+            (cond
+              ((null? obj) &quot;&quot;)  ; an empty nodeset
+              ((not (<a href="sxpathlib.html#codefunc31162">nodeset?</a> obj))
+               (<a href="txpath.html#codefunc13525">sxml:xpointer-runtime-error</a>
+                &quot;NAME function - an argument is not a nodeset&quot;)
+               &quot;&quot;)
+              ((not (pair? (car obj))) &quot;&quot;)  ; no name
+              (else
+               (let ((name (symbol-&gt;string (caar obj))))
+                 (cond
+                   ((<a href="util.html#codefunc35783">string-rindex</a> name #\:)
+                    =&gt; (lambda (pos)
+                         (substring name 0 pos)))
+                   (else &quot;&quot;))))))))))
+</pre>
+<h4><a name='codefunc44747' href='#docfunc44747'>sxml:core-name</a></h4>
+<i><a href='#tocfunc44747'>Index</a></i><br>
+
+<pre> name(node-set?)
+</pre>
+<pre>(define (<a href="txpath.html#codefunc44747">sxml:core-name</a> . arg-func)  ; optional argument
+  (if (null? arg-func)  ; no argument supplied
+      (lambda (nodeset root-node context var-binding)
+        (cond
+          ((null? nodeset) &quot;&quot;)
+          ((not (pair? (car nodeset))) &quot;&quot;)  ; no name
+          (else
+           (symbol-&gt;string (caar nodeset)))))
+      (let ((func (car arg-func)))
+        (lambda (nodeset root-node context var-binding)
+          (let ((obj (func nodeset root-node context var-binding)))
+            (cond
+              ((null? obj) &quot;&quot;)  ; an empty nodeset
+              ((not (<a href="sxpathlib.html#codefunc31162">nodeset?</a> obj))
+               (<a href="txpath.html#codefunc13525">sxml:xpointer-runtime-error</a>
+                &quot;NAME function - an argument is not a nodeset&quot;)
+               &quot;&quot;)
+              ((not (pair? (car obj))) &quot;&quot;)  ; no name
+              (else
+               (symbol-&gt;string (caar obj)))))))))
+</pre>
+<h4><a name='codefunc11588' href='#docfunc11588'>sxml:core-string</a></h4>
+<i><a href='#tocfunc11588'>Index</a></i><br>
+
+<pre> string(object?)
+</pre>
+<pre>(define (<a href="txpath.html#codefunc11588">sxml:core-string</a> . arg-func)  ; optional argument
+  (if (null? arg-func)  ; no argument supplied
+      (lambda (nodeset root-node context var-binding)
+        (<a href="sxpath-ext.html#codefunc14688">sxml:string</a> nodeset))
+      (let ((func (car arg-func)))
+        (lambda (nodeset root-node context var-binding)
+          (<a href="sxpath-ext.html#codefunc14688">sxml:string</a> 
+           (func nodeset root-node context var-binding))))))
+</pre>
+<h4><a name='codefunc12067' href='#docfunc12067'>sxml:core-concat</a></h4>
+<i><a href='#tocfunc12067'>Index</a></i><br>
+
+<pre> concat(string, string, string*)
+</pre>
+<pre>(define (<a href="txpath.html#codefunc12067">sxml:core-concat</a> . arg-func-lst)
+  (lambda (nodeset root-node context var-binding)
+    (apply
+     string-append
+     (map
+      (lambda (f)
+        (<a href="sxpath-ext.html#codefunc14688">sxml:string</a> (f nodeset root-node context var-binding)))
+      arg-func-lst))))
+</pre>
+<h4><a name='codefunc11832' href='#docfunc11832'>sxml:core-starts-with</a></h4>
+<i><a href='#tocfunc11832'>Index</a></i><br>
+
+<pre> starts-with(string, string)
+</pre>
+<pre>(define (<a href="txpath.html#codefunc11832">sxml:core-starts-with</a> arg-func1 arg-func2)
+  (lambda (nodeset root-node context var-binding)
+    (let ((str1 (<a href="sxpath-ext.html#codefunc14688">sxml:string</a>
+                 (arg-func1 nodeset root-node context var-binding)))
+          (str2 (<a href="sxpath-ext.html#codefunc14688">sxml:string</a>
+                 (arg-func2 nodeset root-node context var-binding))))
+      (string-prefix? str2 str1))))
+</pre>
+<h4><a name='codefunc43153' href='#docfunc43153'>sxml:core-contains</a></h4>
+<i><a href='#tocfunc43153'>Index</a></i><br>
+
+<pre> contains(string, string)
+</pre>
+<pre>(define (<a href="txpath.html#codefunc43153">sxml:core-contains</a> arg-func1 arg-func2)
+  (lambda (nodeset root-node context var-binding)
+    (let ((str1 (<a href="sxpath-ext.html#codefunc14688">sxml:string</a>
+                 (arg-func1 nodeset root-node context var-binding)))
+          (str2 (<a href="sxpath-ext.html#codefunc14688">sxml:string</a>
+                 (arg-func2 nodeset root-node context var-binding))))
+      (if (<a href="util.html#codefunc2331">substring?</a> str2 str1) #t #f)  ; must return a boolean
+      )))
+</pre>
+<h4><a name='codefunc6470' href='#docfunc6470'>sxml:core-substring-before</a></h4>
+<i><a href='#tocfunc6470'>Index</a></i><br>
+
+<pre> substring-before(string, string)
+</pre>
+<pre>(define (<a href="txpath.html#codefunc6470">sxml:core-substring-before</a> arg-func1 arg-func2)
+  (lambda (nodeset root-node context var-binding)
+    (let* ((str1 (<a href="sxpath-ext.html#codefunc14688">sxml:string</a>
+                  (arg-func1 nodeset root-node context var-binding)))
+           (str2 (<a href="sxpath-ext.html#codefunc14688">sxml:string</a>
+                  (arg-func2 nodeset root-node context var-binding)))
+           (pos (<a href="util.html#codefunc2331">substring?</a> str2 str1)))
+      (if (not pos)  ; STR1 doesn't contain STR2
+          &quot;&quot;
+          (substring str1 0 pos)))))
+</pre>
+<h4><a name='codefunc43858' href='#docfunc43858'>sxml:core-substring-after</a></h4>
+<i><a href='#tocfunc43858'>Index</a></i><br>
+
+<pre> substring-after(string, string)
+</pre>
+<pre>(define (<a href="txpath.html#codefunc43858">sxml:core-substring-after</a> arg-func1 arg-func2)
+  (lambda (nodeset root-node context var-binding)
+    (let* ((str1 (<a href="sxpath-ext.html#codefunc14688">sxml:string</a>
+                  (arg-func1 nodeset root-node context var-binding)))
+           (str2 (<a href="sxpath-ext.html#codefunc14688">sxml:string</a>
+                  (arg-func2 nodeset root-node context var-binding)))
+           (pos (<a href="util.html#codefunc2331">substring?</a> str2 str1)))
+      (if
+       (not pos)  ; STR1 doesn't contain STR2
+       &quot;&quot;
+       (substring
+        str1 (+ pos (string-length str2)) (string-length str1))))))
+</pre>
+<h4><a name='codefunc45578' href='#docfunc45578'>sxml:core-substring</a></h4>
+<i><a href='#tocfunc45578'>Index</a></i><br>
+
+<pre> substring(string, number, number?)
+</pre>
+<pre>(define (<a href="txpath.html#codefunc45578">sxml:core-substring</a> arg-func1 arg-func2 . arg-func3)
+  (if (null? arg-func3)  ; no third argument supplied
+      (lambda (nodeset root-node context var-binding)
+        (let ((str (<a href="sxpath-ext.html#codefunc14688">sxml:string</a>
+                    (arg-func1 nodeset root-node context var-binding)))
+              (num1 (<a href="sxpath-ext.html#codefunc9829">sxml:number</a>
+                     (arg-func2 nodeset root-node context var-binding))))
+          (let ((len (string-length str))
+                (start (- (inexact-&gt;exact (round num1)) 1)))
+            (if (&gt; start len)
+                &quot;&quot;
+                (substring str (if (&lt; start 0) 0 start) len)))))
+      (let ((arg-func3 (car arg-func3)))
+        (lambda (nodeset root-node context var-binding)
+          (let ((str (<a href="sxpath-ext.html#codefunc14688">sxml:string</a>
+                      (arg-func1 nodeset root-node context var-binding)))
+                (num1 (<a href="sxpath-ext.html#codefunc9829">sxml:number</a>
+                       (arg-func2 nodeset root-node context var-binding)))
+                (num2 (<a href="sxpath-ext.html#codefunc9829">sxml:number</a>
+                       (arg-func3 nodeset root-node context var-binding))))
+            (let* ((len (string-length str))
+                   (start (- (inexact-&gt;exact (round num1)) 1))
+                   (fin (+ start (inexact-&gt;exact (round num2)))))
+              (if (or (&gt; start len) (&lt; fin 0) (&lt; fin start))
+                  &quot;&quot;
+                  (substring str
+                             (if (&lt; start 0) 0 start)
+                             (if (&gt; fin len) len fin)))))))))
+</pre>
+<h4><a name='codefunc31910' href='#docfunc31910'>sxml:core-string-length</a></h4>
+<i><a href='#tocfunc31910'>Index</a></i><br>
+
+<pre> string-length(string?)
+</pre>
+<pre>(define (<a href="txpath.html#codefunc31910">sxml:core-string-length</a> . arg-func)  ; optional argument
+  (if (null? arg-func)  ; no argument supplied
+      (lambda (nodeset root-node context var-binding)
+        (string-length (<a href="sxpath-ext.html#codefunc14688">sxml:string</a> nodeset)))
+      (let ((func (car arg-func)))
+        (lambda (nodeset root-node context var-binding)
+          (string-length
+           (<a href="sxpath-ext.html#codefunc14688">sxml:string</a>
+            (func nodeset root-node context var-binding)))))))
+</pre>
+<h4><a name='codefunc44346' href='#docfunc44346'>sxml:core-normalize-space</a></h4>
+<i><a href='#tocfunc44346'>Index</a></i><br>
+
+<pre> normalize-space(string?)
+</pre>
+<pre>(define (<a href="txpath.html#codefunc44346">sxml:core-normalize-space</a> . arg-func)  ; optional argument
+  (if (null? arg-func)  ; no argument supplied
+      (lambda (nodeset root-node context var-binding)
+        (let rpt ((src (<a href="util.html#codefunc39259">string-split</a> (<a href="sxpath-ext.html#codefunc14688">sxml:string</a> nodeset) <a href="xpath-parser.html#codefunc65329">sxml:whitespace</a>))
+                  (res '()))
+          (cond
+            ((null? src)
+             (apply string-append (reverse res)))
+            ((= (string-length (car src)) 0)  ; empty string
+             (rpt (cdr src) res))
+            ((null? res)
+             (rpt (cdr src) (cons (car src) res)))
+            (else
+             (rpt (cdr src) (cons (car src) (cons &quot; &quot; res)))))))
+      (let ((func (car arg-func)))
+        (lambda (nodeset root-node context var-binding)
+          (let rpt ((src (<a href="util.html#codefunc39259">string-split</a>
+                          (<a href="sxpath-ext.html#codefunc14688">sxml:string</a>
+                           (func nodeset root-node context var-binding))
+                          <a href="xpath-parser.html#codefunc65329">sxml:whitespace</a>))
+                    (res '()))
+            (cond
+              ((null? src)
+               (apply string-append (reverse res)))
+              ((= (string-length (car src)) 0)  ; empty string
+               (rpt (cdr src) res))
+              ((null? res)
+               (rpt (cdr src) (cons (car src) res)))
+              (else
+               (rpt (cdr src) (cons (car src) (cons &quot; &quot; res))))))))))
+</pre>
+<h4><a name='codefunc43519' href='#docfunc43519'>sxml:core-translate</a></h4>
+<i><a href='#tocfunc43519'>Index</a></i><br>
+
+<pre> translate(string, string, string)
+</pre>
+<pre>(define (<a href="txpath.html#codefunc43519">sxml:core-translate</a> arg-func1 arg-func2 arg-func3)
+  (lambda (nodeset root-node context var-binding)
+    (let ((str1 (<a href="sxpath-ext.html#codefunc14688">sxml:string</a>
+                 (arg-func1 nodeset root-node context var-binding)))
+          (str2 (<a href="sxpath-ext.html#codefunc14688">sxml:string</a>
+                 (arg-func2 nodeset root-node context var-binding)))
+          (str3 (<a href="sxpath-ext.html#codefunc14688">sxml:string</a>
+                 (arg-func3 nodeset root-node context var-binding))))
+      (let ((alist
+             (let while ((lst2 (string-&gt;list str2))
+                         (lst3 (string-&gt;list str3))
+                         (alist '()))
+               (cond
+                 ((null? lst2) (reverse alist))
+                 ((null? lst3)
+                  (append
+                   (reverse alist)
+                   (map
+                    (lambda (ch) (cons ch #f))
+                    lst2)))
+                 (else
+                  (while
+                   (cdr lst2)
+                   (cdr lst3)
+                   (cons (cons (car lst2) (car lst3)) alist)))))))
+        (let rpt ((lst1 (string-&gt;list str1))
+                  (res '()))
+          (cond
+            ((null? lst1) (list-&gt;string (reverse res)))
+            ((assoc (car lst1) alist)
+             =&gt; (lambda (pair)
+                  (if (cdr pair)
+                      (rpt (cdr lst1) (cons (cdr pair) res))
+                      (rpt (cdr lst1) res))))
+            (else
+             (rpt (cdr lst1) (cons (car lst1) res)))))))))
+</pre>
+<h4><a name='codefunc9621' href='#docfunc9621'>sxml:core-boolean</a></h4>
+<i><a href='#tocfunc9621'>Index</a></i><br>
+
+<pre> boolean(object)
+</pre>
+<pre>(define (<a href="txpath.html#codefunc9621">sxml:core-boolean</a> arg-func)
+  (lambda (nodeset root-node context var-binding)
+    (<a href="sxpath-ext.html#codefunc35416">sxml:boolean</a> 
+     (arg-func nodeset root-node context var-binding))))
+</pre>
+<h4><a name='codefunc22482' href='#docfunc22482'>sxml:core-not</a></h4>
+<i><a href='#tocfunc22482'>Index</a></i><br>
+
+<pre> not(boolean)
+</pre>
+<pre>(define (<a href="txpath.html#codefunc22482">sxml:core-not</a> arg-func)
+  (lambda (nodeset root-node context var-binding)
+    (not (<a href="sxpath-ext.html#codefunc35416">sxml:boolean</a> 
+          (arg-func nodeset root-node context var-binding)))))
+</pre>
+<h4><a name='codefunc49113' href='#docfunc49113'>sxml:core-true</a></h4>
+<i><a href='#tocfunc49113'>Index</a></i><br>
+
+<pre> true()
+</pre>
+<pre>(define (<a href="txpath.html#codefunc49113">sxml:core-true</a>)
+  (lambda (nodeset root-node context var-binding) #t))
+</pre>
+<h4><a name='codefunc48423' href='#docfunc48423'>sxml:core-false</a></h4>
+<i><a href='#tocfunc48423'>Index</a></i><br>
+
+<pre> false()
+</pre>
+<pre>(define (<a href="txpath.html#codefunc48423">sxml:core-false</a>)
+  (lambda (nodeset root-node context var-binding) #f))
+</pre>
+<h4><a name='codefunc45258' href='#docfunc45258'>sxml:core-lang</a></h4>
+<i><a href='#tocfunc45258'>Index</a></i><br>
+
+<pre> lang(string)
+</pre>
+<pre>(define (<a href="txpath.html#codefunc45258">sxml:core-lang</a> arg-func)
+  (lambda (nodeset root-node context var-binding)
+    (if
+     (null? nodeset)
+     #f
+     (let ((arg (<a href="sxpath-ext.html#codefunc14688">sxml:string</a>
+                 (arg-func nodeset root-node context var-binding)))
+           (context-node (car nodeset)))
+       (let rpt ((pairs
+                  (map
+                   (lambda (node) (cons node #f))
+                   root-node)))
+         (if
+          (null? pairs)  ; context node not found
+          #f
+          (let* ((lng
+                  ((<a href="sxpathlib.html#codefunc5616">sxml:child</a> (<a href="sxpathlib.html#codefunc9356">ntype??</a> '*text*))
+                   ((<a href="sxpathlib.html#codefunc65240">sxml:attribute</a> (<a href="sxpathlib.html#codefunc9356">ntype??</a> 'xml:lang))
+                    (caar pairs))))
+                 (lng (if (null? lng) (cdar pairs) (car lng))))
+            (if
+             (eq? context-node (caar pairs)) ; context node found
+             (and
+              lng
+              (or (string-ci=? arg lng)
+                  (string-prefix-ci? (string-append arg &quot;-&quot;) lng)))
+             (rpt
+              (append
+               (map
+                (lambda (node) (cons node lng))
+                ((<a href="sxpathlib.html#codefunc65240">sxml:attribute</a> (<a href="sxpathlib.html#codefunc9356">ntype??</a> '*)) (caar pairs)))
+               (map
+                (lambda (node) (cons node lng))
+                ((<a href="sxpathlib.html#codefunc5616">sxml:child</a> <a href="sxpathlib.html#codefunc63215">sxml:node?</a>) (caar pairs)))
+               (cdr pairs)))))))))))
+</pre>
+<h4><a name='codefunc12849' href='#docfunc12849'>sxml:core-number</a></h4>
+<i><a href='#tocfunc12849'>Index</a></i><br>
+
+<pre> number(object?)
+</pre>
+<pre>(define (<a href="txpath.html#codefunc12849">sxml:core-number</a> . arg-func)  ; optional argument
+  (if (null? arg-func)  ; no argument supplied
+      (lambda (nodeset root-node context var-binding)
+        (<a href="sxpath-ext.html#codefunc9829">sxml:number</a> nodeset))
+      (let ((func (car arg-func)))
+        (lambda (nodeset root-node context var-binding)
+          (<a href="sxpath-ext.html#codefunc9829">sxml:number</a> 
+           (func nodeset root-node context var-binding))))))
+</pre>
+<h4><a name='codefunc24016' href='#docfunc24016'>sxml:core-sum</a></h4>
+<i><a href='#tocfunc24016'>Index</a></i><br>
+
+<pre> sum(node-set)
+</pre>
+<pre>(define (<a href="txpath.html#codefunc24016">sxml:core-sum</a> arg-func)
+  (lambda (nodeset root-node context var-binding)
+    (let ((res (arg-func nodeset root-node context var-binding)))
+      (cond
+        ((<a href="sxpathlib.html#codefunc31162">nodeset?</a> res)
+         (apply +
+                (map
+                 (lambda (node)
+                   (<a href="sxpath-ext.html#codefunc9829">sxml:number</a> (<a href="sxpath-ext.html#codefunc15784">sxml:string-value</a> node)))
+                 res)))
+        (else
+         (<a href="txpath.html#codefunc13525">sxml:xpointer-runtime-error</a>
+          &quot;SUM function - an argument is not a nodeset&quot;)
+         0)))))
+</pre>
+<h4><a name='codefunc50231' href='#docfunc50231'>sxml:core-floor</a></h4>
+<i><a href='#tocfunc50231'>Index</a></i><br>
+
+<pre> floor(number)
+</pre>
+<pre>(define (<a href="txpath.html#codefunc50231">sxml:core-floor</a> arg-func)
+  (lambda (nodeset root-node context var-binding)
+    (inexact-&gt;exact
+     (floor (<a href="sxpath-ext.html#codefunc9829">sxml:number</a> 
+             (arg-func nodeset root-node context var-binding))))))
+</pre>
+<h4><a name='codefunc10381' href='#docfunc10381'>sxml:core-ceiling</a></h4>
+<i><a href='#tocfunc10381'>Index</a></i><br>
+
+<pre> ceiling(number)
+</pre>
+<pre>(define (<a href="txpath.html#codefunc10381">sxml:core-ceiling</a> arg-func)
+  (lambda (nodeset root-node context var-binding)
+    (inexact-&gt;exact
+     (ceiling (<a href="sxpath-ext.html#codefunc9829">sxml:number</a>
+               (arg-func nodeset root-node context var-binding))))))
+</pre>
+<h4><a name='codefunc50747' href='#docfunc50747'>sxml:core-round</a></h4>
+<i><a href='#tocfunc50747'>Index</a></i><br>
+
+<pre> round(number)
+</pre>
+<pre>(define (<a href="txpath.html#codefunc50747">sxml:core-round</a> arg-func)
+  (lambda (nodeset root-node context var-binding)
+    (inexact-&gt;exact
+     (round (<a href="sxpath-ext.html#codefunc9829">sxml:number</a>
+             (arg-func nodeset root-node context var-binding))))))
+</pre>
+<h4><a name='codefunc6657' href='#docfunc6657'>sxml:api-helper0</a></h4>
+<i><a href='#tocfunc6657'>Index</a></i><br>
+
+<pre>(define (<a href="txpath.html#codefunc6657">sxml:api-helper0</a> parse-proc)
+  (lambda (xpath-string . ns-binding)
+    (let ((res (parse-proc
+                xpath-string
+                (if (null? ns-binding) ns-binding (car ns-binding))
+                '())))
+      (if (<a href="xpath-parser.html#codefunc54318">txp:error?</a> res)  ; error detected
+          #f
+          (lambda (node . var-binding)
+            (let ((node (<a href="sxpathlib.html#codefunc11721">as-nodeset</a> node)))
+              (if
+               (null? var-binding)  ; no variables supplied
+               (res node node (cons 1 1) '())
+               (let ((var-binding (car var-binding)))
+                 (res
+                  node
+                  (cond ((assq '*root* var-binding)
+                         =&gt; (lambda (pair) (<a href="sxpathlib.html#codefunc11721">as-nodeset</a> (cdr pair))))
+                        (else node))
+                  (cons 1 1)
+                  var-binding)))))))))
+</pre>
+<h4><a name='codefunc26103' href='#docfunc26103'>sxml:classic-res</a></h4>
+<i><a href='#tocfunc26103'>Index</a></i><br>
+
+<pre>(define <a href="txpath.html#codefunc26103">sxml:classic-res</a> (<a href="xpath-parser.html#codefunc22538">txp:parameterize-parser</a> <a href="txpath.html#codefunc53447">sxml:classic-params</a>))
+</pre>
+<h4><a name='codefunc59904' href='#docfunc59904'>sxml:api-helper</a></h4>
+<i><a href='#tocfunc59904'>Index</a></i><br>
+
+<pre>(define (<a href="txpath.html#codefunc59904">sxml:api-helper</a> parse-proc)
+  (lambda (xpath-string . ns-binding)
+    (let ((res (parse-proc
+                xpath-string
+                (if (null? ns-binding) ns-binding (car ns-binding))
+                '())))
+      (if (<a href="xpath-parser.html#codefunc54318">txp:error?</a> res)  ; error detected
+          #f
+          (lambda (node . var-binding)
+            (let ((node (<a href="sxpathlib.html#codefunc11721">as-nodeset</a> node)))
+              (if
+               (null? var-binding)  ; no variables supplied
+               (res node node (cons 1 1) '())
+               (let ((var-binding (car var-binding)))
+                 (res
+                  node
+                  (cond ((assq '*root* var-binding)
+                         =&gt; (lambda (pair) (<a href="sxpathlib.html#codefunc11721">as-nodeset</a> (cdr pair))))
+                        (else node))
+                  (cons 1 1)
+                  var-binding)))))))))
+</pre>
+<h4><a name='codefunc9984' href='#docfunc9984'>sxml:xpath</a></h4>
+<i><a href='#tocfunc9984'>Index</a></i><br>
+
+<pre>(define <a href="txpath.html#codefunc9984">sxml:xpath</a>
+  (<a href="txpath.html#codefunc59904">sxml:api-helper</a> (cadr (assq 'xpath <a href="txpath.html#codefunc26103">sxml:classic-res</a>))))
+</pre>
+<h4><a name='codefunc41179' href='#docfunc41179'>sxml:xpointer</a></h4>
+<i><a href='#tocfunc41179'>Index</a></i><br>
+
+<pre>(define <a href="txpath.html#codefunc41179">sxml:xpointer</a>
+  (<a href="txpath.html#codefunc59904">sxml:api-helper</a> (cadr (assq 'xpointer <a href="txpath.html#codefunc26103">sxml:classic-res</a>))))
+</pre>
+<h4><a name='codefunc64791' href='#docfunc64791'>sxml:xpath-expr</a></h4>
+<i><a href='#tocfunc64791'>Index</a></i><br>
+
+<pre>(define <a href="txpath.html#codefunc64791">sxml:xpath-expr</a>
+  (<a href="txpath.html#codefunc59904">sxml:api-helper</a> (cadr (assq 'expr <a href="txpath.html#codefunc26103">sxml:classic-res</a>))))
+</pre>
+<h4><a name='codefunc2296' href='#docfunc2296'>sxml:xpath+root+vars</a></h4>
+<i><a href='#tocfunc2296'>Index</a></i><br>
+
+<pre> Some (deprecated!) aliases for backward compatibility
+ which will be eventually removed
+</pre>
+<pre>(define <a href="txpath.html#codefunc2296">sxml:xpath+root+vars</a> <a href="txpath.html#codefunc9984">sxml:xpath</a>)
+</pre>
+<h4><a name='codefunc39101' href='#docfunc39101'>sxml:xpointer+root+vars</a></h4>
+<i><a href='#tocfunc39101'>Index</a></i><br>
+
+<pre>(define <a href="txpath.html#codefunc39101">sxml:xpointer+root+vars</a> <a href="txpath.html#codefunc41179">sxml:xpointer</a>)
+</pre>
+<h4><a name='codefunc2319' href='#docfunc2319'>sxml:xpath+root</a></h4>
+<i><a href='#tocfunc2319'>Index</a></i><br>
+
+<pre>(define <a href="txpath.html#codefunc2319">sxml:xpath+root</a> <a href="txpath.html#codefunc9984">sxml:xpath</a>)
+</pre>
+<h4><a name='codefunc16985' href='#docfunc16985'>txpath</a></h4>
+<i><a href='#tocfunc16985'>Index</a></i><br>
+
+<pre>(define <a href="txpath.html#codefunc16985">txpath</a> <a href="txpath.html#codefunc9984">sxml:xpath</a>)
+</pre>
+<h4><a name='codefunc12290' href='#docfunc12290'>sxml:api-index-helper</a></h4>
+<i><a href='#tocfunc12290'>Index</a></i><br>
+
+<pre>(define (<a href="txpath.html#codefunc12290">sxml:api-index-helper</a> parse-proc)
+  (lambda (xpath-string . ns-binding)
+    (let ((res (parse-proc
+                xpath-string
+                (if (null? ns-binding) ns-binding (car ns-binding))
+                '())))
+      (if (<a href="xpath-parser.html#codefunc54318">txp:error?</a> res)  ; error detected
+          #f
+          (cons
+           (lambda (node)
+             (let ((node (<a href="sxpathlib.html#codefunc11721">as-nodeset</a> node)))
+               (res node node (cons 1 1) '())))
+           #t)))))
+</pre>
+<h4><a name='codefunc27903' href='#docfunc27903'>sxml:xpath+index</a></h4>
+<i><a href='#tocfunc27903'>Index</a></i><br>
+
+<pre>(define <a href="txpath.html#codefunc27903">sxml:xpath+index</a>
+  (<a href="txpath.html#codefunc12290">sxml:api-index-helper</a> (cadr (assq 'xpath <a href="txpath.html#codefunc26103">sxml:classic-res</a>))))
+</pre>
+<h4><a name='codefunc40993' href='#docfunc40993'>sxml:xpointer+index</a></h4>
+<i><a href='#tocfunc40993'>Index</a></i><br>
+
+<pre>(define <a href="txpath.html#codefunc40993">sxml:xpointer+index</a>
+  (<a href="txpath.html#codefunc12290">sxml:api-index-helper</a> (cadr (assq 'xpointer <a href="txpath.html#codefunc26103">sxml:classic-res</a>))))
+</pre></body></html>

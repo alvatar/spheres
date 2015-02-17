@@ -1,0 +1,3187 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN""http://www.w3.org/TR/html401/loose.dtd"><html><head><meta name="GENERATOR" content="Mole: The Scheme Source Code Digger"><title>Module: xpath-context</title><meta name='keywords' content=''></head><body bgcolor='#ffffff' text='#384412'  link='#11af05' vlink='#728b09'>
+<center><h1>Module: xpath-context</h1></center>
+
+<pre> Context-based XPath implementation
+
+ This software is in Public Domain.
+ IT IS PROVIDED &quot;AS IS&quot;, WITHOUT WARRANTY OF ANY KIND.
+
+ Please send bug reports and comments to:
+   lisovsky@acm.org      Kirill Lisovsky
+   lizorkin@hotbox.ru    Dmitry Lizorkin
+
+ &lt;nodeset&gt; ::= ( &lt;nodeset-member&gt;* )
+ &lt;nodeset-member&gt; ::= &lt;node&gt; | &lt;context&gt;
+ &lt;context&gt; ::= ( *CONTEXT*  &lt;node&gt;  &lt;ancestor&gt;* )
+ &lt;node&gt; - an SXML node (a context node)
+ &lt;ancestor&gt;* - context node's parent, grandparent, grandgrandparent etc.
+
+ A CONTEXT doesn't contain more ANCESTORs than actually required for
+ evaluating the location path. This is achieved by means of an &quot;intellectual&quot;
+ parsing of the location path. The number of ANCESTORs stored in the CONTEXT
+ can differ for different path steps.
+</pre><p><br>
+<!-- Table of content -->
+<p><dl>
+<p><dt><a name='tocchapt30427' href='#chapt30427'><b>Basic operations over context</b></a><dd>
+
+f:  <a name='tocfunc1508' href='#docfunc1508' style='text-decoration:none'>sxml:context-u?</a><br>
+
+f:  <a name='tocfunc37046' href='#docfunc37046' style='text-decoration:none'>sxml:context?</a><br>
+
+<dl><dt><a name='tocsect44794' href='#sect44794'><b>Accessors</b></a><dd>
+
+f:  <a name='tocfunc6309' href='#docfunc6309' style='text-decoration:none'>sxml:context->node-u</a><br>
+
+f:  <a name='tocfunc46900' href='#docfunc46900' style='text-decoration:none'>sxml:context->ancestors-u</a><br>
+
+f:  <a name='tocfunc20165' href='#docfunc20165' style='text-decoration:none'>sxml:context->content-u</a><br>
+
+f:  <a name='tocfunc41847' href='#docfunc41847' style='text-decoration:none'>sxml:context->node</a><br>
+
+f:  <a name='tocfunc35263' href='#docfunc35263' style='text-decoration:none'>sxml:context->ancestors</a><br>
+
+f:  <a name='tocfunc8528' href='#docfunc8528' style='text-decoration:none'>sxml:context->content</a><br>
+
+f:  <a name='tocfunc53298' href='#docfunc53298' style='text-decoration:none'>draft:contextset->nodeset</a><br>
+</dl>
+
+<dl><dt><a name='tocsect47528' href='#sect47528'><b>Mutators</b></a><dd>
+
+f:  <a name='tocfunc34204' href='#docfunc34204' style='text-decoration:none'>draft:make-context</a><br>
+
+f:  <a name='tocfunc37605' href='#docfunc37605' style='text-decoration:none'>draft:smart-make-context</a><br>
+
+f:  <a name='tocfunc63648' href='#docfunc63648' style='text-decoration:none'>draft:siblings->context-set</a><br>
+</dl>
+
+<dl><dt><a name='tocsect10099' href='#sect10099'><b>Operations on num-ancestors</b></a><dd>
+
+f:  <a name='tocfunc29907' href='#docfunc29907' style='text-decoration:none'>draft:na+</a><br>
+
+f:  <a name='tocfunc50100' href='#docfunc50100' style='text-decoration:none'>draft:na-minus</a><br>
+
+f:  <a name='tocfunc38839' href='#docfunc38839' style='text-decoration:none'>draft:na-minus-nneg</a><br>
+
+f:  <a name='tocfunc23095' href='#docfunc23095' style='text-decoration:none'>draft:na-max</a><br>
+
+f:  <a name='tocfunc20543' href='#docfunc20543' style='text-decoration:none'>draft:na-min</a><br>
+
+f:  <a name='tocfunc29926' href='#docfunc29926' style='text-decoration:none'>draft:na></a><br>
+
+f:  <a name='tocfunc45542' href='#docfunc45542' style='text-decoration:none'>draft:na>=</a><br>
+</dl>
+<p><dt><a name='tocchapt31273' href='#chapt31273'><b>Misc helpers</b></a><dd>
+
+f:  <a name='tocfunc47888' href='#docfunc47888' style='text-decoration:none'>draft:list-head</a><br>
+
+f:  <a name='tocfunc53532' href='#docfunc53532' style='text-decoration:none'>draft:list-last</a><br>
+
+f:  <a name='tocfunc47645' href='#docfunc47645' style='text-decoration:none'>draft:make-list</a><br>
+
+f:  <a name='tocfunc8076' href='#docfunc8076' style='text-decoration:none'>draft:signal-semantic-error</a><br>
+
+f:  <a name='tocfunc49694' href='#docfunc49694' style='text-decoration:none'>draft:top?</a><br>
+
+f:  <a name='tocfunc3380' href='#docfunc3380' style='text-decoration:none'>draft:remove-eq-duplicates</a><br>
+
+f:  <a name='tocfunc60759' href='#docfunc60759' style='text-decoration:none'>draft:reach-root</a><br>
+
+f:  <a name='tocfunc48905' href='#docfunc48905' style='text-decoration:none'>draft:recover-contextset</a><br>
+
+<dl><dt><a name='tocsect11671' href='#sect11671'><b>For sxpath: handling a procedure as a location step</b></a><dd>
+
+f:  <a name='tocfunc45116' href='#docfunc45116' style='text-decoration:none'>draft:find-proper-context</a><br>
+</dl>
+<p><dt><a name='tocchapt53480' href='#chapt53480'><b>XPath axes</b></a><dd>
+
+f:  <a name='tocfunc52705' href='#docfunc52705' style='text-decoration:none'>draft:ancestor</a><br>
+
+f:  <a name='tocfunc13921' href='#docfunc13921' style='text-decoration:none'>draft:ancestor-or-self</a><br>
+
+f:  <a name='tocfunc53587' href='#docfunc53587' style='text-decoration:none'>draft:attribute</a><br>
+
+f:  <a name='tocfunc59498' href='#docfunc59498' style='text-decoration:none'>draft:child</a><br>
+
+f:  <a name='tocfunc8266' href='#docfunc8266' style='text-decoration:none'>draft:descendant</a><br>
+
+f:  <a name='tocfunc35017' href='#docfunc35017' style='text-decoration:none'>draft:descendant-or-self</a><br>
+
+f:  <a name='tocfunc54604' href='#docfunc54604' style='text-decoration:none'>draft:following</a><br>
+
+f:  <a name='tocfunc18163' href='#docfunc18163' style='text-decoration:none'>draft:following-sibling</a><br>
+
+f:  <a name='tocfunc44623' href='#docfunc44623' style='text-decoration:none'>draft:namespace</a><br>
+
+f:  <a name='tocfunc20107' href='#docfunc20107' style='text-decoration:none'>draft:parent</a><br>
+
+f:  <a name='tocfunc48197' href='#docfunc48197' style='text-decoration:none'>draft:preceding</a><br>
+
+f:  <a name='tocfunc11756' href='#docfunc11756' style='text-decoration:none'>draft:preceding-sibling</a><br>
+
+f:  <a name='tocfunc57113' href='#docfunc57113' style='text-decoration:none'>draft:self</a><br>
+<p><dt><a name='tocchapt49457' href='#chapt49457'><b>XPath Core Function Library</b></a><dd>
+
+<dl><dt><a name='tocsect63086' href='#sect63086'><b>4.1 Node Set Functions</b></a><dd>
+
+f:  <a name='tocfunc51218' href='#docfunc51218' style='text-decoration:none'>draft:core-last</a><br>
+
+f:  <a name='tocfunc45037' href='#docfunc45037' style='text-decoration:none'>draft:core-position</a><br>
+
+f:  <a name='tocfunc13595' href='#docfunc13595' style='text-decoration:none'>draft:core-count</a><br>
+
+f:  <a name='tocfunc20897' href='#docfunc20897' style='text-decoration:none'>draft:core-id</a><br>
+
+f:  <a name='tocfunc2' href='#docfunc2' style='text-decoration:none'>draft:core-local-name</a><br>
+
+f:  <a name='tocfunc56439' href='#docfunc56439' style='text-decoration:none'>draft:core-namespace-uri</a><br>
+
+f:  <a name='tocfunc50179' href='#docfunc50179' style='text-decoration:none'>draft:core-name</a><br>
+</dl>
+
+<dl><dt><a name='tocsect40811' href='#sect40811'><b>4.2 String Functions</b></a><dd>
+
+f:  <a name='tocfunc15490' href='#docfunc15490' style='text-decoration:none'>draft:core-string</a><br>
+
+f:  <a name='tocfunc7044' href='#docfunc7044' style='text-decoration:none'>draft:core-concat</a><br>
+
+f:  <a name='tocfunc12419' href='#docfunc12419' style='text-decoration:none'>draft:core-starts-with</a><br>
+
+f:  <a name='tocfunc35325' href='#docfunc35325' style='text-decoration:none'>draft:core-contains</a><br>
+
+f:  <a name='tocfunc15982' href='#docfunc15982' style='text-decoration:none'>draft:core-substring-before</a><br>
+
+f:  <a name='tocfunc19200' href='#docfunc19200' style='text-decoration:none'>draft:core-substring-after</a><br>
+
+f:  <a name='tocfunc775' href='#docfunc775' style='text-decoration:none'>draft:core-substring</a><br>
+
+f:  <a name='tocfunc40657' href='#docfunc40657' style='text-decoration:none'>draft:core-string-length</a><br>
+
+f:  <a name='tocfunc13058' href='#docfunc13058' style='text-decoration:none'>draft:core-normalize-space</a><br>
+
+f:  <a name='tocfunc63486' href='#docfunc63486' style='text-decoration:none'>draft:core-translate</a><br>
+</dl>
+
+<dl><dt><a name='tocsect23800' href='#sect23800'><b>4.3 Boolean Functions</b></a><dd>
+
+f:  <a name='tocfunc36218' href='#docfunc36218' style='text-decoration:none'>draft:core-boolean</a><br>
+
+f:  <a name='tocfunc51884' href='#docfunc51884' style='text-decoration:none'>draft:core-not</a><br>
+
+f:  <a name='tocfunc53780' href='#docfunc53780' style='text-decoration:none'>draft:core-true</a><br>
+
+f:  <a name='tocfunc8210' href='#docfunc8210' style='text-decoration:none'>draft:core-false</a><br>
+
+f:  <a name='tocfunc49925' href='#docfunc49925' style='text-decoration:none'>draft:core-lang</a><br>
+</dl>
+
+<dl><dt><a name='tocsect42074' href='#sect42074'><b>4.4 Number Functions</b></a><dd>
+
+f:  <a name='tocfunc10631' href='#docfunc10631' style='text-decoration:none'>draft:core-number</a><br>
+
+f:  <a name='tocfunc51378' href='#docfunc51378' style='text-decoration:none'>draft:core-sum</a><br>
+
+f:  <a name='tocfunc12313' href='#docfunc12313' style='text-decoration:none'>draft:core-floor</a><br>
+
+f:  <a name='tocfunc34173' href='#docfunc34173' style='text-decoration:none'>draft:core-ceiling</a><br>
+
+f:  <a name='tocfunc13339' href='#docfunc13339' style='text-decoration:none'>draft:core-round</a><br>
+</dl>
+<p><dt><a name='tocchapt29406' href='#chapt29406'><b>XPath AST processing</b></a><dd>
+
+f:  <a name='tocfunc48551' href='#docfunc48551' style='text-decoration:none'>draft:ast-axis-specifier</a><br>
+
+f:  <a name='tocfunc28905' href='#docfunc28905' style='text-decoration:none'>draft:ast-node-test</a><br>
+
+<dl><dt><a name='tocsect28150' href='#sect28150'><b>In this section, each function accepts 2 arguments</b></a><dd>
+
+f:  <a name='tocfunc16826' href='#docfunc16826' style='text-decoration:none'>draft:ast-location-path</a><br>
+
+f:  <a name='tocfunc2944' href='#docfunc2944' style='text-decoration:none'>draft:ast-absolute-location-path</a><br>
+
+f:  <a name='tocfunc62611' href='#docfunc62611' style='text-decoration:none'>draft:ast-relative-location-path</a><br>
+
+f:  <a name='tocfunc39144' href='#docfunc39144' style='text-decoration:none'>draft:ast-step</a><br>
+
+f:  <a name='tocfunc30963' href='#docfunc30963' style='text-decoration:none'>draft:ast-step-list</a><br>
+
+f:  <a name='tocfunc25365' href='#docfunc25365' style='text-decoration:none'>draft:ast-predicate</a><br>
+
+f:  <a name='tocfunc28149' href='#docfunc28149' style='text-decoration:none'>draft:ast-predicate-list</a><br>
+
+f:  <a name='tocfunc40677' href='#docfunc40677' style='text-decoration:none'>draft:ast-expr</a><br>
+
+f:  <a name='tocfunc64662' href='#docfunc64662' style='text-decoration:none'>draft:ast-or-expr</a><br>
+
+f:  <a name='tocfunc15019' href='#docfunc15019' style='text-decoration:none'>draft:ast-and-expr</a><br>
+
+f:  <a name='tocfunc16355' href='#docfunc16355' style='text-decoration:none'>draft:ast-equality-expr</a><br>
+
+f:  <a name='tocfunc38219' href='#docfunc38219' style='text-decoration:none'>draft:ast-relational-expr</a><br>
+
+f:  <a name='tocfunc9944' href='#docfunc9944' style='text-decoration:none'>draft:ast-additive-expr</a><br>
+
+f:  <a name='tocfunc32293' href='#docfunc32293' style='text-decoration:none'>draft:ast-multiplicative-expr</a><br>
+
+f:  <a name='tocfunc43570' href='#docfunc43570' style='text-decoration:none'>draft:ast-union-expr</a><br>
+
+f:  <a name='tocfunc21516' href='#docfunc21516' style='text-decoration:none'>draft:ast-path-expr</a><br>
+
+f:  <a name='tocfunc55903' href='#docfunc55903' style='text-decoration:none'>draft:ast-filter-expr</a><br>
+
+f:  <a name='tocfunc25991' href='#docfunc25991' style='text-decoration:none'>draft:ast-variable-reference</a><br>
+
+f:  <a name='tocfunc58574' href='#docfunc58574' style='text-decoration:none'>draft:ast-literal</a><br>
+
+f:  <a name='tocfunc65104' href='#docfunc65104' style='text-decoration:none'>draft:ast-number</a><br>
+
+f:  <a name='tocfunc13507' href='#docfunc13507' style='text-decoration:none'>draft:ast-function-call</a><br>
+
+f:  <a name='tocfunc31927' href='#docfunc31927' style='text-decoration:none'>draft:ast-function-arguments</a><br>
+</dl>
+
+<dl><dt><a name='tocsect40541' href='#sect40541'><b>Section dedicated to XPointer AST</b></a><dd>
+
+f:  <a name='tocfunc29899' href='#docfunc29899' style='text-decoration:none'>draft:ast-xpointer</a><br>
+
+f:  <a name='tocfunc7205' href='#docfunc7205' style='text-decoration:none'>draft:ast-child-seq</a><br>
+
+f:  <a name='tocfunc56923' href='#docfunc56923' style='text-decoration:none'>draft:ast-number-list</a><br>
+
+f:  <a name='tocfunc33522' href='#docfunc33522' style='text-decoration:none'>draft:ast-full-xptr</a><br>
+</dl>
+<p><dt><a name='tocchapt29326' href='#chapt29326'><b>Highest level API functions</b></a><dd>
+
+f:  <a name='tocfunc36352' href='#docfunc36352' style='text-decoration:none'>draft:arglist->ns+na</a><br>
+
+f:  <a name='tocfunc63806' href='#docfunc63806' style='text-decoration:none'>draft:api-helper</a><br>
+
+f:  <a name='tocfunc63611' href='#docfunc63611' style='text-decoration:none'>draft:xpath</a><br>
+
+f:  <a name='tocfunc54261' href='#docfunc54261' style='text-decoration:none'>draft:xpointer</a><br>
+
+f:  <a name='tocfunc4178' href='#docfunc4178' style='text-decoration:none'>draft:xpath-expr</a><br>
+
+f:  <a name='tocfunc21906' href='#docfunc21906' style='text-decoration:none'>draft:sxpath</a><br>
+
+f:  <a name='tocfunc47107' href='#docfunc47107' style='text-decoration:none'>txpath-with-context</a><br>
+
+f:  <a name='tocfunc42376' href='#docfunc42376' style='text-decoration:none'>txpath/c</a><br>
+
+f:  <a name='tocfunc47106' href='#docfunc47106' style='text-decoration:none'>sxpath-with-context</a><br>
+
+f:  <a name='tocfunc42375' href='#docfunc42375' style='text-decoration:none'>sxpath/c</a><br>
+</dl>
+<hr height='5'><center><h3><a name='chapt30427' href='#tocchapt30427'>Basic operations over context</a></h3></center>
+
+<pre></pre>
+<h4><a name='docfunc1508' href='#tocfunc1508'>sxml:context-u?</a></h4>
+(define (sxml:context-u? node)<i><br> ... <a href='#codefunc1508'>Full Code</a> ... )</i>
+<pre> A fast however unsafe predicate
+ Assumes that the 'node' provided is a pair
+</pre><p><br>
+
+<h4><a name='docfunc37046' href='#tocfunc37046'>sxml:context?</a></h4>
+(define (sxml:context? node)<i><br> ... <a href='#codefunc37046'>Full Code</a> ... )</i>
+<pre> Safer predicate
+</pre><p><br>
+
+<hr width='40%' align='center'><center><h3><a name='sect44794' href='#tocsect44794'>Accessors</a></h3></center>
+
+<pre></pre>
+<h4><a name='docfunc6309' href='#tocfunc6309'>sxml:context->node-u</a></h4>
+(define sxml:context-&gt;node-u <i><br> ... <a href='#codefunc6309'>Full Code</a> ... )</i>
+<pre> Fast however unsafe accessors
+ Assume that the argument is the proper context
+</pre><p><br>
+
+<h4><a name='docfunc46900' href='#tocfunc46900'>sxml:context->ancestors-u</a></h4>
+(define sxml:context-&gt;ancestors-u <i><br> ... <a href='#codefunc46900'>Full Code</a> ... )</i><p><br>
+
+<h4><a name='docfunc20165' href='#tocfunc20165'>sxml:context->content-u</a></h4>
+(define sxml:context-&gt;content-u <i><br> ... <a href='#codefunc20165'>Full Code</a> ... )</i><p><br>
+
+<h4><a name='docfunc41847' href='#tocfunc41847'>sxml:context->node</a></h4>
+(define (sxml:context-&gt;node context)<i><br> ... <a href='#codefunc41847'>Full Code</a> ... )</i>
+<pre> Safe accessors
+ Can be applied to both a context and an ordinary node
+</pre><p><br>
+
+<h4><a name='docfunc35263' href='#tocfunc35263'>sxml:context->ancestors</a></h4>
+(define (sxml:context-&gt;ancestors context)<i><br> ... <a href='#codefunc35263'>Full Code</a> ... )</i><p><br>
+
+<h4><a name='docfunc8528' href='#tocfunc8528'>sxml:context->content</a></h4>
+(define (sxml:context-&gt;content context)<i><br> ... <a href='#codefunc8528'>Full Code</a> ... )</i><p><br>
+
+<h4><a name='docfunc53298' href='#tocfunc53298'>draft:contextset->nodeset</a></h4>
+(define (draft:contextset-&gt;nodeset obj)<i><br> ... <a href='#codefunc53298'>Full Code</a> ... )</i>
+<pre> Given a context-set, converts it to a nodeset
+</pre><p><br>
+
+<hr width='40%' align='center'><center><h3><a name='sect47528' href='#tocsect47528'>Mutators</a></h3></center>
+
+<pre></pre>
+<h4><a name='docfunc34204' href='#tocfunc34204'>draft:make-context</a></h4>
+(define (draft:make-context node ancestors)<i><br> ... <a href='#codefunc34204'>Full Code</a> ... )</i>
+<pre> Constructor
+</pre><p><br>
+
+<h4><a name='docfunc37605' href='#tocfunc37605'>draft:smart-make-context</a></h4>
+(define (draft:smart-make-context node ancestors num-anc)<i><br> ... <a href='#codefunc37605'>Full Code</a> ... )</i>
+<pre> A smarter constructor
+ Makes context only when required, with the 'num-anc' required
+</pre><p><br>
+
+<h4><a name='docfunc63648' href='#tocfunc63648'>draft:siblings->context-set</a></h4>
+(define (draft:siblings-&gt;context-set nodeset ancestors)<i><br> ... <a href='#codefunc63648'>Full Code</a> ... )</i>
+<pre> Provided a 'nodeset' of sibling nodes, wraps each into context
+ If 'ancestors' is empty, keeps 'nodeset' unchanged
+</pre><p><br>
+
+<hr width='40%' align='center'><center><h3><a name='sect10099' href='#tocsect10099'>Operations on num-ancestors</a></h3></center>
+
+<pre> Complexity results from #f as a value for num-ancestors (which means that the
+ number of ancestors is infinite)
+</pre>
+<h4><a name='docfunc29907' href='#tocfunc29907'>draft:na+</a></h4>
+(define (draft:na+ na1 na2)<i><br> ... <a href='#codefunc29907'>Full Code</a> ... )</i><p><br>
+
+<h4><a name='docfunc50100' href='#tocfunc50100'>draft:na-minus</a></h4>
+(define (draft:na-minus na value)<i><br> ... <a href='#codefunc50100'>Full Code</a> ... )</i><p><br>
+
+<h4><a name='docfunc38839' href='#tocfunc38839'>draft:na-minus-nneg</a></h4>
+(define (draft:na-minus-nneg na value)<i><br> ... <a href='#codefunc38839'>Full Code</a> ... )</i>
+<pre> Minus, with the result that is always non-negative
+</pre><p><br>
+
+<h4><a name='docfunc23095' href='#tocfunc23095'>draft:na-max</a></h4>
+(define (draft:na-max . na-lst)<i><br> ... <a href='#codefunc23095'>Full Code</a> ... )</i><p><br>
+
+<h4><a name='docfunc20543' href='#tocfunc20543'>draft:na-min</a></h4>
+(define (draft:na-min . na-lst)<i><br> ... <a href='#codefunc20543'>Full Code</a> ... )</i><p><br>
+
+<h4><a name='docfunc29926' href='#tocfunc29926'>draft:na></a></h4>
+(define (draft:na&gt; na1 na2)<i><br> ... <a href='#codefunc29926'>Full Code</a> ... )</i><p><br>
+
+<h4><a name='docfunc45542' href='#tocfunc45542'>draft:na>=</a></h4>
+(define (draft:na&gt;= na1 na2)<i><br> ... <a href='#codefunc45542'>Full Code</a> ... )</i><p><br>
+<hr height='5'><center><h3><a name='chapt31273' href='#tocchapt31273'>Misc helpers</a></h3></center>
+
+<pre></pre>
+<h4><a name='docfunc47888' href='#tocfunc47888'>draft:list-head</a></h4>
+(define (draft:list-head lst k)<i><br> ... <a href='#codefunc47888'>Full Code</a> ... )</i>
+<pre> Similar to R5RS 'list-tail' but returns the new list consisting of the first
+ 'k' members of 'lst'
+ If k&gt;(length lst) or k=#f, lst is returned
+ NOTE1: k=#f is used in this implementation to represent positive infinity
+ NOTE2: Unless k=#f, the result is always a newly allocated list. This is the
+  main methodological difference between this function and R5RS 'list-tail'
+</pre><p><br>
+
+<h4><a name='docfunc53532' href='#tocfunc53532'>draft:list-last</a></h4>
+(define (draft:list-last lst)<i><br> ... <a href='#codefunc53532'>Full Code</a> ... )</i>
+<pre> Returns the last member of the list
+ It is an error for the list to be empty
+</pre><p><br>
+
+<h4><a name='docfunc47645' href='#tocfunc47645'>draft:make-list</a></h4>
+(define (draft:make-list value num)<i><br> ... <a href='#codefunc47645'>Full Code</a> ... )</i>
+<pre> Constructs the (listof value), whose length is num
+</pre><p><br>
+
+<h4><a name='docfunc8076' href='#tocfunc8076'>draft:signal-semantic-error</a></h4>
+(define (draft:signal-semantic-error . text)<i><br> ... <a href='#codefunc8076'>Full Code</a> ... )</i>
+<pre> Similar to txp:signal-semantic-error, but returns #f
+</pre><p><br>
+
+<h4><a name='docfunc49694' href='#tocfunc49694'>draft:top?</a></h4>
+(define (draft:top? node)<i><br> ... <a href='#codefunc49694'>Full Code</a> ... )</i>
+<pre> The top of the SXML document?
+</pre><p><br>
+
+<h4><a name='docfunc3380' href='#tocfunc3380'>draft:remove-eq-duplicates</a></h4>
+(define (draft:remove-eq-duplicates nodeset)<i><br> ... <a href='#codefunc3380'>Full Code</a> ... )</i>
+<pre> Removes eq duplicates from the nodeset
+</pre><p><br>
+
+<h4><a name='docfunc60759' href='#tocfunc60759'>draft:reach-root</a></h4>
+(define (draft:reach-root contextset)<i><br> ... <a href='#codefunc60759'>Full Code</a> ... )</i>
+<pre> Reaches the root of the root of the contextset
+ Result: nodeset
+</pre><p><br>
+
+<h4><a name='docfunc48905' href='#tocfunc48905'>draft:recover-contextset</a></h4>
+(define (draft:recover-contextset nodeset root-node num-anc)<i><br> ... <a href='#codefunc48905'>Full Code</a> ... )</i>
+<pre> Recovers context for each node of the nodeset
+ Context recovery is performed in its usual technique: searching from the
+ root of the document. As a result, this function can be fairly slow.
+ In this implementation, it is sometimes called after an XPath 'id' function,
+ for location paths like  &quot;id(name)/..&quot;
+ By nature of 'id-index', context is lost when we access elements by their
+ ID. It may be a good idea to rework the structure of 'id-index' to make it
+ more suitable for purposes of this context-based XPath implementation.
+ A good news is that only a few elements are usually selected by XPath 'id'
+ function, thus the overhead of searching from the root node might be
+ acceptable in this case. 
+</pre><p><br>
+
+<hr width='40%' align='center'><center><h3><a name='sect11671' href='#tocsect11671'>For sxpath: handling a procedure as a location step</a></h3></center>
+
+<pre></pre>
+<h4><a name='docfunc45116' href='#tocfunc45116'>draft:find-proper-context</a></h4>
+(define (draft:find-proper-context nodeset ancestors-set num-anc)<i><br> ... <a href='#codefunc45116'>Full Code</a> ... )</i>
+<pre> Makes a context-set from a nodeset supplied, with the num-anc required
+  ancestors-set ::= (listof ancestors)
+  ancestors ::= (listof node)
+ Members of the nodeset are known to be descendants-or-selves of
+ (map car ancestors-set)
+</pre><p><br>
+<hr height='5'><center><h3><a name='chapt53480' href='#tocchapt53480'>XPath axes</a></h3></center>
+
+<pre> Implementation is based on the concept of context
+ Compared to &quot;general&quot; SXPath, a new optional argument was added:
+  NUM-ANCESTORS - number of node's ancestors that will be required later in
+  the location path. For example, NUM-ANCESTORS=1 means that the node's parent
+  only must be remembered in the CONTEXT, grandparents will not be required
+</pre>
+<h4><a name='docfunc52705' href='#tocfunc52705'>draft:ancestor</a></h4>
+(define (draft:ancestor test-pred? . num-ancestors)<i><br> ... <a href='#codefunc52705'>Full Code</a> ... )</i>
+<pre> Ancestor axis
+</pre><p><br>
+
+<h4><a name='docfunc13921' href='#tocfunc13921'>draft:ancestor-or-self</a></h4>
+(define (draft:ancestor-or-self test-pred? . num-ancestors)<i><br> ... <a href='#codefunc13921'>Full Code</a> ... )</i>
+<pre> Ancestor-or-self axis
+</pre><p><br>
+
+<h4><a name='docfunc53587' href='#tocfunc53587'>draft:attribute</a></h4>
+(define (draft:attribute test-pred? . num-ancestors)<i><br> ... <a href='#codefunc53587'>Full Code</a> ... )</i>
+<pre> Attribute axis
+ Borrows much from draft:child
+</pre><p><br>
+
+<h4><a name='docfunc59498' href='#tocfunc59498'>draft:child</a></h4>
+(define (draft:child test-pred? . num-ancestors)<i><br> ... <a href='#codefunc59498'>Full Code</a> ... )</i>
+<pre> Child axis
+</pre><p><br>
+
+<h4><a name='docfunc8266' href='#tocfunc8266'>draft:descendant</a></h4>
+(define (draft:descendant test-pred? . num-ancestors)<i><br> ... <a href='#codefunc8266'>Full Code</a> ... )</i>
+<pre> Descendant axis
+</pre><p><br>
+
+<h4><a name='docfunc35017' href='#tocfunc35017'>draft:descendant-or-self</a></h4>
+(define (draft:descendant-or-self test-pred? . num-ancestors)<i><br> ... <a href='#codefunc35017'>Full Code</a> ... )</i>
+<pre> Descendant-or-self axis
+</pre><p><br>
+
+<h4><a name='docfunc54604' href='#tocfunc54604'>draft:following</a></h4>
+(define (draft:following test-pred? . num-ancestors)<i><br> ... <a href='#codefunc54604'>Full Code</a> ... )</i>
+<pre> Following axis
+</pre><p><br>
+
+<h4><a name='docfunc18163' href='#tocfunc18163'>draft:following-sibling</a></h4>
+(define (draft:following-sibling test-pred? . num-ancestors)<i><br> ... <a href='#codefunc18163'>Full Code</a> ... )</i>
+<pre> Following-sibling axis
+</pre><p><br>
+
+<h4><a name='docfunc44623' href='#tocfunc44623'>draft:namespace</a></h4>
+(define (draft:namespace test-pred? . num-ancestors)<i><br> ... <a href='#codefunc44623'>Full Code</a> ... )</i>
+<pre> Namespace axis
+ Borrows much from draft:child
+</pre><p><br>
+
+<h4><a name='docfunc20107' href='#tocfunc20107'>draft:parent</a></h4>
+(define (draft:parent test-pred? . num-ancestors)<i><br> ... <a href='#codefunc20107'>Full Code</a> ... )</i>
+<pre> Parent axis
+</pre><p><br>
+
+<h4><a name='docfunc48197' href='#tocfunc48197'>draft:preceding</a></h4>
+(define (draft:preceding test-pred? . num-ancestors)<i><br> ... <a href='#codefunc48197'>Full Code</a> ... )</i>
+<pre> Preceding axis
+</pre><p><br>
+
+<h4><a name='docfunc11756' href='#tocfunc11756'>draft:preceding-sibling</a></h4>
+(define (draft:preceding-sibling test-pred? . num-ancestors)<i><br> ... <a href='#codefunc11756'>Full Code</a> ... )</i>
+<pre> Preceding-sibling axis
+</pre><p><br>
+
+<h4><a name='docfunc57113' href='#tocfunc57113'>draft:self</a></h4>
+(define (draft:self test-pred? . num-ancestors)<i><br> ... <a href='#codefunc57113'>Full Code</a> ... )</i>
+<pre> Self axis
+ num-ancestors is not used here
+</pre><p><br>
+<hr height='5'><center><h3><a name='chapt49457' href='#tocchapt49457'>XPath Core Function Library</a></h3></center>
+
+<pre></pre>
+<hr width='40%' align='center'><center><h3><a name='sect63086' href='#tocsect63086'>4.1 Node Set Functions</a></h3></center>
+
+<pre></pre>
+<h4><a name='docfunc51218' href='#tocfunc51218'>draft:core-last</a></h4>
+(define (draft:core-last num-anc)<i><br> ... <a href='#codefunc51218'>Full Code</a> ... )</i>
+<pre> last()
+</pre><p><br>
+
+<h4><a name='docfunc45037' href='#tocfunc45037'>draft:core-position</a></h4>
+(define (draft:core-position num-anc)<i><br> ... <a href='#codefunc45037'>Full Code</a> ... )</i>
+<pre> position()
+</pre><p><br>
+
+<h4><a name='docfunc13595' href='#tocfunc13595'>draft:core-count</a></h4>
+(define (draft:core-count num-anc arg-func)<i><br> ... <a href='#codefunc13595'>Full Code</a> ... )</i>
+<pre> count(node-set)
+</pre><p><br>
+
+<h4><a name='docfunc20897' href='#tocfunc20897'>draft:core-id</a></h4>
+(define (draft:core-id num-anc arg-func)<i><br> ... <a href='#codefunc20897'>Full Code</a> ... )</i>
+<pre> id(object)
+</pre><p><br>
+
+<h4><a name='docfunc2' href='#tocfunc2'>draft:core-local-name</a></h4>
+(define (draft:core-local-name num-anc . arg-func)<i><br> ... <a href='#codefunc2'>Full Code</a> ... )</i>
+<pre> local-name(node-set?)
+</pre><p><br>
+
+<h4><a name='docfunc56439' href='#tocfunc56439'>draft:core-namespace-uri</a></h4>
+(define (draft:core-namespace-uri num-anc . arg-func)<i><br> ... <a href='#codefunc56439'>Full Code</a> ... )</i>
+<pre> namespace-uri(node-set?)
+</pre><p><br>
+
+<h4><a name='docfunc50179' href='#tocfunc50179'>draft:core-name</a></h4>
+(define (draft:core-name num-anc . arg-func)<i><br> ... <a href='#codefunc50179'>Full Code</a> ... )</i>
+<pre> name(node-set?)
+</pre><p><br>
+
+<hr width='40%' align='center'><center><h3><a name='sect40811' href='#tocsect40811'>4.2 String Functions</a></h3></center>
+
+<pre></pre>
+<h4><a name='docfunc15490' href='#tocfunc15490'>draft:core-string</a></h4>
+(define (draft:core-string num-anc . arg-func)<i><br> ... <a href='#codefunc15490'>Full Code</a> ... )</i>
+<pre> string(object?)
+</pre><p><br>
+
+<h4><a name='docfunc7044' href='#tocfunc7044'>draft:core-concat</a></h4>
+(define (draft:core-concat num-anc . arg-func-lst)<i><br> ... <a href='#codefunc7044'>Full Code</a> ... )</i>
+<pre> concat(string, string, string*)
+</pre><p><br>
+
+<h4><a name='docfunc12419' href='#tocfunc12419'>draft:core-starts-with</a></h4>
+(define (draft:core-starts-with num-anc arg-func1 arg-func2)<i><br> ... <a href='#codefunc12419'>Full Code</a> ... )</i>
+<pre> starts-with(string, string)
+</pre><p><br>
+
+<h4><a name='docfunc35325' href='#tocfunc35325'>draft:core-contains</a></h4>
+(define (draft:core-contains num-anc arg-func1 arg-func2)<i><br> ... <a href='#codefunc35325'>Full Code</a> ... )</i>
+<pre> contains(string, string)
+</pre><p><br>
+
+<h4><a name='docfunc15982' href='#tocfunc15982'>draft:core-substring-before</a></h4>
+(define (draft:core-substring-before num-anc arg-func1 arg-func2)<i><br> ... <a href='#codefunc15982'>Full Code</a> ... )</i>
+<pre> substring-before(string, string)
+</pre><p><br>
+
+<h4><a name='docfunc19200' href='#tocfunc19200'>draft:core-substring-after</a></h4>
+(define (draft:core-substring-after num-anc arg-func1 arg-func2)<i><br> ... <a href='#codefunc19200'>Full Code</a> ... )</i>
+<pre> substring-after(string, string)
+</pre><p><br>
+
+<h4><a name='docfunc775' href='#tocfunc775'>draft:core-substring</a></h4>
+(define (draft:core-substring num-anc arg-func1 arg-func2 . arg-func3)<i><br> ... <a href='#codefunc775'>Full Code</a> ... )</i>
+<pre> substring(string, number, number?)
+</pre><p><br>
+
+<h4><a name='docfunc40657' href='#tocfunc40657'>draft:core-string-length</a></h4>
+(define (draft:core-string-length num-anc . arg-func)<i><br> ... <a href='#codefunc40657'>Full Code</a> ... )</i>
+<pre> string-length(string?)
+</pre><p><br>
+
+<h4><a name='docfunc13058' href='#tocfunc13058'>draft:core-normalize-space</a></h4>
+(define (draft:core-normalize-space num-anc . arg-func)<i><br> ... <a href='#codefunc13058'>Full Code</a> ... )</i>
+<pre> normalize-space(string?)
+</pre><p><br>
+
+<h4><a name='docfunc63486' href='#tocfunc63486'>draft:core-translate</a></h4>
+(define (draft:core-translate num-anc arg-func1 arg-func2 arg-func3)<i><br> ... <a href='#codefunc63486'>Full Code</a> ... )</i>
+<pre> translate(string, string, string)
+</pre><p><br>
+
+<hr width='40%' align='center'><center><h3><a name='sect23800' href='#tocsect23800'>4.3 Boolean Functions</a></h3></center>
+
+<pre></pre>
+<h4><a name='docfunc36218' href='#tocfunc36218'>draft:core-boolean</a></h4>
+(define (draft:core-boolean num-anc arg-func)<i><br> ... <a href='#codefunc36218'>Full Code</a> ... )</i>
+<pre> boolean(object)
+</pre><p><br>
+
+<h4><a name='docfunc51884' href='#tocfunc51884'>draft:core-not</a></h4>
+(define (draft:core-not num-anc arg-func)<i><br> ... <a href='#codefunc51884'>Full Code</a> ... )</i>
+<pre> not(boolean)
+</pre><p><br>
+
+<h4><a name='docfunc53780' href='#tocfunc53780'>draft:core-true</a></h4>
+(define (draft:core-true num-anc)<i><br> ... <a href='#codefunc53780'>Full Code</a> ... )</i>
+<pre> true()
+</pre><p><br>
+
+<h4><a name='docfunc8210' href='#tocfunc8210'>draft:core-false</a></h4>
+(define (draft:core-false num-anc)<i><br> ... <a href='#codefunc8210'>Full Code</a> ... )</i>
+<pre> false()
+</pre><p><br>
+
+<h4><a name='docfunc49925' href='#tocfunc49925'>draft:core-lang</a></h4>
+(define (draft:core-lang num-anc arg-func)<i><br> ... <a href='#codefunc49925'>Full Code</a> ... )</i>
+<pre> lang(string)
+</pre><p><br>
+
+<hr width='40%' align='center'><center><h3><a name='sect42074' href='#tocsect42074'>4.4 Number Functions</a></h3></center>
+
+<pre></pre>
+<h4><a name='docfunc10631' href='#tocfunc10631'>draft:core-number</a></h4>
+(define (draft:core-number num-anc . arg-func)<i><br> ... <a href='#codefunc10631'>Full Code</a> ... )</i>
+<pre> number(object?)
+</pre><p><br>
+
+<h4><a name='docfunc51378' href='#tocfunc51378'>draft:core-sum</a></h4>
+(define (draft:core-sum num-anc arg-func)<i><br> ... <a href='#codefunc51378'>Full Code</a> ... )</i>
+<pre> sum(node-set)
+</pre><p><br>
+
+<h4><a name='docfunc12313' href='#tocfunc12313'>draft:core-floor</a></h4>
+(define (draft:core-floor num-anc arg-func)<i><br> ... <a href='#codefunc12313'>Full Code</a> ... )</i>
+<pre> floor(number)
+</pre><p><br>
+
+<h4><a name='docfunc34173' href='#tocfunc34173'>draft:core-ceiling</a></h4>
+(define (draft:core-ceiling num-anc arg-func)<i><br> ... <a href='#codefunc34173'>Full Code</a> ... )</i>
+<pre> ceiling(number)
+</pre><p><br>
+
+<h4><a name='docfunc13339' href='#tocfunc13339'>draft:core-round</a></h4>
+(define (draft:core-round num-anc arg-func)<i><br> ... <a href='#codefunc13339'>Full Code</a> ... )</i>
+<pre> round(number)
+</pre><p><br>
+<hr height='5'><center><h3><a name='chapt29406' href='#tocchapt29406'>XPath AST processing</a></h3></center>
+
+<pre> AST is considered to be properly formed
+</pre>
+<h4><a name='docfunc48551' href='#tocfunc48551'>draft:ast-axis-specifier</a></h4>
+(define (draft:ast-axis-specifier op num-anc)<i><br> ... <a href='#codefunc48551'>Full Code</a> ... )</i>
+<pre> {5} &lt;AxisSpecifier&gt; ::= (axis-specifier  &lt;AxisName&gt; )
+ {6} &lt;AxisName&gt; ::= (ancestor)
+                    | (ancestor-or-self)
+                    | (attribute)
+                    | (child)
+                    | (descendant)
+                    | (descendant-or-self)
+                    | (following)
+                    | (following-sibling)
+                    | (namespace)
+                    | (parent)
+                    | (preceding)
+                    | (preceding-sibling)
+                    | (self)
+                    | (arc)  ; the following 3 are added by SXLink
+                    | (traverse)
+                    | (traverse-arc)
+ Returns:  (list lambda num-ancestors pass-vars?)
+  pass-vars? - a boolean: whether var-bindings must be passed to the axis
+</pre><p><br>
+
+<h4><a name='docfunc28905' href='#tocfunc28905'>draft:ast-node-test</a></h4>
+(define (draft:ast-node-test op)<i><br> ... <a href='#codefunc28905'>Full Code</a> ... )</i>
+<pre> {7} &lt;NodeTest&gt; ::= (node-test (*))
+                    | (node-test (namespace-uri  &lt;String&gt; ))
+                    | (node-test (namespace-uri  &lt;String&gt; )?
+                                 (local-name  &lt;String&gt; ))
+                    | (node-test (comment))
+                    | (node-test (text))
+                    | (node-test (pi &lt;String&gt;? ))
+                    | (node-test (point))
+                    | (node-test (range))
+ + added by sxpath native syntax:
+                    | (node-test (equal?  &lt;SXML-node&gt; ))
+                    | (node-test (eq?  &lt;SXML-node&gt; ))
+                    | (node-test (names  &lt;String&gt;+ ))
+                    | (node-test (not-names  &lt;String&gt;+ ))s
+</pre><p><br>
+
+<hr width='40%' align='center'><center><h3><a name='sect28150' href='#tocsect28150'>In this section, each function accepts 2 arguments</a></h3></center>
+
+<pre>  op - S-expression which represents the operation
+  num-anc - how many ancestors are required in the context after that
+            operation
+ and returns either #f, which signals of a semantic error, or
+  (cons (lambda (nodeset position+size var-binding) ...)
+        num-anc-it-requires)
+  position+size - the same to what was called 'context' in TXPath-1  
+</pre>
+<h4><a name='docfunc16826' href='#tocfunc16826'>draft:ast-location-path</a></h4>
+(define (draft:ast-location-path op num-anc)<i><br> ... <a href='#codefunc16826'>Full Code</a> ... )</i>
+<pre> {1} &lt;LocationPath&gt; ::= &lt;RelativeLocationPath&gt;
+                        | &lt;AbsoluteLocationPath&gt;
+</pre><p><br>
+
+<h4><a name='docfunc2944' href='#tocfunc2944'>draft:ast-absolute-location-path</a></h4>
+(define (draft:ast-absolute-location-path op num-anc)<i><br> ... <a href='#codefunc2944'>Full Code</a> ... )</i>
+<pre> {2} &lt;AbsoluteLocationPath&gt; ::= (absolute-location-path  &lt;Step&gt;* )
+</pre><p><br>
+
+<h4><a name='docfunc62611' href='#tocfunc62611'>draft:ast-relative-location-path</a></h4>
+(define (draft:ast-relative-location-path op num-anc)<i><br> ... <a href='#codefunc62611'>Full Code</a> ... )</i>
+<pre> {3} &lt;RelativeLocationPath&gt; ::= (relative-location-path  &lt;Step&gt;+ )
+</pre><p><br>
+
+<h4><a name='docfunc39144' href='#tocfunc39144'>draft:ast-step</a></h4>
+(define (draft:ast-step op num-anc)<i><br> ... <a href='#codefunc39144'>Full Code</a> ... )</i>
+<pre> {4} &lt;Step&gt; ::= (step  &lt;AxisSpecifier&gt; &lt;NodeTest&gt; &lt;Predicate&gt;* )
+                | (range-to  (expr &lt;Expr&gt;)  &lt;Predicate&gt;* )
+</pre><p><br>
+
+<h4><a name='docfunc30963' href='#tocfunc30963'>draft:ast-step-list</a></h4>
+(define (draft:ast-step-list step-lst num-anc)<i><br> ... <a href='#codefunc30963'>Full Code</a> ... )</i>
+<pre> {4a} ( &lt;Step&gt;+ )
+ Returns (cons (listof step-impl) num-anc) or #f
+</pre><p><br>
+
+<h4><a name='docfunc25365' href='#tocfunc25365'>draft:ast-predicate</a></h4>
+(define (draft:ast-predicate op num-anc)<i><br> ... <a href='#codefunc25365'>Full Code</a> ... )</i>
+<pre> {8} &lt;Predicate&gt; ::= (predicate  &lt;Expr&gt; )
+ NOTE: num-anc is dummy here, since it is always 0 for Predicates
+</pre><p><br>
+
+<h4><a name='docfunc28149' href='#tocfunc28149'>draft:ast-predicate-list</a></h4>
+(define (draft:ast-predicate-list op-lst num-anc)<i><br> ... <a href='#codefunc28149'>Full Code</a> ... )</i>
+<pre> {8a} ( &lt;Predicate&gt;+ )
+ Returns (cons (listof pred-impl) num-anc) or #f
+ NOTE: num-anc is dummy here, since it is always 0 for Predicates
+</pre><p><br>
+
+<h4><a name='docfunc40677' href='#tocfunc40677'>draft:ast-expr</a></h4>
+(define (draft:ast-expr op num-anc)<i><br> ... <a href='#codefunc40677'>Full Code</a> ... )</i>
+<pre> {9} &lt;Expr&gt; ::= &lt;OrExpr&gt;
+                | &lt;AndExpr&gt;
+                | &lt;EqualityExpr&gt;
+                | &lt;RelationalExpr&gt;
+                | &lt;AdditiveExpr&gt;
+                | &lt;MultiplicativeExpr&gt;
+                | &lt;UnionExpr&gt;
+                | &lt;PathExpr&gt;
+                | &lt;FilterExpr&gt;
+                | &lt;VariableReference&gt;
+                | &lt;Literal&gt;
+                | &lt;Number&gt;
+                | &lt;FunctionCall&gt;
+                | &lt;LocationPath&gt;
+</pre><p><br>
+
+<h4><a name='docfunc64662' href='#tocfunc64662'>draft:ast-or-expr</a></h4>
+(define (draft:ast-or-expr op num-anc)<i><br> ... <a href='#codefunc64662'>Full Code</a> ... )</i>
+<pre> {10} &lt;OrExpr&gt; ::= (or &lt;Expr&gt; &lt;Expr&gt;+ )
+ NOTE: num-anc is dummy here, since it is always 0 for OrExpr
+</pre><p><br>
+
+<h4><a name='docfunc15019' href='#tocfunc15019'>draft:ast-and-expr</a></h4>
+(define (draft:ast-and-expr op num-anc)<i><br> ... <a href='#codefunc15019'>Full Code</a> ... )</i>
+<pre> {11} &lt;AndExpr&gt; ::= (and &lt;Expr&gt; &lt;Expr&gt;+ )
+ NOTE: num-anc is dummy here, since it is always 0 for AndExpr
+</pre><p><br>
+
+<h4><a name='docfunc16355' href='#tocfunc16355'>draft:ast-equality-expr</a></h4>
+(define (draft:ast-equality-expr op num-anc)<i><br> ... <a href='#codefunc16355'>Full Code</a> ... )</i>
+<pre> {12} &lt;EqualityExpr&gt; ::= (=  &lt;Expr&gt; &lt;Expr&gt; )
+                         | (!=  &lt;Expr&gt; &lt;Expr&gt; )
+ NOTE: num-anc is dummy here, since it is always 0 for EqualityExpr
+</pre><p><br>
+
+<h4><a name='docfunc38219' href='#tocfunc38219'>draft:ast-relational-expr</a></h4>
+(define (draft:ast-relational-expr op num-anc)<i><br> ... <a href='#codefunc38219'>Full Code</a> ... )</i>
+<pre> {13} &lt;RelationalExpr&gt; ::= (&lt;  &lt;Expr&gt; &lt;Expr&gt; )
+                           | (&gt;  &lt;Expr&gt; &lt;Expr&gt; )
+                           | (&lt;=  &lt;Expr&gt; &lt;Expr&gt; )
+                           | (&gt;=  &lt;Expr&gt; &lt;Expr&gt; )
+ NOTE: num-anc is dummy here, since it is always 0 for RelationalExpr
+</pre><p><br>
+
+<h4><a name='docfunc9944' href='#tocfunc9944'>draft:ast-additive-expr</a></h4>
+(define (draft:ast-additive-expr op num-anc)<i><br> ... <a href='#codefunc9944'>Full Code</a> ... )</i>
+<pre> {14} &lt;AdditiveExpr&gt; ::= (+  &lt;Expr&gt; &lt;Expr&gt; )
+                         | (-  &lt;Expr&gt; &lt;Expr&gt;? )
+ NOTE: num-anc is dummy here, since it is always 0 for AdditiveExpr
+</pre><p><br>
+
+<h4><a name='docfunc32293' href='#tocfunc32293'>draft:ast-multiplicative-expr</a></h4>
+(define (draft:ast-multiplicative-expr op num-anc)<i><br> ... <a href='#codefunc32293'>Full Code</a> ... )</i>
+<pre> {15} &lt;MultiplicativeExpr&gt; ::= (*  &lt;Expr&gt; &lt;Expr&gt; )
+                               | (div  &lt;Expr&gt; &lt;Expr&gt; )
+                               | (mod  &lt;Expr&gt; &lt;Expr&gt; )
+ NOTE: num-anc is dummy here, since it is always 0 for MultiplicativeExpr
+</pre><p><br>
+
+<h4><a name='docfunc43570' href='#tocfunc43570'>draft:ast-union-expr</a></h4>
+(define (draft:ast-union-expr op num-anc)<i><br> ... <a href='#codefunc43570'>Full Code</a> ... )</i>
+<pre> {16} &lt;UnionExpr&gt; ::= (union-expr  &lt;Expr&gt; &lt;Expr&gt;+ )
+</pre><p><br>
+
+<h4><a name='docfunc21516' href='#tocfunc21516'>draft:ast-path-expr</a></h4>
+(define (draft:ast-path-expr op num-anc)<i><br> ... <a href='#codefunc21516'>Full Code</a> ... )</i>
+<pre> {17} &lt;PathExpr&gt; ::= (path-expr  &lt;FilterExpr&gt; &lt;Step&gt;+ )
+</pre><p><br>
+
+<h4><a name='docfunc55903' href='#tocfunc55903'>draft:ast-filter-expr</a></h4>
+(define (draft:ast-filter-expr op num-anc)<i><br> ... <a href='#codefunc55903'>Full Code</a> ... )</i>
+<pre> {18} &lt;FilterExpr&gt; ::= (filter-expr (primary-expr  &lt;Expr&gt; )
+                                    &lt;Predicate&gt;* )
+</pre><p><br>
+
+<h4><a name='docfunc25991' href='#tocfunc25991'>draft:ast-variable-reference</a></h4>
+(define (draft:ast-variable-reference op num-anc)<i><br> ... <a href='#codefunc25991'>Full Code</a> ... )</i>
+<pre> {19} &lt;VariableReference&gt; ::= (variable-reference  &lt;String&gt; )
+</pre><p><br>
+
+<h4><a name='docfunc58574' href='#tocfunc58574'>draft:ast-literal</a></h4>
+(define (draft:ast-literal op num-anc)<i><br> ... <a href='#codefunc58574'>Full Code</a> ... )</i>
+<pre> {20} &lt;Literal&gt; ::= (literal  &lt;String&gt; )
+</pre><p><br>
+
+<h4><a name='docfunc65104' href='#tocfunc65104'>draft:ast-number</a></h4>
+(define (draft:ast-number op num-anc)<i><br> ... <a href='#codefunc65104'>Full Code</a> ... )</i>
+<pre> {21} &lt;Number&gt; :: (number  &lt;Number&gt; )
+</pre><p><br>
+
+<h4><a name='docfunc13507' href='#tocfunc13507'>draft:ast-function-call</a></h4>
+(define (draft:ast-function-call op num-anc)<i><br> ... <a href='#codefunc13507'>Full Code</a> ... )</i>
+<pre> {22} &lt;FunctionCall&gt; ::= (function-call (function-name  &lt;String&gt; )
+                                        (argument  &lt;Expr&gt; )* )
+</pre><p><br>
+
+<h4><a name='docfunc31927' href='#tocfunc31927'>draft:ast-function-arguments</a></h4>
+(define (draft:ast-function-arguments op-lst)<i><br> ... <a href='#codefunc31927'>Full Code</a> ... )</i>
+<pre> {22a} ( (argument  &lt;Expr&gt; )* )
+ na-lst - number of ancestors required for each of the arguments
+ Returns: (listof expr-impl) or #f
+</pre><p><br>
+
+<hr width='40%' align='center'><center><h3><a name='sect40541' href='#tocsect40541'>Section dedicated to XPointer AST</a></h3></center>
+
+<pre></pre>
+<h4><a name='docfunc29899' href='#tocfunc29899'>draft:ast-xpointer</a></h4>
+(define (draft:ast-xpointer op num-anc)<i><br> ... <a href='#codefunc29899'>Full Code</a> ... )</i>
+<pre> {25} &lt;XPointer&gt; ::= &lt;ChildSeq&gt;
+                     | &lt;FullXPtr&gt;
+                     | &lt;Expr&gt;
+</pre><p><br>
+
+<h4><a name='docfunc7205' href='#tocfunc7205'>draft:ast-child-seq</a></h4>
+(define (draft:ast-child-seq op num-anc)<i><br> ... <a href='#codefunc7205'>Full Code</a> ... )</i>
+<pre> {26} &lt;ChildSeq&gt; ::= (child-seq (name  &lt;String&gt; ))
+                     | (child-seq (name  &lt;String&gt; )?
+                                  (number  &lt;Number&gt; )+ )
+</pre><p><br>
+
+<h4><a name='docfunc56923' href='#tocfunc56923'>draft:ast-number-list</a></h4>
+(define (draft:ast-number-list number-lst num-anc)<i><br> ... <a href='#codefunc56923'>Full Code</a> ... )</i>
+<pre> {26a} ( (number  &lt;Number&gt; )+ )
+ Returns (cons (listof sxpath-converter) num-anc) or #f
+</pre><p><br>
+
+<h4><a name='docfunc33522' href='#tocfunc33522'>draft:ast-full-xptr</a></h4>
+(define (draft:ast-full-xptr op num-anc)<i><br> ... <a href='#codefunc33522'>Full Code</a> ... )</i>
+<pre> {27} &lt;FullXPtr&gt; ::= (full-xptr  &lt;Expr&gt; &lt;Expr&gt;+ )
+</pre><p><br>
+<hr height='5'><center><h3><a name='chapt29326' href='#tocchapt29326'>Highest level API functions</a></h3></center>
+
+<pre> xpath-string - an XPath location path (a string)
+ ns+na - can contain 'ns-binding' and/or 'num-ancestors' and/or none of them
+ ns-binding - declared namespace prefixes (an optional argument)
+  ns-binding ::= (listof (prefix . uri))
+  prefix - a symbol
+  uri - a string
+ num-ancestors - number of ancestors required for resulting nodeset. Can
+  generally be omitted and is than defaulted to 0, which denotes a _usual_
+  nodeset. If a negative number, this signals that all ancestors should be
+  remembered in the context
+
+ Returns: (lambda (nodeset position+size var-binding) ...)
+ position+size - the same to what was called 'context' in TXPath-1
+ var-binding - XPath variable bindings (an optional argument)
+  var-binding = (listof (var-name . value))
+  var-name - (a symbol) a name of a variable
+  value - its value. The value can have the following type: boolean, number,
+  string, nodeset. NOTE: a node must be represented as a singleton nodeset
+</pre>
+<h4><a name='docfunc36352' href='#tocfunc36352'>draft:arglist->ns+na</a></h4>
+(define (draft:arglist-&gt;ns+na arglst)<i><br> ... <a href='#codefunc36352'>Full Code</a> ... )</i>
+<pre> Given a list of arguments, returns
+  (values ns-binding num-anc)
+</pre><p><br>
+
+<h4><a name='docfunc63806' href='#tocfunc63806'>draft:api-helper</a></h4>
+(define (draft:api-helper grammar-parser ast-parser)<i><br> ... <a href='#codefunc63806'>Full Code</a> ... )</i>
+<pre> Helper for constructing several highest-level API functions
+</pre><p><br>
+
+<h4><a name='docfunc63611' href='#tocfunc63611'>draft:xpath</a></h4>
+(define draft:xpath <i><br> ... <a href='#codefunc63611'>Full Code</a> ... )</i><p><br>
+
+<h4><a name='docfunc54261' href='#tocfunc54261'>draft:xpointer</a></h4>
+(define draft:xpointer <i><br> ... <a href='#codefunc54261'>Full Code</a> ... )</i><p><br>
+
+<h4><a name='docfunc4178' href='#tocfunc4178'>draft:xpath-expr</a></h4>
+(define draft:xpath-expr <i><br> ... <a href='#codefunc4178'>Full Code</a> ... )</i><p><br>
+
+<h4><a name='docfunc21906' href='#tocfunc21906'>draft:sxpath</a></h4>
+(define draft:sxpath <i><br> ... <a href='#codefunc21906'>Full Code</a> ... )</i><p><br>
+
+<h4><a name='docfunc47107' href='#tocfunc47107'>txpath-with-context</a></h4>
+(define txpath-with-context <i><br> ... <a href='#codefunc47107'>Full Code</a> ... )</i>
+<pre> Aliases
+</pre><p><br>
+
+<h4><a name='docfunc42376' href='#tocfunc42376'>txpath/c</a></h4>
+(define txpath/c <i><br> ... <a href='#codefunc42376'>Full Code</a> ... )</i><p><br>
+
+<h4><a name='docfunc47106' href='#tocfunc47106'>sxpath-with-context</a></h4>
+(define sxpath-with-context <i><br> ... <a href='#codefunc47106'>Full Code</a> ... )</i><p><br>
+
+<h4><a name='docfunc42375' href='#tocfunc42375'>sxpath/c</a></h4>
+(define sxpath/c <i><br> ... <a href='#codefunc42375'>Full Code</a> ... )</i><p><br>
+<center><h1>Code</h1></center>
+
+<h4><a name='codefunc1508' href='#docfunc1508'>sxml:context-u?</a></h4>
+<i><a href='#tocfunc1508'>Index</a></i><br>
+
+<pre> A fast however unsafe predicate
+ Assumes that the 'node' provided is a pair
+</pre>
+<pre>(define (<a href="xpath-context.html#codefunc1508">sxml:context-u?</a> node)
+  (eq? (car node) '*CONTEXT*))
+</pre>
+<h4><a name='codefunc37046' href='#docfunc37046'>sxml:context?</a></h4>
+<i><a href='#tocfunc37046'>Index</a></i><br>
+
+<pre> Safer predicate
+</pre>
+<pre>(define (<a href="xpath-context.html#codefunc37046">sxml:context?</a> node)
+  (and (pair? node) (eq? (car node) '*CONTEXT*)))
+</pre>
+<h4><a name='codefunc47888' href='#docfunc47888'>draft:list-head</a></h4>
+<i><a href='#tocfunc47888'>Index</a></i><br>
+
+<pre> Similar to R5RS 'list-tail' but returns the new list consisting of the first
+ 'k' members of 'lst'
+ If k&gt;(length lst) or k=#f, lst is returned
+ NOTE1: k=#f is used in this implementation to represent positive infinity
+ NOTE2: Unless k=#f, the result is always a newly allocated list. This is the
+  main methodological difference between this function and R5RS 'list-tail'
+</pre>
+<pre>(define (<a href="xpath-context.html#codefunc47888">draft:list-head</a> lst k)
+  (letrec
+      ((list-head
+        (lambda (lst k)
+          (if (or (null? lst) (zero? k))
+              '()
+              (cons (car lst) (list-head (cdr lst) (- k 1)))))))
+    (if k
+        (list-head lst k)
+        lst)))
+</pre>
+<h4><a name='codefunc53532' href='#docfunc53532'>draft:list-last</a></h4>
+<i><a href='#tocfunc53532'>Index</a></i><br>
+
+<pre> Returns the last member of the list
+ It is an error for the list to be empty
+</pre>
+<pre>(define (<a href="xpath-context.html#codefunc53532">draft:list-last</a> lst)
+  (if (null? (cdr lst))
+      (car lst)
+      (<a href="xpath-context.html#codefunc53532">draft:list-last</a> (cdr lst))))
+</pre>
+<h4><a name='codefunc47645' href='#docfunc47645'>draft:make-list</a></h4>
+<i><a href='#tocfunc47645'>Index</a></i><br>
+
+<pre> Constructs the (listof value), whose length is num
+</pre>
+<pre>(define (<a href="xpath-context.html#codefunc47645">draft:make-list</a> value num)
+  (if (= num 0)
+      '()
+      (cons value (<a href="xpath-context.html#codefunc47645">draft:make-list</a> value (- num 1)))))
+</pre>
+<h4><a name='codefunc8076' href='#docfunc8076'>draft:signal-semantic-error</a></h4>
+<i><a href='#tocfunc8076'>Index</a></i><br>
+
+<pre> Similar to txp:signal-semantic-error, but returns #f
+</pre>
+<pre>(define (<a href="xpath-context.html#codefunc8076">draft:signal-semantic-error</a> . text)
+  (apply <a href="xpath-parser.html#codefunc48950">txp:signal-semantic-error</a> text)
+  #f)
+</pre>
+<h4><a name='codefunc49694' href='#docfunc49694'>draft:top?</a></h4>
+<i><a href='#tocfunc49694'>Index</a></i><br>
+
+<pre> The top of the SXML document?
+</pre>
+<pre>(define (<a href="xpath-context.html#codefunc49694">draft:top?</a> node)
+  (and (pair? node) (eq? (car node) '*TOP*)))
+</pre>
+<h4><a name='codefunc3380' href='#docfunc3380'>draft:remove-eq-duplicates</a></h4>
+<i><a href='#tocfunc3380'>Index</a></i><br>
+
+<pre> Removes eq duplicates from the nodeset
+</pre>
+<pre>(define (<a href="xpath-context.html#codefunc3380">draft:remove-eq-duplicates</a> nodeset)
+  (cond
+    ((null? nodeset) nodeset)
+    ((memq (car nodeset) (cdr nodeset))
+     (<a href="xpath-context.html#codefunc3380">draft:remove-eq-duplicates</a> (cdr nodeset)))
+    (else
+     (cons (car nodeset) (<a href="xpath-context.html#codefunc3380">draft:remove-eq-duplicates</a> (cdr nodeset))))))
+</pre>
+<h4><a name='codefunc60759' href='#docfunc60759'>draft:reach-root</a></h4>
+<i><a href='#tocfunc60759'>Index</a></i><br>
+
+<pre> Reaches the root of the root of the contextset
+ Result: nodeset
+</pre>
+<pre>(define (<a href="xpath-context.html#codefunc60759">draft:reach-root</a> contextset)
+  (let ((nodeset (map
+                  (lambda (node)
+                    (if
+                     (<a href="xpath-context.html#codefunc37046">sxml:context?</a> node)
+                     (<a href="xpath-context.html#codefunc53532">draft:list-last</a> (<a href="xpath-context.html#codefunc46900">sxml:context-&gt;ancestors-u</a> node))
+                     node))
+                  contextset)))
+    (if (or (null? nodeset) (null? (car nodeset)))  ; (length nodeset)&lt;=1
+        nodeset
+        (<a href="xpath-context.html#codefunc3380">draft:remove-eq-duplicates</a> nodeset))))
+</pre>
+<h4><a name='codefunc48905' href='#docfunc48905'>draft:recover-contextset</a></h4>
+<i><a href='#tocfunc48905'>Index</a></i><br>
+
+<pre> Recovers context for each node of the nodeset
+ Context recovery is performed in its usual technique: searching from the
+ root of the document. As a result, this function can be fairly slow.
+ In this implementation, it is sometimes called after an XPath 'id' function,
+ for location paths like  &quot;id(name)/..&quot;
+ By nature of 'id-index', context is lost when we access elements by their
+ ID. It may be a good idea to rework the structure of 'id-index' to make it
+ more suitable for purposes of this context-based XPath implementation.
+ A good news is that only a few elements are usually selected by XPath 'id'
+ function, thus the overhead of searching from the root node might be
+ acceptable in this case. 
+</pre>
+<pre>(define (<a href="xpath-context.html#codefunc48905">draft:recover-contextset</a> nodeset root-node num-anc)
+  (map
+   (lambda (node)
+     (<a href="xpath-context.html#codefunc37605">draft:smart-make-context</a>
+      node
+      (((<a href="sxpath-ext.html#codefunc36053">sxml:ancestor</a> (lambda (x) #t)) root-node) node)
+      num-anc))
+   nodeset))
+</pre>
+<h4><a name='codefunc52705' href='#docfunc52705'>draft:ancestor</a></h4>
+<i><a href='#tocfunc52705'>Index</a></i><br>
+
+<pre> Ancestor axis
+</pre>
+<pre>(define (<a href="xpath-context.html#codefunc52705">draft:ancestor</a> test-pred? . num-ancestors)
+  (let* ((num-anc (if (null? num-ancestors) 0 (car num-ancestors)))
+         (this-axis
+          (lambda (node)  ; not a nodeset
+            (if
+             (<a href="xpath-context.html#codefunc37046">sxml:context?</a> node)
+             (let loop ((ancs-to-view (<a href="xpath-context.html#codefunc46900">sxml:context-&gt;ancestors-u</a> node))
+                        (res '()))
+               (cond
+                 ((null? ancs-to-view)  ; processed everyone
+                  (reverse res)  ; reverse document order required
+                  )
+                 ((test-pred? (car ancs-to-view))  ; can add it to result
+                  (loop
+                   (cdr ancs-to-view)
+                   (cons
+                    (<a href="xpath-context.html#codefunc37605">draft:smart-make-context</a>
+                     (car ancs-to-view) (cdr ancs-to-view) num-anc)
+                    res)))
+                 (else  ; current node doesn't satisfy the predicate
+                  (loop (cdr ancs-to-view) res))))
+             '()  ; no ancestors
+             ))))
+    (lambda (node)   ; node or nodeset
+      (if (<a href="sxpathlib.html#codefunc31162">nodeset?</a> node)
+          (<a href="sxpathlib.html#codefunc27946">map-union</a> this-axis node)
+          (this-axis node)))))
+</pre>
+<h4><a name='codefunc13921' href='#docfunc13921'>draft:ancestor-or-self</a></h4>
+<i><a href='#tocfunc13921'>Index</a></i><br>
+
+<pre> Ancestor-or-self axis
+</pre>
+<pre>(define (<a href="xpath-context.html#codefunc13921">draft:ancestor-or-self</a> test-pred? . num-ancestors)
+  (let* ((num-anc (if (null? num-ancestors) 0 (car num-ancestors)))
+         (this-axis
+          (lambda (node)  ; not a nodeset
+            (cond
+              ((<a href="xpath-context.html#codefunc37046">sxml:context?</a> node)
+               (let loop ((ancs-to-view (<a href="xpath-context.html#codefunc20165">sxml:context-&gt;content-u</a> node))
+                          (res '()))
+                 (cond
+                   ((null? ancs-to-view)  ; processed everyone
+                    (reverse res)  ; reverse document order required
+                    )
+                   ((test-pred? (car ancs-to-view))  ; can add it to result
+                    (loop
+                     (cdr ancs-to-view)
+                     (cons
+                      (<a href="xpath-context.html#codefunc37605">draft:smart-make-context</a>
+                       (car ancs-to-view) (cdr ancs-to-view) num-anc)
+                      res)))
+                   (else  ; current node doesn't satisfy the predicate
+                    (loop (cdr ancs-to-view) res)))))
+              ; ordinary SXML node
+              ((test-pred? node)  ; satisfies the predicate
+               (list node))
+              (else
+               '())))))
+    (lambda (node)   ; node or nodeset
+      (if (<a href="sxpathlib.html#codefunc31162">nodeset?</a> node)
+          (<a href="sxpathlib.html#codefunc27946">map-union</a> this-axis node)
+          (this-axis node)))))
+</pre>
+<h4><a name='codefunc53587' href='#docfunc53587'>draft:attribute</a></h4>
+<i><a href='#tocfunc53587'>Index</a></i><br>
+
+<pre> Attribute axis
+ Borrows much from draft:child
+</pre>
+<pre>(define (<a href="xpath-context.html#codefunc53587">draft:attribute</a> test-pred? . num-ancestors)
+  (let* ((num-anc (if (null? num-ancestors) 0 (car num-ancestors)))
+         (this-axis
+          (lambda (node)  ; not a nodeset
+            (cond
+              ((not (pair? node)) '())   ; no attributes
+              ; (car node) is always a symbol
+              ((<a href="xpath-context.html#codefunc1508">sxml:context-u?</a> node)  ; a context node
+               (<a href="xpath-context.html#codefunc63648">draft:siblings-&gt;context-set</a>
+                ((<a href="sxpathlib.html#codefunc7531">sxml:filter</a> test-pred?)
+                 (<a href="sxpathlib.html#codefunc50657">sxml:attr-list</a> (<a href="xpath-context.html#codefunc6309">sxml:context-&gt;node-u</a> node)))
+                (<a href="xpath-context.html#codefunc47888">draft:list-head</a> (<a href="xpath-context.html#codefunc20165">sxml:context-&gt;content-u</a> node) num-anc)))
+              (else  ; an ordinary node, and is a pair
+               (<a href="xpath-context.html#codefunc63648">draft:siblings-&gt;context-set</a>
+                ((<a href="sxpathlib.html#codefunc7531">sxml:filter</a> test-pred?) (<a href="sxpathlib.html#codefunc50657">sxml:attr-list</a> node))
+                (<a href="xpath-context.html#codefunc47888">draft:list-head</a> (list node) num-anc)))))))
+    (lambda (node)   ; node or nodeset
+      (if (<a href="sxpathlib.html#codefunc31162">nodeset?</a> node)
+          (<a href="sxpathlib.html#codefunc27946">map-union</a> this-axis node)
+          (this-axis node)))))  
+</pre>
+<h4><a name='codefunc59498' href='#docfunc59498'>draft:child</a></h4>
+<i><a href='#tocfunc59498'>Index</a></i><br>
+
+<pre> Child axis
+</pre>
+<pre>(define (<a href="xpath-context.html#codefunc59498">draft:child</a> test-pred? . num-ancestors)
+  (let* ((num-anc (if (null? num-ancestors) 0 (car num-ancestors)))
+         (this-axis
+          (lambda (node)  ; not a nodeset
+            (cond
+              ((not (pair? node)) '())   ; no children
+              ; (car node) is always a symbol
+              ((<a href="xpath-context.html#codefunc1508">sxml:context-u?</a> node)  ; a context node
+               (<a href="xpath-context.html#codefunc63648">draft:siblings-&gt;context-set</a>
+                ((<a href="sxpathlib.html#codefunc3917">select-kids</a> test-pred?) (<a href="xpath-context.html#codefunc6309">sxml:context-&gt;node-u</a> node))
+                (<a href="xpath-context.html#codefunc47888">draft:list-head</a> (<a href="xpath-context.html#codefunc20165">sxml:context-&gt;content-u</a> node) num-anc)))
+              ; an ordinary node, and is a pair
+              ((memq (car node) '(*PI* *COMMENT* *ENTITY*))
+               '())
+              (else
+               (<a href="xpath-context.html#codefunc63648">draft:siblings-&gt;context-set</a>
+                ((<a href="sxpathlib.html#codefunc7531">sxml:filter</a> test-pred?) (cdr node))  ; like in '<a href="sxpathlib.html#codefunc3917">select-kids</a>'
+                (<a href="xpath-context.html#codefunc47888">draft:list-head</a> (list node) num-anc)))))))
+    (lambda (node)   ; node or nodeset
+      (if (<a href="sxpathlib.html#codefunc31162">nodeset?</a> node)
+          (<a href="sxpathlib.html#codefunc27946">map-union</a> this-axis node)
+          (this-axis node)))))
+</pre>
+<h4><a name='codefunc8266' href='#docfunc8266'>draft:descendant</a></h4>
+<i><a href='#tocfunc8266'>Index</a></i><br>
+
+<pre> Descendant axis
+</pre>
+<pre>(define (<a href="xpath-context.html#codefunc8266">draft:descendant</a> test-pred? . num-ancestors)
+  (let* ((num-anc (if (null? num-ancestors) 0 (car num-ancestors)))
+         (child (<a href="xpath-context.html#codefunc59498">draft:child</a> <a href="sxpathlib.html#codefunc63215">sxml:node?</a> num-anc))
+         (this-axis
+          (lambda (node)  ; not a nodeset                        
+            (let rpt ((res '())
+                      (more (child node)))
+              (if (null? more)
+                  (reverse res)
+                  (rpt
+                   (if (test-pred? (<a href="xpath-context.html#codefunc41847">sxml:context-&gt;node</a> (car more)))
+                       (cons (car more) res)
+                       res)
+                   (append (child (car more)) (cdr more))))))))
+    (lambda (node)   ; node or nodeset
+      (if (<a href="sxpathlib.html#codefunc31162">nodeset?</a> node)
+          (<a href="sxpathlib.html#codefunc27946">map-union</a> this-axis node)
+          (this-axis node)))))
+</pre>
+<h4><a name='codefunc35017' href='#docfunc35017'>draft:descendant-or-self</a></h4>
+<i><a href='#tocfunc35017'>Index</a></i><br>
+
+<pre> Descendant-or-self axis
+</pre>
+<pre>(define (<a href="xpath-context.html#codefunc35017">draft:descendant-or-self</a> test-pred? . num-ancestors)
+  (let* ((num-anc (if (null? num-ancestors) 0 (car num-ancestors)))
+         (child (<a href="xpath-context.html#codefunc59498">draft:child</a> <a href="sxpathlib.html#codefunc63215">sxml:node?</a> num-anc))
+         (this-axis
+          (lambda (node)  ; not a nodeset                        
+            (let rpt ((res '())
+                      (more (list node)))
+              (if (null? more)
+                  (reverse res)
+                  (rpt
+                   (if (test-pred? (<a href="xpath-context.html#codefunc41847">sxml:context-&gt;node</a> (car more)))
+                       (cons (car more) res)
+                       res)
+                   (append (child (car more)) (cdr more))))))))
+    (lambda (node)   ; node or nodeset
+      (if (<a href="sxpathlib.html#codefunc31162">nodeset?</a> node)
+          (<a href="sxpathlib.html#codefunc27946">map-union</a> this-axis node)
+          (this-axis node)))))
+</pre>
+<h4><a name='codefunc54604' href='#docfunc54604'>draft:following</a></h4>
+<i><a href='#tocfunc54604'>Index</a></i><br>
+
+<pre> Following axis
+</pre>
+<pre>(define (<a href="xpath-context.html#codefunc54604">draft:following</a> test-pred? . num-ancestors)
+  (let* ((num-anc (if (null? num-ancestors) 0 (car num-ancestors)))
+         (descend (<a href="xpath-context.html#codefunc35017">draft:descendant-or-self</a> test-pred? num-anc))
+         (this-axis
+          (lambda (node)  ; not a nodeset
+            (if
+             (<a href="xpath-context.html#codefunc37046">sxml:context?</a> node)
+             (let loop ((curr-node (<a href="xpath-context.html#codefunc6309">sxml:context-&gt;node-u</a> node))
+                        (ancs-to-view (<a href="xpath-context.html#codefunc46900">sxml:context-&gt;ancestors-u</a> node))
+                        (res '()))
+               (if
+                (null? ancs-to-view)  ; processed everyone                 
+                res
+                (loop
+                 (car ancs-to-view)
+                 (cdr ancs-to-view)
+                 (append
+                  res
+                  (descend
+                   (<a href="xpath-context.html#codefunc63648">draft:siblings-&gt;context-set</a>
+                    (cond
+                       ((memq curr-node
+                        (cdr  ; parent is an element =&gt; cdr gives its children
+                         (car ancs-to-view)))
+                        =&gt; cdr)
+                       (else  ; curr-node is an attribute node
+                        ((<a href="sxpathlib.html#codefunc3917">select-kids</a> <a href="sxpathlib.html#codefunc63215">sxml:node?</a>) (car ancs-to-view))))
+                     (<a href="xpath-context.html#codefunc47888">draft:list-head</a> ancs-to-view num-anc)))))))
+             '()  ; no following members
+             ))))
+    (lambda (node)   ; node or nodeset
+      (if (<a href="sxpathlib.html#codefunc31162">nodeset?</a> node)
+          (<a href="sxpathlib.html#codefunc27946">map-union</a> this-axis node)
+          (this-axis node)))))
+</pre>
+<h4><a name='codefunc18163' href='#docfunc18163'>draft:following-sibling</a></h4>
+<i><a href='#tocfunc18163'>Index</a></i><br>
+
+<pre> Following-sibling axis
+</pre>
+<pre>(define (<a href="xpath-context.html#codefunc18163">draft:following-sibling</a> test-pred? . num-ancestors)
+  (let* ((num-anc (if (null? num-ancestors) 0 (car num-ancestors)))
+         (this-axis
+          (lambda (node)  ; not a nodeset
+            (if
+             (and (<a href="xpath-context.html#codefunc37046">sxml:context?</a> node)                  
+                  (not (null? (<a href="xpath-context.html#codefunc46900">sxml:context-&gt;ancestors-u</a> node))))
+             (cond
+               ((memq (<a href="xpath-context.html#codefunc6309">sxml:context-&gt;node-u</a> node)
+                      (cdr  ; parent is an element =&gt; cdr gives its children
+                       (car (<a href="xpath-context.html#codefunc46900">sxml:context-&gt;ancestors-u</a> node))))
+                =&gt; (lambda (foll-siblings)
+                     (<a href="xpath-context.html#codefunc63648">draft:siblings-&gt;context-set</a>
+                      ((<a href="sxpathlib.html#codefunc7531">sxml:filter</a> test-pred?) (cdr foll-siblings))
+                      (<a href="xpath-context.html#codefunc47888">draft:list-head</a>
+                       (<a href="xpath-context.html#codefunc46900">sxml:context-&gt;ancestors-u</a> node) num-anc))))
+               (else  ; no following siblings
+                '()))
+             '()  ; no parent =&gt; no siblings
+             ))))
+    (lambda (node)   ; node or nodeset
+      (if (<a href="sxpathlib.html#codefunc31162">nodeset?</a> node)
+          (<a href="sxpathlib.html#codefunc27946">map-union</a> this-axis node)
+          (this-axis node)))))
+</pre>
+<h4><a name='codefunc44623' href='#docfunc44623'>draft:namespace</a></h4>
+<i><a href='#tocfunc44623'>Index</a></i><br>
+
+<pre> Namespace axis
+ Borrows much from draft:child
+</pre>
+<pre>(define (<a href="xpath-context.html#codefunc44623">draft:namespace</a> test-pred? . num-ancestors)
+  (let* ((num-anc (if (null? num-ancestors) 0 (car num-ancestors)))
+         (this-axis
+          (lambda (node)  ; not a nodeset
+            (cond
+              ((not (pair? node)) '())   ; no namespaces
+              ; (car node) is always a symbol
+              ((<a href="xpath-context.html#codefunc1508">sxml:context-u?</a> node)  ; a context node
+               (<a href="xpath-context.html#codefunc63648">draft:siblings-&gt;context-set</a>
+                ((<a href="sxpathlib.html#codefunc7531">sxml:filter</a> test-pred?)
+                 (<a href="sxml-tools.html#codefunc24174">sxml:ns-list</a> (<a href="xpath-context.html#codefunc6309">sxml:context-&gt;node-u</a> node)))
+                (<a href="xpath-context.html#codefunc47888">draft:list-head</a> (<a href="xpath-context.html#codefunc20165">sxml:context-&gt;content-u</a> node) num-anc)))
+              (else  ; an ordinary node, and is a pair
+               (<a href="xpath-context.html#codefunc63648">draft:siblings-&gt;context-set</a>
+                ((<a href="sxpathlib.html#codefunc7531">sxml:filter</a> test-pred?) (<a href="sxml-tools.html#codefunc24174">sxml:ns-list</a> node))
+                (<a href="xpath-context.html#codefunc47888">draft:list-head</a> (list node) num-anc)))))))
+    (lambda (node)   ; node or nodeset
+      (if (<a href="sxpathlib.html#codefunc31162">nodeset?</a> node)
+          (<a href="sxpathlib.html#codefunc27946">map-union</a> this-axis node)
+          (this-axis node)))))
+</pre>
+<h4><a name='codefunc20107' href='#docfunc20107'>draft:parent</a></h4>
+<i><a href='#tocfunc20107'>Index</a></i><br>
+
+<pre> Parent axis
+</pre>
+<pre>(define (<a href="xpath-context.html#codefunc20107">draft:parent</a> test-pred? . num-ancestors)
+  (let* ((num-anc (if (null? num-ancestors) 0 (car num-ancestors)))
+         (this-axis
+          (lambda (node)  ; not a nodeset
+            (if
+             (and (<a href="xpath-context.html#codefunc37046">sxml:context?</a> node)
+                  (not (null? (<a href="xpath-context.html#codefunc46900">sxml:context-&gt;ancestors-u</a> node)))
+                  (test-pred? (car (<a href="xpath-context.html#codefunc46900">sxml:context-&gt;ancestors-u</a> node))))
+             (<a href="xpath-context.html#codefunc37605">draft:smart-make-context</a>
+              (car (<a href="xpath-context.html#codefunc46900">sxml:context-&gt;ancestors-u</a> node))
+              (cdr (<a href="xpath-context.html#codefunc46900">sxml:context-&gt;ancestors-u</a> node))
+              num-anc)
+             '()  ; no parent
+             ))))
+    (lambda (node)   ; node or nodeset
+      (if (<a href="sxpathlib.html#codefunc31162">nodeset?</a> node)
+          (<a href="sxpathlib.html#codefunc27946">map-union</a> this-axis node)
+          (this-axis node)))))
+</pre>
+<h4><a name='codefunc48197' href='#docfunc48197'>draft:preceding</a></h4>
+<i><a href='#tocfunc48197'>Index</a></i><br>
+
+<pre> Preceding axis
+</pre>
+<pre>(define (<a href="xpath-context.html#codefunc48197">draft:preceding</a> test-pred? . num-ancestors)
+  (let* ((num-anc (if (null? num-ancestors) 0 (car num-ancestors)))
+         (descend (<a href="xpath-context.html#codefunc35017">draft:descendant-or-self</a> test-pred? num-anc))
+         (this-axis
+          (lambda (node)  ; not a nodeset
+            (if
+             (<a href="xpath-context.html#codefunc37046">sxml:context?</a> node)
+             (let loop ((curr-node (<a href="xpath-context.html#codefunc6309">sxml:context-&gt;node-u</a> node))
+                        (ancs-to-view (<a href="xpath-context.html#codefunc46900">sxml:context-&gt;ancestors-u</a> node))                        
+                        (to-descend '()))
+               (cond
+                 ((null? ancs-to-view)  ; processed everyone
+                  (<a href="sxpathlib.html#codefunc27946">map-union</a>
+                   (lambda (node) (reverse (descend node)))
+                   to-descend))
+                 ((memq curr-node
+                        (reverse
+                         ((<a href="sxpathlib.html#codefunc3917">select-kids</a> <a href="sxpathlib.html#codefunc63215">sxml:node?</a>)
+                          (car ancs-to-view))))
+                  =&gt; (lambda (prec-siblings)
+                       (loop
+                        (car ancs-to-view)
+                        (cdr ancs-to-view)
+                        (append
+                         to-descend
+                         (<a href="xpath-context.html#codefunc63648">draft:siblings-&gt;context-set</a>
+                           (cdr prec-siblings)
+                           (<a href="xpath-context.html#codefunc47888">draft:list-head</a> ancs-to-view num-anc))))))
+                 (else  ; no preceding siblings
+                  (loop (car ancs-to-view)
+                        (cdr ancs-to-view)
+                        to-descend))))
+             '()  ; no preceding members
+             ))))
+    (lambda (node)   ; node or nodeset
+      (if (<a href="sxpathlib.html#codefunc31162">nodeset?</a> node)
+          (<a href="sxpathlib.html#codefunc27946">map-union</a> this-axis node)
+          (this-axis node)))))
+</pre>
+<h4><a name='codefunc11756' href='#docfunc11756'>draft:preceding-sibling</a></h4>
+<i><a href='#tocfunc11756'>Index</a></i><br>
+
+<pre> Preceding-sibling axis
+</pre>
+<pre>(define (<a href="xpath-context.html#codefunc11756">draft:preceding-sibling</a> test-pred? . num-ancestors)
+  (let* ((num-anc (if (null? num-ancestors) 0 (car num-ancestors)))
+         (this-axis
+          (lambda (node)  ; not a nodeset
+            (if
+             (and (<a href="xpath-context.html#codefunc37046">sxml:context?</a> node)                  
+                  (not (null? (<a href="xpath-context.html#codefunc46900">sxml:context-&gt;ancestors-u</a> node))))
+             (cond
+               ((memq (<a href="xpath-context.html#codefunc6309">sxml:context-&gt;node-u</a> node)
+                      (reverse
+                       (cdr  ; parent is an element =&gt; cdr gives its children
+                        (car (<a href="xpath-context.html#codefunc46900">sxml:context-&gt;ancestors-u</a> node)))))
+                =&gt; (lambda (prec-siblings)
+                     (<a href="xpath-context.html#codefunc63648">draft:siblings-&gt;context-set</a>
+                      ((<a href="sxpathlib.html#codefunc7531">sxml:filter</a> test-pred?) (cdr prec-siblings))
+                      (<a href="xpath-context.html#codefunc47888">draft:list-head</a>
+                       (<a href="xpath-context.html#codefunc46900">sxml:context-&gt;ancestors-u</a> node) num-anc))))
+               (else  ; no preceding siblings
+                '()))
+             '()  ; no parent =&gt; no siblings
+             ))))
+    (lambda (node)   ; node or nodeset
+      (if (<a href="sxpathlib.html#codefunc31162">nodeset?</a> node)
+          (<a href="sxpathlib.html#codefunc27946">map-union</a> this-axis node)
+          (this-axis node)))))
+</pre>
+<h4><a name='codefunc57113' href='#docfunc57113'>draft:self</a></h4>
+<i><a href='#tocfunc57113'>Index</a></i><br>
+
+<pre> Self axis
+ num-ancestors is not used here
+</pre>
+<pre>(define (<a href="xpath-context.html#codefunc57113">draft:self</a> test-pred? . num-ancestors)
+  (<a href="sxpathlib.html#codefunc7531">sxml:filter</a>
+   (lambda (node) (test-pred? (<a href="xpath-context.html#codefunc41847">sxml:context-&gt;node</a> node)))))
+</pre>
+<h4><a name='codefunc48551' href='#docfunc48551'>draft:ast-axis-specifier</a></h4>
+<i><a href='#tocfunc48551'>Index</a></i><br>
+
+<pre> {5} &lt;AxisSpecifier&gt; ::= (axis-specifier  &lt;AxisName&gt; )
+ {6} &lt;AxisName&gt; ::= (ancestor)
+                    | (ancestor-or-self)
+                    | (attribute)
+                    | (child)
+                    | (descendant)
+                    | (descendant-or-self)
+                    | (following)
+                    | (following-sibling)
+                    | (namespace)
+                    | (parent)
+                    | (preceding)
+                    | (preceding-sibling)
+                    | (self)
+                    | (arc)  ; the following 3 are added by SXLink
+                    | (traverse)
+                    | (traverse-arc)
+ Returns:  (list lambda num-ancestors pass-vars?)
+  pass-vars? - a boolean: whether var-bindings must be passed to the axis
+</pre>
+<pre>(define (<a href="xpath-context.html#codefunc48551">draft:ast-axis-specifier</a> op num-anc)
+  (if
+   (not (eq? (car op) 'axis-specifier))
+   (<a href="xpath-context.html#codefunc8076">draft:signal-semantic-error</a> &quot;not an AxisSpecifier - &quot; op)
+   (case (caadr op)  ; AxisName
+     ((ancestor)
+      (list <a href="xpath-context.html#codefunc52705">draft:ancestor</a> #f #f))
+     ((ancestor-or-self)
+      (list <a href="xpath-context.html#codefunc13921">draft:ancestor-or-self</a> #f #f))
+     ((attribute)
+      (list <a href="xpath-context.html#codefunc53587">draft:attribute</a> (<a href="xpath-context.html#codefunc38839">draft:na-minus-nneg</a> num-anc 1) #f))
+     ((child)
+      (list <a href="xpath-context.html#codefunc59498">draft:child</a> (<a href="xpath-context.html#codefunc38839">draft:na-minus-nneg</a> num-anc 1) #f))
+     ((descendant)
+      (list <a href="xpath-context.html#codefunc8266">draft:descendant</a> (<a href="xpath-context.html#codefunc38839">draft:na-minus-nneg</a> num-anc 1) #f))
+     ((descendant-or-self)
+      (list <a href="xpath-context.html#codefunc35017">draft:descendant-or-self</a> num-anc #f))
+     ((following)
+      (list <a href="xpath-context.html#codefunc54604">draft:following</a> #f #f))
+     ((following-sibling)
+      (list <a href="xpath-context.html#codefunc18163">draft:following-sibling</a> (<a href="xpath-context.html#codefunc23095">draft:na-max</a> num-anc 1) #f))
+     ((namespace)
+      (list <a href="xpath-context.html#codefunc44623">draft:namespace</a> (<a href="xpath-context.html#codefunc38839">draft:na-minus-nneg</a> num-anc 1) #f))
+     ((parent)
+      (list <a href="xpath-context.html#codefunc20107">draft:parent</a> (<a href="xpath-context.html#codefunc29907">draft:na+</a> num-anc 1) #f))
+     ((preceding)
+      (list <a href="xpath-context.html#codefunc48197">draft:preceding</a> #f #f))
+     ((preceding-sibling)
+      (list <a href="xpath-context.html#codefunc11756">draft:preceding-sibling</a> (<a href="xpath-context.html#codefunc23095">draft:na-max</a> num-anc 1) #f))
+     ((<a href="libmisc.html#codefunc52191">self</a>)
+      (list <a href="xpath-context.html#codefunc57113">draft:self</a> num-anc #f))
+     ((arc)
+      (list <a href="xlink.html#codefunc50615">xlink:axis-arc</a> #f #f))
+     ((traverse)
+      (list <a href="xlink.html#codefunc45061">xlink:axis-traverse</a> #f #t))
+     ((traverse-arc)
+      (list <a href="xlink.html#codefunc20426">xlink:axis-traverse-arc</a> #f #t))
+     (else
+      (<a href="xpath-context.html#codefunc8076">draft:signal-semantic-error</a> &quot;unknown AxisName - &quot; op)))))
+</pre>
+<h4><a name='codefunc28905' href='#docfunc28905'>draft:ast-node-test</a></h4>
+<i><a href='#tocfunc28905'>Index</a></i><br>
+
+<pre> {7} &lt;NodeTest&gt; ::= (node-test (*))
+                    | (node-test (namespace-uri  &lt;String&gt; ))
+                    | (node-test (namespace-uri  &lt;String&gt; )?
+                                 (local-name  &lt;String&gt; ))
+                    | (node-test (comment))
+                    | (node-test (text))
+                    | (node-test (pi &lt;String&gt;? ))
+                    | (node-test (point))
+                    | (node-test (range))
+ + added by sxpath native syntax:
+                    | (node-test (equal?  &lt;SXML-node&gt; ))
+                    | (node-test (eq?  &lt;SXML-node&gt; ))
+                    | (node-test (names  &lt;String&gt;+ ))
+                    | (node-test (not-names  &lt;String&gt;+ ))s
+</pre>
+<pre>(define (<a href="xpath-context.html#codefunc28905">draft:ast-node-test</a> op)
+  (if
+   (not (eq? (car op) 'node-test))
+   (<a href="xpath-context.html#codefunc8076">draft:signal-semantic-error</a> &quot;not an NodeTest - &quot; op)
+   (case (caadr op)  ; NodeTest name
+     ((*)
+      (<a href="sxpathlib.html#codefunc9356">ntype??</a> '*))
+     ((namespace-uri)
+      (cond
+        ((= (length op) 2)  ; NodeTest in the form of prefix:*
+         (<a href="sxpathlib.html#codefunc32267">ntype-namespace-id??</a> (cadadr op)))
+        ((eq? (caaddr op) 'local-name)
+         (<a href="sxpathlib.html#codefunc9356">ntype??</a> (string-&gt;symbol
+                   (string-append (cadadr op) &quot;:&quot; (cadr (caddr op))))))
+        (else
+         (<a href="xpath-context.html#codefunc8076">draft:signal-semantic-error</a> &quot;improper QName NodeTest - &quot; op))))
+     ((local-name)      
+      (<a href="sxpathlib.html#codefunc9356">ntype??</a> (string-&gt;symbol (cadadr op))))
+     ((comment)
+      (<a href="sxpathlib.html#codefunc9356">ntype??</a> '*COMMENT*))
+     ((text)
+      (<a href="sxpathlib.html#codefunc9356">ntype??</a> '*text*))
+     ((pi)
+      (if (= (length (cadr op)) 2)  ; PI target supplied
+          (let ((target (string-&gt;symbol (cadadr op))))
+            (lambda (node)
+              (and (pair? node)
+                   (eq? (car node) '*PI*)
+                   (equal? (cadr node) target))))
+          (lambda (node)
+            (and (pair? node) (eq? (car node) '*PI*)))))
+     ((node) <a href="sxpathlib.html#codefunc63215">sxml:node?</a>)
+     ((point)
+      (<a href="xpath-context.html#codefunc8076">draft:signal-semantic-error</a>
+       &quot;point() NodeTest is not supported by this implementation&quot;))
+     ((range)
+      (<a href="xpath-context.html#codefunc8076">draft:signal-semantic-error</a>
+       &quot;range() NodeTest is not supported by this implementation&quot;))
+     ((equal?)
+      (<a href="sxpathlib.html#codefunc7186">node-equal?</a> (cadadr op)))
+     ((eq?)
+      (<a href="sxpathlib.html#codefunc31089">node-eq?</a> (cadadr op)))
+     ((names)
+      (<a href="sxpathlib.html#codefunc6363">ntype-names??</a> (cdadr op)))
+     ((not-names)
+      (<a href="sxpathlib.html#codefunc65081">sxml:complement</a> (<a href="sxpathlib.html#codefunc6363">ntype-names??</a> (cdadr op))))
+     (else
+      (<a href="xpath-context.html#codefunc8076">draft:signal-semantic-error</a> &quot;unknown NodeTest - &quot; op)))))
+</pre>
+<h4><a name='codefunc36352' href='#docfunc36352'>draft:arglist->ns+na</a></h4>
+<i><a href='#tocfunc36352'>Index</a></i><br>
+
+<pre> Given a list of arguments, returns
+  (values ns-binding num-anc)
+</pre>
+<pre>(define (<a href="xpath-context.html#codefunc36352">draft:arglist-&gt;ns+na</a> arglst)
+  (let loop ((arglst arglst)
+             (ns-binding '())
+             (num-anc 0))
+    (cond
+      ((null? arglst) (values ns-binding num-anc))
+      ((pair? (car arglst))
+       (loop (cdr arglst) (car arglst) num-anc))
+      ((number? (car arglst))
+       (loop (cdr arglst) ns-binding
+             (if (negative? (car arglst)) #f (car arglst))))
+      (else
+       (loop (cdr arglst) ns-binding num-anc)))))
+</pre>
+<h4><a name='codefunc63806' href='#docfunc63806'>draft:api-helper</a></h4>
+<i><a href='#tocfunc63806'>Index</a></i><br>
+
+<pre> Helper for constructing several highest-level API functions
+</pre>
+<pre>(define (<a href="xpath-context.html#codefunc63806">draft:api-helper</a> grammar-parser ast-parser)
+  (lambda (xpath-string . ns+na)
+    (call-with-values
+     (lambda () (<a href="xpath-context.html#codefunc36352">draft:arglist-&gt;ns+na</a> ns+na))
+     (lambda (ns-binding num-anc)
+       (and-let*
+        ((ast (grammar-parser xpath-string ns-binding))
+         (impl-lst (ast-parser ast num-anc)))
+        (let ((res (car impl-lst)))
+          (lambda (node . var-binding)
+            ((if (and num-anc (zero? num-anc))
+                 <a href="xpath-context.html#codefunc53298">draft:contextset-&gt;nodeset</a>
+                 (lambda (x) x))             
+             (res (<a href="sxpathlib.html#codefunc11721">as-nodeset</a> node) (cons 1 1)
+                  ;(<a href="xlink.html#codefunc96">xlink:add-docs-to-vars</a>
+                  ; node
+                  (if (null? var-binding)
+                      var-binding (car var-binding))
+                  ; )
+                  )))))))))
+</pre>
+<h4><a name='codefunc63611' href='#docfunc63611'>draft:xpath</a></h4>
+<i><a href='#tocfunc63611'>Index</a></i><br>
+
+<pre>(define <a href="xpath-context.html#codefunc63611">draft:xpath</a> (<a href="xpath-context.html#codefunc63806">draft:api-helper</a> <a href="xpath-ast.html#codefunc39640">txp:xpath-&gt;ast</a> <a href="xpath-context.html#codefunc16826">draft:ast-location-path</a>))
+</pre>
+<h4><a name='codefunc54261' href='#docfunc54261'>draft:xpointer</a></h4>
+<i><a href='#tocfunc54261'>Index</a></i><br>
+
+<pre>(define <a href="xpath-context.html#codefunc54261">draft:xpointer</a> (<a href="xpath-context.html#codefunc63806">draft:api-helper</a> <a href="xpath-ast.html#codefunc9635">txp:xpointer-&gt;ast</a> <a href="xpath-context.html#codefunc29899">draft:ast-xpointer</a>))
+</pre>
+<h4><a name='codefunc4178' href='#docfunc4178'>draft:xpath-expr</a></h4>
+<i><a href='#tocfunc4178'>Index</a></i><br>
+
+<pre>(define <a href="xpath-context.html#codefunc4178">draft:xpath-expr</a> (<a href="xpath-context.html#codefunc63806">draft:api-helper</a> <a href="xpath-ast.html#codefunc20413">txp:expr-&gt;ast</a> <a href="xpath-context.html#codefunc40677">draft:ast-expr</a>))
+</pre>
+<h4><a name='codefunc21906' href='#docfunc21906'>draft:sxpath</a></h4>
+<i><a href='#tocfunc21906'>Index</a></i><br>
+
+<pre>(define <a href="xpath-context.html#codefunc21906">draft:sxpath</a> (<a href="xpath-context.html#codefunc63806">draft:api-helper</a> <a href="xpath-ast.html#codefunc42815">txp:sxpath-&gt;ast</a> <a href="xpath-context.html#codefunc40677">draft:ast-expr</a>))
+</pre>
+<h4><a name='codefunc47107' href='#docfunc47107'>txpath-with-context</a></h4>
+<i><a href='#tocfunc47107'>Index</a></i><br>
+
+<pre> Aliases
+</pre>
+<pre>(define <a href="xpath-context.html#codefunc47107">txpath-with-context</a> <a href="xpath-context.html#codefunc63611">draft:xpath</a>)
+</pre>
+<h4><a name='codefunc42376' href='#docfunc42376'>txpath/c</a></h4>
+<i><a href='#tocfunc42376'>Index</a></i><br>
+
+<pre>(define <a href="xpath-context.html#codefunc42376">txpath/c</a> <a href="xpath-context.html#codefunc63611">draft:xpath</a>)
+</pre>
+<h4><a name='codefunc47106' href='#docfunc47106'>sxpath-with-context</a></h4>
+<i><a href='#tocfunc47106'>Index</a></i><br>
+
+<pre>(define <a href="xpath-context.html#codefunc47106">sxpath-with-context</a> <a href="xpath-context.html#codefunc21906">draft:sxpath</a>)
+</pre>
+<h4><a name='codefunc42375' href='#docfunc42375'>sxpath/c</a></h4>
+<i><a href='#tocfunc42375'>Index</a></i><br>
+
+<pre>(define <a href="xpath-context.html#codefunc42375">sxpath/c</a> <a href="xpath-context.html#codefunc21906">draft:sxpath</a>)
+</pre>
+<h4><a name='codefunc6309' href='#docfunc6309'>sxml:context->node-u</a></h4>
+<i><a href='#tocfunc6309'>Index</a></i><br>
+
+<pre> Fast however unsafe accessors
+ Assume that the argument is the proper context
+</pre>
+<pre>(define <a href="xpath-context.html#codefunc6309">sxml:context-&gt;node-u</a> cadr)
+</pre>
+<h4><a name='codefunc46900' href='#docfunc46900'>sxml:context->ancestors-u</a></h4>
+<i><a href='#tocfunc46900'>Index</a></i><br>
+
+<pre>(define <a href="xpath-context.html#codefunc46900">sxml:context-&gt;ancestors-u</a> cddr)
+</pre>
+<h4><a name='codefunc20165' href='#docfunc20165'>sxml:context->content-u</a></h4>
+<i><a href='#tocfunc20165'>Index</a></i><br>
+
+<pre>(define <a href="xpath-context.html#codefunc20165">sxml:context-&gt;content-u</a> cdr)
+</pre>
+<h4><a name='codefunc41847' href='#docfunc41847'>sxml:context->node</a></h4>
+<i><a href='#tocfunc41847'>Index</a></i><br>
+
+<pre> Safe accessors
+ Can be applied to both a context and an ordinary node
+</pre>
+<pre>(define (<a href="xpath-context.html#codefunc41847">sxml:context-&gt;node</a> context)
+  (if (<a href="xpath-context.html#codefunc37046">sxml:context?</a> context) (cadr context) context))
+</pre>
+<h4><a name='codefunc35263' href='#docfunc35263'>sxml:context->ancestors</a></h4>
+<i><a href='#tocfunc35263'>Index</a></i><br>
+
+<pre>(define (<a href="xpath-context.html#codefunc35263">sxml:context-&gt;ancestors</a> context)
+  (if (<a href="xpath-context.html#codefunc37046">sxml:context?</a> context) (cddr context) '()))
+</pre>
+<h4><a name='codefunc8528' href='#docfunc8528'>sxml:context->content</a></h4>
+<i><a href='#tocfunc8528'>Index</a></i><br>
+
+<pre>(define (<a href="xpath-context.html#codefunc8528">sxml:context-&gt;content</a> context)
+  (if (<a href="xpath-context.html#codefunc37046">sxml:context?</a> context) (cdr context) (list context)))
+</pre>
+<h4><a name='codefunc53298' href='#docfunc53298'>draft:contextset->nodeset</a></h4>
+<i><a href='#tocfunc53298'>Index</a></i><br>
+
+<pre> Given a context-set, converts it to a nodeset
+</pre>
+<pre>(define (<a href="xpath-context.html#codefunc53298">draft:contextset-&gt;nodeset</a> obj)
+  (if (<a href="sxpathlib.html#codefunc31162">nodeset?</a> obj)
+      (map <a href="xpath-context.html#codefunc41847">sxml:context-&gt;node</a> obj)
+      obj))
+</pre>
+<h4><a name='codefunc34204' href='#docfunc34204'>draft:make-context</a></h4>
+<i><a href='#tocfunc34204'>Index</a></i><br>
+
+<pre> Constructor
+</pre>
+<pre>(define (<a href="xpath-context.html#codefunc34204">draft:make-context</a> node ancestors)
+  (cons '*CONTEXT* (cons node ancestors)))
+</pre>
+<h4><a name='codefunc37605' href='#docfunc37605'>draft:smart-make-context</a></h4>
+<i><a href='#tocfunc37605'>Index</a></i><br>
+
+<pre> A smarter constructor
+ Makes context only when required, with the 'num-anc' required
+</pre>
+<pre>(define (<a href="xpath-context.html#codefunc37605">draft:smart-make-context</a> node ancestors num-anc)
+  (if
+   (or (and num-anc (zero? num-anc))
+       (null? ancestors))
+   node  ; no need for context construction
+   (cons '*CONTEXT*
+         (cons node
+               (<a href="xpath-context.html#codefunc47888">draft:list-head</a> ancestors num-anc)))))
+</pre>
+<h4><a name='codefunc63648' href='#docfunc63648'>draft:siblings->context-set</a></h4>
+<i><a href='#tocfunc63648'>Index</a></i><br>
+
+<pre> Provided a 'nodeset' of sibling nodes, wraps each into context
+ If 'ancestors' is empty, keeps 'nodeset' unchanged
+</pre>
+<pre>(define (<a href="xpath-context.html#codefunc63648">draft:siblings-&gt;context-set</a> nodeset ancestors)
+  (if (null? ancestors)
+      nodeset
+      (map
+       (lambda (node) (<a href="xpath-context.html#codefunc34204">draft:make-context</a> node ancestors))
+       nodeset)))
+</pre>
+<h4><a name='codefunc29907' href='#docfunc29907'>draft:na+</a></h4>
+<i><a href='#tocfunc29907'>Index</a></i><br>
+
+<pre>(define (<a href="xpath-context.html#codefunc29907">draft:na+</a> na1 na2)
+  (if
+   (or (not na1) (not na2)) ; either argument is infinite
+   #f
+   (+ na1 na2)))
+</pre>
+<h4><a name='codefunc50100' href='#docfunc50100'>draft:na-minus</a></h4>
+<i><a href='#tocfunc50100'>Index</a></i><br>
+
+<pre>(define (<a href="xpath-context.html#codefunc50100">draft:na-minus</a> na value)
+  (if (not na) na (- na value)))
+</pre>
+<h4><a name='codefunc38839' href='#docfunc38839'>draft:na-minus-nneg</a></h4>
+<i><a href='#tocfunc38839'>Index</a></i><br>
+
+<pre> Minus, with the result that is always non-negative
+</pre>
+<pre>(define (<a href="xpath-context.html#codefunc38839">draft:na-minus-nneg</a> na value)
+  (cond
+    ((not na) na)
+    ((&lt; (- na value) 0) 0)
+    (else (- na value))))
+</pre>
+<h4><a name='codefunc23095' href='#docfunc23095'>draft:na-max</a></h4>
+<i><a href='#tocfunc23095'>Index</a></i><br>
+
+<pre>(define (<a href="xpath-context.html#codefunc23095">draft:na-max</a> . na-lst)
+  (cond
+    ((null? na-lst) 0)
+    ((member #f na-lst) #f)
+    (else (apply max na-lst))))
+</pre>
+<h4><a name='codefunc20543' href='#docfunc20543'>draft:na-min</a></h4>
+<i><a href='#tocfunc20543'>Index</a></i><br>
+
+<pre>(define (<a href="xpath-context.html#codefunc20543">draft:na-min</a> . na-lst)
+  (if
+   (null? na-lst) 0
+   (let ((num-lst (<a href="common.html#codefunc20536">filter</a> (lambda (x) x) na-lst)))
+     (if (null? num-lst) #f  ; all na-lst consists of #f
+         (apply min num-lst)))))
+</pre>
+<h4><a name='codefunc29926' href='#docfunc29926'>draft:na></a></h4>
+<i><a href='#tocfunc29926'>Index</a></i><br>
+
+<pre>(define (<a href="xpath-context.html#codefunc29926">draft:na&gt;</a> na1 na2)
+  (cond
+   ((not na2) ; second argument in infinite
+    #f)
+   ((not na1) ; first argument is infinite
+    #t)
+   (else  ; niether argument is infinite
+    (&gt; na1 na2))))
+</pre>
+<h4><a name='codefunc45542' href='#docfunc45542'>draft:na>=</a></h4>
+<i><a href='#tocfunc45542'>Index</a></i><br>
+
+<pre>(define (<a href="xpath-context.html#codefunc45542">draft:na&gt;=</a> na1 na2)
+  (cond
+   ((not na2) ; second argument in infinite
+    (not na1))  
+   ((not na1) ; first argument is infinite
+    #t)
+   (else  ; niether argument is infinite
+    (&gt;= na1 na2))))
+</pre>
+<h4><a name='codefunc45116' href='#docfunc45116'>draft:find-proper-context</a></h4>
+<i><a href='#tocfunc45116'>Index</a></i><br>
+
+<pre> Makes a context-set from a nodeset supplied, with the num-anc required
+  ancestors-set ::= (listof ancestors)
+  ancestors ::= (listof node)
+ Members of the nodeset are known to be descendants-or-selves of
+ (map car ancestors-set)
+</pre>
+<pre>(define (<a href="xpath-context.html#codefunc45116">draft:find-proper-context</a> nodeset ancestors-set num-anc)
+  (map
+   (lambda (node)
+     (if
+      (<a href="xpath-context.html#codefunc37046">sxml:context?</a> node)  ; already a context
+      node  ; nothing to be done  
+      (let loop ((this-level ancestors-set)
+                 (next-level '()))
+        (if
+         (null? this-level)  ; this level fully analyzed
+         (if (null? next-level)  ; failed to find
+             node
+             (loop next-level '()))
+         (let ((ancestors (car this-level)))
+           (if
+            (eq? node (car ancestors))  ; proper ancestors found
+            (<a href="xpath-context.html#codefunc34204">draft:make-context</a>
+             node
+             (<a href="xpath-context.html#codefunc47888">draft:list-head</a> (cdr ancestors) num-anc))
+            (loop (cdr this-level)
+                  (append
+                   (map
+                    (lambda (n) (cons n ancestors))
+                    ((<a href="sxpathlib.html#codefunc5616">sxml:child</a> <a href="sxpathlib.html#codefunc63215">sxml:node?</a>) (car ancestors)))
+                   (map
+                    (lambda (n) (cons n ancestors))
+                    ((<a href="sxpathlib.html#codefunc65240">sxml:attribute</a> (lambda (x) #t)) (car ancestors)))
+                   next-level))))))))
+   nodeset))
+</pre>
+<h4><a name='codefunc51218' href='#docfunc51218'>draft:core-last</a></h4>
+<i><a href='#tocfunc51218'>Index</a></i><br>
+
+<pre> last()
+</pre>
+<pre>(define (<a href="xpath-context.html#codefunc51218">draft:core-last</a> num-anc)
+  (lambda (nodeset position+size var-binding)
+    (cdr position+size)))
+</pre>
+<h4><a name='codefunc45037' href='#docfunc45037'>draft:core-position</a></h4>
+<i><a href='#tocfunc45037'>Index</a></i><br>
+
+<pre> position()
+</pre>
+<pre>(define (<a href="xpath-context.html#codefunc45037">draft:core-position</a> num-anc)
+  (lambda (nodeset position+size var-binding)
+    (car position+size)))
+</pre>
+<h4><a name='codefunc13595' href='#docfunc13595'>draft:core-count</a></h4>
+<i><a href='#tocfunc13595'>Index</a></i><br>
+
+<pre> count(node-set)
+</pre>
+<pre>(define (<a href="xpath-context.html#codefunc13595">draft:core-count</a> num-anc arg-func)
+  (lambda (nodeset position+size var-binding)
+    (let ((res (arg-func nodeset position+size var-binding)))
+      (cond
+        ((<a href="sxpathlib.html#codefunc31162">nodeset?</a> res) (length res))
+        (else
+         (<a href="txpath.html#codefunc13525">sxml:xpointer-runtime-error</a>
+          &quot;count() function - an argument is not a nodeset&quot;)
+         0)))))
+</pre>
+<h4><a name='codefunc20897' href='#docfunc20897'>draft:core-id</a></h4>
+<i><a href='#tocfunc20897'>Index</a></i><br>
+
+<pre> id(object)
+</pre>
+<pre>(define (<a href="xpath-context.html#codefunc20897">draft:core-id</a> num-anc arg-func) 
+  (lambda (nodeset position+size var-binding)    
+    (let* ((root-node (<a href="xpath-context.html#codefunc60759">draft:reach-root</a> nodeset))
+           (id-nset ((<a href="sxpathlib.html#codefunc5616">sxml:child</a> (<a href="sxpathlib.html#codefunc9356">ntype??</a> 'id-index))
+                     ((<a href="sxpathlib.html#codefunc5616">sxml:child</a> (<a href="sxpathlib.html#codefunc9356">ntype??</a> '@@)) root-node))))
+      (if
+       (null? id-nset)  ; no id-index
+       '()  ; ID function returns an empty nodeset
+       (let ((res ((<a href="sxpath-ext.html#codefunc20095">sxml:id</a> (cdar id-nset))  ; implemented in &quot;sxpath-ext.scm&quot;
+                   (<a href="xpath-context.html#codefunc53298">draft:contextset-&gt;nodeset</a>
+                    (arg-func nodeset position+size var-binding)))))
+         (if (and num-anc (zero? num-anc))  ; no ancestors required
+             res
+             (<a href="xpath-context.html#codefunc48905">draft:recover-contextset</a> res root-node num-anc)))))))
+</pre>
+<h4><a name='codefunc2' href='#docfunc2'>draft:core-local-name</a></h4>
+<i><a href='#tocfunc2'>Index</a></i><br>
+
+<pre> local-name(node-set?)
+</pre>
+<pre>(define (<a href="xpath-context.html#codefunc2">draft:core-local-name</a> num-anc . arg-func)  ; optional argument 
+  (if (null? arg-func)  ; no argument supplied
+      (lambda (nodeset position+size var-binding)
+        (let ((nodeset (<a href="xpath-context.html#codefunc53298">draft:contextset-&gt;nodeset</a> nodeset)))
+          (cond
+            ((null? nodeset) &quot;&quot;)
+            ((not (pair? (car nodeset))) &quot;&quot;)  ; no name
+            (else
+             (let ((name (symbol-&gt;string (caar nodeset))))
+               (cond
+                 ((<a href="util.html#codefunc35783">string-rindex</a> name #\:)
+                  =&gt; (lambda (pos)
+                       (substring name (+ pos 1) (string-length name))))
+                 (else  ; a NCName
+                  name)))))))
+      (let ((func (car arg-func)))
+        (lambda (nodeset position+size var-binding)          
+          (let ((obj
+                 (<a href="xpath-context.html#codefunc53298">draft:contextset-&gt;nodeset</a>
+                  (func nodeset position+size var-binding))))
+            (cond
+              ((null? obj) &quot;&quot;)  ; an empty nodeset
+              ((not (<a href="sxpathlib.html#codefunc31162">nodeset?</a> obj))
+               (<a href="txpath.html#codefunc13525">sxml:xpointer-runtime-error</a>
+                &quot;NAME function - an argument is not a nodeset&quot;)              
+               &quot;&quot;)
+              ((not (pair? (car obj))) &quot;&quot;)  ; no name
+              (else
+               (let ((name (symbol-&gt;string (caar obj))))
+                 (cond
+                   ((<a href="util.html#codefunc35783">string-rindex</a> name #\:)
+                    =&gt; (lambda (pos)
+                         (substring
+                          name (+ pos 1) (string-length name))))
+                   (else  ; a NCName
+                    name))))))))))
+</pre>
+<h4><a name='codefunc56439' href='#docfunc56439'>draft:core-namespace-uri</a></h4>
+<i><a href='#tocfunc56439'>Index</a></i><br>
+
+<pre> namespace-uri(node-set?)
+</pre>
+<pre>(define (<a href="xpath-context.html#codefunc56439">draft:core-namespace-uri</a> num-anc . arg-func)  ; optional argument
+  (if (null? arg-func)  ; no argument supplied
+      (lambda (nodeset position+size var-binding)
+        (let ((nodeset (<a href="xpath-context.html#codefunc53298">draft:contextset-&gt;nodeset</a> nodeset)))
+          (cond
+            ((null? nodeset) &quot;&quot;)
+            ((not (pair? (car nodeset))) &quot;&quot;)  ; no name
+            (else
+             (let ((name (symbol-&gt;string (caar nodeset))))
+               (cond
+                 ((<a href="util.html#codefunc35783">string-rindex</a> name #\:)
+                  =&gt; (lambda (pos)
+                       (substring name 0 pos)))
+                 (else  ; a NCName
+                  &quot;&quot;)))))))
+      (let ((func (car arg-func)))
+        (lambda (nodeset position+size var-binding)          
+          (let ((obj
+                 (<a href="xpath-context.html#codefunc53298">draft:contextset-&gt;nodeset</a>
+                  (func nodeset position+size var-binding))))           
+            (cond
+              ((null? obj) &quot;&quot;)  ; an empty nodeset
+              ((not (<a href="sxpathlib.html#codefunc31162">nodeset?</a> obj))
+               (<a href="txpath.html#codefunc13525">sxml:xpointer-runtime-error</a>
+                &quot;NAME function - an argument is not a nodeset&quot;)
+               &quot;&quot;)
+              ((not (pair? (car obj))) &quot;&quot;)  ; no name
+              (else
+               (let ((name (symbol-&gt;string (caar obj))))
+                 (cond
+                   ((<a href="util.html#codefunc35783">string-rindex</a> name #\:)
+                    =&gt; (lambda (pos)
+                         (substring name 0 pos)))
+                   (else &quot;&quot;))))))))))
+</pre>
+<h4><a name='codefunc50179' href='#docfunc50179'>draft:core-name</a></h4>
+<i><a href='#tocfunc50179'>Index</a></i><br>
+
+<pre> name(node-set?)
+</pre>
+<pre>(define (<a href="xpath-context.html#codefunc50179">draft:core-name</a> num-anc . arg-func)  ; optional argument
+  (if (null? arg-func)  ; no argument supplied
+      (lambda (nodeset position+size var-binding)
+        (let ((nodeset (<a href="xpath-context.html#codefunc53298">draft:contextset-&gt;nodeset</a> nodeset)))
+          (cond
+            ((null? nodeset) &quot;&quot;)
+            ((not (pair? (car nodeset))) &quot;&quot;)  ; no name
+            (else
+             (symbol-&gt;string (caar nodeset))))))
+      (let ((func (car arg-func)))
+        (lambda (nodeset position+size var-binding)          
+          (let ((obj
+                 (<a href="xpath-context.html#codefunc53298">draft:contextset-&gt;nodeset</a>
+                  (func nodeset position+size var-binding))))        
+            (cond
+              ((null? obj) &quot;&quot;)  ; an empty nodeset
+              ((not (<a href="sxpathlib.html#codefunc31162">nodeset?</a> obj))
+               (<a href="txpath.html#codefunc13525">sxml:xpointer-runtime-error</a>
+                &quot;NAME function - an argument is not a nodeset&quot;)
+               &quot;&quot;)
+              ((not (pair? (car obj))) &quot;&quot;)  ; no name
+              (else
+               (symbol-&gt;string (caar obj)))))))))
+</pre>
+<h4><a name='codefunc15490' href='#docfunc15490'>draft:core-string</a></h4>
+<i><a href='#tocfunc15490'>Index</a></i><br>
+
+<pre> string(object?)
+</pre>
+<pre>(define (<a href="xpath-context.html#codefunc15490">draft:core-string</a> num-anc . arg-func)  ; optional argument
+  (if (null? arg-func)  ; no argument supplied
+      (lambda (nodeset position+size var-binding)
+        (<a href="sxpath-ext.html#codefunc14688">sxml:string</a>
+         (<a href="xpath-context.html#codefunc53298">draft:contextset-&gt;nodeset</a> nodeset)))
+      (let ((func (car arg-func)))
+        (lambda (nodeset position+size var-binding)
+          (<a href="sxpath-ext.html#codefunc14688">sxml:string</a>
+           (<a href="xpath-context.html#codefunc53298">draft:contextset-&gt;nodeset</a>
+            (func nodeset position+size var-binding)))))))
+</pre>
+<h4><a name='codefunc7044' href='#docfunc7044'>draft:core-concat</a></h4>
+<i><a href='#tocfunc7044'>Index</a></i><br>
+
+<pre> concat(string, string, string*)
+</pre>
+<pre>(define (<a href="xpath-context.html#codefunc7044">draft:core-concat</a> num-anc . arg-func-lst)
+  (lambda (nodeset position+size var-binding)
+    (apply
+     string-append
+     (map
+      (lambda (f)
+        (<a href="sxpath-ext.html#codefunc14688">sxml:string</a>
+         (<a href="xpath-context.html#codefunc53298">draft:contextset-&gt;nodeset</a>
+          (f nodeset position+size var-binding))))
+      arg-func-lst))))
+</pre>
+<h4><a name='codefunc12419' href='#docfunc12419'>draft:core-starts-with</a></h4>
+<i><a href='#tocfunc12419'>Index</a></i><br>
+
+<pre> starts-with(string, string)
+</pre>
+<pre>(define (<a href="xpath-context.html#codefunc12419">draft:core-starts-with</a> num-anc arg-func1 arg-func2)
+  (lambda (nodeset position+size var-binding)
+    (let ((str1 (<a href="sxpath-ext.html#codefunc14688">sxml:string</a>
+                 (<a href="xpath-context.html#codefunc53298">draft:contextset-&gt;nodeset</a>
+                  (arg-func1 nodeset position+size var-binding))))
+          (str2 (<a href="sxpath-ext.html#codefunc14688">sxml:string</a>
+                 (<a href="xpath-context.html#codefunc53298">draft:contextset-&gt;nodeset</a>
+                  (arg-func2 nodeset position+size var-binding)))))
+      (string-prefix? str2 str1))))
+</pre>
+<h4><a name='codefunc35325' href='#docfunc35325'>draft:core-contains</a></h4>
+<i><a href='#tocfunc35325'>Index</a></i><br>
+
+<pre> contains(string, string)
+</pre>
+<pre>(define (<a href="xpath-context.html#codefunc35325">draft:core-contains</a> num-anc arg-func1 arg-func2)
+  (lambda (nodeset position+size var-binding)
+    (let ((str1 (<a href="sxpath-ext.html#codefunc14688">sxml:string</a>
+                 (<a href="xpath-context.html#codefunc53298">draft:contextset-&gt;nodeset</a>
+                  (arg-func1 nodeset position+size var-binding))))
+          (str2 (<a href="sxpath-ext.html#codefunc14688">sxml:string</a>
+                 (<a href="xpath-context.html#codefunc53298">draft:contextset-&gt;nodeset</a>
+                  (arg-func2 nodeset position+size var-binding)))))
+      (if (<a href="util.html#codefunc2331">substring?</a> str2 str1) #t #f)  ; must return a boolean
+      )))
+</pre>
+<h4><a name='codefunc15982' href='#docfunc15982'>draft:core-substring-before</a></h4>
+<i><a href='#tocfunc15982'>Index</a></i><br>
+
+<pre> substring-before(string, string)
+</pre>
+<pre>(define (<a href="xpath-context.html#codefunc15982">draft:core-substring-before</a> num-anc arg-func1 arg-func2)
+  (lambda (nodeset position+size var-binding)
+    (let* ((str1 (<a href="sxpath-ext.html#codefunc14688">sxml:string</a>
+                  (<a href="xpath-context.html#codefunc53298">draft:contextset-&gt;nodeset</a>
+                   (arg-func1 nodeset position+size var-binding))))
+           (str2 (<a href="sxpath-ext.html#codefunc14688">sxml:string</a>
+                  (<a href="xpath-context.html#codefunc53298">draft:contextset-&gt;nodeset</a>
+                   (arg-func2 nodeset position+size var-binding))))
+           (pos (<a href="util.html#codefunc2331">substring?</a> str2 str1)))
+      (if (not pos)  ; STR1 doesn't contain STR2
+          &quot;&quot;
+          (substring str1 0 pos)))))
+</pre>
+<h4><a name='codefunc19200' href='#docfunc19200'>draft:core-substring-after</a></h4>
+<i><a href='#tocfunc19200'>Index</a></i><br>
+
+<pre> substring-after(string, string)
+</pre>
+<pre>(define (<a href="xpath-context.html#codefunc19200">draft:core-substring-after</a> num-anc arg-func1 arg-func2)
+  (lambda (nodeset position+size var-binding)
+    (let* ((str1 (<a href="sxpath-ext.html#codefunc14688">sxml:string</a>
+                  (<a href="xpath-context.html#codefunc53298">draft:contextset-&gt;nodeset</a>
+                   (arg-func1 nodeset position+size var-binding))))
+           (str2 (<a href="sxpath-ext.html#codefunc14688">sxml:string</a>
+                  (<a href="xpath-context.html#codefunc53298">draft:contextset-&gt;nodeset</a>
+                   (arg-func2 nodeset position+size var-binding))))
+           (pos (<a href="util.html#codefunc2331">substring?</a> str2 str1)))
+      (if
+       (not pos)  ; STR1 doesn't contain STR2
+       &quot;&quot;
+       (substring
+        str1 (+ pos (string-length str2)) (string-length str1))))))
+</pre>
+<h4><a name='codefunc775' href='#docfunc775'>draft:core-substring</a></h4>
+<i><a href='#tocfunc775'>Index</a></i><br>
+
+<pre> substring(string, number, number?)
+</pre>
+<pre>(define (<a href="xpath-context.html#codefunc775">draft:core-substring</a> num-anc arg-func1 arg-func2 . arg-func3)
+  (if (null? arg-func3)  ; no third argument supplied
+      (lambda (nodeset position+size var-binding)
+        (let ((str (<a href="sxpath-ext.html#codefunc14688">sxml:string</a>
+                    (<a href="xpath-context.html#codefunc53298">draft:contextset-&gt;nodeset</a>
+                     (arg-func1 nodeset position+size var-binding))))
+              (num1 (<a href="sxpath-ext.html#codefunc9829">sxml:number</a>
+                     (<a href="xpath-context.html#codefunc53298">draft:contextset-&gt;nodeset</a>
+                      (arg-func2 nodeset position+size var-binding)))))
+          (let ((len (string-length str))
+                (start (- (inexact-&gt;exact (round num1)) 1)))
+            (if (&gt; start len)
+                &quot;&quot;
+                (substring str (if (&lt; start 0) 0 start) len)))))
+      (let ((arg-func3 (car arg-func3)))
+        (lambda (nodeset position+size var-binding)
+          (let ((str (<a href="sxpath-ext.html#codefunc14688">sxml:string</a>
+                      (<a href="xpath-context.html#codefunc53298">draft:contextset-&gt;nodeset</a>
+                       (arg-func1 nodeset position+size var-binding))))
+                (num1 (<a href="sxpath-ext.html#codefunc9829">sxml:number</a>
+                       (<a href="xpath-context.html#codefunc53298">draft:contextset-&gt;nodeset</a>
+                        (arg-func2 nodeset position+size var-binding))))
+                (num2 (<a href="sxpath-ext.html#codefunc9829">sxml:number</a>
+                       (<a href="xpath-context.html#codefunc53298">draft:contextset-&gt;nodeset</a>
+                        (arg-func3 nodeset position+size var-binding)))))
+            (let* ((len (string-length str))
+                   (start (- (inexact-&gt;exact (round num1)) 1))
+                   (fin (+ start (inexact-&gt;exact (round num2)))))
+              (if (or (&gt; start len) (&lt; fin 0) (&lt; fin start))
+                  &quot;&quot;
+                  (substring str
+                             (if (&lt; start 0) 0 start)
+                             (if (&gt; fin len) len fin)))))))))
+</pre>
+<h4><a name='codefunc40657' href='#docfunc40657'>draft:core-string-length</a></h4>
+<i><a href='#tocfunc40657'>Index</a></i><br>
+
+<pre> string-length(string?)
+</pre>
+<pre>(define (<a href="xpath-context.html#codefunc40657">draft:core-string-length</a> num-anc . arg-func)  ; optional argument
+  (if (null? arg-func)  ; no argument supplied
+      (lambda (nodeset position+size var-binding)
+        (string-length
+         (<a href="sxpath-ext.html#codefunc14688">sxml:string</a> (<a href="xpath-context.html#codefunc53298">draft:contextset-&gt;nodeset</a> nodeset))))
+      (let ((func (car arg-func)))
+        (lambda (nodeset position+size var-binding)
+          (string-length
+           (<a href="sxpath-ext.html#codefunc14688">sxml:string</a>
+            (<a href="xpath-context.html#codefunc53298">draft:contextset-&gt;nodeset</a>
+             (func nodeset position+size var-binding))))))))
+</pre>
+<h4><a name='codefunc13058' href='#docfunc13058'>draft:core-normalize-space</a></h4>
+<i><a href='#tocfunc13058'>Index</a></i><br>
+
+<pre> normalize-space(string?)
+</pre>
+<pre>(define (<a href="xpath-context.html#codefunc13058">draft:core-normalize-space</a> num-anc . arg-func)  ; optional argument
+  (if (null? arg-func)  ; no argument supplied
+      (lambda (nodeset position+size var-binding)
+        (let rpt ((src (<a href="util.html#codefunc39259">string-split</a>
+                        (<a href="sxpath-ext.html#codefunc14688">sxml:string</a> (<a href="xpath-context.html#codefunc53298">draft:contextset-&gt;nodeset</a> nodeset))
+                        <a href="xpath-parser.html#codefunc65329">sxml:whitespace</a>))
+                  (res '()))
+          (cond
+            ((null? src)
+             (apply string-append (reverse res)))
+            ((= (string-length (car src)) 0)  ; empty string
+             (rpt (cdr src) res))
+            ((null? res)
+             (rpt (cdr src) (cons (car src) res)))
+            (else
+             (rpt (cdr src) (cons (car src) (cons &quot; &quot; res)))))))
+      (let ((func (car arg-func)))
+        (lambda (nodeset position+size var-binding)
+          (let rpt ((src (<a href="util.html#codefunc39259">string-split</a>
+                          (<a href="sxpath-ext.html#codefunc14688">sxml:string</a>
+                           (<a href="xpath-context.html#codefunc53298">draft:contextset-&gt;nodeset</a>
+                            (func nodeset position+size var-binding)))
+                          <a href="xpath-parser.html#codefunc65329">sxml:whitespace</a>))
+                    (res '()))
+            (cond
+              ((null? src)
+               (apply string-append (reverse res)))
+              ((= (string-length (car src)) 0)  ; empty string
+               (rpt (cdr src) res))
+              ((null? res)
+               (rpt (cdr src) (cons (car src) res)))
+              (else
+               (rpt (cdr src) (cons (car src) (cons &quot; &quot; res))))))))))
+</pre>
+<h4><a name='codefunc63486' href='#docfunc63486'>draft:core-translate</a></h4>
+<i><a href='#tocfunc63486'>Index</a></i><br>
+
+<pre> translate(string, string, string)
+</pre>
+<pre>(define (<a href="xpath-context.html#codefunc63486">draft:core-translate</a> num-anc arg-func1 arg-func2 arg-func3)
+  (lambda (nodeset position+size var-binding)    
+    (let ((str1 (<a href="sxpath-ext.html#codefunc14688">sxml:string</a>
+                 (<a href="xpath-context.html#codefunc53298">draft:contextset-&gt;nodeset</a>
+                  (arg-func1 nodeset position+size var-binding))))
+          (str2 (<a href="sxpath-ext.html#codefunc14688">sxml:string</a>
+                 (<a href="xpath-context.html#codefunc53298">draft:contextset-&gt;nodeset</a>
+                  (arg-func2 nodeset position+size var-binding))))
+          (str3 (<a href="sxpath-ext.html#codefunc14688">sxml:string</a>
+                 (<a href="xpath-context.html#codefunc53298">draft:contextset-&gt;nodeset</a>
+                  (arg-func3 nodeset position+size var-binding)))))
+      (let ((alist
+             (let while ((lst2 (string-&gt;list str2))
+                         (lst3 (string-&gt;list str3))
+                         (alist '()))
+               (cond
+                 ((null? lst2) (reverse alist))
+                 ((null? lst3)
+                  (append
+                   (reverse alist)
+                   (map
+                    (lambda (ch) (cons ch #f))
+                    lst2)))
+                 (else
+                  (while
+                   (cdr lst2)
+                   (cdr lst3)
+                   (cons (cons (car lst2) (car lst3)) alist)))))))
+        (let rpt ((lst1 (string-&gt;list str1))
+                  (res '()))
+          (cond
+            ((null? lst1) (list-&gt;string (reverse res)))
+            ((assoc (car lst1) alist)
+             =&gt; (lambda (pair)
+                  (if (cdr pair)
+                      (rpt (cdr lst1) (cons (cdr pair) res))
+                      (rpt (cdr lst1) res))))
+            (else
+             (rpt (cdr lst1) (cons (car lst1) res)))))))))
+</pre>
+<h4><a name='codefunc36218' href='#docfunc36218'>draft:core-boolean</a></h4>
+<i><a href='#tocfunc36218'>Index</a></i><br>
+
+<pre> boolean(object)
+</pre>
+<pre>(define (<a href="xpath-context.html#codefunc36218">draft:core-boolean</a> num-anc arg-func)
+  (lambda (nodeset position+size var-binding)
+    (<a href="sxpath-ext.html#codefunc35416">sxml:boolean</a>
+     (arg-func nodeset position+size var-binding))))
+</pre>
+<h4><a name='codefunc51884' href='#docfunc51884'>draft:core-not</a></h4>
+<i><a href='#tocfunc51884'>Index</a></i><br>
+
+<pre> not(boolean)
+</pre>
+<pre>(define (<a href="xpath-context.html#codefunc51884">draft:core-not</a> num-anc arg-func)
+  (lambda (nodeset position+size var-binding)
+    (not (<a href="sxpath-ext.html#codefunc35416">sxml:boolean</a> 
+          (arg-func nodeset position+size var-binding)))))
+</pre>
+<h4><a name='codefunc53780' href='#docfunc53780'>draft:core-true</a></h4>
+<i><a href='#tocfunc53780'>Index</a></i><br>
+
+<pre> true()
+</pre>
+<pre>(define (<a href="xpath-context.html#codefunc53780">draft:core-true</a> num-anc)
+  (lambda (nodeset position+size var-binding) #t))
+</pre>
+<h4><a name='codefunc8210' href='#docfunc8210'>draft:core-false</a></h4>
+<i><a href='#tocfunc8210'>Index</a></i><br>
+
+<pre> false()
+</pre>
+<pre>(define (<a href="xpath-context.html#codefunc8210">draft:core-false</a> num-anc)
+  (lambda (nodeset position+size var-binding) #f))
+</pre>
+<h4><a name='codefunc49925' href='#docfunc49925'>draft:core-lang</a></h4>
+<i><a href='#tocfunc49925'>Index</a></i><br>
+
+<pre> lang(string)
+</pre>
+<pre>(define (<a href="xpath-context.html#codefunc49925">draft:core-lang</a> num-anc arg-func)
+  (lambda (nodeset position+size var-binding)    
+    (let ((arg (<a href="sxpath-ext.html#codefunc14688">sxml:string</a>
+                (<a href="xpath-context.html#codefunc53298">draft:contextset-&gt;nodeset</a>
+                 (arg-func nodeset position+size var-binding))))
+          (lng
+           ((<a href="xpath-context.html#codefunc59498">draft:child</a> (<a href="sxpathlib.html#codefunc9356">ntype??</a> '*text*))
+            ((<a href="xpath-context.html#codefunc53587">draft:attribute</a> (<a href="sxpathlib.html#codefunc9356">ntype??</a> 'xml:lang))
+             ((<a href="xpath-context.html#codefunc13921">draft:ancestor-or-self</a> (lambda (x) #t))
+              (car nodeset)  ; context-node = (car nodeset)
+              )))))
+      (and (not (null? lng))
+           (or (string-ci=? arg (car lng))
+               (string-prefix-ci? (string-append arg &quot;-&quot;) (car lng)))))))       
+</pre>
+<h4><a name='codefunc10631' href='#docfunc10631'>draft:core-number</a></h4>
+<i><a href='#tocfunc10631'>Index</a></i><br>
+
+<pre> number(object?)
+</pre>
+<pre>(define (<a href="xpath-context.html#codefunc10631">draft:core-number</a> num-anc . arg-func)  ; optional argument
+  (if (null? arg-func)  ; no argument supplied
+      (lambda (nodeset position+size var-binding)
+        (<a href="sxpath-ext.html#codefunc9829">sxml:number</a> (<a href="xpath-context.html#codefunc53298">draft:contextset-&gt;nodeset</a> nodeset)))
+      (let ((func (car arg-func)))
+        (lambda (nodeset position+size var-binding)
+          (<a href="sxpath-ext.html#codefunc9829">sxml:number</a>
+           (<a href="xpath-context.html#codefunc53298">draft:contextset-&gt;nodeset</a>
+            (func nodeset position+size var-binding)))))))
+</pre>
+<h4><a name='codefunc51378' href='#docfunc51378'>draft:core-sum</a></h4>
+<i><a href='#tocfunc51378'>Index</a></i><br>
+
+<pre> sum(node-set)
+</pre>
+<pre>(define (<a href="xpath-context.html#codefunc51378">draft:core-sum</a> num-anc arg-func)
+  (lambda (nodeset position+size var-binding)
+    (let ((res (arg-func nodeset position+size var-binding)))
+      (cond
+        ((<a href="sxpathlib.html#codefunc31162">nodeset?</a> res)
+         (apply +
+                (map
+                 (lambda (node)
+                   (<a href="sxpath-ext.html#codefunc9829">sxml:number</a>
+                    (<a href="sxpath-ext.html#codefunc15784">sxml:string-value</a> (<a href="xpath-context.html#codefunc41847">sxml:context-&gt;node</a> node))))
+                 res)))
+        (else
+         (<a href="txpath.html#codefunc13525">sxml:xpointer-runtime-error</a>
+          &quot;SUM function - an argument is not a nodeset&quot;)
+         0)))))
+</pre>
+<h4><a name='codefunc12313' href='#docfunc12313'>draft:core-floor</a></h4>
+<i><a href='#tocfunc12313'>Index</a></i><br>
+
+<pre> floor(number)
+</pre>
+<pre>(define (<a href="xpath-context.html#codefunc12313">draft:core-floor</a> num-anc arg-func)
+  (lambda (nodeset position+size var-binding)
+    (inexact-&gt;exact
+     (floor (<a href="sxpath-ext.html#codefunc9829">sxml:number</a>
+             (<a href="xpath-context.html#codefunc53298">draft:contextset-&gt;nodeset</a>
+              (arg-func nodeset position+size var-binding)))))))
+</pre>
+<h4><a name='codefunc34173' href='#docfunc34173'>draft:core-ceiling</a></h4>
+<i><a href='#tocfunc34173'>Index</a></i><br>
+
+<pre> ceiling(number)
+</pre>
+<pre>(define (<a href="xpath-context.html#codefunc34173">draft:core-ceiling</a> num-anc arg-func)
+  (lambda (nodeset position+size var-binding)
+    (inexact-&gt;exact
+     (ceiling (<a href="sxpath-ext.html#codefunc9829">sxml:number</a>
+               (<a href="xpath-context.html#codefunc53298">draft:contextset-&gt;nodeset</a>
+                (arg-func nodeset position+size var-binding)))))))
+</pre>
+<h4><a name='codefunc13339' href='#docfunc13339'>draft:core-round</a></h4>
+<i><a href='#tocfunc13339'>Index</a></i><br>
+
+<pre> round(number)
+</pre>
+<pre>(define (<a href="xpath-context.html#codefunc13339">draft:core-round</a> num-anc arg-func)
+  (lambda (nodeset position+size var-binding)
+    (inexact-&gt;exact
+     (round (<a href="sxpath-ext.html#codefunc9829">sxml:number</a>
+             (<a href="xpath-context.html#codefunc53298">draft:contextset-&gt;nodeset</a>
+              (arg-func nodeset position+size var-binding)))))))
+</pre>
+<h4><a name='codefunc16826' href='#docfunc16826'>draft:ast-location-path</a></h4>
+<i><a href='#tocfunc16826'>Index</a></i><br>
+
+<pre> {1} &lt;LocationPath&gt; ::= &lt;RelativeLocationPath&gt;
+                        | &lt;AbsoluteLocationPath&gt;
+</pre>
+<pre>(define (<a href="xpath-context.html#codefunc16826">draft:ast-location-path</a> op num-anc)
+  (case (car op)
+    ((absolute-location-path)
+     (<a href="xpath-context.html#codefunc2944">draft:ast-absolute-location-path</a> op num-anc))
+    ((relative-location-path)
+     (<a href="xpath-context.html#codefunc62611">draft:ast-relative-location-path</a> op num-anc))
+    (else
+     (<a href="xpath-context.html#codefunc8076">draft:signal-semantic-error</a> &quot;improper LocationPath - &quot; op))))
+</pre>
+<h4><a name='codefunc2944' href='#docfunc2944'>draft:ast-absolute-location-path</a></h4>
+<i><a href='#tocfunc2944'>Index</a></i><br>
+
+<pre> {2} &lt;AbsoluteLocationPath&gt; ::= (absolute-location-path  &lt;Step&gt;* )
+</pre>
+<pre>(define (<a href="xpath-context.html#codefunc2944">draft:ast-absolute-location-path</a> op num-anc)
+  (cond
+    ((not (eq? (car op) 'absolute-location-path))
+     (<a href="xpath-context.html#codefunc8076">draft:signal-semantic-error</a> &quot;not an AbsoluteLocationPath - &quot; op))
+    ((null? (cdr op))  ; no Steps
+     (cons
+      (lambda (nodeset position+size var-binding)
+        (<a href="xpath-context.html#codefunc60759">draft:reach-root</a> nodeset))
+      #f))
+    (else
+     (and-let*
+      ((steps-res (<a href="xpath-context.html#codefunc30963">draft:ast-step-list</a> (cdr op) num-anc)))
+      (cons
+       (if
+        (null? (cdar steps-res))  ; only a single step
+        (let ((step-impl (caar steps-res)))
+          (lambda (nodeset position+size var-binding)
+            (step-impl
+             (<a href="xpath-context.html#codefunc60759">draft:reach-root</a> nodeset) position+size var-binding)))
+        (let ((converters (car steps-res)))
+          (lambda (nodeset position+size var-binding)
+            (let rpt ((nset (<a href="xpath-context.html#codefunc60759">draft:reach-root</a> nodeset))
+                      (fs converters))
+              (if (null? fs)
+                  nset
+                  (rpt ((car fs) nset position+size var-binding)
+                       (cdr fs)))))))
+       #f)))))
+</pre>
+<h4><a name='codefunc62611' href='#docfunc62611'>draft:ast-relative-location-path</a></h4>
+<i><a href='#tocfunc62611'>Index</a></i><br>
+
+<pre> {3} &lt;RelativeLocationPath&gt; ::= (relative-location-path  &lt;Step&gt;+ )
+</pre>
+<pre>(define (<a href="xpath-context.html#codefunc62611">draft:ast-relative-location-path</a> op num-anc)
+  (if
+   (not (eq? (car op) 'relative-location-path))
+   (<a href="xpath-context.html#codefunc8076">draft:signal-semantic-error</a> &quot;not a RelativeLocationPath - &quot; op)
+   (and-let*
+    ((steps-res (<a href="xpath-context.html#codefunc30963">draft:ast-step-list</a> (cdr op) num-anc)))
+    (cons
+     (if
+      (null? (cdar steps-res))  ; only a single step
+      (caar steps-res)
+      (let ((converters (car steps-res)))
+        (lambda (nodeset position+size var-binding)
+          (let rpt ((nset nodeset)
+                    (fs converters))
+            (if (null? fs)
+                nset
+                (rpt ((car fs) nset position+size var-binding)
+                     (cdr fs)))))))
+     (cdr steps-res)))))
+</pre>
+<h4><a name='codefunc39144' href='#docfunc39144'>draft:ast-step</a></h4>
+<i><a href='#tocfunc39144'>Index</a></i><br>
+
+<pre> {4} &lt;Step&gt; ::= (step  &lt;AxisSpecifier&gt; &lt;NodeTest&gt; &lt;Predicate&gt;* )
+                | (range-to  (expr &lt;Expr&gt;)  &lt;Predicate&gt;* )
+</pre>
+<pre>(define (<a href="xpath-context.html#codefunc39144">draft:ast-step</a> op num-anc)
+  (cond
+    ((eq? (car op) 'range-to)
+     (<a href="xpath-context.html#codefunc8076">draft:signal-semantic-error</a> &quot;range-to function not implemented&quot;))
+    ((eq? (car op) 'filter-expr)  ; can be produced by <a href="sxpath.html#codefunc16984">sxpath</a>
+     (<a href="xpath-context.html#codefunc55903">draft:ast-filter-expr</a> op num-anc))
+    ((eq? (car op) 'lambda-step)  ; created by <a href="sxpath.html#codefunc16984">sxpath</a>
+     (cons
+      (let ((proc (cadr op)))
+        (if
+         (and num-anc (zero? num-anc))  ; no ancestors required
+         (lambda (node position+size var-binding)
+           (proc (<a href="xpath-context.html#codefunc53298">draft:contextset-&gt;nodeset</a> (<a href="sxpathlib.html#codefunc11721">as-nodeset</a> node))
+                 var-binding))
+         (lambda (node position+size var-binding)
+           (<a href="xpath-context.html#codefunc45116">draft:find-proper-context</a>
+            (proc (<a href="xpath-context.html#codefunc53298">draft:contextset-&gt;nodeset</a> (<a href="sxpathlib.html#codefunc11721">as-nodeset</a> node))
+                  var-binding)
+            (append
+             (map <a href="xpath-context.html#codefunc8528">sxml:context-&gt;content</a> (<a href="sxpathlib.html#codefunc11721">as-nodeset</a> node))
+             (apply append   ; nodes that can be obtained through var values
+                    (map
+                     (lambda (pair)
+                       (if (<a href="sxpathlib.html#codefunc31162">nodeset?</a> (cdr pair))
+                           (map <a href="xpath-context.html#codefunc8528">sxml:context-&gt;content</a> (cdr pair))
+                           '()))
+                     var-binding)))
+            num-anc))))
+      num-anc))
+    ((eq? (car op) 'step)
+     (if
+      (null? (cdddr op))  ; no Predicates
+      (and-let*
+       ((axis-lst (<a href="xpath-context.html#codefunc48551">draft:ast-axis-specifier</a> (cadr op) num-anc))
+        (ntest (<a href="xpath-context.html#codefunc28905">draft:ast-node-test</a> (caddr op))))
+       (let ((axis ((car axis-lst) ntest num-anc)))
+         (cons
+          (if (caddr axis-lst)  ; var-binding is to be passed
+              (lambda (nodeset position+size var-binding)
+                (axis nodeset var-binding))
+              (lambda (nodeset position+size var-binding)
+                (axis nodeset)))
+          (cadr axis-lst))))
+      (and-let*
+       ((preds-res (<a href="xpath-context.html#codefunc28149">draft:ast-predicate-list</a> (cdddr op) 0))
+        (axis-lst (<a href="xpath-context.html#codefunc48551">draft:ast-axis-specifier</a>
+                   (cadr op) (<a href="xpath-context.html#codefunc23095">draft:na-max</a> num-anc (cdr preds-res))))
+        (ntest (<a href="xpath-context.html#codefunc28905">draft:ast-node-test</a> (caddr op))))
+       (let ((axis ((car axis-lst)
+                    ntest (<a href="xpath-context.html#codefunc23095">draft:na-max</a> num-anc (cdr preds-res))))
+             (pred-impl-lst (car preds-res)))
+         (cons
+          (if
+           (caddr axis-lst)  ; variables are to be passed to the axis
+           (lambda (nodeset position+size var-binding)
+             (<a href="sxpathlib.html#codefunc27946">map-union</a>
+              (lambda (node)
+                (let loop ((nset (axis node var-binding))
+                           (preds pred-impl-lst))
+                  (if
+                   (null? preds)
+                   nset
+                   (loop ((car preds) nset position+size var-binding)
+                         (cdr preds)))))
+              nodeset))
+           (lambda (nodeset position+size var-binding)
+             (<a href="sxpathlib.html#codefunc27946">map-union</a>
+              (lambda (node)
+                (let loop ((nset (axis node))
+                           (preds pred-impl-lst))
+                  (if
+                   (null? preds)
+                   nset
+                   (loop ((car preds) nset position+size var-binding)
+                         (cdr preds)))))
+              nodeset)))
+          (cadr axis-lst))))))
+    (else
+     (<a href="xpath-context.html#codefunc8076">draft:signal-semantic-error</a> &quot;not a Step - &quot; op))))
+</pre>
+<h4><a name='codefunc30963' href='#docfunc30963'>draft:ast-step-list</a></h4>
+<i><a href='#tocfunc30963'>Index</a></i><br>
+
+<pre> {4a} ( &lt;Step&gt;+ )
+ Returns (cons (listof step-impl) num-anc) or #f
+</pre>
+<pre>(define (<a href="xpath-context.html#codefunc30963">draft:ast-step-list</a> step-lst num-anc)
+  (let loop ((steps-to-view (reverse step-lst))
+             (res-lst '())
+             (num-anc num-anc))
+    (if
+     (null? steps-to-view)  ; everyone processed
+     (cons res-lst num-anc)
+     (and-let*
+      ((step-res (<a href="xpath-context.html#codefunc39144">draft:ast-step</a> (car steps-to-view) num-anc)))
+      (loop
+       (cdr steps-to-view)
+       (cons (car step-res) res-lst)
+       (cdr step-res))))))
+</pre>
+<h4><a name='codefunc25365' href='#docfunc25365'>draft:ast-predicate</a></h4>
+<i><a href='#tocfunc25365'>Index</a></i><br>
+
+<pre> {8} &lt;Predicate&gt; ::= (predicate  &lt;Expr&gt; )
+ NOTE: num-anc is dummy here, since it is always 0 for Predicates
+</pre>
+<pre>(define (<a href="xpath-context.html#codefunc25365">draft:ast-predicate</a> op num-anc)
+  (if
+   (not (eq? (car op) 'predicate))
+   (<a href="xpath-context.html#codefunc8076">draft:signal-semantic-error</a> &quot;not an Predicate - &quot; op)
+   (and-let*
+    ((expr-res (<a href="xpath-context.html#codefunc40677">draft:ast-expr</a> (cadr op) 0)))
+    (let ((pred (car expr-res)))
+      (cons
+       (lambda (nodeset position+size var-binding)         
+         (if
+          (null? nodeset)  ; already empty
+          nodeset  ; nothing to <a href="common.html#codefunc20536">filter</a>
+          (let ((size (length nodeset)))  ; context size              
+            (let loop ((nset nodeset)
+                       (res '())
+                       (pos 1))
+              (if
+               (null? nset)
+               (reverse res)
+               (let ((value (pred (list (car nset))
+                                  (cons pos size)
+                                  var-binding)))
+                 (loop (cdr nset)
+                       (if (if (number? value)
+                               (= value pos)
+                               (<a href="sxpath-ext.html#codefunc35416">sxml:boolean</a> value))
+                           (cons (car nset) res)
+                           res)
+                       (+ pos 1))))))))
+       (cdr expr-res))))))
+</pre>
+<h4><a name='codefunc28149' href='#docfunc28149'>draft:ast-predicate-list</a></h4>
+<i><a href='#tocfunc28149'>Index</a></i><br>
+
+<pre> {8a} ( &lt;Predicate&gt;+ )
+ Returns (cons (listof pred-impl) num-anc) or #f
+ NOTE: num-anc is dummy here, since it is always 0 for Predicates
+</pre>
+<pre>(define (<a href="xpath-context.html#codefunc28149">draft:ast-predicate-list</a> op-lst num-anc)  
+  (let ((pred-res-lst
+         (map
+          (lambda (op) (<a href="xpath-context.html#codefunc25365">draft:ast-predicate</a> op 0))
+          op-lst)))
+    (if
+     (member #f pred-res-lst)  ; error detected
+     #f
+     (cons
+      (map car pred-res-lst)
+      (apply <a href="xpath-context.html#codefunc23095">draft:na-max</a> (map cdr pred-res-lst))))))
+</pre>
+<h4><a name='codefunc40677' href='#docfunc40677'>draft:ast-expr</a></h4>
+<i><a href='#tocfunc40677'>Index</a></i><br>
+
+<pre> {9} &lt;Expr&gt; ::= &lt;OrExpr&gt;
+                | &lt;AndExpr&gt;
+                | &lt;EqualityExpr&gt;
+                | &lt;RelationalExpr&gt;
+                | &lt;AdditiveExpr&gt;
+                | &lt;MultiplicativeExpr&gt;
+                | &lt;UnionExpr&gt;
+                | &lt;PathExpr&gt;
+                | &lt;FilterExpr&gt;
+                | &lt;VariableReference&gt;
+                | &lt;Literal&gt;
+                | &lt;Number&gt;
+                | &lt;FunctionCall&gt;
+                | &lt;LocationPath&gt;
+</pre>
+<pre>(define (<a href="xpath-context.html#codefunc40677">draft:ast-expr</a> op num-anc)
+  (case (car op)
+    ((or)
+     (<a href="xpath-context.html#codefunc64662">draft:ast-or-expr</a> op num-anc))
+    ((and)
+     (<a href="xpath-context.html#codefunc15019">draft:ast-and-expr</a> op num-anc))
+    ((= !=)
+     (<a href="xpath-context.html#codefunc16355">draft:ast-equality-expr</a> op num-anc))
+    ((&lt; &gt; &lt;= &gt;=)
+     (<a href="xpath-context.html#codefunc38219">draft:ast-relational-expr</a> op num-anc))
+    ((+ -)
+     (<a href="xpath-context.html#codefunc9944">draft:ast-additive-expr</a> op num-anc))
+    ((* div mod)
+     (<a href="xpath-context.html#codefunc32293">draft:ast-multiplicative-expr</a> op num-anc))
+    ((union-expr)
+     (<a href="xpath-context.html#codefunc43570">draft:ast-union-expr</a> op num-anc))
+    ((path-expr)
+     (<a href="xpath-context.html#codefunc21516">draft:ast-path-expr</a> op num-anc))
+    ((filter-expr)
+     (<a href="xpath-context.html#codefunc55903">draft:ast-filter-expr</a> op num-anc))
+    ((variable-reference)
+     (<a href="xpath-context.html#codefunc25991">draft:ast-variable-reference</a> op num-anc))
+    ((literal)
+     (<a href="xpath-context.html#codefunc58574">draft:ast-literal</a> op num-anc))
+    ((number)
+     (<a href="xpath-context.html#codefunc65104">draft:ast-number</a> op num-anc))
+    ((function-call)
+     (<a href="xpath-context.html#codefunc13507">draft:ast-function-call</a> op num-anc))
+    ((absolute-location-path)
+     (<a href="xpath-context.html#codefunc2944">draft:ast-absolute-location-path</a> op num-anc))
+    ((relative-location-path)
+     (<a href="xpath-context.html#codefunc62611">draft:ast-relative-location-path</a> op num-anc))
+    (else
+     (<a href="xpath-context.html#codefunc8076">draft:signal-semantic-error</a> &quot;unknown Expr - &quot; op))))
+</pre>
+<h4><a name='codefunc64662' href='#docfunc64662'>draft:ast-or-expr</a></h4>
+<i><a href='#tocfunc64662'>Index</a></i><br>
+
+<pre> {10} &lt;OrExpr&gt; ::= (or &lt;Expr&gt; &lt;Expr&gt;+ )
+ NOTE: num-anc is dummy here, since it is always 0 for OrExpr
+</pre>
+<pre>(define (<a href="xpath-context.html#codefunc64662">draft:ast-or-expr</a> op num-anc)
+  (let ((expr-res-lst
+         (map
+          (lambda (expr) (<a href="xpath-context.html#codefunc40677">draft:ast-expr</a> expr 0))
+          (cdr op))))
+    (if
+     (member #f expr-res-lst)  ; error detected
+     #f
+     (let ((expr-impls (map car expr-res-lst)))
+     (cons
+      (lambda (nodeset position+size var-binding)
+        (let rpt ((fs expr-impls))
+          (cond
+            ((null? fs) #f)
+            ((<a href="sxpath-ext.html#codefunc35416">sxml:boolean</a> ((car fs) nodeset position+size var-binding)) #t)
+            (else (rpt (cdr fs))))))
+      (apply <a href="xpath-context.html#codefunc23095">draft:na-max</a> (map cdr expr-res-lst)))))))
+</pre>
+<h4><a name='codefunc15019' href='#docfunc15019'>draft:ast-and-expr</a></h4>
+<i><a href='#tocfunc15019'>Index</a></i><br>
+
+<pre> {11} &lt;AndExpr&gt; ::= (and &lt;Expr&gt; &lt;Expr&gt;+ )
+ NOTE: num-anc is dummy here, since it is always 0 for AndExpr
+</pre>
+<pre>(define (<a href="xpath-context.html#codefunc15019">draft:ast-and-expr</a> op num-anc)
+  (let ((expr-res-lst
+         (map
+          (lambda (expr) (<a href="xpath-context.html#codefunc40677">draft:ast-expr</a> expr 0))
+          (cdr op))))
+    (if
+     (member #f expr-res-lst)  ; error detected
+     #f
+     (let ((expr-impls (map car expr-res-lst)))
+     (cons
+      (lambda (nodeset position+size var-binding)
+        (let rpt ((fs expr-impls))
+          (cond
+            ((null? fs) #t)
+            ((not
+              (<a href="sxpath-ext.html#codefunc35416">sxml:boolean</a> ((car fs) nodeset position+size var-binding)))
+             #f)
+            (else (rpt (cdr fs))))))
+      (apply <a href="xpath-context.html#codefunc23095">draft:na-max</a> (map cdr expr-res-lst)))))))
+</pre>
+<h4><a name='codefunc16355' href='#docfunc16355'>draft:ast-equality-expr</a></h4>
+<i><a href='#tocfunc16355'>Index</a></i><br>
+
+<pre> {12} &lt;EqualityExpr&gt; ::= (=  &lt;Expr&gt; &lt;Expr&gt; )
+                         | (!=  &lt;Expr&gt; &lt;Expr&gt; )
+ NOTE: num-anc is dummy here, since it is always 0 for EqualityExpr
+</pre>
+<pre>(define (<a href="xpath-context.html#codefunc16355">draft:ast-equality-expr</a> op num-anc)
+  (and-let*
+   ((left-lst (<a href="xpath-context.html#codefunc40677">draft:ast-expr</a> (cadr op) 0))
+    (right-lst (<a href="xpath-context.html#codefunc40677">draft:ast-expr</a> (caddr op) 0)))
+   (let ((cmp-op (cadr (assq (car op) `((= ,sxml:equal?)
+                                        (!= ,sxml:not-equal?)))))
+         (left (car left-lst))
+         (right (car right-lst)))
+     (cons
+      (lambda (nodeset position+size var-binding)
+        (cmp-op
+         (<a href="xpath-context.html#codefunc53298">draft:contextset-&gt;nodeset</a>
+          (left nodeset position+size var-binding))
+         (<a href="xpath-context.html#codefunc53298">draft:contextset-&gt;nodeset</a>
+          (right nodeset position+size var-binding))))
+      (<a href="xpath-context.html#codefunc23095">draft:na-max</a> (cdr left-lst) (cdr right-lst))))))
+</pre>
+<h4><a name='codefunc38219' href='#docfunc38219'>draft:ast-relational-expr</a></h4>
+<i><a href='#tocfunc38219'>Index</a></i><br>
+
+<pre> {13} &lt;RelationalExpr&gt; ::= (&lt;  &lt;Expr&gt; &lt;Expr&gt; )
+                           | (&gt;  &lt;Expr&gt; &lt;Expr&gt; )
+                           | (&lt;=  &lt;Expr&gt; &lt;Expr&gt; )
+                           | (&gt;=  &lt;Expr&gt; &lt;Expr&gt; )
+ NOTE: num-anc is dummy here, since it is always 0 for RelationalExpr
+</pre>
+<pre>(define (<a href="xpath-context.html#codefunc38219">draft:ast-relational-expr</a> op num-anc)
+  (and-let*
+   ((left-lst (<a href="xpath-context.html#codefunc40677">draft:ast-expr</a> (cadr op) 0))
+    (right-lst (<a href="xpath-context.html#codefunc40677">draft:ast-expr</a> (caddr op) 0)))
+   (let ((cmp-op
+          (<a href="sxpath-ext.html#codefunc41977">sxml:relational-cmp</a>
+           (cadr (assq (car op) `((&lt; ,&lt;) (&gt; ,&gt;) (&lt;= ,&lt;=) (&gt;= ,&gt;=))))))
+         (left (car left-lst))
+         (right (car right-lst)))
+     (cons
+      (lambda (nodeset position+size var-binding)
+        (cmp-op
+         (<a href="xpath-context.html#codefunc53298">draft:contextset-&gt;nodeset</a>
+          (left nodeset position+size var-binding))
+         (<a href="xpath-context.html#codefunc53298">draft:contextset-&gt;nodeset</a>
+          (right nodeset position+size var-binding))))
+      (<a href="xpath-context.html#codefunc23095">draft:na-max</a> (cdr left-lst) (cdr right-lst))))))
+</pre>
+<h4><a name='codefunc9944' href='#docfunc9944'>draft:ast-additive-expr</a></h4>
+<i><a href='#tocfunc9944'>Index</a></i><br>
+
+<pre> {14} &lt;AdditiveExpr&gt; ::= (+  &lt;Expr&gt; &lt;Expr&gt; )
+                         | (-  &lt;Expr&gt; &lt;Expr&gt;? )
+ NOTE: num-anc is dummy here, since it is always 0 for AdditiveExpr
+</pre>
+<pre>(define (<a href="xpath-context.html#codefunc9944">draft:ast-additive-expr</a> op num-anc)
+  (let ((expr-res-lst
+         (map
+          (lambda (expr) (<a href="xpath-context.html#codefunc40677">draft:ast-expr</a> expr 0))
+          (cdr op))))
+    (if
+     (member #f expr-res-lst)  ; error detected
+     #f
+     (let ((add-op (cadr (assq (car op) `((+ ,+) (- ,-)))))
+           (expr-impls (map car expr-res-lst)))
+     (cons
+      (lambda (nodeset position+size var-binding)
+        (apply
+         add-op
+         (map
+          (lambda (expr)
+            (<a href="sxpath-ext.html#codefunc9829">sxml:number</a>
+             (<a href="xpath-context.html#codefunc53298">draft:contextset-&gt;nodeset</a>
+              (expr nodeset position+size var-binding))))
+          expr-impls)))
+      (apply <a href="xpath-context.html#codefunc23095">draft:na-max</a> (map cdr expr-res-lst)))))))
+</pre>
+<h4><a name='codefunc32293' href='#docfunc32293'>draft:ast-multiplicative-expr</a></h4>
+<i><a href='#tocfunc32293'>Index</a></i><br>
+
+<pre> {15} &lt;MultiplicativeExpr&gt; ::= (*  &lt;Expr&gt; &lt;Expr&gt; )
+                               | (div  &lt;Expr&gt; &lt;Expr&gt; )
+                               | (mod  &lt;Expr&gt; &lt;Expr&gt; )
+ NOTE: num-anc is dummy here, since it is always 0 for MultiplicativeExpr
+</pre>
+<pre>(define (<a href="xpath-context.html#codefunc32293">draft:ast-multiplicative-expr</a> op num-anc)
+  (and-let*
+   ((left-lst (<a href="xpath-context.html#codefunc40677">draft:ast-expr</a> (cadr op) 0))
+    (right-lst (<a href="xpath-context.html#codefunc40677">draft:ast-expr</a> (caddr op) 0)))
+   (let ((mul-op
+          (cadr (assq (car op) `((* ,*) (div ,/) (mod ,remainder)))))
+         (left (car left-lst))
+         (right (car right-lst)))
+     (cons
+      (lambda (nodeset position+size var-binding)
+        (mul-op
+         (<a href="sxpath-ext.html#codefunc9829">sxml:number</a>
+          (<a href="xpath-context.html#codefunc53298">draft:contextset-&gt;nodeset</a>
+           (left nodeset position+size var-binding)))
+         (<a href="sxpath-ext.html#codefunc9829">sxml:number</a>
+          (<a href="xpath-context.html#codefunc53298">draft:contextset-&gt;nodeset</a>
+           (right nodeset position+size var-binding)))))
+      (<a href="xpath-context.html#codefunc23095">draft:na-max</a> (cdr left-lst) (cdr right-lst))))))
+</pre>
+<h4><a name='codefunc43570' href='#docfunc43570'>draft:ast-union-expr</a></h4>
+<i><a href='#tocfunc43570'>Index</a></i><br>
+
+<pre> {16} &lt;UnionExpr&gt; ::= (union-expr  &lt;Expr&gt; &lt;Expr&gt;+ )
+</pre>
+<pre>(define (<a href="xpath-context.html#codefunc43570">draft:ast-union-expr</a> op num-anc)
+  (let ((expr-res-lst
+         (map
+          (lambda (expr) (<a href="xpath-context.html#codefunc40677">draft:ast-expr</a> expr 0))
+          (cdr op))))
+    (if
+     (member #f expr-res-lst)  ; error detected
+     #f
+     (let ((expr-impls (map car expr-res-lst)))
+     (cons
+      (lambda (nodeset position+size var-binding)
+        (let rpt ((res '())
+                  (fs expr-impls))
+          (if
+           (null? fs)
+           res
+           (let ((nset ((car fs) nodeset position+size var-binding)))
+             (rpt
+              (append 
+               res
+               (cond
+                 ((not (<a href="sxpathlib.html#codefunc31162">nodeset?</a> nset))
+                  (<a href="txpath.html#codefunc13525">sxml:xpointer-runtime-error</a> 
+                   &quot;expected - nodeset instead of &quot; nset)
+                  '())
+                 (else nset)))
+              (cdr fs))))))
+      (apply <a href="xpath-context.html#codefunc23095">draft:na-max</a> (map cdr expr-res-lst)))))))
+</pre>
+<h4><a name='codefunc21516' href='#docfunc21516'>draft:ast-path-expr</a></h4>
+<i><a href='#tocfunc21516'>Index</a></i><br>
+
+<pre> {17} &lt;PathExpr&gt; ::= (path-expr  &lt;FilterExpr&gt; &lt;Step&gt;+ )
+</pre>
+<pre>(define (<a href="xpath-context.html#codefunc21516">draft:ast-path-expr</a> op num-anc)
+  (and-let*
+    ((steps-res (<a href="xpath-context.html#codefunc30963">draft:ast-step-list</a> (cddr op) num-anc))
+     (filter-lst (<a href="xpath-context.html#codefunc55903">draft:ast-filter-expr</a> (cadr op) (cdr steps-res))))
+    (let ((init-impl (car filter-lst))
+          (converters (car steps-res)))
+      (cons       
+        (lambda (nodeset position+size var-binding)
+          (let ((nset
+                 (init-impl nodeset position+size var-binding)))
+            (let rpt ((nset 
+                       (cond
+                         ((<a href="sxpathlib.html#codefunc31162">nodeset?</a> nset) nset)
+                         (else
+                          (<a href="txpath.html#codefunc13525">sxml:xpointer-runtime-error</a> 
+                           &quot;expected - nodeset instead of &quot; nset)
+                          '())))
+                      (fs converters))
+              (if (null? fs)
+                  nset
+                  (rpt ((car fs) nset position+size var-binding)
+                       (cdr fs))))))
+        (cdr filter-lst)))))
+</pre>
+<h4><a name='codefunc55903' href='#docfunc55903'>draft:ast-filter-expr</a></h4>
+<i><a href='#tocfunc55903'>Index</a></i><br>
+
+<pre> {18} &lt;FilterExpr&gt; ::= (filter-expr (primary-expr  &lt;Expr&gt; )
+                                    &lt;Predicate&gt;* )
+</pre>
+<pre>(define (<a href="xpath-context.html#codefunc55903">draft:ast-filter-expr</a> op num-anc)
+  (cond
+    ((not (eq? (car op) 'filter-expr))
+     (<a href="xpath-context.html#codefunc8076">draft:signal-semantic-error</a> &quot;not an FilterExpr - &quot; op))
+    ((not (eq? (caadr op) 'primary-expr))
+     (<a href="xpath-context.html#codefunc8076">draft:signal-semantic-error</a> &quot;not an PrimaryExpr - &quot; (cadr op)))
+    ((null? (cddr op))  ; no Predicates
+     (<a href="xpath-context.html#codefunc40677">draft:ast-expr</a> (cadadr op) num-anc))
+    (else
+     (and-let*
+       ((preds-res (<a href="xpath-context.html#codefunc28149">draft:ast-predicate-list</a> (cddr op) 0))
+        (expr-lst (<a href="xpath-context.html#codefunc40677">draft:ast-expr</a>
+                   (cadadr op) (<a href="xpath-context.html#codefunc23095">draft:na-max</a> num-anc (cdr preds-res)))))
+       (let ((expr-impl (car expr-lst))
+             (pred-impl-lst (car preds-res)))
+         (cons
+          (lambda (nodeset position+size var-binding)
+            (let ((prim-res (expr-impl nodeset position+size var-binding)))              
+              (let loop ((nset (cond
+                                 ((<a href="sxpathlib.html#codefunc31162">nodeset?</a> prim-res) prim-res)
+                                 (else 
+                                  (<a href="txpath.html#codefunc13525">sxml:xpointer-runtime-error</a> 
+                                   &quot;expected - nodeset instead of &quot; prim-res)
+                                  '())))
+                         (preds pred-impl-lst))
+                (if
+                 (null? preds)
+                 nset
+                 (loop ((car preds) nset position+size var-binding)
+                       (cdr preds))))))
+            (cdr expr-lst)))))))     
+</pre>
+<h4><a name='codefunc25991' href='#docfunc25991'>draft:ast-variable-reference</a></h4>
+<i><a href='#tocfunc25991'>Index</a></i><br>
+
+<pre> {19} &lt;VariableReference&gt; ::= (variable-reference  &lt;String&gt; )
+</pre>
+<pre>(define (<a href="xpath-context.html#codefunc25991">draft:ast-variable-reference</a> op num-anc)
+  (let ((name (string-&gt;symbol (cadr op))))
+    (cons
+     (lambda (nodeset position+size var-binding)
+       (cond
+         ((assoc name var-binding)
+          =&gt; cdr)
+         (else
+          (<a href="txpath.html#codefunc13525">sxml:xpointer-runtime-error</a> &quot;unbound variable - &quot; name)
+          '())))
+     0)))
+</pre>
+<h4><a name='codefunc58574' href='#docfunc58574'>draft:ast-literal</a></h4>
+<i><a href='#tocfunc58574'>Index</a></i><br>
+
+<pre> {20} &lt;Literal&gt; ::= (literal  &lt;String&gt; )
+</pre>
+<pre>(define (<a href="xpath-context.html#codefunc58574">draft:ast-literal</a> op num-anc)
+  (let ((literal (cadr op)))
+    (cons
+     (lambda (nodeset position+size var-binding) literal)
+     0)))
+</pre>
+<h4><a name='codefunc65104' href='#docfunc65104'>draft:ast-number</a></h4>
+<i><a href='#tocfunc65104'>Index</a></i><br>
+
+<pre> {21} &lt;Number&gt; :: (number  &lt;Number&gt; )
+</pre>
+<pre>(define (<a href="xpath-context.html#codefunc65104">draft:ast-number</a> op num-anc)
+  (let ((number (cadr op)))
+    (cons
+     (lambda (nodeset position+size var-binding) number)
+     0)))
+</pre>
+<h4><a name='codefunc13507' href='#docfunc13507'>draft:ast-function-call</a></h4>
+<i><a href='#tocfunc13507'>Index</a></i><br>
+
+<pre> {22} &lt;FunctionCall&gt; ::= (function-call (function-name  &lt;String&gt; )
+                                        (argument  &lt;Expr&gt; )* )
+</pre>
+<pre>(define (<a href="xpath-context.html#codefunc13507">draft:ast-function-call</a> op num-anc)
+  (let ((core-alist
+         ; (list fun-name min-num-args max-num-args na4res impl)
+         `((last 0 0 0 ,draft:core-last)
+           (position 0 0 0 ,draft:core-position)
+           (count 1 1 0 ,draft:core-count)
+           (id 1 1 #f ,draft:core-id)
+           (local-name 0 1 0 ,draft:core-local-name)
+           (namespace-uri 0 1 0 ,draft:core-namespace-uri)
+           (name 0 1 0 ,draft:core-name)
+           (string 0 1 0 ,draft:core-string)
+           (concat 2 -1 0 ,draft:core-concat)
+           (starts-with 2 2 0 ,draft:core-starts-with)
+           (contains 2 2 0 ,draft:core-contains)
+           (substring-before 2 2 0 ,draft:core-substring-before)
+           (substring-after 2 2 0 ,draft:core-substring-after)
+           (substring 2 3 0 ,draft:core-substring)
+           (string-length 0 1 0 ,draft:core-string-length)
+           (normalize-space 0 1 0 ,draft:core-normalize-space)
+           (translate 3 3 0 ,draft:core-translate)
+           (boolean 1 1 0 ,draft:core-boolean)
+           (not 1 1 0 ,draft:core-not)
+           (true 0 0 0 ,draft:core-true)
+           (false 0 0 0 ,draft:core-false)
+           (lang 1 1 #f ,draft:core-lang)
+           (number 0 1 0 ,draft:core-number)
+           (sum 1 1 0 ,draft:core-sum)
+           (floor 1 1 0 ,draft:core-floor)
+           (ceiling 1 1 0 ,draft:core-ceiling)
+           (round 1 1 0 ,draft:core-round))))
+    (cond
+      ((not (eq? (caadr op) 'function-name))
+       (<a href="xpath-context.html#codefunc8076">draft:signal-semantic-error</a> &quot;not an FunctionName - &quot; (cadr op)))
+      ((assq (string-&gt;symbol (cadadr op)) core-alist)       
+       =&gt; (lambda (description)  ; Core function found
+            (cond
+              ((&lt; (length (cddr op)) (cadr description))
+               (<a href="xpath-context.html#codefunc8076">draft:signal-semantic-error</a>
+                &quot;too few arguments for the Core Function call - &quot;
+                (cadadr op)))
+              ((and (&gt;= (caddr description) 0)
+                    (&gt; (length (cddr op)) (caddr description)))
+               (<a href="xpath-context.html#codefunc8076">draft:signal-semantic-error</a>
+                &quot;too many arguments for the Core Function call - &quot;
+                (cadadr op)))
+              (else  ; correct number of arguments
+               (and-let*
+                ((args-impl (<a href="xpath-context.html#codefunc31927">draft:ast-function-arguments</a> (cddr op))))
+                (cons
+                 ; Producing a function implementation
+                 (apply (list-ref description 4) num-anc args-impl)
+                 (list-ref description 3)))))))
+           (else  ; function definition not found
+            (<a href="xpath-context.html#codefunc8076">draft:signal-semantic-error</a>
+             &quot;function call to an unknown function - &quot; (cadadr op))))))
+</pre>
+<h4><a name='codefunc31927' href='#docfunc31927'>draft:ast-function-arguments</a></h4>
+<i><a href='#tocfunc31927'>Index</a></i><br>
+
+<pre> {22a} ( (argument  &lt;Expr&gt; )* )
+ na-lst - number of ancestors required for each of the arguments
+ Returns: (listof expr-impl) or #f
+</pre>
+<pre>(define (<a href="xpath-context.html#codefunc31927">draft:ast-function-arguments</a> op-lst)
+  (let ((arg-res-lst
+         (map
+          (lambda (op)
+            (if
+             (not (eq? (car op) 'argument))
+             (<a href="xpath-context.html#codefunc8076">draft:signal-semantic-error</a> &quot;not an Argument - &quot; op)
+             (<a href="xpath-context.html#codefunc40677">draft:ast-expr</a> (cadr op) 0)))
+          op-lst)))
+    (if
+     (member #f arg-res-lst)  ; semantic error detected
+     #f
+     (map car arg-res-lst))))
+</pre>
+<h4><a name='codefunc29899' href='#docfunc29899'>draft:ast-xpointer</a></h4>
+<i><a href='#tocfunc29899'>Index</a></i><br>
+
+<pre> {25} &lt;XPointer&gt; ::= &lt;ChildSeq&gt;
+                     | &lt;FullXPtr&gt;
+                     | &lt;Expr&gt;
+</pre>
+<pre>(define (<a href="xpath-context.html#codefunc29899">draft:ast-xpointer</a> op num-anc)    
+  (case (car op)
+    ((child-seq)
+     (<a href="xpath-context.html#codefunc7205">draft:ast-child-seq</a> op num-anc))
+    ((full-xptr)
+     (<a href="xpath-context.html#codefunc33522">draft:ast-full-xptr</a> op num-anc))
+    (else
+     (<a href="xpath-context.html#codefunc40677">draft:ast-expr</a> op num-anc))))
+</pre>
+<h4><a name='codefunc7205' href='#docfunc7205'>draft:ast-child-seq</a></h4>
+<i><a href='#tocfunc7205'>Index</a></i><br>
+
+<pre> {26} &lt;ChildSeq&gt; ::= (child-seq (name  &lt;String&gt; ))
+                     | (child-seq (name  &lt;String&gt; )?
+                                  (number  &lt;Number&gt; )+ )
+</pre>
+<pre>(define (<a href="xpath-context.html#codefunc7205">draft:ast-child-seq</a> op num-anc)
+  (if
+   (eq? (caadr op) 'name)
+   (and-let*
+    ((numbers-res (<a href="xpath-context.html#codefunc56923">draft:ast-number-list</a> (cddr op) num-anc)))
+    (let ((id-value (cadadr op))
+          (converters (car numbers-res))
+          (num-ancestors (cdr numbers-res)))
+      (cons
+       (lambda (nodeset position+size var-binding)
+         (let* ((root-node (<a href="xpath-context.html#codefunc60759">draft:reach-root</a> nodeset))
+                (id-nset ((<a href="sxpathlib.html#codefunc5616">sxml:child</a> (<a href="sxpathlib.html#codefunc9356">ntype??</a> 'id-index))
+                          ((<a href="sxpathlib.html#codefunc5616">sxml:child</a> (<a href="sxpathlib.html#codefunc9356">ntype??</a> '@@)) root-node))))
+           (if
+            (null? id-nset)  ; no id-index
+            '()
+            (let ((nd (<a href="sxml-tools.html#codefunc13926">sxml:lookup</a> id-value (cdar id-nset))))
+              (if (not nd)
+                  '()
+                  (let rpt ((nset 
+                             (if (and num-ancestors (zero? num-ancestors))
+                                 (list nd)
+                                 (<a href="xpath-context.html#codefunc48905">draft:recover-contextset</a>
+                                  (list nd) root-node num-ancestors)))
+                            (fs converters))
+                    (if (null? fs)
+                        nset
+                        (rpt ((car fs) nset) (cdr fs)))))))))
+       #f)))
+   (and-let*
+    ((numbers-res (<a href="xpath-context.html#codefunc56923">draft:ast-number-list</a> (cdr op) num-anc)))
+    (let ((converters (car numbers-res)))
+      (cons
+       (lambda (nodeset position+size var-binding)
+         (let ((child-seq-impl
+                (lambda (node)
+                  (let rpt ((nset nodeset) (fs converters))
+                    (if (null? fs)
+                        nset
+                        (rpt ((car fs) nset) (cdr fs)))))))
+           (if (<a href="sxpathlib.html#codefunc31162">nodeset?</a> nodeset)
+               (<a href="sxpathlib.html#codefunc27946">map-union</a> child-seq-impl nodeset)
+               (child-seq-impl nodeset))))
+       (cdr numbers-res))))))
+</pre>
+<h4><a name='codefunc56923' href='#docfunc56923'>draft:ast-number-list</a></h4>
+<i><a href='#tocfunc56923'>Index</a></i><br>
+
+<pre> {26a} ( (number  &lt;Number&gt; )+ )
+ Returns (cons (listof sxpath-converter) num-anc) or #f
+</pre>
+<pre>(define (<a href="xpath-context.html#codefunc56923">draft:ast-number-list</a> number-lst num-anc)
+  (let loop ((to-view (reverse number-lst))
+             (res-lst '())
+             (num-anc num-anc))
+    (cond
+      ((null? to-view)  ; everyone processed
+       (cons res-lst num-anc))
+      ((not (eq? (caar to-view) 'number))
+       (<a href="xpath-context.html#codefunc8076">draft:signal-semantic-error</a> &quot;not an Number - &quot; (car to-view)))
+      (else       
+       (loop
+        (cdr to-view)        
+        (cons (<a href="xpath-context.html#codefunc59498">draft:child</a> (<a href="sxpathlib.html#codefunc9356">ntype??</a> '*) num-anc)
+              (cons (<a href="sxpathlib.html#codefunc47215">node-pos</a> (cadar to-view))
+                    res-lst))
+        (<a href="xpath-context.html#codefunc38839">draft:na-minus-nneg</a> num-anc 1))))))
+</pre>
+<h4><a name='codefunc33522' href='#docfunc33522'>draft:ast-full-xptr</a></h4>
+<i><a href='#tocfunc33522'>Index</a></i><br>
+
+<pre> {27} &lt;FullXPtr&gt; ::= (full-xptr  &lt;Expr&gt; &lt;Expr&gt;+ )
+</pre>
+<pre>(define (<a href="xpath-context.html#codefunc33522">draft:ast-full-xptr</a> op num-anc)
+  (let ((expr-res-lst
+         (map
+          (lambda (expr) (<a href="xpath-context.html#codefunc40677">draft:ast-expr</a> expr 0))
+          (cdr op))))
+    (if
+     (member #f expr-res-lst)  ; error detected
+     #f
+     (let ((expr-impls (map car expr-res-lst)))
+     (cons
+      (lambda (nodeset position+size var-binding)
+        (let rpt ((fs expr-impls))
+          (if (null? fs)
+              '()
+              (let ((nset ((car fs) nodeset position+size var-binding)))
+                (if (null? nset)
+                    (rpt (cdr fs))
+                    nset)))))        
+      (apply <a href="xpath-context.html#codefunc23095">draft:na-max</a> (map cdr expr-res-lst)))))))
+</pre></body></html>

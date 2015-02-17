@@ -1,0 +1,257 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN""http://www.w3.org/TR/html401/loose.dtd"><html><head><meta name="GENERATOR" content="Mole: The Scheme Source Code Digger"><title>Module: http</title><meta name='keywords' content=''></head><body bgcolor='#ffffff' text='#384412'  link='#11af05' vlink='#728b09'>
+<center><h1>Module: http</h1></center>
+<p><br>
+<!-- Table of content -->
+<p><dl>
+
+<dl><dt><a name='tocsect31566' href='#sect31566'><b>A system-dependent part</b></a><dd>
+</dl>
+
+m:  <a name='tocmacro65227' href='#docmacro65227' style='text-decoration:none'>define-def</a><br>
+
+f:  <a name='tocfunc26928' href='#docfunc26928' style='text-decoration:none'>http-transaction</a><br>
+</dl>
+
+<hr width='40%' align='center'><center><h3><a name='sect31566' href='#tocsect31566'>A system-dependent part</a></h3></center>
+
+<pre> Opening, closing and shutting down TCP connections and flushing the
+ ports
+   open-tcp-connection hostname::string port-number::int -&gt; (i-port . o-port)
+   flush-output-port port -&gt; void
+   shutdown-sender port -&gt; void  ; shutdown the sending part of the connection
+
+ These functions are necessarily platform- and system-specific
+</pre>
+<h4><a name='docmacro65227' href='#tocmacro65227'>define-def</a></h4>
+(define-macro (define-def ident assoc-list defaultvalue)<i><br> ... <a href='#codemacro65227'>Full Code</a> ... )</i>
+<pre> syntax: define-def ident assoc-list defaultvalue
+ Bind a variable ident to a value found in an assoc list.
+ assoc-list is a list of pairs (symbol . value)
+ We look up 'ident' in the assoc-list, and bind it to the found value, unless
+ the latter is #f.
+ If the lookup fails, the defaultvalue is used.
+</pre><p><br>
+
+<h4><a name='docfunc26928' href='#tocfunc26928'>http-transaction</a></h4>
+(define (http-transaction req-method req-url req-parms response-handler)<i><br> ... <a href='#codefunc26928'>Full Code</a> ... )</i>
+<pre> The body of the function. 
+ The function is written as a collection of mutually-recursive
+ procedures that implement a transactional FSM.
+</pre><p><br>
+<center><h1>Code</h1></center>
+
+<h5><a name='codemacro65227' href='#docmacro65227'>define-def</a></h5>
+<i><a href='#tocmacro65227'>Index</a></i><br>
+
+<pre> syntax: define-def ident assoc-list defaultvalue
+ Bind a variable ident to a value found in an assoc list.
+ assoc-list is a list of pairs (symbol . value)
+ We look up 'ident' in the assoc-list, and bind it to the found value, unless
+ the latter is #f.
+ If the lookup fails, the defaultvalue is used.
+</pre>
+<pre>(define-macro (<a href="http.html#codemacro65227">define-def</a> ident assoc-list defaultvalue)
+  `(define ,ident 
+     (or
+      (cond
+       ((assq ',ident ,assoc-list) =&gt; cdr)
+       (else #f))
+      ,defaultvalue)))
+</pre>
+<h4><a name='codefunc26928' href='#docfunc26928'>http-transaction</a></h4>
+<i><a href='#tocfunc26928'>Index</a></i><br>
+
+<pre> The body of the function. 
+ The function is written as a collection of mutually-recursive
+ procedures that implement a transactional FSM.
+</pre>
+<pre>(define (<a href="http.html#codefunc26928">http-transaction</a> req-method req-url req-parms response-handler)
+
+  ; expected keyword arguments and their default values
+  (<a href="http.html#codemacro65227">define-def</a> http-proxy req-parms  #f)
+  (<a href="http.html#codemacro65227">define-def</a> user-agent req-parms  &quot;Scheme-HTTP/1.0&quot;)
+  (<a href="http.html#codemacro65227">define-def</a> http-req   req-parms  '())
+  (<a href="http.html#codemacro65227">define-def</a> logger     req-parms
+    (lambda (port msg . other-msgs) (<a href="myenv.html#codefunc55253">cerr</a> msg other-msgs <a href="myenv.html#codefunc27758">nl</a>)))
+
+  (define CRLF (string (integer-&gt;char 13) (integer-&gt;char 10)))
+
+  (define (die reason headers port)
+    (if port (close-output-port port))
+    (abort (<a href="srfi-12.html#codefunc26087">make-property-condition</a> 'HTTP-TRANSACTION
+	      'REASON reason 'HEADERS headers)))
+
+  ; re-throw the exception exc as a HTTP-TRANSACTION exception
+  (define (die-again exc reason headers port)
+    (if port (close-output-port port))
+    (abort (<a href="srfi-12.html#codefunc59570">make-composite-condition</a>
+	    (<a href="srfi-12.html#codefunc26087">make-property-condition</a>
+	     'HTTP-TRANSACTION 'REASON reason 'HEADERS headers)
+	    exc)))
+
+  ; Open a connection, send the request, and if successful,
+  ; invoke the read-resp-status-line on the opened http-port.
+  (define (make-req schema dummy host resource)
+    (let* ((target-host (or http-proxy host))
+	   (target-addr-lst (<a href="util.html#codefunc39259">string-split</a> target-host '(#\:)))
+	   (target-host-proper (car target-addr-lst))
+	   (target-port
+	    (if (pair? (cdr target-addr-lst))
+		(string-&gt;integer (cadr target-addr-lst) 0
+				 (string-length (cadr target-addr-lst)))
+		80))
+	   (dummy (logger #f &quot;Connecting to &quot; target-host-proper &quot;:&quot;
+			  target-port))
+	   ; prevent hacking
+	   (dummy (if (string-index target-host-proper #\|)
+		      (error &quot;Bad target addr: &quot; target-host-proper)))
+	   (http-ports (open-tcp-connection target-host-proper target-port))
+	   (http-i-port (car http-ports))
+	   (http-o-port (cdr http-ports))
+	   )
+
+      (for-each
+       (lambda (str) (display str http-o-port))
+       `(,req-method &quot; &quot;
+		  ; if the proxy is set, request the full REQ-URL; otherwise,
+		  ; send only the relative URL
+	 ,@(if http-proxy (list req-url) (list &quot;/&quot; resource))
+	 &quot; HTTP/1.0&quot; ,CRLF
+	 &quot;Host: &quot; ,host ,CRLF
+	 &quot;User-agent: &quot; ,user-agent ,CRLF
+	 &quot;Connection: close&quot; ,CRLF))
+      (if (procedure? http-req)
+	  (http-req http-o-port)	; let the user write other headers
+	  (begin
+	    (for-each (lambda (header-name-value)
+			(display (car header-name-value) http-o-port)
+			(write-char #\: http-o-port)
+			(display (cdr header-name-value) http-o-port)
+			(display CRLF http-o-port))
+		      http-req)
+	    (display CRLF http-o-port) ; An empty line ends headers
+	    ))
+      (flush-output-port http-o-port)
+      (shutdown-sender http-o-port)
+      (logger http-o-port &quot;sent request. Now listening for the response...&quot;)
+      (read-resp-status-line http-i-port)))
+
+
+  ; Read the first line of the server's response, something like
+  ; HTTP/1.x 200 OK
+  ; and extract the response code
+  ; Invoke
+  ;  read-headers http-i-port resp-code
+  ;		'(HTTP-RESPONSE . the-whole-response-line)
+  ; or raise an exception if the response line is absent or invalid
+  (define (read-resp-status-line http-port)
+    (let* ((resp-line (read-line http-port))
+	   (dummy (logger http-port &quot;Got response :&quot; resp-line)) 
+	   (resp-headers (list (cons 'HTTP-RESPONSE resp-line))))
+      (cond
+       ((eof-object? resp-line)
+	(die 'NO-REPLY '() http-port))
+       ((not (string-prefix? &quot;HTTP/1.&quot; resp-line))
+	(die 'BAD-RESP-LINE resp-headers http-port))
+       (else
+	(let* ((resp-line-parts (<a href="util.html#codefunc39259">string-split</a> resp-line '() 3))
+	       (resp-code
+		(and (pair? resp-line-parts)
+		     (pair? (cdr resp-line-parts))
+		     (string-&gt;integer (cadr resp-line-parts) 0
+				      (string-length (cadr resp-line-parts)))))
+	       )
+	  (if resp-code
+	      (read-headers http-port resp-code resp-headers)
+	      (die 'BAD-RESP-LINE resp-headers http-port)))))))
+
+
+  ; read-headers http-port resp-code init-resp-headers
+  ; The http-port is positioned after the response line.
+  ; The procedure reads HTTP response headers and adds them to
+  ; init-resp-headers.
+  ; On success, the procedure exits to response-handler, passing
+  ; it the response code, the read headers and the http-port. The
+  ; port is positioned after the empty line that terminates the headers.
+  (define (read-headers http-port resp-code init-resp-headers)
+    (let ((headers
+	   (with-exception-handler
+            (lambda (exc)
+              (die-again exc 'BAD-HEADER init-resp-headers http-port))
+            (lambda ()
+              (<a href="mime.html#codefunc52288">MIME:read-headers</a> http-port)))))
+      (response-handler resp-code (append init-resp-headers headers)
+			 http-port)))
+
+  ; parse the req-url and exit either to make-req, or to 
+  ; the response-handler to handle the error
+  (let ((url-parts (<a href="util.html#codefunc39259">string-split</a> req-url '(#\/) 4)))
+    ; this stub is added by Dmitry Lizorkin for handling URIs consisting of
+    ; just a schema and a host, say, &quot;http://www.plt-scheme.org&quot;
+    (let ((url-parts
+           (if (and (string=? &quot;http:&quot; (car url-parts))
+                    (= 3 (length url-parts)))
+               (append url-parts '(&quot;&quot;))
+               url-parts)))    
+    (cond
+     ((not (= 4 (length url-parts)))
+      (die 'BAD-REQ-URL '() #f))
+     ((string=? &quot;http:&quot; (car url-parts))
+      (apply make-req url-parts))
+     (else
+      (die 'UNSUPPORTED-SCHEMA '() #f)
+      ))))
+)
+</pre>
+<h5><a name='codeapp6205' href='#docapp6205'>cond-expand</a></h5>
+<i><a href='#tocapp6205'>Index</a></i><br>
+
+<pre>(cond-expand
+ (gambit
+  ; For Gambit 4
+  (define (open-tcp-connection host port-number)
+    (assert (integer? port-number) (positive? port-number))
+    (let ((p (open-tcp-client
+              (list server-address: host
+                    port-number: port-number))))
+      (cons p p)))
+  (define flush-output-port force-output)
+  (define close-tcp-connection close-port)
+
+  ; DL: by analogue with Gambit 3
+  (define shutdown-sender force-output)
+
+; Previous version for Gambit 3
+;  ; The Gambit implementation relies on internal Gambit procedures,
+;  ; whose names start with ##
+;  ; Such identifiers cannot be _read_ on many other systems
+;  ; The following macro constructs Gambit-specific ids on the fly
+;  (define-macro (_gid id)
+;    (string-&gt;symbol (string-append &quot;##&quot; (symbol-&gt;string id))))
+;  (define (open-tcp-connection host port-number)
+;    (assert (integer? port-number) (positive? port-number))
+;    (let ((io-port ((_gid open-input-output-file)
+;		    (string-append &quot;tcp://&quot; host &quot;:&quot; 
+;				   (number-&gt;string port-number)))))
+;      (cons io-port io-port)))
+;  (define flush-output-port flush-output)
+;  (define shutdown-sender flush-output)
+  )
+ (bigloo
+  (define (open-tcp-connection host port-number)
+    (let ((sock (make-client-socket host port-number)))
+      (cons (socket-input sock) (socket-output sock))))
+  ; flush-output-port is built-in
+  (define shutdown-sender close-output-port)
+  )
+ ((or plt chicken)
+  (define (open-tcp-connection host port-number)
+    (call-with-values
+     (lambda () (tcp-connect host port-number))
+     (lambda (input-port output-port)
+       (cons input-port output-port))))
+  (define flush-output-port flush-output)
+  (define shutdown-sender close-output-port)
+  )
+)
+</pre></body></html>

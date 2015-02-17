@@ -1,0 +1,372 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN""http://www.w3.org/TR/html401/loose.dtd"><html><head><meta name="GENERATOR" content="Mole: The Scheme Source Code Digger"><title>Module: tree-trans</title><meta name='keywords' content=''></head><body bgcolor='#ffffff' text='#384412'  link='#11af05' vlink='#728b09'>
+<center><h1>Module: tree-trans</h1></center>
+<p><br>
+<!-- Table of content -->
+<p><dl>
+
+f:  <a name='tocfunc45706' href='#docfunc45706' style='text-decoration:none'>SRV:send-reply</a><br>
+
+f:  <a name='tocfunc51646' href='#docfunc51646' style='text-decoration:none'>pre-post-order</a><br>
+
+f:  <a name='tocfunc10729' href='#docfunc10729' style='text-decoration:none'>post-order</a><br>
+
+<dl><dt><a name='tocsect24966' href='#sect24966'><b>			Extended tree fold</b></a><dd>
+
+f:  <a name='tocfunc18247' href='#docfunc18247' style='text-decoration:none'>foldts</a><br>
+
+f:  <a name='tocfunc11247' href='#docfunc11247' style='text-decoration:none'>replace-range</a><br>
+</dl>
+</dl>
+
+<h4><a name='docfunc45706' href='#tocfunc45706'>SRV:send-reply</a></h4>
+(define (SRV:send-reply . fragments)<i><br> ... <a href='#codefunc45706'>Full Code</a> ... )</i>
+<pre> Output the 'fragments'
+ The fragments are a list of strings, characters,
+ numbers, thunks, #f, #t -- and other fragments.
+ The function traverses the tree depth-first, writes out
+ strings and characters, executes thunks, and ignores
+ #f and '().
+ The function returns #t if anything was written at all;
+ otherwise the result is #f
+ If #t occurs among the fragments, it is not written out
+ but causes the result of SRV:send-reply to be #t
+</pre><p><br>
+
+<h4><a name='docfunc51646' href='#tocfunc51646'>pre-post-order</a></h4>
+(define (pre-post-order tree bindings)<i><br> ... <a href='#codefunc51646'>Full Code</a> ... )</i>
+<pre> procedure: pre-post-order TREE BINDINGS
+
+	          Traversal of an SXML tree or a grove:
+			a &lt;Node&gt; or a &lt;Nodelist&gt;
+
+ A &lt;Node&gt; and a &lt;Nodelist&gt; are mutually-recursive datatypes that
+ underlie the SXML tree:
+	&lt;Node&gt; ::= (name . &lt;Nodelist&gt;) | &quot;text string&quot;
+ An (ordered) set of nodes is just a list of the constituent nodes:
+ 	&lt;Nodelist&gt; ::= (&lt;Node&gt; ...)
+ Nodelists, and Nodes other than text strings are both lists. A
+ &lt;Nodelist&gt; however is either an empty list, or a list whose head is
+ not a symbol (an atom in general). A symbol at the head of a node is
+ either an XML name (in which case it's a tag of an XML element), or
+ an administrative name such as '@'.
+ See SXPath.scm and SSAX.scm for more information on SXML.
+
+
+ Pre-Post-order traversal of a tree and creation of a new tree:
+	pre-post-order:: &lt;tree&gt; x &lt;bindings&gt; -&gt; &lt;new-tree&gt;
+ where
+ &lt;bindings&gt; ::= (&lt;binding&gt; ...)
+ &lt;binding&gt; ::= (&lt;trigger-symbol&gt; *preorder* . &lt;handler&gt;) |
+               (&lt;trigger-symbol&gt; *macro* . &lt;handler&gt;) |
+		(&lt;trigger-symbol&gt; &lt;new-bindings&gt; . &lt;handler&gt;) |
+		(&lt;trigger-symbol&gt; . &lt;handler&gt;)
+ &lt;trigger-symbol&gt; ::= XMLname | *text* | *default*
+ &lt;handler&gt; :: &lt;trigger-symbol&gt; x [&lt;tree&gt;] -&gt; &lt;new-tree&gt;
+
+ The pre-post-order function visits the nodes and nodelists
+ pre-post-order (depth-first).  For each &lt;Node&gt; of the form (name
+ &lt;Node&gt; ...) it looks up an association with the given 'name' among
+ its &lt;bindings&gt;. If failed, pre-post-order tries to locate a
+ *default* binding. It's an error if the latter attempt fails as
+ well.  Having found a binding, the pre-post-order function first
+ checks to see if the binding is of the form
+	(&lt;trigger-symbol&gt; *preorder* . &lt;handler&gt;)
+ If it is, the handler is 'applied' to the current node. Otherwise,
+ the pre-post-order function first calls itself recursively for each
+ child of the current node, with &lt;new-bindings&gt; prepended to the
+ &lt;bindings&gt; in effect. The result of these calls is passed to the
+ &lt;handler&gt; (along with the head of the current &lt;Node&gt;). To be more
+ precise, the handler is _applied_ to the head of the current node
+ and its processed children. The result of the handler, which should
+ also be a &lt;tree&gt;, replaces the current &lt;Node&gt;. If the current &lt;Node&gt;
+ is a text string or other atom, a special binding with a symbol
+ *text* is looked up.
+
+ A binding can also be of a form
+	(&lt;trigger-symbol&gt; *macro* . &lt;handler&gt;)
+ This is equivalent to *preorder* described above. However, the result
+ is re-processed again, with the current stylesheet.
+
+</pre><p><br>
+
+<h4><a name='docfunc10729' href='#tocfunc10729'>post-order</a></h4>
+(define post-order <i><br> ... <a href='#codefunc10729'>Full Code</a> ... )</i>
+<pre> procedure: post-order TREE BINDINGS
+ post-order is a strict subset of pre-post-order without *preorder*
+ (let alone *macro*) traversals. 
+ Now pre-post-order is actually faster than the old post-order.
+ The function post-order is deprecated and is aliased below for
+ backward compatibility.
+</pre><p><br>
+
+<hr width='40%' align='center'><center><h3><a name='sect24966' href='#tocsect24966'>			Extended tree fold</a></h3></center>
+
+<pre> tree = atom | (node-name tree ...)
+
+ foldts fdown fup fhere seed (Leaf str) = fhere seed str
+ foldts fdown fup fhere seed (Nd kids) =
+         fup seed $ foldl (foldts fdown fup fhere) (fdown seed) kids
+</pre>
+<h4><a name='docfunc18247' href='#tocfunc18247'>foldts</a></h4>
+(define (foldts fdown fup fhere seed tree)<i><br> ... <a href='#codefunc18247'>Full Code</a> ... )</i>
+<pre> procedure fhere: seed -&gt; atom -&gt; seed
+ procedure fdown: seed -&gt; node -&gt; seed
+ procedure fup: parent-seed -&gt; last-kid-seed -&gt; node -&gt; seed
+ foldts returns the final seed
+</pre><p><br>
+
+<h4><a name='docfunc11247' href='#tocfunc11247'>replace-range</a></h4>
+(define (replace-range beg-pred end-pred forest)<i><br> ... <a href='#codefunc11247'>Full Code</a> ... )</i>
+<pre> where
+	type FOREST = (NODE ...)
+	type NODE = Atom | (Name . FOREST) | FOREST
+
+ The range of nodes is specified by two predicates, beg-pred and end-pred.
+	beg-pred:: NODE -&gt; #f | FOREST
+	end-pred:: NODE -&gt; #f | FOREST
+ The beg-pred predicate decides on the beginning of the range. The node
+ for which the predicate yields non-#f marks the beginning of the range
+ The non-#f value of the predicate replaces the node. The value can be a
+ list of nodes. The replace-range procedure then traverses the tree and skips
+ all the nodes, until the end-pred yields non-#f. The value of the end-pred
+ replaces the end-range node. The new end node and its brothers will be
+ re-scanned.
+ The predicates are evaluated pre-order. We do not descend into a node that
+ is marked as the beginning of the range.
+</pre><p><br>
+<center><h1>Code</h1></center>
+
+<h4><a name='codefunc45706' href='#docfunc45706'>SRV:send-reply</a></h4>
+<i><a href='#tocfunc45706'>Index</a></i><br>
+
+<pre> Output the 'fragments'
+ The fragments are a list of strings, characters,
+ numbers, thunks, #f, #t -- and other fragments.
+ The function traverses the tree depth-first, writes out
+ strings and characters, executes thunks, and ignores
+ #f and '().
+ The function returns #t if anything was written at all;
+ otherwise the result is #f
+ If #t occurs among the fragments, it is not written out
+ but causes the result of SRV:send-reply to be #t
+</pre>
+<pre>(define (<a href="SXML-tree-trans.html#codefunc45706">SRV:send-reply</a> . fragments)
+  (let loop ((fragments fragments) (result #f))
+    (cond
+      ((null? fragments) result)
+      ((not (car fragments)) (loop (cdr fragments) result))
+      ((null? (car fragments)) (loop (cdr fragments) result))
+      ((eq? #t (car fragments)) (loop (cdr fragments) #t))
+      ((pair? (car fragments))
+        (loop (cdr fragments) (loop (car fragments) result)))
+      ((procedure? (car fragments))
+        ((car fragments))
+        (loop (cdr fragments) #t))
+      (else
+        (display (car fragments))
+        (loop (cdr fragments) #t)))))
+</pre>
+<h4><a name='codefunc51646' href='#docfunc51646'>pre-post-order</a></h4>
+<i><a href='#tocfunc51646'>Index</a></i><br>
+
+<pre> procedure: pre-post-order TREE BINDINGS
+
+	          Traversal of an SXML tree or a grove:
+			a &lt;Node&gt; or a &lt;Nodelist&gt;
+
+ A &lt;Node&gt; and a &lt;Nodelist&gt; are mutually-recursive datatypes that
+ underlie the SXML tree:
+	&lt;Node&gt; ::= (name . &lt;Nodelist&gt;) | &quot;text string&quot;
+ An (ordered) set of nodes is just a list of the constituent nodes:
+ 	&lt;Nodelist&gt; ::= (&lt;Node&gt; ...)
+ Nodelists, and Nodes other than text strings are both lists. A
+ &lt;Nodelist&gt; however is either an empty list, or a list whose head is
+ not a symbol (an atom in general). A symbol at the head of a node is
+ either an XML name (in which case it's a tag of an XML element), or
+ an administrative name such as '@'.
+ See SXPath.scm and SSAX.scm for more information on SXML.
+
+
+ Pre-Post-order traversal of a tree and creation of a new tree:
+	pre-post-order:: &lt;tree&gt; x &lt;bindings&gt; -&gt; &lt;new-tree&gt;
+ where
+ &lt;bindings&gt; ::= (&lt;binding&gt; ...)
+ &lt;binding&gt; ::= (&lt;trigger-symbol&gt; *preorder* . &lt;handler&gt;) |
+               (&lt;trigger-symbol&gt; *macro* . &lt;handler&gt;) |
+		(&lt;trigger-symbol&gt; &lt;new-bindings&gt; . &lt;handler&gt;) |
+		(&lt;trigger-symbol&gt; . &lt;handler&gt;)
+ &lt;trigger-symbol&gt; ::= XMLname | *text* | *default*
+ &lt;handler&gt; :: &lt;trigger-symbol&gt; x [&lt;tree&gt;] -&gt; &lt;new-tree&gt;
+
+ The pre-post-order function visits the nodes and nodelists
+ pre-post-order (depth-first).  For each &lt;Node&gt; of the form (name
+ &lt;Node&gt; ...) it looks up an association with the given 'name' among
+ its &lt;bindings&gt;. If failed, pre-post-order tries to locate a
+ *default* binding. It's an error if the latter attempt fails as
+ well.  Having found a binding, the pre-post-order function first
+ checks to see if the binding is of the form
+	(&lt;trigger-symbol&gt; *preorder* . &lt;handler&gt;)
+ If it is, the handler is 'applied' to the current node. Otherwise,
+ the pre-post-order function first calls itself recursively for each
+ child of the current node, with &lt;new-bindings&gt; prepended to the
+ &lt;bindings&gt; in effect. The result of these calls is passed to the
+ &lt;handler&gt; (along with the head of the current &lt;Node&gt;). To be more
+ precise, the handler is _applied_ to the head of the current node
+ and its processed children. The result of the handler, which should
+ also be a &lt;tree&gt;, replaces the current &lt;Node&gt;. If the current &lt;Node&gt;
+ is a text string or other atom, a special binding with a symbol
+ *text* is looked up.
+
+ A binding can also be of a form
+	(&lt;trigger-symbol&gt; *macro* . &lt;handler&gt;)
+ This is equivalent to *preorder* described above. However, the result
+ is re-processed again, with the current stylesheet.
+
+</pre>
+<pre>(define (<a href="SXML-tree-trans.html#codefunc51646">pre-post-order</a> tree bindings)
+  (let* ((default-binding (assq '*default* bindings))
+	 (text-binding (or (assq '*text* bindings) default-binding))
+	 (text-handler			; Cache default and text bindings
+	   (and text-binding
+	     (if (procedure? (cdr text-binding))
+	         (cdr text-binding) (cddr text-binding)))))
+    (let loop ((tree tree))
+      (cond
+	((null? tree) '())
+	((not (pair? tree))
+	  (let ((trigger '*text*))
+	    (if text-handler (text-handler trigger tree)
+	      (error &quot;Unknown binding for &quot; trigger &quot; and no default&quot;))))
+	((not (symbol? (car tree))) (map loop tree)) ; tree is a nodelist
+	(else				; tree is an SXML node
+	  (let* ((trigger (car tree))
+		 (binding (or (assq trigger bindings) default-binding)))
+	    (cond
+	      ((not binding) 
+		(error &quot;Unknown binding for &quot; trigger &quot; and no default&quot;))
+	      ((not (pair? (cdr binding)))  ; must be a procedure: handler
+		(apply (cdr binding) trigger (map loop (cdr tree))))
+	      ((eq? '*preorder* (cadr binding))
+		(apply (cddr binding) tree))
+	      ((eq? '*macro* (cadr binding))
+		(loop (apply (cddr binding) tree)))
+	      (else			    ; (cadr binding) is a local binding
+		(apply (cddr binding) trigger 
+		  (<a href="SXML-tree-trans.html#codefunc51646">pre-post-order</a> (cdr tree) (append (cadr binding) bindings)))
+		))))))))
+</pre>
+<h4><a name='codefunc10729' href='#docfunc10729'>post-order</a></h4>
+<i><a href='#tocfunc10729'>Index</a></i><br>
+
+<pre> procedure: post-order TREE BINDINGS
+ post-order is a strict subset of pre-post-order without *preorder*
+ (let alone *macro*) traversals. 
+ Now pre-post-order is actually faster than the old post-order.
+ The function post-order is deprecated and is aliased below for
+ backward compatibility.
+</pre>
+<pre>(define <a href="SXML-tree-trans.html#codefunc10729">post-order</a> <a href="SXML-tree-trans.html#codefunc51646">pre-post-order</a>)
+</pre>
+<h4><a name='codefunc18247' href='#docfunc18247'>foldts</a></h4>
+<i><a href='#tocfunc18247'>Index</a></i><br>
+
+<pre> procedure fhere: seed -&gt; atom -&gt; seed
+ procedure fdown: seed -&gt; node -&gt; seed
+ procedure fup: parent-seed -&gt; last-kid-seed -&gt; node -&gt; seed
+ foldts returns the final seed
+</pre>
+<pre>(define (<a href="SXML-tree-trans.html#codefunc18247">foldts</a> fdown fup fhere seed tree)
+  (cond
+   ((null? tree) seed)
+   ((not (pair? tree))		; An atom
+    (fhere seed tree))
+   (else
+    (let loop ((kid-seed (fdown seed tree)) (kids (cdr tree)))
+      (if (null? kids)
+	  (fup seed kid-seed tree)
+	  (loop (<a href="SXML-tree-trans.html#codefunc18247">foldts</a> fdown fup fhere kid-seed (car kids))
+		(cdr kids)))))))
+</pre>
+<h4><a name='codefunc11247' href='#docfunc11247'>replace-range</a></h4>
+<i><a href='#tocfunc11247'>Index</a></i><br>
+
+<pre> where
+	type FOREST = (NODE ...)
+	type NODE = Atom | (Name . FOREST) | FOREST
+
+ The range of nodes is specified by two predicates, beg-pred and end-pred.
+	beg-pred:: NODE -&gt; #f | FOREST
+	end-pred:: NODE -&gt; #f | FOREST
+ The beg-pred predicate decides on the beginning of the range. The node
+ for which the predicate yields non-#f marks the beginning of the range
+ The non-#f value of the predicate replaces the node. The value can be a
+ list of nodes. The replace-range procedure then traverses the tree and skips
+ all the nodes, until the end-pred yields non-#f. The value of the end-pred
+ replaces the end-range node. The new end node and its brothers will be
+ re-scanned.
+ The predicates are evaluated pre-order. We do not descend into a node that
+ is marked as the beginning of the range.
+</pre>
+<pre>(define (<a href="SXML-tree-trans.html#codefunc11247">replace-range</a> beg-pred end-pred forest)
+
+  ; loop forest keep? new-forest
+  ; forest is the forest to traverse
+  ; new-forest accumulates the nodes we will keep, in the reverse
+  ; order
+  ; If keep? is #t, keep the curr node if atomic. If the node is not atomic,
+  ; traverse its children and keep those that are not in the skip range.
+  ; If keep? is #f, skip the current node if atomic. Otherwise,
+  ; traverse its children. If all children are skipped, skip the node
+  ; as well.
+
+  (define (loop forest keep? new-forest)
+    (if (null? forest) (values (reverse new-forest) keep?)
+	(let ((node (car forest)))
+	  (if keep?
+	      (cond			; accumulate mode
+	       ((beg-pred node) =&gt;	; see if the node starts the skip range
+		(lambda (repl-branches)	; if so, skip/replace the node
+		  (loop (cdr forest) #f 
+			(append (reverse repl-branches) new-forest))))
+	       ((not (pair? node))	; it's an atom, keep it
+		(loop (cdr forest) keep? (cons node new-forest)))
+	       (else
+                (let ((node?
+                       (symbol? (car node)))) ; or is it a nodelist?
+                  (call-with-values
+                   ; traverse its children
+                   (lambda () (loop (if node? (cdr node) node) #t '()))
+                   (lambda (new-kids keep?)		
+                     (loop (cdr forest) keep?
+                           (cons 
+                            (if node? (cons (car node) new-kids) new-kids)
+                            new-forest)))))))
+	      ; skip mode
+	      (cond
+	       ((end-pred node) =&gt;	; end the skip range
+		(lambda (repl-branches)	; repl-branches will be re-scanned
+		  (loop (append repl-branches (cdr forest)) #t
+			new-forest)))
+	       ((not (pair? node))	; it's an atom, skip it
+		(loop (cdr forest) keep? new-forest))
+	       (else
+                (let ((node?
+                       (symbol? (car node))))  ; or is it a nodelist?
+                  ; traverse its children
+                  (call-with-values
+                   (lambda () (loop (if node? (cdr node) node) #f '()))
+                   (lambda (new-kids keep?)
+                     (loop
+                      (cdr forest) keep?
+                      (if (or keep? (pair? new-kids))
+                          (cons
+                           (if node? (cons (car node) new-kids) new-kids)
+                           new-forest)
+                          new-forest)		; if all kids are skipped
+                      ))))))))))			; skip the node too
+  
+  (call-with-values
+   (lambda () (loop forest #t '()))
+   (lambda (new-forest keep?)
+     new-forest)))
+</pre></body></html>

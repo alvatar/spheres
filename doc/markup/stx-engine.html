@@ -1,0 +1,951 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN""http://www.w3.org/TR/html401/loose.dtd"><html><head><meta name="GENERATOR" content="Mole: The Scheme Source Code Digger"><title>Module: stx-engine</title><meta name='keywords' content=''></head><body bgcolor='#ffffff' text='#384412'  link='#11af05' vlink='#728b09'>
+<center><h1>Module: stx-engine</h1></center>
+
+<pre> $Id: stx-engine.scm,v 1.9403 2002/12/25 19:33:48 kl Exp kl $
+</pre><p><br>
+<!-- Table of content -->
+<p><dl>
+
+f:  <a name='tocfunc63403' href='#docfunc63403' style='text-decoration:none'>stx:version</a><br>
+
+f:  <a name='tocfunc37173' href='#docfunc37173' style='text-decoration:none'>stx:error</a><br>
+
+f:  <a name='tocfunc9279' href='#docfunc9279' style='text-decoration:none'>stx:read-content</a><br>
+
+f:  <a name='tocfunc29678' href='#docfunc29678' style='text-decoration:none'>stx:clean-feed</a><br>
+
+f:  <a name='tocfunc59359' href='#docfunc59359' style='text-decoration:none'>sxml:clean-feed</a><br>
+
+<dl><dt><a name='tocsect36304' href='#sect36304'><b>This functions will be probably moved to sxml-tools</b></a><dd>
+
+f:  <a name='tocfunc12599' href='#docfunc12599' style='text-decoration:none'>sxml:refactor-ns</a><br>
+
+f:  <a name='tocfunc506' href='#docfunc506' style='text-decoration:none'>sxml:xml->sxml-autoprefix</a><br>
+
+f:  <a name='tocfunc20772' href='#docfunc20772' style='text-decoration:none'>sxml:extract-prefix-assigs</a><br>
+</dl>
+<p><dt><a name='tocchapt57804' href='#chapt57804'><b>Tree transformation</b></a><dd>
+
+f:  <a name='tocfunc22124' href='#docfunc22124' style='text-decoration:none'>stx:apply-templates</a><br>
+
+f:  <a name='tocfunc16266' href='#docfunc16266' style='text-decoration:none'>stx:find-template</a><br>
+
+f:  <a name='tocfunc27226' href='#docfunc27226' style='text-decoration:none'>stx:load-sst</a><br>
+
+f:  <a name='tocfunc53194' href='#docfunc53194' style='text-decoration:none'>stx:stx->tmpl+env</a><br>
+
+f:  <a name='tocfunc13989' href='#docfunc13989' style='text-decoration:none'>stx:write-ss</a><br>
+
+f:  <a name='tocfunc55988' href='#docfunc55988' style='text-decoration:none'>stx:transform-dynamic</a><br>
+
+f:  <a name='tocfunc58057' href='#docfunc58057' style='text-decoration:none'>stx:write-transformer</a><br>
+
+f:  <a name='tocfunc10751' href='#docfunc10751' style='text-decoration:none'>stx:eval-transformer</a><br>
+
+f:  <a name='tocfunc26897' href='#docfunc26897' style='text-decoration:none'>stx:transform</a><br>
+
+f:  <a name='tocfunc28923' href='#docfunc28923' style='text-decoration:none'>stx:translate</a><br>
+
+f:  <a name='tocfunc33217' href='#docfunc33217' style='text-decoration:none'>stx:make-stx-stylesheet</a><br>
+
+<dl><dt><a name='tocsect2927' href='#sect2927'><b>Transformers for XSL stylesheet elements</b></a><dd>
+
+f:  <a name='tocfunc11135' href='#docfunc11135' style='text-decoration:none'>stx:scm->stx</a><br>
+
+f:  <a name='tocfunc52082' href='#docfunc52082' style='text-decoration:none'>stx:stx-var->stx</a><br>
+
+f:  <a name='tocfunc51819' href='#docfunc51819' style='text-decoration:none'>stx:xsl-var->stx</a><br>
+
+f:  <a name='tocfunc46276' href='#docfunc46276' style='text-decoration:none'>stx:attr->html</a><br>
+
+f:  <a name='tocfunc15235' href='#docfunc15235' style='text-decoration:none'>stx:xsl->stx</a><br>
+
+m:  <a name='tocmacro13721' href='#docmacro13721' style='text-decoration:none'>stx:call-function</a><br>
+</dl>
+<p><dt><a name='tocchapt48027' href='#chapt48027'><b>Wrappers</b></a><dd>
+</dl>
+
+<h4><a name='docfunc63403' href='#tocfunc63403'>stx:version</a></h4>
+(define stx:version <i><br> ... <a href='#codefunc63403'>Full Code</a> ... )</i>
+<pre> Auxilliary 
+</pre><p><br>
+
+<h4><a name='docfunc37173' href='#tocfunc37173'>stx:error</a></h4>
+(define (stx:error . messages)<i><br> ... <a href='#codefunc37173'>Full Code</a> ... )</i><p><br>
+
+<h4><a name='docfunc9279' href='#tocfunc9279'>stx:read-content</a></h4>
+(define (stx:read-content obj objname)<i><br> ... <a href='#codefunc9279'>Full Code</a> ... )</i>
+<pre> Reads content of a given SXML element 'obj' using Scheme reader.
+ The content has to be a list of strings (first of them will be read).
+ If the content is empty, &quot;&quot; is returned.
+</pre><p><br>
+
+<h4><a name='docfunc29678' href='#tocfunc29678'>stx:clean-feed</a></h4>
+(define (stx:clean-feed . fragments)<i><br> ... <a href='#codefunc29678'>Full Code</a> ... )</i><p><br>
+
+<h4><a name='docfunc59359' href='#tocfunc59359'>sxml:clean-feed</a></h4>
+(define (sxml:clean-feed . fragments)<i><br> ... <a href='#codefunc59359'>Full Code</a> ... )</i>
+<pre> DL: Borrowed from the older version of SXML Tools
+ Filter the 'fragments'
+ The fragments are a list of strings, characters,
+ numbers, thunks, #f -- and other fragments.
+ The function traverses the tree depth-first, and returns a list
+ of strings, characters and executed thunks, and ignores #f and '().
+
+ If all the meaningful fragments are strings, then
+  (apply string-append ... )
+ to a result of this function will return its string-value 
+
+ It may be considered as a variant of Oleg Kiselyov's SRV:send-reply:
+ While SRV:send-reply displays fragments, this function returns the list 
+ of meaningful fragments and filter out the garbage.
+</pre><p><br>
+
+<hr width='40%' align='center'><center><h3><a name='sect36304' href='#tocsect36304'>This functions will be probably moved to sxml-tools</a></h3></center>
+
+<pre></pre>
+<h4><a name='docfunc12599' href='#tocfunc12599'>sxml:refactor-ns</a></h4>
+(define (sxml:refactor-ns tree)<i><br> ... <a href='#codefunc12599'>Full Code</a> ... )</i>
+<pre> Transforms top-level *NAMESPACES* in SXML document 
+ parsed using SSAX 4.9 to aux-list representation compatible to
+ SXML-spec. ver. 2.5
+</pre><p><br>
+
+<h4><a name='docfunc506' href='#tocfunc506'>sxml:xml->sxml-autoprefix</a></h4>
+(define (sxml:xml-&gt;sxml-autoprefix name)<i><br> ... <a href='#codefunc506'>Full Code</a> ... )</i>
+<pre> Reads XML document as SXML tree. NS prefixes declared in XML document
+ are used as namespace-id's.
+</pre><p><br>
+
+<h4><a name='docfunc20772' href='#tocfunc20772'>sxml:extract-prefix-assigs</a></h4>
+(define (sxml:extract-prefix-assigs file)<i><br> ... <a href='#codefunc20772'>Full Code</a> ... )</i>
+<pre> of NS-prefix/URIs declared as a list of pairs.
+</pre><p><br>
+<hr height='5'><center><h3><a name='chapt57804' href='#tocchapt57804'>Tree transformation</a></h3></center>
+
+<pre></pre>
+<h4><a name='docfunc22124' href='#tocfunc22124'>stx:apply-templates</a></h4>
+(define (stx:apply-templates tree templates root environment)<i><br> ... <a href='#codefunc22124'>Full Code</a> ... )</i>
+<pre> stx:apply-templates:: &lt;tree&gt; x &lt;templates&gt; x &lt;root&gt; x &lt;environment&gt; -&gt; &lt;new-tree&gt;
+ where
+ &lt;templates&gt; ::= &lt;default-template&gt; &lt;text-template&gt; &lt;template&gt;*
+ &lt;default-template&gt; ::= (*default* . &lt;handler&gt;)
+ &lt;text-template&gt; ::= (*text* . &lt;handler&gt;)
+ &lt;template&gt;  ::= (&lt;matcher&gt; &lt;handler&gt;) | ( XMLname &lt;handler&gt;)
+ &lt;root&gt;     ::= &lt;document-root&gt;
+ &lt;environment&gt; ::= &lt;lambda-tuple&gt;
+ &lt;matcher&gt;  ::= &lt;node&gt; &lt;root&gt; -&gt; &lt;nodeset&gt;
+ &lt;handler&gt; :: &lt;node&gt; &lt;templates&gt; &lt;root&gt; &lt;environment&gt; -&gt; &lt;new-node&gt;
+
+ The stx:apply-templates function visits top-level nodes of a given tree and 
+ process them in accordance with a list of templates given. 
+ If a node is a textual one then it is processed usind 'text-template',
+ which has to be second element in given list of templates. 
+ If a node is a pair then stx:apply-templates looks up a corresponding template
+ among  given &lt;templates&gt; using stx:find-template function. 
+ If failed, stx:apply-templates tries to locate a *default* template, 
+ which has to be first element in given list of templates. It's an
+ error if this latter attempt fails as well.  
+ Having found a template, its handler is applied to the current node. 
+ The result of the handler application, which should
+ also be a &lt;tree&gt;, replaces the current node in output tree.
+
+ This function is slightly similar to Oleg Kiselyov's &quot;pre-post-order&quot; function
+ with *preorder* bindings. 
+</pre><p><br>
+
+<h4><a name='docfunc16266' href='#tocfunc16266'>stx:find-template</a></h4>
+(define (stx:find-template node templates root)<i><br> ... <a href='#codefunc16266'>Full Code</a> ... )</i>
+<pre>  stx:find-template: &lt;node&gt; x &lt;templates&gt; x &lt;root&gt; -&gt; &lt;template&gt;
+  This function returns first template in &lt;templates&gt; whouse &lt;matcher&gt;
+  matches given &lt;node&gt;
+  &lt;matcher&gt; matches node if:
+    - if it is a symbol and its the same as the name of the node matched
+    - if it is a procedure (sxpath/txpath generated one) then it is 
+     applyed (with respect to given &lt;root&gt;) sequentially to the matched node 
+     and its parents until the matched node is a member of a resulting nodeset 
+     or root node is reached. In the first case the node matches successfuly, 
+     in the second case it does not. 
+</pre><p><br>
+
+<h4><a name='docfunc27226' href='#tocfunc27226'>stx:load-sst</a></h4>
+(define (stx:load-sst link)<i><br> ... <a href='#codefunc27226'>Full Code</a> ... )</i>
+<pre> Returns SXML tree for a given link.
+ A link is a lambda-tuple of its attributes.
+</pre><p><br>
+
+<h4><a name='docfunc53194' href='#tocfunc53194'>stx:stx->tmpl+env</a></h4>
+(define (stx:stx-&gt;tmpl+env stx-objects)<i><br> ... <a href='#codefunc53194'>Full Code</a> ... )</i>
+<pre> Transform top-level objects of stx:stylesheet 
+ to a list whose car is corresponding template (#f no templates generated) 
+ and whose cadr is corresponding environment binding (#f if no bindings),
+</pre><p><br>
+
+<h4><a name='docfunc13989' href='#tocfunc13989'>stx:write-ss</a></h4>
+(define (stx:write-ss t+e fname)<i><br> ... <a href='#codefunc13989'>Full Code</a> ... )</i><p><br>
+
+<h4><a name='docfunc55988' href='#tocfunc55988'>stx:transform-dynamic</a></h4>
+(define (stx:transform-dynamic doc sst-sxml)<i><br> ... <a href='#codefunc55988'>Full Code</a> ... )</i>
+<pre> transformate given SXML document &lt;doc&gt; using stylesheet &lt;sst&gt; in SXML
+ format
+</pre><p><br>
+
+<h4><a name='docfunc58057' href='#tocfunc58057'>stx:write-transformer</a></h4>
+(define (stx:write-transformer sst file)<i><br> ... <a href='#codefunc58057'>Full Code</a> ... )</i><p><br>
+
+<h4><a name='docfunc10751' href='#tocfunc10751'>stx:eval-transformer</a></h4>
+(define (stx:eval-transformer sst-scm)<i><br> ... <a href='#codefunc10751'>Full Code</a> ... )</i>
+<pre> evalutes components  of given (in Scheme) STX stylesheet and returns a &quot;prepared&quot;
+ stylesheet where all the necessary S-expressions are evaluated 
+</pre><p><br>
+
+<h4><a name='docfunc26897' href='#tocfunc26897'>stx:transform</a></h4>
+(define (stx:transform doc sst-lambda)<i><br> ... <a href='#codefunc26897'>Full Code</a> ... )</i>
+<pre> transforms given SXML document &lt;doc&gt; using prepared (compiled or eval'uated)
+ stylesheet &lt;sst-lambda&gt;
+</pre><p><br>
+
+<h4><a name='docfunc28923' href='#tocfunc28923'>stx:translate</a></h4>
+(define (stx:translate sst)<i><br> ... <a href='#codefunc28923'>Full Code</a> ... )</i>
+<pre> translate given STX stylesheet &lt;sst&gt; from SXML to Scheme 
+</pre><p><br>
+
+<h4><a name='docfunc33217' href='#tocfunc33217'>stx:make-stx-stylesheet</a></h4>
+(define (stx:make-stx-stylesheet stx-tree)<i><br> ... <a href='#codefunc33217'>Full Code</a> ... )</i>
+<pre> Generates an stx:stylesheet from a stylesheet represented as &lt;stx-tree&gt;
+ in SXML format
+</pre><p><br>
+
+<hr width='40%' align='center'><center><h3><a name='sect2927' href='#tocsect2927'>Transformers for XSL stylesheet elements</a></h3></center>
+
+<pre></pre>
+<h4><a name='docfunc11135' href='#tocfunc11135'>stx:scm->stx</a></h4>
+(define (stx:scm-&gt;stx tmplt)<i><br> ... <a href='#codefunc11135'>Full Code</a> ... )</i>
+<pre> Transforms element stx:template (extracted from XSL stylesheet and
+ represented in SXML format) to stx:template
+</pre><p><br>
+
+<h4><a name='docfunc52082' href='#tocfunc52082'>stx:stx-var->stx</a></h4>
+(define (stx:stx-var-&gt;stx var)<i><br> ... <a href='#codefunc52082'>Full Code</a> ... )</i>
+<pre> Transforms STX element stx:var to stx:variable
+</pre><p><br>
+
+<h4><a name='docfunc51819' href='#tocfunc51819'>stx:xsl-var->stx</a></h4>
+(define (stx:xsl-var-&gt;stx var)<i><br> ... <a href='#codefunc51819'>Full Code</a> ... )</i>
+<pre> Transforms XSL element xsl:var to stx:variable
+</pre><p><br>
+
+<h4><a name='docfunc46276' href='#tocfunc46276'>stx:attr->html</a></h4>
+(define (stx:attr-&gt;html attr)<i><br> ... <a href='#codefunc46276'>Full Code</a> ... )</i><p><br>
+
+<h4><a name='docfunc15235' href='#tocfunc15235'>stx:xsl->stx</a></h4>
+(define (stx:xsl-&gt;stx tmplt output-attr doc-string-out custom-prefixes c-root)<i><br> ... <a href='#codefunc15235'>Full Code</a> ... )</i>
+<pre> transforms an xsl:template to stx:template
+</pre><p><br>
+
+<h4><a name='docmacro13721' href='#tocmacro13721'>stx:call-function</a></h4>
+(define-macro stx:call-function (lambda (name type tpl-node $-env)<i><br> ... <a href='#codemacro13721'>Full Code</a> ... )</i>
+<pre> A helper for stx:xsl-&gt;stx 
+</pre><p><br>
+<hr height='5'><center><h3><a name='chapt48027' href='#tocchapt48027'>Wrappers</a></h3></center>
+
+<pre></pre><center><h1>Code</h1></center>
+
+<h4><a name='codefunc63403' href='#docfunc63403'>stx:version</a></h4>
+<i><a href='#tocfunc63403'>Index</a></i><br>
+
+<pre> Auxilliary 
+</pre>
+<pre>(define <a href="stx-engine.html#codefunc63403">stx:version</a> 
+  (string-append &quot; $Revision: 1.9403 $&quot; <a href="myenv.html#codefunc27758">nl</a> &quot; $Date: 2002/12/25 19:33:48 $&quot;))
+</pre>
+<h4><a name='codefunc37173' href='#docfunc37173'>stx:error</a></h4>
+<i><a href='#tocfunc37173'>Index</a></i><br>
+
+<pre>(define (<a href="stx-engine.html#codefunc37173">stx:error</a> . messages)
+  (<a href="myenv.html#codefunc55253">cerr</a> <a href="myenv.html#codefunc27758">nl</a> &quot;STX: &quot;)
+  (apply <a href="myenv.html#codefunc55253">cerr</a> messages)
+  (<a href="myenv.html#codefunc55253">cerr</a> <a href="myenv.html#codefunc27758">nl</a>)
+  (exit -1))
+</pre>
+<h4><a name='codefunc9279' href='#docfunc9279'>stx:read-content</a></h4>
+<i><a href='#tocfunc9279'>Index</a></i><br>
+
+<pre> Reads content of a given SXML element 'obj' using Scheme reader.
+ The content has to be a list of strings (first of them will be read).
+ If the content is empty, &quot;&quot; is returned.
+</pre>
+<pre>(define (<a href="stx-engine.html#codefunc9279">stx:read-content</a> obj objname)
+  (let ((ct (<a href="sxml-tools.html#codefunc36973">sxml:content</a> obj)))
+    (cond 
+      ((null? ct) &quot;&quot;)
+      ((string? (car ct))
+       (with-exception-handler         
+        (lambda(mes)
+          (apply <a href="stx-engine.html#codefunc37173">stx:error</a> 
+                 `(&quot;Error &quot; ,nl ,mes ,nl &quot;reading &quot; ,objname &quot; code:&quot; ,nl
+                   ,(car ct) ,nl &quot;from element&quot; ,nl
+                   ,@(<a href="stx-engine.html#codefunc59359">sxml:clean-feed</a> (<a href="sxml-tools.html#codefunc55211">sxml:sxml-&gt;xml</a> obj)) ,nl))
+          (exit))
+        (lambda()
+          (<a href="myenv.html#codefunc15729">call-with-input-string</a> (car ct) read))))
+      (else 
+	    (<a href="stx-engine.html#codefunc37173">stx:error</a> &quot;Invalid &quot; objname &quot; element:&quot; <a href="myenv.html#codefunc27758">nl</a> obj)))
+      ))
+</pre>
+<h4><a name='codefunc29678' href='#docfunc29678'>stx:clean-feed</a></h4>
+<i><a href='#tocfunc29678'>Index</a></i><br>
+
+<pre>(define (<a href="stx-engine.html#codefunc29678">stx:clean-feed</a> . fragments)
+  (reverse
+  (let loop ((fragments fragments) (result '()))
+    (cond
+      ((null? fragments) result)
+      ((not (car fragments)) (loop (cdr fragments) result))
+      ((null? (car fragments)) (loop (cdr fragments) result))
+      (else
+        (loop (cdr fragments) 
+	      (cons (car fragments) result)))))))
+</pre>
+<h4><a name='codefunc59359' href='#docfunc59359'>sxml:clean-feed</a></h4>
+<i><a href='#tocfunc59359'>Index</a></i><br>
+
+<pre> DL: Borrowed from the older version of SXML Tools
+ Filter the 'fragments'
+ The fragments are a list of strings, characters,
+ numbers, thunks, #f -- and other fragments.
+ The function traverses the tree depth-first, and returns a list
+ of strings, characters and executed thunks, and ignores #f and '().
+
+ If all the meaningful fragments are strings, then
+  (apply string-append ... )
+ to a result of this function will return its string-value 
+
+ It may be considered as a variant of Oleg Kiselyov's SRV:send-reply:
+ While SRV:send-reply displays fragments, this function returns the list 
+ of meaningful fragments and filter out the garbage.
+</pre>
+<pre>(define (<a href="stx-engine.html#codefunc59359">sxml:clean-feed</a> . fragments)
+  (reverse
+  (let loop ((fragments fragments) (result '()))
+    (cond
+      ((null? fragments) result)
+      ((not (car fragments)) (loop (cdr fragments) result))
+      ((null? (car fragments)) (loop (cdr fragments) result))
+      ((pair? (car fragments))
+        (loop (cdr fragments) 
+	      (loop (car fragments) result)))
+ ;      ((procedure? (car fragments))
+ ;         (loop (cdr fragments) 
+ ;              (cons ((car fragments))
+ ;	       result)))
+      (else
+        (loop (cdr fragments) 
+	      (cons (car fragments) result)))))))
+</pre>
+<h4><a name='codefunc12599' href='#docfunc12599'>sxml:refactor-ns</a></h4>
+<i><a href='#tocfunc12599'>Index</a></i><br>
+
+<pre> Transforms top-level *NAMESPACES* in SXML document 
+ parsed using SSAX 4.9 to aux-list representation compatible to
+ SXML-spec. ver. 2.5
+</pre>
+<pre>(define (<a href="stx-engine.html#codefunc12599">sxml:refactor-ns</a> tree)
+  (if (and (pair? tree) (pair? (cdr tree)) (pair? (cadr tree))
+	   (eq? '*NAMESPACES* (caadr tree)))
+    `(,(car tree) (@@ (*NAMESPACES* ,@(cdadr tree))) ,@(cddr tree))
+    tree))
+</pre>
+<h4><a name='codefunc506' href='#docfunc506'>sxml:xml->sxml-autoprefix</a></h4>
+<i><a href='#tocfunc506'>Index</a></i><br>
+
+<pre> Reads XML document as SXML tree. NS prefixes declared in XML document
+ are used as namespace-id's.
+</pre>
+<pre>(define (<a href="stx-engine.html#codefunc506">sxml:xml-&gt;sxml-autoprefix</a> name)
+  (<a href="stx-engine.html#codefunc12599">sxml:refactor-ns</a> ; workaround for SSAX 4.9
+    (let ((ns-list (<a href="stx-engine.html#codefunc20772">sxml:extract-prefix-assigs</a> name)))  
+    (<a href="SSAX-code.html#codefunc62346">ssax:xml-&gt;sxml</a>
+      (<a href="access-remote.html#codefunc60351">open-input-resource</a> name)
+      ns-list))))
+</pre>
+<h4><a name='codefunc20772' href='#docfunc20772'>sxml:extract-prefix-assigs</a></h4>
+<i><a href='#tocfunc20772'>Index</a></i><br>
+
+<pre> of NS-prefix/URIs declared as a list of pairs.
+</pre>
+<pre>(define (<a href="stx-engine.html#codefunc20772">sxml:extract-prefix-assigs</a> file)
+  (call-with-input-file
+      file
+    (lambda (p)
+      (<a href="SSAX-code.html#codefunc63037">ssax:skip-S</a> p)
+      (let loop ((lst (<a href="SSAX-code.html#codefunc30768">ssax:read-markup-token</a> p)))
+        (case (car lst)
+          ((PI)  ; Processing instruction           
+           (<a href="SSAX-code.html#codefunc24411">ssax:skip-pi</a> p)  ; ignore until the end           
+           (<a href="SSAX-code.html#codefunc63037">ssax:skip-S</a> p)
+           (loop (<a href="SSAX-code.html#codefunc30768">ssax:read-markup-token</a> p)))
+          ((START)
+           (<a href="sxml-tools.html#codefunc62306">filter-and-map</a>
+            (lambda(x)
+              (and (pair? (car x)) (eq? 'xmlns (caar x))))
+            (lambda(x)
+              (cons (cdar x) (cdr x)))
+            (<a href="SSAX-code.html#codefunc7667">ssax:read-attributes</a> p '())))
+          (else
+           (display &quot;Unknown token type: &quot;)
+           (display (car lst))
+           (exit)))))))
+</pre>
+<h4><a name='codefunc22124' href='#docfunc22124'>stx:apply-templates</a></h4>
+<i><a href='#tocfunc22124'>Index</a></i><br>
+
+<pre> stx:apply-templates:: &lt;tree&gt; x &lt;templates&gt; x &lt;root&gt; x &lt;environment&gt; -&gt; &lt;new-tree&gt;
+ where
+ &lt;templates&gt; ::= &lt;default-template&gt; &lt;text-template&gt; &lt;template&gt;*
+ &lt;default-template&gt; ::= (*default* . &lt;handler&gt;)
+ &lt;text-template&gt; ::= (*text* . &lt;handler&gt;)
+ &lt;template&gt;  ::= (&lt;matcher&gt; &lt;handler&gt;) | ( XMLname &lt;handler&gt;)
+ &lt;root&gt;     ::= &lt;document-root&gt;
+ &lt;environment&gt; ::= &lt;lambda-tuple&gt;
+ &lt;matcher&gt;  ::= &lt;node&gt; &lt;root&gt; -&gt; &lt;nodeset&gt;
+ &lt;handler&gt; :: &lt;node&gt; &lt;templates&gt; &lt;root&gt; &lt;environment&gt; -&gt; &lt;new-node&gt;
+
+ The stx:apply-templates function visits top-level nodes of a given tree and 
+ process them in accordance with a list of templates given. 
+ If a node is a textual one then it is processed usind 'text-template',
+ which has to be second element in given list of templates. 
+ If a node is a pair then stx:apply-templates looks up a corresponding template
+ among  given &lt;templates&gt; using stx:find-template function. 
+ If failed, stx:apply-templates tries to locate a *default* template, 
+ which has to be first element in given list of templates. It's an
+ error if this latter attempt fails as well.  
+ Having found a template, its handler is applied to the current node. 
+ The result of the handler application, which should
+ also be a &lt;tree&gt;, replaces the current node in output tree.
+
+ This function is slightly similar to Oleg Kiselyov's &quot;pre-post-order&quot; function
+ with *preorder* bindings. 
+</pre>
+<pre>(define (<a href="stx-engine.html#codefunc22124">stx:apply-templates</a> tree templates root environment)
+  (cond
+    ((<a href="sxpathlib.html#codefunc31162">nodeset?</a> tree)
+     (map (lambda (a-tree) 
+	    (<a href="stx-engine.html#codefunc22124">stx:apply-templates</a> a-tree templates root environment)) 
+	  tree))
+    ((pair? tree) 
+     (cond
+       ((<a href="libmisc.html#codefunc37645">tee-4</a> &quot;Template: &quot; 
+	(<a href="stx-engine.html#codefunc16266">stx:find-template</a> tree 
+		      (cddr templates) ; *default* and *text* skipped
+		      root)) 
+	=&gt; (lambda (template) 
+	     ((cadr template) tree templates root environment)))
+       (else 
+	 (if (eq? '*default* (caar templates))
+	   ((cadar templates) tree templates root environment)
+	   (<a href="stx-engine.html#codefunc37173">stx:error</a> &quot;stx:apply-templates: There is no template in: &quot; templates
+		      ; <a href="myenv.html#codefunc27758">nl</a> &quot;for: &quot; tree
+		      )) 
+	 )))
+    ((string? tree) ; *text*
+	 (if (eq? '*text* (caadr templates))
+	   ((cadadr templates) tree)
+	   (<a href="stx-engine.html#codefunc37173">stx:error</a> &quot;stx:apply-templates: There is no *text* templates for: &quot; 
+		      templates))) 
+    (else (<a href="stx-engine.html#codefunc37173">stx:error</a> &quot;Unexpected type of node: &quot; tree))))
+</pre>
+<h4><a name='codefunc16266' href='#docfunc16266'>stx:find-template</a></h4>
+<i><a href='#tocfunc16266'>Index</a></i><br>
+
+<pre>  stx:find-template: &lt;node&gt; x &lt;templates&gt; x &lt;root&gt; -&gt; &lt;template&gt;
+  This function returns first template in &lt;templates&gt; whouse &lt;matcher&gt;
+  matches given &lt;node&gt;
+  &lt;matcher&gt; matches node if:
+    - if it is a symbol and its the same as the name of the node matched
+    - if it is a procedure (sxpath/txpath generated one) then it is 
+     applyed (with respect to given &lt;root&gt;) sequentially to the matched node 
+     and its parents until the matched node is a member of a resulting nodeset 
+     or root node is reached. In the first case the node matches successfuly, 
+     in the second case it does not. 
+</pre>
+<pre>(define (<a href="stx-engine.html#codefunc16266">stx:find-template</a> node templates root)
+  (let ((pattern-matches? 
+	  (lambda (node pattern-test) 
+	    (let rpt ((context-node node))
+	      (cond 
+		((null? context-node) #f)
+		((memq node (pattern-test context-node
+                                          `((*root* ,root))))
+		 #t)
+		(else ; try PARENT
+		  (rpt ((<a href="sxml-tools.html#codefunc8257">sxml:node-parent</a> root) context-node))))))))  
+    (let rpt ((bnd templates)) 
+      (cond ((null? bnd) #f)
+	    ((and (symbol? (caar bnd)) (eq? (caar bnd) (car node)))
+	     (car bnd))
+	    ((and (procedure? (caar bnd)) ; redundant?
+		  (pattern-matches? node (caar bnd)))
+	     (car bnd))
+	    (else (rpt (cdr bnd)))))))
+</pre>
+<h4><a name='codefunc27226' href='#docfunc27226'>stx:load-sst</a></h4>
+<i><a href='#tocfunc27226'>Index</a></i><br>
+
+<pre> Returns SXML tree for a given link.
+ A link is a lambda-tuple of its attributes.
+</pre>
+<pre>(define (<a href="stx-engine.html#codefunc27226">stx:load-sst</a> link)
+ ((cond 
+    ((equal? (link 'type) &quot;stx&quot;)
+       (lambda(x)
+	 (call-with-input-file x read)))
+    ((equal? (link 'type) &quot;sxml&quot;)
+     (<a href="stx-engine.html#codefunc33217">stx:make-stx-stylesheet</a>
+       (lambda(x)
+	 (call-with-input-file x read))))
+    ; default is xml
+    (else 
+       (lambda(x)
+         (<a href="stx-engine.html#codefunc33217">stx:make-stx-stylesheet</a>
+          (<a href="stx-engine.html#codefunc506">sxml:xml-&gt;sxml-autoprefix</a> x)))))
+   (link 'href)))
+</pre>
+<h4><a name='codefunc53194' href='#docfunc53194'>stx:stx->tmpl+env</a></h4>
+<i><a href='#tocfunc53194'>Index</a></i><br>
+
+<pre> Transform top-level objects of stx:stylesheet 
+ to a list whose car is corresponding template (#f no templates generated) 
+ and whose cadr is corresponding environment binding (#f if no bindings),
+</pre>
+<pre>(define (<a href="stx-engine.html#codefunc53194">stx:stx-&gt;tmpl+env</a> stx-objects)
+ (let rpt ((objs stx-objects)
+	   (templts '())
+	   (envrt '()))
+  (cond
+    ((null? objs) (list (reverse templts)
+			envrt))
+    ; templates
+    ((eq? (caar objs) 'stx:template)
+     (let* ((obj (car objs))
+	(handler (caddr obj)))
+       (rpt 
+	 (cdr objs)
+	 (cond 
+	   ((<a href="sxml-tools.html#codefunc47873">sxml:attr</a> obj 'match) 
+	    =&gt; (lambda (x) 
+		 (cons 
+		   (list `(<a href="sxpath.html#codefunc16984">sxpath</a> ,x) handler)
+		   ;(list `(sxp:xpath+root ,x) handler)
+		   templts)))
+	   ((<a href="sxml-tools.html#codefunc47873">sxml:attr</a> obj 'match-lambda)
+	    =&gt; (lambda (x) 
+		 (cons (list x handler) templts)))
+	   (else 
+	     (<a href="libmisc.html#codefunc64021">verb-2</a> <a href="myenv.html#codefunc27758">nl</a> &quot;NO match for: &quot; (cadr obj))
+	     templts))
+	 (cond 
+	   ((<a href="sxml-tools.html#codefunc47873">sxml:attr</a> obj 'name)
+	    =&gt; (lambda (x) 
+		 (cons  
+		   (list (string-&gt;symbol x) handler) envrt)))
+	   (else 
+	     (<a href="libmisc.html#codefunc64021">verb-2</a> <a href="myenv.html#codefunc27758">nl</a> &quot;NO name for: &quot; (cadr obj) 
+		     &quot;==&quot; (<a href="sxml-tools.html#codefunc47873">sxml:attr</a> obj 'name))
+	     envrt)))))
+    ((eq? (caar objs) 'stx:variable)
+      (let* ((obj (car objs))
+	     (name (<a href="sxml-tools.html#codefunc47873">sxml:attr</a> obj 'name)) 
+	     (code  (caddr obj)))              ; (<a href="sxml-tools.html#codefunc36973">sxml:content</a> obj)
+	(rpt 
+	(cdr objs)
+	templts
+	(cons (list (string-&gt;symbol name) code) envrt))))
+    (else
+      (<a href="libmisc.html#codefunc64021">verb-2</a> <a href="myenv.html#codefunc27758">nl</a> &quot;Unrecognized object: &quot; (caar objs) <a href="myenv.html#codefunc27758">nl</a>)
+      (rpt (cdr objs) templts envrt)))))
+</pre>
+<h4><a name='codefunc13989' href='#docfunc13989'>stx:write-ss</a></h4>
+<i><a href='#tocfunc13989'>Index</a></i><br>
+
+<pre>(define (<a href="stx-engine.html#codefunc13989">stx:write-ss</a> t+e fname)
+  (let* ((of
+          ; DL: replacing this non-R5RS call with the following piece of code
+          ;(open-output-file fname 'replace)
+          (begin 
+            (when (file-exists? fname) (delete-file fname))
+            (open-output-file fname)))
+	 (wrt (lambda x 
+		(for-each (lambda(y) (display y of)) x))))
+    (wrt    &quot;#cs(module transform mzscheme&quot; <a href="myenv.html#codefunc27758">nl</a> 
+            &quot;(require&quot; <a href="myenv.html#codefunc27758">nl</a>
+            &quot;(rename (lib \&quot;list.ss\&quot;) sort mergesort)&quot; <a href="myenv.html#codefunc27758">nl</a>
+            &quot;(lib \&quot;stx-engine.ss\&quot; \&quot;sxml\&quot;)&quot; <a href="myenv.html#codefunc27758">nl</a>
+            &quot;(lib \&quot;util.ss\&quot; \&quot;ssax\&quot;)&quot; <a href="myenv.html#codefunc27758">nl</a> 
+            &quot;(lib \&quot;txpath.ss\&quot; \&quot;sxml\&quot;)&quot; <a href="myenv.html#codefunc27758">nl</a>
+            &quot;(lib \&quot;sxpath-ext.ss\&quot; \&quot;sxml\&quot;)&quot; <a href="myenv.html#codefunc27758">nl</a> 
+            &quot;(lib \&quot;sxml-tools.ss\&quot; \&quot;sxml\&quot;)&quot; <a href="myenv.html#codefunc27758">nl</a>
+            &quot;(lib \&quot;sxpathlib.ss\&quot; \&quot;sxml\&quot;)&quot; <a href="myenv.html#codefunc27758">nl</a>
+            &quot;(lib \&quot;libmisc.ss\&quot; \&quot;sxml\&quot;)&quot; <a href="myenv.html#codefunc27758">nl</a>
+            &quot;(lib \&quot;myenv.ss\&quot; \&quot;ssax\&quot;)&quot; <a href="myenv.html#codefunc27758">nl</a>
+            &quot;(lib \&quot;common.ss\&quot; \&quot;sxml\&quot;))&quot; <a href="myenv.html#codefunc27758">nl</a>
+	    &quot;(provide stylesheet)&quot; <a href="myenv.html#codefunc27758">nl</a>)
+    
+    (wrt <a href="myenv.html#codefunc27758">nl</a> &quot;(define stylesheet (list &quot; <a href="myenv.html#codefunc27758">nl</a> &quot;(list ; templates:&quot;)
+  (for-each
+    (lambda(x)
+      (wrt <a href="myenv.html#codefunc27758">nl</a> &quot;(list &quot;) 
+      (pp (car x) of)
+      (wrt &quot;&quot;) 
+      (pp (cadr x) of)
+      (wrt &quot;)&quot; <a href="myenv.html#codefunc27758">nl</a>))
+    (car t+e))
+    (wrt &quot;) ; end templates&quot; <a href="myenv.html#codefunc27758">nl</a> <a href="myenv.html#codefunc27758">nl</a> &quot;( list ; environment:&quot;)
+  (for-each
+    (lambda(x)
+      (wrt <a href="myenv.html#codefunc27758">nl</a> &quot;(list '&quot; (car x) <a href="myenv.html#codefunc27758">nl</a>) 
+      (pp (cadr x) of)
+      (wrt &quot;) ; end of `&quot; (car x) &quot;'&quot; <a href="myenv.html#codefunc27758">nl</a>))
+    (cadr t+e))
+    (wrt &quot;)  ; end environment&quot; <a href="myenv.html#codefunc27758">nl</a>)
+    (wrt &quot;)) ; end stylesheet&quot; <a href="myenv.html#codefunc27758">nl</a>)
+    (wrt &quot;)&quot; <a href="myenv.html#codefunc27758">nl</a>) ; end module 
+  ))
+</pre>
+<h4><a name='codefunc55988' href='#docfunc55988'>stx:transform-dynamic</a></h4>
+<i><a href='#tocfunc55988'>Index</a></i><br>
+
+<pre> transformate given SXML document &lt;doc&gt; using stylesheet &lt;sst&gt; in SXML
+ format
+</pre>
+<pre>(define (<a href="stx-engine.html#codefunc55988">stx:transform-dynamic</a> doc sst-sxml)
+  (<a href="stx-engine.html#codefunc26897">stx:transform</a>
+    doc
+    (<a href="stx-engine.html#codefunc10751">stx:eval-transformer</a>
+      (<a href="stx-engine.html#codefunc28923">stx:translate</a> sst-sxml))))
+</pre>
+<h4><a name='codefunc58057' href='#docfunc58057'>stx:write-transformer</a></h4>
+<i><a href='#tocfunc58057'>Index</a></i><br>
+
+<pre>(define (<a href="stx-engine.html#codefunc58057">stx:write-transformer</a> sst file)
+     (<a href="stx-engine.html#codefunc13989">stx:write-ss</a> (<a href="stx-engine.html#codefunc28923">stx:translate</a> sst) file))
+</pre>
+<h4><a name='codefunc10751' href='#docfunc10751'>stx:eval-transformer</a></h4>
+<i><a href='#tocfunc10751'>Index</a></i><br>
+
+<pre> evalutes components  of given (in Scheme) STX stylesheet and returns a &quot;prepared&quot;
+ stylesheet where all the necessary S-expressions are evaluated 
+</pre>
+<pre>(define (<a href="stx-engine.html#codefunc10751">stx:eval-transformer</a> sst-scm)
+  (list 
+	(map 
+	  (lambda(x)
+	    (list (eval (car x))
+		  (eval (cadr x))))
+	  (car sst-scm))
+	(map 
+	  (lambda(x)
+	    (list (car x)
+		  (eval (cadr x))))
+	  (cadr sst-scm))))
+</pre>
+<h4><a name='codefunc26897' href='#docfunc26897'>stx:transform</a></h4>
+<i><a href='#tocfunc26897'>Index</a></i><br>
+
+<pre> transforms given SXML document &lt;doc&gt; using prepared (compiled or eval'uated)
+ stylesheet &lt;sst-lambda&gt;
+</pre>
+<pre>(define (<a href="stx-engine.html#codefunc26897">stx:transform</a> doc sst-lambda)
+  (let ((string-out <a href="sxml-tools.html#codefunc51486">sxml:sxml-&gt;html</a>))
+   (<a href="stx-engine.html#codefunc22124">stx:apply-templates</a> doc
+      ; bindings
+      (<a href="libmisc.html#codefunc37644">tee-3</a>
+	&quot;Templates: &quot;
+       (append
+	 `((*default* 
+	       ,(lambda (node bindings root environment)
+		   (<a href="stx-engine.html#codefunc22124">stx:apply-templates</a> (<a href="sxml-tools.html#codefunc36973">sxml:content</a> node) 
+				      bindings 
+				      root environment)))
+	   (*text* 
+	      ,string-out))
+	  (car sst-lambda)))
+      ;root 
+      doc
+      ; environment
+      (apply 
+	<a href="libmisc.html#codefunc28493">lambda-tuple</a>
+	(<a href="libmisc.html#codefunc37644">tee-3</a> 
+	  &quot;Environment: &quot;
+	  (append 
+	    `((<a href="stx-engine.html#codefunc63403">stx:version</a> ,stx:version))
+	  (cadr sst-lambda) 
+	    ))))))
+</pre>
+<h4><a name='codefunc28923' href='#docfunc28923'>stx:translate</a></h4>
+<i><a href='#tocfunc28923'>Index</a></i><br>
+
+<pre> translate given STX stylesheet &lt;sst&gt; from SXML to Scheme 
+</pre>
+<pre>(define (<a href="stx-engine.html#codefunc28923">stx:translate</a> sst)
+  (let* 
+    (
+ ;     (output-attr
+ ;       ; lambda tuple of 'xsl:output' attributes
+ ;       (apply <a href="libmisc.html#codefunc28493">lambda-tuple</a>
+ ;	      (cond
+ ;		(((<a href="sxpath.html#codefunc37991">if-car-sxpath</a> '(xsl:stylesheet xsl:output @)) sst)
+ ;		 =&gt;  cdr)
+ ;		(else '((method &quot;html&quot;))))))
+ ;     ((string-out)
+ ;      (case (string-&gt;symbol (output-attr 'method))
+ ;	((text) <a href="libmisc.html#codefunc52191">self</a>)
+ ;	((xml)  <a href="sxml-tools.html#codefunc19212">sxml:string-&gt;xml</a>)
+ ;	(else   <a href="sxml-tools.html#codefunc51486">sxml:sxml-&gt;html</a>)))
+     (stx-sst
+       (<a href="libmisc.html#codefunc37643">tee-2</a>
+	 &quot;STX stylesheets: &quot;
+	 (append sst
+		 (apply append
+			(map
+			  (lambda(x)
+			    (<a href="libmisc.html#codefunc37643">tee-2</a> 
+			      &quot;IMPORTED: &quot; 
+			      ; just stx:template and stx:variable elements
+			      ; are used from imported _STX_ stylesheets
+			      ((<a href="sxpath.html#codefunc16984">sxpath</a> '((*or* stx:template stx:variable))) 
+			       (<a href="stx-engine.html#codefunc27226">stx:load-sst</a> (apply <a href="libmisc.html#codefunc28493">lambda-tuple</a> 
+						    (<a href="sxpathlib.html#codefunc50657">sxml:attr-list</a> x))))))
+			  ((<a href="sxpath.html#codefunc16984">sxpath</a> '((*or* xsl:import stx:import))) sst))))))
+     (templates+env
+       (<a href="libmisc.html#codefunc37643">tee-2</a>
+	 &quot;templates+env&quot;
+	 (<a href="stx-engine.html#codefunc53194">stx:stx-&gt;tmpl+env</a>
+	  ((<a href="sxpath.html#codefunc16984">sxpath</a> '(*)) stx-sst))))
+     )
+   templates+env))
+</pre>
+<h4><a name='codefunc33217' href='#docfunc33217'>stx:make-stx-stylesheet</a></h4>
+<i><a href='#tocfunc33217'>Index</a></i><br>
+
+<pre> Generates an stx:stylesheet from a stylesheet represented as &lt;stx-tree&gt;
+ in SXML format
+</pre>
+<pre>(define (<a href="stx-engine.html#codefunc33217">stx:make-stx-stylesheet</a> stx-tree)
+  (let* 
+    ((output-attr
+       ; lambda tuple of 'xsl:output' attributes
+       (apply <a href="libmisc.html#codefunc28493">lambda-tuple</a>
+	      (cond
+		(((<a href="sxpath.html#codefunc37991">if-car-sxpath</a> '(xsl:stylesheet xsl:output @)) stx-tree)
+		 =&gt;  cdr)
+		(else '((method &quot;html&quot;))))))
+     (string-out
+      (case (string-&gt;symbol (output-attr 'method))
+	((text) '<a href="libmisc.html#codefunc52191">self</a>)
+	((xml)  '<a href="sxml-tools.html#codefunc19212">sxml:string-&gt;xml</a>)
+	(else   '<a href="sxml-tools.html#codefunc51486">sxml:sxml-&gt;html</a>)))
+     (custom-prefixes 
+       (map string-&gt;symbol
+	    ((<a href="sxpath.html#codefunc16984">sxpath</a> '(xsl:stylesheet stx:import @ prefix *text*))
+	     stx-tree))))
+     (cons 'stx:stylesheet
+   (map
+      (lambda(x)
+	(cond 
+	  ; xsl:template
+	  ((eq? (car x) 'xsl:template)
+	   (<a href="stx-engine.html#codefunc15235">stx:xsl-&gt;stx</a> x output-attr string-out custom-prefixes
+			 stx-tree))
+	  ; stx:template
+	  ((eq? (car x) 'stx:template)
+	   (<a href="stx-engine.html#codefunc11135">stx:scm-&gt;stx</a> x))
+	  ; stx:variable
+	  ((eq? (car x) 'stx:variable)
+	   (<a href="stx-engine.html#codefunc52082">stx:stx-var-&gt;stx</a> x))
+	  ; xsl:variable
+	  ((eq? (car x) 'xsl:variable)
+	   (<a href="stx-engine.html#codefunc51819">stx:xsl-var-&gt;stx</a> x))
+	  (else x)))
+      ((<a href="sxpath.html#codefunc16984">sxpath</a> `(xsl:stylesheet *)) stx-tree)))
+    ))
+</pre>
+<h4><a name='codefunc11135' href='#docfunc11135'>stx:scm->stx</a></h4>
+<i><a href='#tocfunc11135'>Index</a></i><br>
+
+<pre> Transforms element stx:template (extracted from XSL stylesheet and
+ represented in SXML format) to stx:template
+</pre>
+<pre>(define (<a href="stx-engine.html#codefunc11135">stx:scm-&gt;stx</a> tmplt)
+  `(stx:template (@ ,@(<a href="sxpathlib.html#codefunc50657">sxml:attr-list</a> tmplt))
+	(lambda (current-node stx:templates current-root $)
+		 ,(<a href="stx-engine.html#codefunc9279">stx:read-content</a> tmplt &quot;&lt;stx:template@match&gt;&quot;))))
+</pre>
+<h4><a name='codefunc52082' href='#docfunc52082'>stx:stx-var->stx</a></h4>
+<i><a href='#tocfunc52082'>Index</a></i><br>
+
+<pre> Transforms STX element stx:var to stx:variable
+</pre>
+<pre>(define (<a href="stx-engine.html#codefunc52082">stx:stx-var-&gt;stx</a> var)
+  `(stx:variable (@ ,@(<a href="sxpathlib.html#codefunc50657">sxml:attr-list</a> var))
+		 ,(<a href="stx-engine.html#codefunc9279">stx:read-content</a> var &quot;&lt;stx:variable&quot;)))
+</pre>
+<h4><a name='codefunc51819' href='#docfunc51819'>stx:xsl-var->stx</a></h4>
+<i><a href='#tocfunc51819'>Index</a></i><br>
+
+<pre> Transforms XSL element xsl:var to stx:variable
+</pre>
+<pre>(define (<a href="stx-engine.html#codefunc51819">stx:xsl-var-&gt;stx</a> var)
+  `(stx:variable (@ ,@(<a href="sxpathlib.html#codefunc50657">sxml:attr-list</a> var))
+		 ',(<a href="sxml-tools.html#codefunc36973">sxml:content</a> var)))
+</pre>
+<h4><a name='codefunc46276' href='#docfunc46276'>stx:attr->html</a></h4>
+<i><a href='#tocfunc46276'>Index</a></i><br>
+
+<pre>(define (<a href="stx-engine.html#codefunc46276">stx:attr-&gt;html</a> attr)
+	 (if (equal? &quot;&quot; (cadr attr))
+              `(list &quot; &quot; ,(<a href="sxml-tools.html#codefunc12101">sxml:ncname</a> attr))
+              `(list &quot; &quot; ,(<a href="sxml-tools.html#codefunc12101">sxml:ncname</a> attr) &quot;='&quot; ,(cadr attr) &quot;'&quot;)))
+</pre>
+<h4><a name='codefunc15235' href='#docfunc15235'>stx:xsl->stx</a></h4>
+<i><a href='#tocfunc15235'>Index</a></i><br>
+
+<pre> transforms an xsl:template to stx:template
+</pre>
+<pre>(define (<a href="stx-engine.html#codefunc15235">stx:xsl-&gt;stx</a> tmplt output-attr doc-string-out 
+		       custom-prefixes c-root)
+  (let* 
+    ; list of template's attributes
+    ((attr-list (<a href="sxpathlib.html#codefunc50657">sxml:attr-list</a> tmplt))
+     (sst-method (cond 
+		   ((<a href="sxml-tools.html#codefunc42978">sxml:attr-from-list</a> attr-list 'stx:method)
+		    =&gt; string-&gt;symbol)
+	           ; xml is default
+		   (else 'xml)))
+     ; output string for _template_  (not document!) conversion
+     (sst-string-out
+       (case sst-method
+	 ((text) <a href="libmisc.html#codefunc52191">self</a>)
+	 ((html)  <a href="sxml-tools.html#codefunc15487">sxml:string-&gt;html</a>)
+	 (else   <a href="sxml-tools.html#codefunc55211">sxml:sxml-&gt;xml</a>))))
+
+  `(stx:template (@ ,@attr-list)
+	(lambda (current-node stx:templates current-root $)
+	  ,(cons 'list
+	  ;(<a href="stx-engine.html#codefunc29678">stx:clean-feed</a>
+	  (<a href="stx-engine.html#codefunc22124">stx:apply-templates</a> 
+	    (<a href="sxml-tools.html#codefunc36973">sxml:content</a> tmplt)
+	    `((*default* 
+		 ,(lambda (tt-node bindings root environment)
+		     (if (cond ((<a href="sxml-tools.html#codefunc60924">sxml:name-&gt;ns-id</a> (car tt-node)) 
+				=&gt; (lambda(x) 
+				     (member (string-&gt;symbol x)
+					     custom-prefixes)))
+			       (else #f))	 
+		       ; user-defined tag 
+		       `(<a href="stx-engine.html#codemacro13721">stx:call-function</a> ,(<a href="sxml-tools.html#codefunc12101">sxml:ncname</a> tt-node) 
+					   &quot;Custom Tag&quot;
+					   ,tt-node
+					   $)
+		       ; XHTML tag
+		       (let ((nm (<a href="sxml-tools.html#codefunc12101">sxml:ncname</a> tt-node))
+			     (content (<a href="sxml-tools.html#codefunc36973">sxml:content</a> tt-node)))
+			 (if (null? content)
+			   `(list &quot;&lt;&quot; ,nm ,@(map <a href="stx-engine.html#codefunc46276">stx:attr-&gt;html</a> 
+					   (<a href="sxpathlib.html#codefunc50657">sxml:attr-list</a> tt-node)) &quot;/&gt;&quot;)
+			   `(list &quot;&lt;&quot; ,nm ,@(map <a href="stx-engine.html#codefunc46276">stx:attr-&gt;html</a> 
+					   (<a href="sxpathlib.html#codefunc50657">sxml:attr-list</a> tt-node)) &quot;&gt;&quot;
+			     ,@(<a href="stx-engine.html#codefunc22124">stx:apply-templates</a> content 
+						    bindings root environment)
+			     &quot;&lt;/&quot; ,nm &quot;&gt;&quot; ))))
+		     ))
+	      (*text*  ; text string in template 
+		 ,sst-string-out)
+	      (xsl:apply-templates ; t-node is &lt;xsl:apply-templates/&gt;
+		 ,(lambda (t-node bindings root environment) 
+		     `(<a href="stx-engine.html#codefunc22124">stx:apply-templates</a>
+			,(cond 
+			   ((<a href="sxml-tools.html#codefunc47873">sxml:attr</a> t-node 'select)
+			    =&gt; (lambda (lp)
+				 `((<a href="sxpath.html#codefunc16984">sxpath</a> ,lp) current-node current-root)
+				 ;`((sxp:xpath+root ,lp) current-node current-root)
+				 ))
+			   (else '(<a href="sxml-tools.html#codefunc36973">sxml:content</a> current-node)))
+			stx:templates current-root $)))
+              (xsl:if
+                ,(lambda (t-node bindings root environment)
+			       ``(<a href="stx-engine.html#codefunc22124">stx:apply-templates</a>
+                                 ,(<a href="sxml-tools.html#codefunc36973">sxml:content</a> ,t-node)
+                                 bindings
+                                 root
+                                 environment)
+                             ))
+	      (xsl:call-template ; t-node is &lt;xsl:call-template/&gt;
+		 ,(lambda (t-node bindings root environment) 
+		     `(<a href="stx-engine.html#codemacro13721">stx:call-function</a> ,(<a href="sxml-tools.html#codefunc47873">sxml:attr</a> t-node 'name)
+					&quot;Named Template&quot;
+					,t-node
+					$)))
+	      (xsl:value-of  ; t-node is &lt;xsl:value-of/&gt;
+		 ,(lambda (t-node bindings root environment) 
+		     `(,(if (equal? &quot;yes&quot; 
+				      (<a href="sxml-tools.html#codefunc47873">sxml:attr</a> t-node 'disable-output-escaping))
+			   '<a href="libmisc.html#codefunc52191">self</a>
+			   doc-string-out)
+			(<a href="sxpath-ext.html#codefunc14688">sxml:string</a> 
+			   ((<a href="sxpath.html#codefunc16984">sxpath</a> ,(<a href="sxml-tools.html#codefunc47873">sxml:attr</a> t-node 'select)) 
+			   ;((sxp:xpath ,(<a href="sxml-tools.html#codefunc47873">sxml:attr</a> t-node 'select)) 
+			    current-node))))) 
+	      ; &lt;xsl:copy-of/&gt;
+	      (xsl:copy-of  
+		 ,(lambda (t-node bindings root environment) 
+		     `((<a href="sxpath.html#codefunc16984">sxpath</a> ,(<a href="sxml-tools.html#codefunc47873">sxml:attr</a> t-node 'select)) current-node))) 
+		     ;`((sxp:xpath ,(<a href="sxml-tools.html#codefunc47873">sxml:attr</a> t-node 'select)) current-node))) 
+	      (stx:eval      ; t-node is &lt;stx:eval/&gt;
+		 ,(lambda (t-node bindings root environment)  
+		     (let ((content
+			     (<a href="stx-engine.html#codefunc9279">stx:read-content</a> t-node &quot;&lt;stx:eval&gt;&quot;)))
+		     `(call-with-err-handler
+		       (lambda()
+			 (eval ,content))
+		       (lambda(mes)
+			 (apply <a href="stx-engine.html#codefunc37173">stx:error</a> `(&quot;Error &quot; ,nl ,mes ,nl 
+					    &quot;while evaluating code:&quot; ,nl 
+					    ,,content 
+					    ,nl &quot;from element&quot; ,nl 
+					    ,@(<a href="stx-engine.html#codefunc59359">sxml:clean-feed</a> 
+						(<a href="sxml-tools.html#codefunc55211">sxml:sxml-&gt;xml</a>
+						  ',t-node)))))))))
+	      ) c-root 
+	    (<a href="libmisc.html#codefunc28493">lambda-tuple</a>) ; compile-time environment
+	    )))))) 
+</pre>
+<h5><a name='codemacro13721' href='#docmacro13721'>stx:call-function</a></h5>
+<i><a href='#tocmacro13721'>Index</a></i><br>
+
+<pre> A helper for stx:xsl-&gt;stx 
+</pre>
+<pre>(define-macro <a href="stx-engine.html#codemacro13721">stx:call-function</a> 
+  (lambda (name type tpl-node $-env)
+  `(let ((fn (,$-env 
+	      (string-&gt;symbol ,name))))
+    (if 
+      (eq? fn '*LT-NOT-FOUND*)
+      (apply <a href="stx-engine.html#codefunc37173">stx:error</a> 
+	     (append 
+	      (list &quot;Undefined &quot; ,type  &quot; with name &quot; ,name &quot; is called by:&quot; <a href="myenv.html#codefunc27758">nl</a>)
+	       (<a href="stx-engine.html#codefunc59359">sxml:clean-feed</a> (<a href="sxml-tools.html#codefunc55211">sxml:sxml-&gt;xml</a> ',tpl-node))
+	       (list <a href="myenv.html#codefunc27758">nl</a> &quot;Valid names: &quot;) (map car (,$-env))
+				))
+      (call-with-err-handler
+	(lambda()
+	  (<a href="stx-engine.html#codefunc59359">sxml:clean-feed</a>
+ 	      (fn current-node stx:templates current-root (,$-env '*LT-ADD* 
+						      `(stx:param ,',tpl-node)))))
+	(lambda (mes)
+	  (apply <a href="stx-engine.html#codefunc37173">stx:error</a> 
+		 (list ,type &quot; evaluation ERROR&quot; 
+		   <a href="myenv.html#codefunc27758">nl</a> mes <a href="myenv.html#codefunc27758">nl</a> &quot;for:&quot; <a href="myenv.html#codefunc27758">nl</a>
+		   (<a href="stx-engine.html#codefunc59359">sxml:clean-feed</a> 
+		     (<a href="sxml-tools.html#codefunc55211">sxml:sxml-&gt;xml</a> ',tpl-node))))))))))
+</pre></body></html>

@@ -1,0 +1,455 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN""http://www.w3.org/TR/html401/loose.dtd"><html><head><meta name="GENERATOR" content="Mole: The Scheme Source Code Digger"><title>Module: access-remote</title><meta name='keywords' content=''></head><body bgcolor='#ffffff' text='#384412'  link='#11af05' vlink='#728b09'>
+<center><h1>Module: access-remote</h1></center>
+
+<pre> Uniform access to local and remote resources
+ Resolution for relative URIs in accordance with RFC 2396
+
+ This software is in Public Domain.
+ IT IS PROVIDED &quot;AS IS&quot;, WITHOUT WARRANTY OF ANY KIND.
+
+ Please send bug reports and comments to:
+   lizorkin@hotbox.ru    Dmitry Lizorkin
+</pre><p><br>
+<!-- Table of content -->
+<p><dl>
+<p><dt><a name='tocchapt31256' href='#chapt31256'><b>Accessing (remote) resources</b></a><dd>
+
+f:  <a name='tocfunc12107' href='#docfunc12107' style='text-decoration:none'>resource-exists?</a><br>
+
+f:  <a name='tocfunc60351' href='#docfunc60351' style='text-decoration:none'>open-input-resource</a><br>
+<p><dt><a name='tocchapt50978' href='#chapt50978'><b>Determining resource type</b></a><dd>
+
+f:  <a name='tocfunc13194' href='#docfunc13194' style='text-decoration:none'>ar:file-extension</a><br>
+
+f:  <a name='tocfunc15661' href='#docfunc15661' style='text-decoration:none'>ar:resource-type</a><br>
+<p><dt><a name='tocchapt61829' href='#chapt61829'><b>Working on absolute/relative URIs</b></a><dd>
+
+<dl><dt><a name='tocsect20244' href='#sect20244'><b>The URI and its components</b></a><dd>
+
+f:  <a name='tocfunc48981' href='#docfunc48981' style='text-decoration:none'>ar:uri->components</a><br>
+
+f:  <a name='tocfunc39036' href='#docfunc39036' style='text-decoration:none'>ar:components->uri</a><br>
+</dl>
+
+<dl><dt><a name='tocsect25735' href='#sect25735'><b>Path and its path_segments</b></a><dd>
+
+f:  <a name='tocfunc14680' href='#docfunc14680' style='text-decoration:none'>ar:path->segments</a><br>
+
+f:  <a name='tocfunc14680' href='#docfunc14680' style='text-decoration:none'>ar:segments->path</a><br>
+
+f:  <a name='tocfunc14999' href='#docfunc14999' style='text-decoration:none'>ar:normalize-dir-lst</a><br>
+</dl>
+
+<dl><dt><a name='tocsect36867' href='#sect36867'><b>Resolves a relative URI with respect to the base URI</b></a><dd>
+
+f:  <a name='tocfunc58957' href='#docfunc58957' style='text-decoration:none'>ar:resolve-uri-according-base</a><br>
+</dl>
+</dl>
+<hr height='5'><center><h3><a name='chapt31256' href='#tocchapt31256'>Accessing (remote) resources</a></h3></center>
+
+<pre></pre>
+<h4><a name='docfunc12107' href='#tocfunc12107'>resource-exists?</a></h4>
+(define (resource-exists? req-uri)<i><br> ... <a href='#codefunc12107'>Full Code</a> ... )</i>
+<pre> Whether the resource exists (generalization of FILE-EXISTS? predicate)
+  REQ-URI - a string representing a URI of the resource
+ This predicate doesn't have any side effects
+</pre><p><br>
+
+<h4><a name='docfunc60351' href='#tocfunc60351'>open-input-resource</a></h4>
+(define (open-input-resource req-uri)<i><br> ... <a href='#codefunc60351'>Full Code</a> ... )</i>
+<pre> Opens an input port for a resource
+  REQ-URI - a string representing a URI of the resource
+ An input port is returned if there were no errors. In case of an error,
+ the function returns #f and displays an error message as a side effect.
+ Doesn't raise any exceptions.
+</pre><p><br>
+<hr height='5'><center><h3><a name='chapt50978' href='#tocchapt50978'>Determining resource type</a></h3></center>
+
+<pre></pre>
+<h4><a name='docfunc13194' href='#tocfunc13194'>ar:file-extension</a></h4>
+(define (ar:file-extension filename)<i><br> ... <a href='#codefunc13194'>Full Code</a> ... )</i>
+<pre> Returns a file extenstion
+  filename - a string
+ File extension is returned in the form of a string
+</pre><p><br>
+
+<h4><a name='docfunc15661' href='#tocfunc15661'>ar:resource-type</a></h4>
+(define (ar:resource-type req-uri)<i><br> ... <a href='#codefunc15661'>Full Code</a> ... )</i>
+<pre> Determines the type of a resource
+  REQ-URI - a string representing a URI of the resource
+ For a local resource, its type is determined by its file extension
+ One of the following is returned:
+  #f - if the requested resource doesn't exist
+  'xml - for a resource that is an XML document
+  'html - for a resource that is an HTML document
+  'unknown - for any other resource type
+</pre><p><br>
+<hr height='5'><center><h3><a name='chapt61829' href='#tocchapt61829'>Working on absolute/relative URIs</a></h3></center>
+
+<pre> This section is based on RFC 2396
+</pre>
+<hr width='40%' align='center'><center><h3><a name='sect20244' href='#tocsect20244'>The URI and its components</a></h3></center>
+
+<pre>  URI-reference = [ absoluteURI | relativeURI ] [ &quot;#&quot; fragment ]
+  genericURI = &lt;scheme&gt;://&lt;authority&gt;&lt;path&gt;?&lt;query&gt;
+ For a sertain subset of URI schemes, absoluteURI = genericURI
+ We will suppose this condition valid in this implementation
+</pre>
+<h4><a name='docfunc48981' href='#tocfunc48981'>ar:uri->components</a></h4>
+(define (ar:uri-&gt;components uri)<i><br> ... <a href='#codefunc48981'>Full Code</a> ... )</i>
+<pre> Returns: (values scheme authority path query fragment)
+ If some component is not presented in the given URI, #f is returned for this
+ component. Note that the path component is always presented in the URI
+</pre><p><br>
+
+<h4><a name='docfunc39036' href='#tocfunc39036'>ar:components->uri</a></h4>
+(define (ar:components-&gt;uri scheme authority path query fragment)<i><br> ... <a href='#codefunc39036'>Full Code</a> ... )</i>
+<pre> Combines components into the URI
+</pre><p><br>
+
+<hr width='40%' align='center'><center><h3><a name='sect25735' href='#tocsect25735'>Path and its path_segments</a></h3></center>
+
+<pre>  abs_path = &quot;/&quot; path_segments
+  path_segments = segment *( &quot;/&quot; segment ) 
+</pre>
+<h4><a name='docfunc14680' href='#tocfunc14680'>ar:path->segments</a></h4>
+(define (ar:path-&gt;segments path)<i><br> ... <a href='#codefunc14680'>Full Code</a> ... )</i>
+<pre> Splits the given path into segments
+ Returns: (values root dir-lst filename)
+  dir-lst ::= (listof directory-name)
+  root - either an empty string, or &quot;/&quot; or drive-name (for Windows filesystems)
+</pre><p><br>
+
+<h4><a name='docfunc14680' href='#tocfunc14680'>ar:segments->path</a></h4>
+(define (ar:segments-&gt;path root dir-lst filename backslash?)<i><br> ... <a href='#codefunc14680'>Full Code</a> ... )</i>
+<pre> Combines path_segments into the path
+  backslash? - a boolean value: whether the backslach shall be used as a
+ delimiter between path_segments. If #f, straight slash is used
+</pre><p><br>
+
+<h4><a name='docfunc14999' href='#tocfunc14999'>ar:normalize-dir-lst</a></h4>
+(define (ar:normalize-dir-lst dir-lst)<i><br> ... <a href='#codefunc14999'>Full Code</a> ... )</i>
+<pre> Removes redundant segment combinations from the dir-lst
+  '(&quot;smth&quot; &quot;..&quot;) --&gt; removed
+  '(&quot;.&quot;) --&gt; removed
+ The algorithm is formally specified in RFC 2396, 5.2, step 6)
+</pre><p><br>
+
+<hr width='40%' align='center'><center><h3><a name='sect36867' href='#tocsect36867'>Resolves a relative URI with respect to the base URI</a></h3></center>
+
+<pre></pre>
+<h4><a name='docfunc58957' href='#tocfunc58957'>ar:resolve-uri-according-base</a></h4>
+(define (ar:resolve-uri-according-base base-uri req-uri)<i><br> ... <a href='#codefunc58957'>Full Code</a> ... )</i>
+<pre>  base-uri - base URI for the requiested one
+ Returns the resolved URI
+</pre><p><br>
+<center><h1>Code</h1></center>
+
+<h4><a name='codefunc12107' href='#docfunc12107'>resource-exists?</a></h4>
+<i><a href='#tocfunc12107'>Index</a></i><br>
+
+<pre> Whether the resource exists (generalization of FILE-EXISTS? predicate)
+  REQ-URI - a string representing a URI of the resource
+ This predicate doesn't have any side effects
+</pre>
+<pre>(define (<a href="access-remote.html#codefunc12107">resource-exists?</a> req-uri)
+  (cond
+    ((string-prefix? &quot;http://&quot; req-uri)  ; HTTP scheme is used in REQ-URI
+     (with-exception-handler
+      (lambda (x) #f)  ; an uncaught exception occured during http transaction
+      (lambda ()
+        (<a href="http.html#codefunc26928">http-transaction</a>
+         &quot;HEAD&quot;
+         req-uri
+         (list (cons 'logger (lambda (port message . other-messages) #t)))
+         (lambda (resp-code resp-headers resp-port)
+           (close-input-port resp-port)
+           (and (&gt;= resp-code 200) (&lt; resp-code 400)))))))
+    (else  ; a local file
+     (file-exists? req-uri))))
+</pre>
+<h4><a name='codefunc60351' href='#docfunc60351'>open-input-resource</a></h4>
+<i><a href='#tocfunc60351'>Index</a></i><br>
+
+<pre> Opens an input port for a resource
+  REQ-URI - a string representing a URI of the resource
+ An input port is returned if there were no errors. In case of an error,
+ the function returns #f and displays an error message as a side effect.
+ Doesn't raise any exceptions.
+</pre>
+<pre>(define (<a href="access-remote.html#codefunc60351">open-input-resource</a> req-uri)
+  (with-exception-handler
+   (lambda (x)
+     (<a href="myenv.html#codefunc55253">cerr</a> <a href="myenv.html#codefunc27758">nl</a> req-uri &quot;: &quot; ((<a href="srfi-12.html#codefunc23464">condition-property-accessor</a> 'exn 'message) x) <a href="myenv.html#codefunc27758">nl</a>)
+     #f)
+   (lambda ()
+     (cond
+       ((string-prefix? &quot;http://&quot; req-uri)  ; HTTP scheme is used in REQ-URI
+        (<a href="http.html#codefunc26928">http-transaction</a>
+         &quot;GET&quot;
+         req-uri
+         (list (cons 'logger (lambda (port message . other-messages) #t)))
+         (lambda (resp-code resp-headers resp-port)
+           (cond
+             ((and (&gt;= resp-code 200) (&lt; resp-code 400)) resp-port)
+             (else
+              (close-input-port resp-port)
+              (<a href="myenv.html#codefunc55253">cerr</a> <a href="myenv.html#codefunc27758">nl</a> req-uri &quot;: resource not available: &quot; resp-code <a href="myenv.html#codefunc27758">nl</a>)
+              #f)))))
+       (else  ; a local file     
+        (open-input-file req-uri))))))
+</pre>
+<h4><a name='codefunc13194' href='#docfunc13194'>ar:file-extension</a></h4>
+<i><a href='#tocfunc13194'>Index</a></i><br>
+
+<pre> Returns a file extenstion
+  filename - a string
+ File extension is returned in the form of a string
+</pre>
+<pre>(define (<a href="access-remote.html#codefunc13194">ar:file-extension</a> filename)
+  (let loop ((src (reverse (string-&gt;list filename)))
+             (res '()))
+    (cond
+      ((null? src)  ; no dot encountered =&gt; no extension
+       &quot;&quot;)
+      ((char=? (car src) #\.)
+       (list-&gt;string res))
+      (else
+       (loop (cdr src) (cons (car src) res))))))
+</pre>
+<h4><a name='codefunc15661' href='#docfunc15661'>ar:resource-type</a></h4>
+<i><a href='#tocfunc15661'>Index</a></i><br>
+
+<pre> Determines the type of a resource
+  REQ-URI - a string representing a URI of the resource
+ For a local resource, its type is determined by its file extension
+ One of the following is returned:
+  #f - if the requested resource doesn't exist
+  'xml - for a resource that is an XML document
+  'html - for a resource that is an HTML document
+  'unknown - for any other resource type
+</pre>
+<pre>(define (<a href="access-remote.html#codefunc15661">ar:resource-type</a> req-uri)
+  (cond
+    ((string-prefix? &quot;http://&quot; req-uri)  ; HTTP scheme is used in REQ-URI
+     (with-exception-handler
+      (lambda (x) #f)  ; an uncaught exception occured during http transaction
+      (lambda ()
+        (<a href="http.html#codefunc26928">http-transaction</a>
+         &quot;HEAD&quot;
+         req-uri
+         (list (cons 'logger (lambda (port message . other-messages) #t)))
+         (lambda (resp-code resp-headers resp-port)
+           (close-input-port resp-port)
+           (if
+            (or (&lt; resp-code 200) (&gt;= resp-code 400))
+            #f  ; Resource doesn't exist              
+            (let ((content-type (assq 'CONTENT-TYPE resp-headers)))
+              (cond
+                ((not content-type)  ; no content type specified
+                 'unknown)
+                ((string-prefix? &quot;text/xml&quot; (cdr content-type))
+                 'xml)
+                ((string-prefix? &quot;text/html&quot; (cdr content-type))
+                 'html)
+                ((string-prefix? &quot;text/plain&quot; (cdr content-type))
+                 'plain)
+                (else
+                 'unknown)))))))))
+    (else  ; a local file
+     (cond
+       ((not (file-exists? req-uri))  ; file doesn't exist
+        #f)
+       ((assoc (<a href="access-remote.html#codefunc13194">ar:file-extension</a> req-uri)
+               '((&quot;xml&quot; . xml) (&quot;html&quot; . html) (&quot;htm&quot; . html)))
+        =&gt; cdr)
+       (else 'unknown)))))
+</pre>
+<h4><a name='codefunc48981' href='#docfunc48981'>ar:uri->components</a></h4>
+<i><a href='#tocfunc48981'>Index</a></i><br>
+
+<pre> Returns: (values scheme authority path query fragment)
+ If some component is not presented in the given URI, #f is returned for this
+ component. Note that the path component is always presented in the URI
+</pre>
+<pre>(define (<a href="access-remote.html#codefunc48981">ar:uri-&gt;components</a> uri)
+  (call-with-values
+   (lambda () (cond
+                ((<a href="util.html#codefunc35783">string-rindex</a> uri #\#)
+                 =&gt; (lambda (pos)
+                      (values
+                       (substring uri (+ pos 1) (string-length uri))
+                       (substring uri 0 pos))))
+                (else
+                 (values #f uri))))
+   (lambda (fragment uri)
+     (call-with-values
+      (lambda () (cond
+                   ((<a href="util.html#codefunc35783">string-rindex</a> uri #\?)
+                    =&gt; (lambda (pos)
+                         (values
+                          (substring uri (+ pos 1) (string-length uri))
+                          (substring uri 0 pos))))
+                   (else
+                    (values #f uri))))
+      (lambda (query uri)
+        (call-with-values
+         (lambda ()
+           (cond
+             ((<a href="util.html#codefunc2331">substring?</a> &quot;://&quot; uri)
+              =&gt; (lambda (pos)
+                   (values
+                    (substring uri 0 (+ pos 3))
+                    (substring uri (+ pos 3) (string-length uri)))))
+             ((string-index uri #\:)
+              =&gt; (lambda (pos)
+                   (values
+                    (substring uri 0 (+ pos 1))
+                    (substring uri (+ pos 1) (string-length uri)))))
+             (else
+              (values #f uri))))
+         (lambda (scheme uri)
+           (call-with-values
+            (lambda ()
+              (cond
+                ((not scheme)
+                 (values #f uri))
+                ((string-index uri #\/)
+                 =&gt; (lambda (pos)
+                      (values
+                       (substring uri 0 pos)
+                       (substring uri pos (string-length uri)))))
+                (else
+                 (values #f uri))))
+            (lambda (authority path)
+              (values scheme authority path query fragment))))))))))
+</pre>
+<h4><a name='codefunc39036' href='#docfunc39036'>ar:components->uri</a></h4>
+<i><a href='#tocfunc39036'>Index</a></i><br>
+
+<pre> Combines components into the URI
+</pre>
+<pre>(define (<a href="access-remote.html#codefunc39036">ar:components-&gt;uri</a> scheme authority path query fragment)
+  (apply string-append
+         (append
+          (if scheme (list scheme) '())
+          (if authority (list authority) '())
+          (list path)
+          (if query (list &quot;?&quot; query) '())
+          (if fragment (list &quot;#&quot; fragment) '()))))
+</pre>
+<h4><a name='codefunc14680' href='#docfunc14680'>ar:path->segments</a></h4>
+<i><a href='#tocfunc14680'>Index</a></i><br>
+
+<pre> Splits the given path into segments
+ Returns: (values root dir-lst filename)
+  dir-lst ::= (listof directory-name)
+  root - either an empty string, or &quot;/&quot; or drive-name (for Windows filesystems)
+</pre>
+<pre>(define (<a href="access-remote.html#codefunc14680">ar:path-&gt;segments</a> path)
+  (call-with-values
+   (lambda ()
+     (let ((lng (string-length path)))
+       (cond
+         ((and (&gt; lng 0) (char=? (string-ref path 0) #\/))
+           (values &quot;/&quot; (substring path 1 lng)))
+       ((and (&gt; lng 1)
+             (char=? (string-ref path 1) #\:)
+             (member (string-ref path 2) (list #\/ #\\)))
+        (values (substring path 0 3)
+                (substring path 3 lng)))
+       (else (values &quot;&quot; path)))))
+   (lambda (root rel-path)
+     (let ((lst (<a href="util.html#codefunc39259">string-split</a> rel-path (list #\/ #\\))))
+       (if (null? lst)  ; the relative path is empty
+           (values root '() &quot;&quot;)
+           (let ((lst (reverse lst)))
+             (values root (reverse (cdr lst)) (car lst))))))))
+</pre>
+<h4><a name='codefunc14680' href='#docfunc14680'>ar:segments->path</a></h4>
+<i><a href='#tocfunc14680'>Index</a></i><br>
+
+<pre> Combines path_segments into the path
+  backslash? - a boolean value: whether the backslach shall be used as a
+ delimiter between path_segments. If #f, straight slash is used
+</pre>
+<pre>(define (<a href="access-remote.html#codefunc14680">ar:segments-&gt;path</a> root dir-lst filename backslash?)
+  (let ((delim (if backslash? &quot;\\&quot; &quot;/&quot;)))
+    (apply string-append
+           (append
+            (list root)
+            (apply append
+                   (map
+                    (lambda (directory-name)
+                      (list directory-name delim))
+                    dir-lst))
+            (list filename)))))
+</pre>
+<h4><a name='codefunc14999' href='#docfunc14999'>ar:normalize-dir-lst</a></h4>
+<i><a href='#tocfunc14999'>Index</a></i><br>
+
+<pre> Removes redundant segment combinations from the dir-lst
+  '(&quot;smth&quot; &quot;..&quot;) --&gt; removed
+  '(&quot;.&quot;) --&gt; removed
+ The algorithm is formally specified in RFC 2396, 5.2, step 6)
+</pre>
+<pre>(define (<a href="access-remote.html#codefunc14999">ar:normalize-dir-lst</a> dir-lst)
+  (cond
+    ((null? dir-lst) dir-lst)
+    ((string=? (car dir-lst) &quot;.&quot;)
+     (<a href="access-remote.html#codefunc14999">ar:normalize-dir-lst</a> (cdr dir-lst)))
+    ((string=? (car dir-lst) &quot;..&quot;)
+     (cons (car dir-lst) (<a href="access-remote.html#codefunc14999">ar:normalize-dir-lst</a> (cdr dir-lst))))
+    (else
+     (let ((processed (<a href="access-remote.html#codefunc14999">ar:normalize-dir-lst</a> (cdr dir-lst))))
+       (cond
+         ((null? processed)
+          (list (car dir-lst)))
+         ((string=? (car processed) &quot;..&quot;)
+          (cdr processed))
+         (else
+          (cons (car dir-lst) processed)))))))
+</pre>
+<h4><a name='codefunc58957' href='#docfunc58957'>ar:resolve-uri-according-base</a></h4>
+<i><a href='#tocfunc58957'>Index</a></i><br>
+
+<pre>  base-uri - base URI for the requiested one
+ Returns the resolved URI
+</pre>
+<pre>(define (<a href="access-remote.html#codefunc58957">ar:resolve-uri-according-base</a> base-uri req-uri)
+  (call-with-values
+   (lambda () (<a href="access-remote.html#codefunc48981">ar:uri-&gt;components</a> req-uri))
+   (lambda (req-scheme req-authority req-path req-query req-fragment)
+     (if
+      (or req-scheme req-authority)  ; it is the absolute URI
+      req-uri
+      (call-with-values
+       (lambda () (<a href="access-remote.html#codefunc14680">ar:path-&gt;segments</a> req-path))
+       (lambda (req-root req-dir-lst req-filename)
+         (if
+          (&gt; (string-length req-root) 1)  ; absolute path from the disc drive
+          req-uri
+          (call-with-values
+           (lambda () (<a href="access-remote.html#codefunc48981">ar:uri-&gt;components</a> base-uri))
+           (lambda 
+               (base-scheme base-authority base-path base-query base-fragment)
+             (if
+              (string=? req-root &quot;/&quot;)  ; absolute path from server
+              (<a href="access-remote.html#codefunc39036">ar:components-&gt;uri</a> base-scheme base-authority
+                                  req-path req-query req-fragment)
+              ; else the requested URI is the relative URI
+              (call-with-values
+               (lambda () (<a href="access-remote.html#codefunc14680">ar:path-&gt;segments</a> base-path))
+               (lambda (base-root base-dir-lst base-filename)
+                 (<a href="access-remote.html#codefunc39036">ar:components-&gt;uri</a>
+                  base-scheme
+                  base-authority
+                  (<a href="access-remote.html#codefunc14680">ar:segments-&gt;path</a>
+                   base-root
+                   (<a href="access-remote.html#codefunc14999">ar:normalize-dir-lst</a> (append base-dir-lst req-dir-lst))
+                   req-filename
+                   (and (not (string-index base-path #\/))
+                        (string-index req-path #\\)))
+                  req-query
+                  req-fragment)))))))))))))
+</pre></body></html>

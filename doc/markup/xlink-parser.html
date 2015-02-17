@@ -1,0 +1,2133 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN""http://www.w3.org/TR/html401/loose.dtd"><html><head><meta name="GENERATOR" content="Mole: The Scheme Source Code Digger"><title>Module: xlink-parser</title><meta name='keywords' content=''></head><body bgcolor='#ffffff' text='#384412'  link='#11af05' vlink='#728b09'>
+<center><h1>Module: xlink-parser</h1></center>
+
+<pre> Parser for XML documents that contain XLink elements
+
+ This software is in Public Domain.
+ IT IS PROVIDED &quot;AS IS&quot;, WITHOUT WARRANTY OF ANY KIND.
+
+ Please send bug reports and comments to:
+   lisovsky@acm.org      Kirill Lisovsky
+   lizorkin@hotbox.ru    Dmitry Lizorkin
+
+ Returns an SXML presentation for a document plus additional information
+ extracted from XLink markup (described below)
+
+ 'SSAX:XML-&gt;SXML+xlink' function is the core of the programme. This funcion
+ is a modified Oleg Kiselyov's 'SSAX:XML-&gt;SXML' function.
+ 'SSAX:XML-&gt;SXML+xlink' has a complicated seed which consists of ten elements:
+  xlink:seed = (list  mode  sxlink-arcs  sxpointer  stack
+                      locators+resources  arcs  declared-labels)
+ 
+ 1. mode = 'general, 'extended or 'none. They have the following meaning:
+  - 'general - there are no XLink elements among current element's ancestors.
+ So, 'extended' or 'simple' elements are expected (others don't have any XLink
+ semantical meaning)
+  - 'extended - for elements that are direct children of an extended link
+ element, i.e. 'locator', 'resource' or 'arc'
+  - 'none - no XLink elements are expected niether in the current element
+ nor in any of its descendants
+
+ 2. sxlink-arcs - contains information extracted from XLink elements. 
+  sxlink-arcs = (list  sxlink-arc
+                          sxlink-arc
+                          ...)
+  sxlink-arc - as defined in the SXLink Specification
+
+ 3. Reverse S-expression representation for XPointer ChildSeq for a currently
+ processed element
+  sxpointer ::= (listof number)
+ For example, '(5 4 1) corresponds to &quot;/1/4/5&quot;  
+
+ 4. stack - a list of stack-elements. This list has the following semantics:
+ - new stack-element is added when the beginning of each element is processed
+ - the stack-element is consumed at the finish-element (of the same element)
+  stack = (list  stack-element
+                 stack-element
+                 ...)
+  stack-element = (list  position  xlink-values)
+  position - a position within a file
+  xlink-values = (list  type  href  role  arcrole  show  actuate  label  from  to)
+ where, for example, 'type' is the value of xlink:type attribute or #f if 
+ there is no such attribute
+
+ The other parameters of the seed are presented when an extended link is
+ processed
+
+ 5. locators+resources - locator and resource elements defined within an
+ extended link. They are temporarily stored in this parameter. This info
+ is converted into an 'sxlink-arcs' parameter when the end-tag for an
+ extended link element is encountered
+  locators+resources = (list  locator-or-resource
+                              locator-or-resource
+                              ...)
+  locator-or-resource = (list  uri  fragment  role  label
+                               position  element)
+  label - a string representing the value of xlink:label attribute, or #f if
+ this attribute was omitted 
+
+ 6. arcs - information about arce defined within an extended link. This info
+ is converted into an 'sxlink-arcs' parameter when the end-tag for an
+ extended link element is encountered
+  arcs = (list  arc-info
+                arc-info
+                ...)
+  arc-info = (list  arcrole  show  actuate  from  to
+                    position  element)
+  from - a string representing the value of xlink:from attribute, or #f if
+ this attribute was omitted 
+  to - the same for an xlink:to attribute
+
+ 7. declared-labels - labels declared within an extended link. This parameter
+ is used for constraint checking
+  declared-labels = (list  label  label ...)
+  label - a string
+</pre><p><br>
+<!-- Table of content -->
+<p><dl>
+
+f:  <a name='tocfunc20545' href='#docfunc20545' style='text-decoration:none'>xlink:namespace-uri</a><br>
+
+f:  <a name='tocfunc36765' href='#docfunc36765' style='text-decoration:none'>xlink:linkbase-uri</a><br>
+<p><dt><a name='tocchapt56819' href='#chapt56819'><b>A 'seed' datatype</b></a><dd>
+
+<dl><dt><a name='tocsect17920' href='#sect17920'><b>Two constructors for a seed</b></a><dd>
+
+f:  <a name='tocfunc63011' href='#docfunc63011' style='text-decoration:none'>xlink:make-small-seed</a><br>
+
+f:  <a name='tocfunc42509' href='#docfunc42509' style='text-decoration:none'>xlink:make-full-seed</a><br>
+</dl>
+
+<dl><dt><a name='tocsect55896' href='#sect55896'><b>Accessor functions</b></a><dd>
+
+f:  <a name='tocfunc45351' href='#docfunc45351' style='text-decoration:none'>xlink:seed-mode</a><br>
+
+f:  <a name='tocfunc16485' href='#docfunc16485' style='text-decoration:none'>xlink:seed-sxlink-arcs</a><br>
+
+f:  <a name='tocfunc4879' href='#docfunc4879' style='text-decoration:none'>xlink:seed-sxpointer</a><br>
+
+f:  <a name='tocfunc7979' href='#docfunc7979' style='text-decoration:none'>xlink:seed-stack</a><br>
+
+f:  <a name='tocfunc28216' href='#docfunc28216' style='text-decoration:none'>xlink:seed-locators+resources</a><br>
+
+f:  <a name='tocfunc42040' href='#docfunc42040' style='text-decoration:none'>xlink:seed-arcs</a><br>
+
+f:  <a name='tocfunc54582' href='#docfunc54582' style='text-decoration:none'>xlink:seed-declared-labels</a><br>
+</dl>
+<p><dt><a name='tocchapt47990' href='#chapt47990'><b>Here basic functions for special datatypes are collected</b></a><dd>
+
+<dl><dt><a name='tocsect19573' href='#sect19573'><b>2. 'sxlink-arcs' datatype</b></a><dd>
+
+f:  <a name='tocfunc58975' href='#docfunc58975' style='text-decoration:none'>xlink:add-simple</a><br>
+
+f:  <a name='tocfunc19904' href='#docfunc19904' style='text-decoration:none'>xlink:add-extended</a><br>
+</dl>
+
+<dl><dt><a name='tocsect63048' href='#sect63048'><b>3. 'sxpointer' datatype</b></a><dd>
+
+f:  <a name='tocfunc38264' href='#docfunc38264' style='text-decoration:none'>xlink:sxpointer->childseq</a><br>
+
+f:  <a name='tocfunc18983' href='#docfunc18983' style='text-decoration:none'>xlink:sxpointer4sibling</a><br>
+</dl>
+
+<dl><dt><a name='tocsect64712' href='#sect64712'><b>5. 'locators+resources' datatype</b></a><dd>
+
+f:  <a name='tocfunc56305' href='#docfunc56305' style='text-decoration:none'>xlink:make-locator-or-resource</a><br>
+
+f:  <a name='tocfunc64767' href='#docfunc64767' style='text-decoration:none'>xlink:resource-label</a><br>
+
+f:  <a name='tocfunc39675' href='#docfunc39675' style='text-decoration:none'>xlink:resource-data</a><br>
+
+f:  <a name='tocfunc59336' href='#docfunc59336' style='text-decoration:none'>xlink:add-locator</a><br>
+
+f:  <a name='tocfunc21457' href='#docfunc21457' style='text-decoration:none'>xlink:add-resource</a><br>
+</dl>
+
+<dl><dt><a name='tocsect64767' href='#sect64767'><b>6. 'arcs' datatype</b></a><dd>
+
+f:  <a name='tocfunc28880' href='#docfunc28880' style='text-decoration:none'>xlink:make-arc-info</a><br>
+
+f:  <a name='tocfunc26862' href='#docfunc26862' style='text-decoration:none'>xlink:arc-info-from</a><br>
+
+f:  <a name='tocfunc1918' href='#docfunc1918' style='text-decoration:none'>xlink:arc-info-to</a><br>
+
+f:  <a name='tocfunc17322' href='#docfunc17322' style='text-decoration:none'>xlink:arc-info-linkbase</a><br>
+
+f:  <a name='tocfunc23231' href='#docfunc23231' style='text-decoration:none'>xlink:arc-info-position</a><br>
+
+f:  <a name='tocfunc27601' href='#docfunc27601' style='text-decoration:none'>xlink:arc-info-data</a><br>
+
+f:  <a name='tocfunc6615' href='#docfunc6615' style='text-decoration:none'>xlink:add-arc</a><br>
+
+f:  <a name='tocfunc31371' href='#docfunc31371' style='text-decoration:none'>xlink:add-default-arc</a><br>
+</dl>
+
+<dl><dt><a name='tocsect7695' href='#sect7695'><b>7. 'declared-labels' datatype</b></a><dd>
+
+f:  <a name='tocfunc35477' href='#docfunc35477' style='text-decoration:none'>xlink:add-declared-label</a><br>
+
+f:  <a name='tocfunc30763' href='#docfunc30763' style='text-decoration:none'>xlink:all-labels-declared</a><br>
+</dl>
+<p><dt><a name='tocchapt26947' href='#chapt26947'><b>Some simple functions working with attributes</b></a><dd>
+
+<dl><dt><a name='tocsect7284' href='#sect7284'><b>Trivial constructor and accessor functions</b></a><dd>
+
+f:  <a name='tocfunc19986' href='#docfunc19986' style='text-decoration:none'>xlink:construct-xlink-values</a><br>
+
+f:  <a name='tocfunc17569' href='#docfunc17569' style='text-decoration:none'>xlink:values-type</a><br>
+
+f:  <a name='tocfunc11675' href='#docfunc11675' style='text-decoration:none'>xlink:values-href</a><br>
+
+f:  <a name='tocfunc16023' href='#docfunc16023' style='text-decoration:none'>xlink:values-role</a><br>
+
+f:  <a name='tocfunc63763' href='#docfunc63763' style='text-decoration:none'>xlink:values-arcrole</a><br>
+
+f:  <a name='tocfunc44440' href='#docfunc44440' style='text-decoration:none'>xlink:values-title</a><br>
+
+f:  <a name='tocfunc17058' href='#docfunc17058' style='text-decoration:none'>xlink:values-show</a><br>
+
+f:  <a name='tocfunc64527' href='#docfunc64527' style='text-decoration:none'>xlink:values-actuate</a><br>
+
+f:  <a name='tocfunc39561' href='#docfunc39561' style='text-decoration:none'>xlink:values-label</a><br>
+
+f:  <a name='tocfunc13730' href='#docfunc13730' style='text-decoration:none'>xlink:values-from</a><br>
+
+f:  <a name='tocfunc54321' href='#docfunc54321' style='text-decoration:none'>xlink:values-to</a><br>
+</dl>
+
+<dl><dt><a name='tocsect41337' href='#sect41337'><b>Functions which read attributes</b></a><dd>
+
+f:  <a name='tocfunc63870' href='#docfunc63870' style='text-decoration:none'>xlink:read-attributes</a><br>
+
+f:  <a name='tocfunc56844' href='#docfunc56844' style='text-decoration:none'>xlink:read-SXML-attributes</a><br>
+</dl>
+
+<dl><dt><a name='tocsect621' href='#sect621'><b>These functions check XLink constrains which limit some attributes' xlink-values</b></a><dd>
+
+f:  <a name='tocfunc22203' href='#docfunc22203' style='text-decoration:none'>xlink:check-helper</a><br>
+
+f:  <a name='tocfunc43928' href='#docfunc43928' style='text-decoration:none'>xlink:check-type-show-actuate-constraints</a><br>
+</dl>
+<p><dt><a name='tocchapt29724' href='#chapt29724'><b>Functions which perform starting and ending actions for XLink elements</b></a><dd>
+
+<dl><dt><a name='tocsect46489' href='#sect46489'><b>A general element</b></a><dd>
+
+f:  <a name='tocfunc22090' href='#docfunc22090' style='text-decoration:none'>xlink:general-start</a><br>
+
+f:  <a name='tocfunc56778' href='#docfunc56778' style='text-decoration:none'>xlink:general-end</a><br>
+</dl>
+
+<dl><dt><a name='tocsect63436' href='#sect63436'><b>An element and all its descendants don't have any XLink meaning</b></a><dd>
+
+f:  <a name='tocfunc13118' href='#docfunc13118' style='text-decoration:none'>xlink:none-start</a><br>
+
+f:  <a name='tocfunc46021' href='#docfunc46021' style='text-decoration:none'>xlink:none-end</a><br>
+</dl>
+
+<dl><dt><a name='tocsect41780' href='#sect41780'><b>A simple-link element</b></a><dd>
+
+f:  <a name='tocfunc40366' href='#docfunc40366' style='text-decoration:none'>xlink:simple-start</a><br>
+
+f:  <a name='tocfunc7734' href='#docfunc7734' style='text-decoration:none'>xlink:simple-end</a><br>
+</dl>
+
+<dl><dt><a name='tocsect49739' href='#sect49739'><b>An extended-link element</b></a><dd>
+
+f:  <a name='tocfunc1295' href='#docfunc1295' style='text-decoration:none'>xlink:extended-start</a><br>
+
+f:  <a name='tocfunc34198' href='#docfunc34198' style='text-decoration:none'>xlink:extended-end</a><br>
+</dl>
+
+<dl><dt><a name='tocsect51611' href='#sect51611'><b>A locator element</b></a><dd>
+
+f:  <a name='tocfunc27212' href='#docfunc27212' style='text-decoration:none'>xlink:locator-start</a><br>
+
+f:  <a name='tocfunc61900' href='#docfunc61900' style='text-decoration:none'>xlink:locator-end</a><br>
+</dl>
+
+<dl><dt><a name='tocsect29032' href='#sect29032'><b>A resource element</b></a><dd>
+
+f:  <a name='tocfunc2848' href='#docfunc2848' style='text-decoration:none'>xlink:resource-start</a><br>
+
+f:  <a name='tocfunc35751' href='#docfunc35751' style='text-decoration:none'>xlink:resource-end</a><br>
+</dl>
+
+<dl><dt><a name='tocsect55100' href='#sect55100'><b>An arc element</b></a><dd>
+
+f:  <a name='tocfunc40026' href='#docfunc40026' style='text-decoration:none'>xlink:arc-start</a><br>
+
+f:  <a name='tocfunc9179' href='#docfunc9179' style='text-decoration:none'>xlink:arc-end</a><br>
+</dl>
+<p><dt><a name='tocchapt48336' href='#chapt48336'><b>Miscellaneous utility functions</b></a><dd>
+
+<dl><dt><a name='tocsect52062' href='#sect52062'><b>Functions dealing with position</b></a><dd>
+
+f:  <a name='tocfunc21481' href='#docfunc21481' style='text-decoration:none'>xlink:get-port-position</a><br>
+
+f:  <a name='tocfunc42660' href='#docfunc42660' style='text-decoration:none'>xlink:parser-error</a><br>
+</dl>
+
+<dl><dt><a name='tocsect48296' href='#sect48296'><b>Functions working on branches of an SXML tree</b></a><dd>
+
+f:  <a name='tocfunc39145' href='#docfunc39145' style='text-decoration:none'>xlink:branch-helper</a><br>
+
+f:  <a name='tocfunc49437' href='#docfunc49437' style='text-decoration:none'>xlink:replace-branch</a><br>
+
+f:  <a name='tocfunc30467' href='#docfunc30467' style='text-decoration:none'>xlink:append-branch</a><br>
+</dl>
+
+<dl><dt><a name='tocsect2573' href='#sect2573'><b>Processing the document URI</b></a><dd>
+
+f:  <a name='tocfunc6919' href='#docfunc6919' style='text-decoration:none'>xlink:get-uri</a><br>
+
+f:  <a name='tocfunc63308' href='#docfunc63308' style='text-decoration:none'>xlink:set-uri-for-sxlink-arcs</a><br>
+</dl>
+<p><dt><a name='tocchapt8181' href='#chapt8181'><b>Core features of the parser</b></a><dd>
+
+<dl><dt><a name='tocsect5587' href='#sect5587'><b>Handler units for SSAX multi-parser</b></a><dd>
+
+f:  <a name='tocfunc8115' href='#docfunc8115' style='text-decoration:none'>xlink:new-level-seed-handler</a><br>
+
+f:  <a name='tocfunc43619' href='#docfunc43619' style='text-decoration:none'>xlink:finish-element-handler</a><br>
+
+f:  <a name='tocfunc39405' href='#docfunc39405' style='text-decoration:none'>xlink:ending-action</a><br>
+</dl>
+
+<dl><dt><a name='tocsect46363' href='#sect46363'><b>The function which adds XLink-related information to the SXML document</b></a><dd>
+
+f:  <a name='tocfunc54388' href='#docfunc54388' style='text-decoration:none'>SXML->SXML+xlink</a><br>
+</dl>
+
+<dl><dt><a name='tocsect61243' href='#sect61243'><b>Adds SXLink arc information to SHTML document</b></a><dd>
+
+f:  <a name='tocfunc974' href='#docfunc974' style='text-decoration:none'>SHTML->SHTML+xlink</a><br>
+</dl>
+</dl>
+
+<h4><a name='docfunc20545' href='#tocfunc20545'>xlink:namespace-uri</a></h4>
+(define xlink:namespace-uri <i><br> ... <a href='#codefunc20545'>Full Code</a> ... )</i>
+<pre> Some global constants
+</pre><p><br>
+
+<h4><a name='docfunc36765' href='#tocfunc36765'>xlink:linkbase-uri</a></h4>
+(define xlink:linkbase-uri <i><br> ... <a href='#codefunc36765'>Full Code</a> ... )</i><p><br>
+<hr height='5'><center><h3><a name='chapt56819' href='#tocchapt56819'>A 'seed' datatype</a></h3></center>
+
+<pre>  xlink:seed = (list  mode  sxlink-arcs  sxpointer  stack
+                      locators+resources  arcs  declared-labels)
+ The last three parameters are optional. See a head comment for details
+</pre>
+<hr width='40%' align='center'><center><h3><a name='sect17920' href='#tocsect17920'>Two constructors for a seed</a></h3></center>
+
+<pre> They are introducted in order to control (possible) future modifications of
+ a 'seed' list
+</pre>
+<h4><a name='docfunc63011' href='#tocfunc63011'>xlink:make-small-seed</a></h4>
+(define (xlink:make-small-seed mode sxlink-arcs sxpointer stack)<i><br> ... <a href='#codefunc63011'>Full Code</a> ... )</i>
+<pre> This function constructs a seed consisting only of six compulsory elements
+</pre><p><br>
+
+<h4><a name='docfunc42509' href='#tocfunc42509'>xlink:make-full-seed</a></h4>
+(define (xlink:make-full-seed mode sxlink-arcs sxpointer stack locators+resources arcs declared-labels)<i><br> ... <a href='#codefunc42509'>Full Code</a> ... )</i>
+<pre> The similar function which makes a full-length seed
+</pre><p><br>
+
+<hr width='40%' align='center'><center><h3><a name='sect55896' href='#tocsect55896'>Accessor functions</a></h3></center>
+
+<pre></pre>
+<h4><a name='docfunc45351' href='#tocfunc45351'>xlink:seed-mode</a></h4>
+(define (xlink:seed-mode seed)<i><br> ... <a href='#codefunc45351'>Full Code</a> ... )</i><p><br>
+
+<h4><a name='docfunc16485' href='#tocfunc16485'>xlink:seed-sxlink-arcs</a></h4>
+(define (xlink:seed-sxlink-arcs seed)<i><br> ... <a href='#codefunc16485'>Full Code</a> ... )</i><p><br>
+
+<h4><a name='docfunc4879' href='#tocfunc4879'>xlink:seed-sxpointer</a></h4>
+(define (xlink:seed-sxpointer seed)<i><br> ... <a href='#codefunc4879'>Full Code</a> ... )</i><p><br>
+
+<h4><a name='docfunc7979' href='#tocfunc7979'>xlink:seed-stack</a></h4>
+(define (xlink:seed-stack seed)<i><br> ... <a href='#codefunc7979'>Full Code</a> ... )</i><p><br>
+
+<h4><a name='docfunc28216' href='#tocfunc28216'>xlink:seed-locators+resources</a></h4>
+(define (xlink:seed-locators+resources seed)<i><br> ... <a href='#codefunc28216'>Full Code</a> ... )</i>
+<pre> We assume that the seed has the full length for the latter four functions
+</pre><p><br>
+
+<h4><a name='docfunc42040' href='#tocfunc42040'>xlink:seed-arcs</a></h4>
+(define (xlink:seed-arcs seed)<i><br> ... <a href='#codefunc42040'>Full Code</a> ... )</i><p><br>
+
+<h4><a name='docfunc54582' href='#tocfunc54582'>xlink:seed-declared-labels</a></h4>
+(define (xlink:seed-declared-labels seed)<i><br> ... <a href='#codefunc54582'>Full Code</a> ... )</i><p><br>
+<hr height='5'><center><h3><a name='chapt47990' href='#tocchapt47990'>Here basic functions for special datatypes are collected</a></h3></center>
+
+<pre></pre>
+<hr width='40%' align='center'><center><h3><a name='sect19573' href='#tocsect19573'>2. 'sxlink-arcs' datatype</a></h3></center>
+
+<pre></pre>
+<h4><a name='docfunc58975' href='#tocfunc58975'>xlink:add-simple</a></h4>
+(define (xlink:add-simple xlink-values element position sxpointer sxlink-arcs)<i><br> ... <a href='#codefunc58975'>Full Code</a> ... )</i>
+<pre> Adds the arc defined by the XLink simple link to 'sxlink-arcs'
+</pre><p><br>
+
+<h4><a name='docfunc19904' href='#tocfunc19904'>xlink:add-extended</a></h4>
+(define (xlink:add-extended locators+resources arcs sxlink-arcs declaration)<i><br> ... <a href='#codefunc19904'>Full Code</a> ... )</i>
+<pre> This function appends information to 'sxlink-arcs' according to
+ 'locators+resources' and 'arcs' parameters.
+ The function is called at the end-tag of an extended link element.
+</pre><p><br>
+
+<hr width='40%' align='center'><center><h3><a name='sect63048' href='#tocsect63048'>3. 'sxpointer' datatype</a></h3></center>
+
+<pre> Reverse S-expression representation for XPointer ChildSeq for a currently
+ processed element
+  sxpointer ::= (listof number)
+ For example, '(5 4 1) corresponds to &quot;/1/4/5&quot;  
+</pre>
+<h4><a name='docfunc38264' href='#tocfunc38264'>xlink:sxpointer->childseq</a></h4>
+(define (xlink:sxpointer-&gt;childseq sxpointer)<i><br> ... <a href='#codefunc38264'>Full Code</a> ... )</i><p><br>
+
+<h4><a name='docfunc18983' href='#tocfunc18983'>xlink:sxpointer4sibling</a></h4>
+(define (xlink:sxpointer4sibling sxpointer)<i><br> ... <a href='#codefunc18983'>Full Code</a> ... )</i>
+<pre> Forms sxpointer for the following sibling element of the current element
+</pre><p><br>
+
+<hr width='40%' align='center'><center><h3><a name='sect64712' href='#tocsect64712'>5. 'locators+resources' datatype</a></h3></center>
+
+<pre> locators+resources - locator and resource elements defined within an
+ extended link. They are temporarily stored in this parameter. This info
+ is converted into an 'sxlink-arcs' parameter when the end-tag for an
+ extended link element is encountered
+  locators+resources = (list  locator-or-resource
+                              locator-or-resource
+                              ...)
+  locator-or-resource = (list  label  resource-data)
+  resource-data - whatever required to describe the resource in terms of
+ the SXLink Specification
+</pre>
+<h4><a name='docfunc56305' href='#tocfunc56305'>xlink:make-locator-or-resource</a></h4>
+(define (xlink:make-locator-or-resource label resource-info)<i><br> ... <a href='#codefunc56305'>Full Code</a> ... )</i>
+<pre> Constructor
+</pre><p><br>
+
+<h4><a name='docfunc64767' href='#tocfunc64767'>xlink:resource-label</a></h4>
+(define (xlink:resource-label locator-or-resource)<i><br> ... <a href='#codefunc64767'>Full Code</a> ... )</i>
+<pre> Accessors
+ NOTE: We don't apply teta-reduction for the sake of easier bug detection
+</pre><p><br>
+
+<h4><a name='docfunc39675' href='#tocfunc39675'>xlink:resource-data</a></h4>
+(define (xlink:resource-data locator-or-resource)<i><br> ... <a href='#codefunc39675'>Full Code</a> ... )</i><p><br>
+
+<h4><a name='docfunc59336' href='#tocfunc59336'>xlink:add-locator</a></h4>
+(define (xlink:add-locator xlink-values position element locators+resources)<i><br> ... <a href='#codefunc59336'>Full Code</a> ... )</i>
+<pre> If the following XLink constraint is fulfilled, adds information about the
+ XLink locator element to 'locators+resources'. Otherwise, displays an error
+ message and doesn't add anything.
+  Constraint: Attributes on Locator Element
+  The locator-type element must have the locator attribute (see 5.4 Locator
+  Attribute (href)). The locator attribute (href) must have a value supplied.
+</pre><p><br>
+
+<h4><a name='docfunc21457' href='#tocfunc21457'>xlink:add-resource</a></h4>
+(define (xlink:add-resource xlink-values element sxpointer locators+resources)<i><br> ... <a href='#codefunc21457'>Full Code</a> ... )</i>
+<pre> Adds information concerning XLink resource element to 'locators+resources'
+</pre><p><br>
+
+<hr width='40%' align='center'><center><h3><a name='sect64767' href='#tocsect64767'>6. 'arcs' datatype</a></h3></center>
+
+<pre> arcs - information about arce defined within an extended link. This info
+ is converted into an 'sxlink-arcs' parameter when the end-tag for an
+ extended link element is encountered
+  arcs = (list  arc-info
+                arc-info
+                ...)
+  arc-info = (list  from  to  linkbase  position  data)
+  linkbase - a boolean: whether a linkbase arc
+  arc-data - whatever required to describe the arc in terms of the SXLink
+ Specification
+</pre>
+<h4><a name='docfunc28880' href='#tocfunc28880'>xlink:make-arc-info</a></h4>
+(define (xlink:make-arc-info from to linkbase position data)<i><br> ... <a href='#codefunc28880'>Full Code</a> ... )</i>
+<pre> Constructor
+</pre><p><br>
+
+<h4><a name='docfunc26862' href='#tocfunc26862'>xlink:arc-info-from</a></h4>
+(define (xlink:arc-info-from arc-info)<i><br> ... <a href='#codefunc26862'>Full Code</a> ... )</i>
+<pre> Accessors
+ NOTE: We don't apply teta-reduction for the sake of easier bug detection
+</pre><p><br>
+
+<h4><a name='docfunc1918' href='#tocfunc1918'>xlink:arc-info-to</a></h4>
+(define (xlink:arc-info-to arc-info)<i><br> ... <a href='#codefunc1918'>Full Code</a> ... )</i><p><br>
+
+<h4><a name='docfunc17322' href='#tocfunc17322'>xlink:arc-info-linkbase</a></h4>
+(define (xlink:arc-info-linkbase arc-info)<i><br> ... <a href='#codefunc17322'>Full Code</a> ... )</i><p><br>
+
+<h4><a name='docfunc23231' href='#tocfunc23231'>xlink:arc-info-position</a></h4>
+(define (xlink:arc-info-position arc-info)<i><br> ... <a href='#codefunc23231'>Full Code</a> ... )</i><p><br>
+
+<h4><a name='docfunc27601' href='#tocfunc27601'>xlink:arc-info-data</a></h4>
+(define (xlink:arc-info-data arc-info)<i><br> ... <a href='#codefunc27601'>Full Code</a> ... )</i><p><br>
+
+<h4><a name='docfunc6615' href='#tocfunc6615'>xlink:add-arc</a></h4>
+(define (xlink:add-arc xlink-values position element arcs)<i><br> ... <a href='#codefunc6615'>Full Code</a> ... )</i>
+<pre> Adds arc information to 'arcs' datatype. A side effect - checks the following
+ XLink constraint:
+  Constraint: No Arc Duplication
+  Each arc-type element must have a pair of from and to xlink-values that does
+  not  repeat the from and to xlink-values (respectively) for any other
+  arc-type element in the same extended link; that is, each pair in a link
+  must be unique.
+</pre><p><br>
+
+<h4><a name='docfunc31371' href='#tocfunc31371'>xlink:add-default-arc</a></h4>
+(define (xlink:add-default-arc element arcs)<i><br> ... <a href='#codefunc31371'>Full Code</a> ... )</i>
+<pre> XLink specification, 5.1.3:
+  If no arc-type elements are provided in an extended link, then by extension
+  the missing from and to xlink-values are interpreted as standing for all the
+  labels in that link.
+ Inserts such a default arc if 'arcs' are empty
+</pre><p><br>
+
+<hr width='40%' align='center'><center><h3><a name='sect7695' href='#tocsect7695'>7. 'declared-labels' datatype</a></h3></center>
+
+<pre> declared-labels - labels declared within an extended link. This parameter
+ is used for constraint checking
+  declared-labels = (list  label  label ...)
+  label - a string
+</pre>
+<h4><a name='docfunc35477' href='#tocfunc35477'>xlink:add-declared-label</a></h4>
+(define (xlink:add-declared-label xlink-values declared-labels)<i><br> ... <a href='#codefunc35477'>Full Code</a> ... )</i>
+<pre> If an xlink:label attribute is presented in 'xlink-values', it's value is added
+ to 'declared-labels'. Otherwise, 'declared-labels' remain unchainged
+</pre><p><br>
+
+<h4><a name='docfunc30763' href='#tocfunc30763'>xlink:all-labels-declared</a></h4>
+(define (xlink:all-labels-declared arcs declared-labels)<i><br> ... <a href='#codefunc30763'>Full Code</a> ... )</i>
+<pre> The function checks the following XLink constraint
+  Constraint: label, from, and to xlink-values
+  The value of a label, from, or to attribute must be an NCName. If a value 
+  is supplied for a from or to attribute, it must correspond to the same value
+  for some label attribute on a locator- or resource-type element that appears
+  as a direct child inside the same extended-type element as does the arc-type 
+  element. 
+ Error message is displayed if some label was undeclared.
+ The function always returns #t.
+ It is called at the end-tag of an extended link element
+</pre><p><br>
+<hr height='5'><center><h3><a name='chapt26947' href='#tocchapt26947'>Some simple functions working with attributes</a></h3></center>
+
+<pre>  xlink-values = (list
+                   type href role arcrole title show actuate label from to)
+</pre>
+<hr width='40%' align='center'><center><h3><a name='sect7284' href='#tocsect7284'>Trivial constructor and accessor functions</a></h3></center>
+
+<pre> These functions are used as a level of abstraction
+</pre>
+<h4><a name='docfunc19986' href='#tocfunc19986'>xlink:construct-xlink-values</a></h4>
+(define (xlink:construct-xlink-values type href role arcrole title show actuate label from to)<i><br> ... <a href='#codefunc19986'>Full Code</a> ... )</i>
+<pre> Constructs a datatype (just a list in a current implementation) which
+ contains xlink-values of all xlink-related attributes. For example, 'type'
+ is the value of xlink:type attribute or #f if there is no such attribute.
+ This datatype will be called 'xlink-values' in the latter text
+</pre><p><br>
+
+<h4><a name='docfunc17569' href='#tocfunc17569'>xlink:values-type</a></h4>
+(define (xlink:values-type xlink-values)<i><br> ... <a href='#codefunc17569'>Full Code</a> ... )</i>
+<pre> Accessors
+ NOTE: We don't apply teta-reduction for the sake of easier bug detection
+</pre><p><br>
+
+<h4><a name='docfunc11675' href='#tocfunc11675'>xlink:values-href</a></h4>
+(define (xlink:values-href xlink-values)<i><br> ... <a href='#codefunc11675'>Full Code</a> ... )</i><p><br>
+
+<h4><a name='docfunc16023' href='#tocfunc16023'>xlink:values-role</a></h4>
+(define (xlink:values-role xlink-values)<i><br> ... <a href='#codefunc16023'>Full Code</a> ... )</i><p><br>
+
+<h4><a name='docfunc63763' href='#tocfunc63763'>xlink:values-arcrole</a></h4>
+(define (xlink:values-arcrole xlink-values)<i><br> ... <a href='#codefunc63763'>Full Code</a> ... )</i><p><br>
+
+<h4><a name='docfunc44440' href='#tocfunc44440'>xlink:values-title</a></h4>
+(define (xlink:values-title xlink-values)<i><br> ... <a href='#codefunc44440'>Full Code</a> ... )</i><p><br>
+
+<h4><a name='docfunc17058' href='#tocfunc17058'>xlink:values-show</a></h4>
+(define (xlink:values-show xlink-values)<i><br> ... <a href='#codefunc17058'>Full Code</a> ... )</i><p><br>
+
+<h4><a name='docfunc64527' href='#tocfunc64527'>xlink:values-actuate</a></h4>
+(define (xlink:values-actuate xlink-values)<i><br> ... <a href='#codefunc64527'>Full Code</a> ... )</i><p><br>
+
+<h4><a name='docfunc39561' href='#tocfunc39561'>xlink:values-label</a></h4>
+(define (xlink:values-label xlink-values)<i><br> ... <a href='#codefunc39561'>Full Code</a> ... )</i><p><br>
+
+<h4><a name='docfunc13730' href='#tocfunc13730'>xlink:values-from</a></h4>
+(define (xlink:values-from xlink-values)<i><br> ... <a href='#codefunc13730'>Full Code</a> ... )</i><p><br>
+
+<h4><a name='docfunc54321' href='#tocfunc54321'>xlink:values-to</a></h4>
+(define (xlink:values-to xlink-values)<i><br> ... <a href='#codefunc54321'>Full Code</a> ... )</i><p><br>
+
+<hr width='40%' align='center'><center><h3><a name='sect41337' href='#tocsect41337'>Functions which read attributes</a></h3></center>
+
+<pre></pre>
+<h4><a name='docfunc63870' href='#tocfunc63870'>xlink:read-attributes</a></h4>
+(define (xlink:read-attributes attributes namespaces)<i><br> ... <a href='#codefunc63870'>Full Code</a> ... )</i>
+<pre> The function is given a list called 'attributes' (in SSAX parser). This list
+ has the form
+  attributes = (list  attribute  
+                      attribute
+                      ...)
+  attribute = (cons  (cons  namespace-prefix  attribute-name)
+                     attribute-value )
+           or (cons  attribute-name  attribute-value )
+  namespaces - defined in &quot;ssax.scm&quot;
+ reads XLink attributes' values and returns a 'xlink-values' datatype
+ (the result of 'xlink:construct-xlink-values' function)
+</pre><p><br>
+
+<h4><a name='docfunc56844' href='#tocfunc56844'>xlink:read-SXML-attributes</a></h4>
+(define (xlink:read-SXML-attributes element ns-prefixes)<i><br> ... <a href='#codefunc56844'>Full Code</a> ... )</i>
+<pre> Reads SXML element's attributes
+  element - an SXML node representing an element
+  ns-prefixes = (list  (list  prefix  namespace-uri)
+                       (list  prefix  namespace-uri)
+                       ...)
+  prefix - a symbol
+  namespace-uri - a string
+ An 'xlink-values' datatype is returned
+</pre><p><br>
+
+<hr width='40%' align='center'><center><h3><a name='sect621' href='#tocsect621'>These functions check XLink constrains which limit some attributes' xlink-values</a></h3></center>
+
+<pre></pre>
+<h4><a name='docfunc22203' href='#tocfunc22203'>xlink:check-helper</a></h4>
+(define (xlink:check-helper value valid-xlink-values attr-name position)<i><br> ... <a href='#codefunc22203'>Full Code</a> ... )</i>
+<pre> A helper function which is used by the next one
+  value - a value of an attribute (#f if there is no such attribute)
+  valid-xlink-values - a list of xlink-values which are allowed for this attribute
+  attr-name - a string denotating a name of an attribute (for a message)
+  position - position within a file
+ Function always returns #t. 
+ Side effects: function &quot;cerr&quot;s a message if 'value' is not #f and not within
+ 'valid-xlink-values'
+</pre><p><br>
+
+<h4><a name='docfunc43928' href='#tocfunc43928'>xlink:check-type-show-actuate-constraints</a></h4>
+(define (xlink:check-type-show-actuate-constraints xlink-values position)<i><br> ... <a href='#codefunc43928'>Full Code</a> ... )</i>
+<pre>  xlink-values = (type href role arcrole show actuate label from to)
+ where, for example, 'type' is the value of xlink:type attribute or #f if 
+ there is no such attribute (this datatype is a result 
+ of 'read-xlink-attributes' function)
+  position - position within a file
+
+ The function checks the three similar XLink constraints:
+  1. Constraint: type Value
+  The value of the type attribute must be supplied. The value must be one of
+  &quot;simple&quot;, &quot;extended&quot;, &quot;locator&quot;, &quot;arc&quot;, &quot;resource&quot;, &quot;title&quot;, or &quot;none&quot;.
+  2. Constraint: show Value
+  If a value is supplied for a show attribute, it must be one of the xlink-values
+  &quot;new&quot;, &quot;replace&quot;, &quot;embed&quot;, &quot;other&quot;, and &quot;none&quot;.
+  3. Constraint: actuate Value
+  If a value is supplied for an actuate attribute, it must be be one of the 
+  xlink-values &quot;onLoad&quot;, &quot;onRequest&quot;, &quot;other&quot;, and &quot;none&quot;.
+ 
+ The result is always #t
+ Side effects - error messages (printed by
+ an 'xlink:check-helper' function above)
+</pre><p><br>
+<hr height='5'><center><h3><a name='chapt29724' href='#tocchapt29724'>Functions which perform starting and ending actions for XLink elements</a></h3></center>
+
+<pre> All these functions have the same signature:
+
+ (smth-start position xlink-values xlink:seed)
+  position - position within a file
+  xlink-values = (list  type  href  role  arcrole  show  actuate  label  from  to)
+ where, for example, 'type' is the value of xlink:type attribute or #f if 
+ there is no such attribute
+  xlink:seed = (list  mode  sxlink-arcs  sxpointer  stack
+                      locators+resources  arcs  declared-labels)
+ See a head comment for details
+
+ (smth-end xlink:parent-seed xlink:seed element)
+ element - the SXML presentation of the current element
+
+ All the functions return a new 'xlink:seed'
+</pre>
+<hr width='40%' align='center'><center><h3><a name='sect46489' href='#tocsect46489'>A general element</a></h3></center>
+
+<pre> It is the element which doesn't have any XLink meaning, but its descendants
+ might have such a meaning
+</pre>
+<h4><a name='docfunc22090' href='#tocfunc22090'>xlink:general-start</a></h4>
+(define (xlink:general-start position xlink-values seed)<i><br> ... <a href='#codefunc22090'>Full Code</a> ... )</i><p><br>
+
+<h4><a name='docfunc56778' href='#tocfunc56778'>xlink:general-end</a></h4>
+(define (xlink:general-end parent-seed seed element)<i><br> ... <a href='#codefunc56778'>Full Code</a> ... )</i><p><br>
+
+<hr width='40%' align='center'><center><h3><a name='sect63436' href='#tocsect63436'>An element and all its descendants don't have any XLink meaning</a></h3></center>
+
+<pre></pre>
+<h4><a name='docfunc13118' href='#tocfunc13118'>xlink:none-start</a></h4>
+(define (xlink:none-start position xlink-values seed)<i><br> ... <a href='#codefunc13118'>Full Code</a> ... )</i><p><br>
+
+<h4><a name='docfunc46021' href='#tocfunc46021'>xlink:none-end</a></h4>
+(define (xlink:none-end parent-seed seed element)<i><br> ... <a href='#codefunc46021'>Full Code</a> ... )</i><p><br>
+
+<hr width='40%' align='center'><center><h3><a name='sect41780' href='#tocsect41780'>A simple-link element</a></h3></center>
+
+<pre></pre>
+<h4><a name='docfunc40366' href='#tocfunc40366'>xlink:simple-start</a></h4>
+(define (xlink:simple-start position xlink-values seed)<i><br> ... <a href='#codefunc40366'>Full Code</a> ... )</i><p><br>
+
+<h4><a name='docfunc7734' href='#tocfunc7734'>xlink:simple-end</a></h4>
+(define (xlink:simple-end parent-seed seed element)<i><br> ... <a href='#codefunc7734'>Full Code</a> ... )</i><p><br>
+
+<hr width='40%' align='center'><center><h3><a name='sect49739' href='#tocsect49739'>An extended-link element</a></h3></center>
+
+<pre></pre>
+<h4><a name='docfunc1295' href='#tocfunc1295'>xlink:extended-start</a></h4>
+(define (xlink:extended-start position xlink-values seed)<i><br> ... <a href='#codefunc1295'>Full Code</a> ... )</i><p><br>
+
+<h4><a name='docfunc34198' href='#tocfunc34198'>xlink:extended-end</a></h4>
+(define (xlink:extended-end parent-seed seed element)<i><br> ... <a href='#codefunc34198'>Full Code</a> ... )</i><p><br>
+
+<hr width='40%' align='center'><center><h3><a name='sect51611' href='#tocsect51611'>A locator element</a></h3></center>
+
+<pre></pre>
+<h4><a name='docfunc27212' href='#tocfunc27212'>xlink:locator-start</a></h4>
+(define (xlink:locator-start position xlink-values seed)<i><br> ... <a href='#codefunc27212'>Full Code</a> ... )</i><p><br>
+
+<h4><a name='docfunc61900' href='#tocfunc61900'>xlink:locator-end</a></h4>
+(define (xlink:locator-end parent-seed seed element)<i><br> ... <a href='#codefunc61900'>Full Code</a> ... )</i><p><br>
+
+<hr width='40%' align='center'><center><h3><a name='sect29032' href='#tocsect29032'>A resource element</a></h3></center>
+
+<pre></pre>
+<h4><a name='docfunc2848' href='#tocfunc2848'>xlink:resource-start</a></h4>
+(define (xlink:resource-start position xlink-values seed)<i><br> ... <a href='#codefunc2848'>Full Code</a> ... )</i><p><br>
+
+<h4><a name='docfunc35751' href='#tocfunc35751'>xlink:resource-end</a></h4>
+(define (xlink:resource-end parent-seed seed element)<i><br> ... <a href='#codefunc35751'>Full Code</a> ... )</i><p><br>
+
+<hr width='40%' align='center'><center><h3><a name='sect55100' href='#tocsect55100'>An arc element</a></h3></center>
+
+<pre></pre>
+<h4><a name='docfunc40026' href='#tocfunc40026'>xlink:arc-start</a></h4>
+(define (xlink:arc-start position xlink-values seed)<i><br> ... <a href='#codefunc40026'>Full Code</a> ... )</i><p><br>
+
+<h4><a name='docfunc9179' href='#tocfunc9179'>xlink:arc-end</a></h4>
+(define (xlink:arc-end parent-seed seed element)<i><br> ... <a href='#codefunc9179'>Full Code</a> ... )</i><p><br>
+<hr height='5'><center><h3><a name='chapt48336' href='#tocchapt48336'>Miscellaneous utility functions</a></h3></center>
+
+<pre></pre>
+<hr width='40%' align='center'><center><h3><a name='sect52062' href='#tocsect52062'>Functions dealing with position</a></h3></center>
+
+<pre></pre>
+<h4><a name='docfunc21481' href='#tocfunc21481'>xlink:get-port-position</a></h4>
+(define (xlink:get-port-position port)<i><br> ... <a href='#codefunc21481'>Full Code</a> ... )</i>
+<pre> Returns posiotion of a port
+ NOTE: Specific for different Scheme implementations
+</pre><p><br>
+
+<h4><a name='docfunc42660' href='#tocfunc42660'>xlink:parser-error</a></h4>
+(define (xlink:parser-error position . text)<i><br> ... <a href='#codefunc42660'>Full Code</a> ... )</i>
+<pre> This function displays an error message. #t is returned
+  position - position within a file
+  text - a message to display
+</pre><p><br>
+
+<hr width='40%' align='center'><center><h3><a name='sect48296' href='#tocsect48296'>Functions working on branches of an SXML tree</a></h3></center>
+
+<pre></pre>
+<h4><a name='docfunc39145' href='#tocfunc39145'>xlink:branch-helper</a></h4>
+(define (xlink:branch-helper action-on-branch)<i><br> ... <a href='#codefunc39145'>Full Code</a> ... )</i>
+<pre> Helper is used by the following functions in this section
+  action-on-branch ::= (lambda (elem content-nodeset) ...)
+  elem - SXML element that corresponds to the branch
+  content-nodeset - new content
+ The lambda should return the new elem
+</pre><p><br>
+
+<h4><a name='docfunc49437' href='#tocfunc49437'>xlink:replace-branch</a></h4>
+(define xlink:replace-branch <i><br> ... <a href='#codefunc49437'>Full Code</a> ... )</i>
+<pre> Replaces the content of the branch with a new content
+  document - SXML document
+  branch-lpath ::= (listof symbol)
+  branch-lpath - is like an sxpath location path. There must be no more than
+ one branch in an SXML tree with this location path. If this branch doesn't
+ exist, it will be created as the first branch in a document
+  content-nodeset ::= (listof node)
+  content-nodeset - defines the content of the branch
+</pre><p><br>
+
+<h4><a name='docfunc30467' href='#tocfunc30467'>xlink:append-branch</a></h4>
+(define xlink:append-branch <i><br> ... <a href='#codefunc30467'>Full Code</a> ... )</i>
+<pre> Appends 'content-nodeset' to the content of the given branch
+</pre><p><br>
+
+<hr width='40%' align='center'><center><h3><a name='sect2573' href='#tocsect2573'>Processing the document URI</a></h3></center>
+
+<pre> (borrowed from &quot;xlink.scm&quot;)
+</pre>
+<h4><a name='docfunc6919' href='#tocfunc6919'>xlink:get-uri</a></h4>
+(define (xlink:get-uri doc)<i><br> ... <a href='#codefunc6919'>Full Code</a> ... )</i>
+<pre> Given a document, returns its URI (a string)
+ #f is returned if there is no &quot;@@/uri&quot; subtree in the document
+</pre><p><br>
+
+<h4><a name='docfunc63308' href='#tocfunc63308'>xlink:set-uri-for-sxlink-arcs</a></h4>
+(define (xlink:set-uri-for-sxlink-arcs uri sxlink-arcs)<i><br> ... <a href='#codefunc63308'>Full Code</a> ... )</i>
+<pre> Adds the URI of the document where the arcs were declared, to sxlink-arcs
+ Returns modified sxlink-arcs
+</pre><p><br>
+<hr height='5'><center><h3><a name='chapt8181' href='#tocchapt8181'>Core features of the parser</a></h3></center>
+
+<pre></pre>
+<hr width='40%' align='center'><center><h3><a name='sect5587' href='#tocsect5587'>Handler units for SSAX multi-parser</a></h3></center>
+
+<pre></pre>
+<h4><a name='docfunc8115' href='#tocfunc8115'>xlink:new-level-seed-handler</a></h4>
+(define (xlink:new-level-seed-handler port attributes namespaces seed)<i><br> ... <a href='#codefunc8115'>Full Code</a> ... )</i>
+<pre> This function is called by the NEW-LEVEL-SEED handler
+ A new 'xlink:seed' is returned
+</pre><p><br>
+
+<h4><a name='docfunc43619' href='#tocfunc43619'>xlink:finish-element-handler</a></h4>
+(define (xlink:finish-element-handler parent-seed seed element)<i><br> ... <a href='#codefunc43619'>Full Code</a> ... )</i>
+<pre> This function is called by the FINISH-ELEMENT handler
+ A new 'xlink:seed' is returned
+</pre><p><br>
+
+<h4><a name='docfunc39405' href='#tocfunc39405'>xlink:ending-action</a></h4>
+(define (xlink:ending-action xlink:seed)<i><br> ... <a href='#codefunc39405'>Full Code</a> ... )</i>
+<pre> Constructs the member of an axuiliary list
+</pre><p><br>
+
+<hr width='40%' align='center'><center><h3><a name='sect46363' href='#tocsect46363'>The function which adds XLink-related information to the SXML document</a></h3></center>
+
+<pre></pre>
+<h4><a name='docfunc54388' href='#tocfunc54388'>SXML->SXML+xlink</a></h4>
+(define (SXML-&gt;SXML+xlink document)<i><br> ... <a href='#codefunc54388'>Full Code</a> ... )</i>
+<pre>  document - an SXML document
+ The function emulates a 'fold-ts' operation.
+ A new SXML document is returned. It contains an auxiliary list with an
+ 'sxlink' subtree. If the source document already contains such a
+ subtree, it will be replaced. Other subtrees in an auxiliary list will
+ remain unchanged.
+</pre><p><br>
+
+<hr width='40%' align='center'><center><h3><a name='sect61243' href='#tocsect61243'>Adds SXLink arc information to SHTML document</a></h3></center>
+
+<pre></pre>
+<h4><a name='docfunc974' href='#tocfunc974'>SHTML->SHTML+xlink</a></h4>
+(define (SHTML-&gt;SHTML+xlink document)<i><br> ... <a href='#codefunc974'>Full Code</a> ... )</i><p><br>
+<center><h1>Code</h1></center>
+
+<h4><a name='codefunc20545' href='#docfunc20545'>xlink:namespace-uri</a></h4>
+<i><a href='#tocfunc20545'>Index</a></i><br>
+
+<pre> Some global constants
+</pre>
+<pre>(define <a href="xlink-parser.html#codefunc20545">xlink:namespace-uri</a> 'http://www.w3.org/1999/xlink)
+</pre>
+<h4><a name='codefunc36765' href='#docfunc36765'>xlink:linkbase-uri</a></h4>
+<i><a href='#tocfunc36765'>Index</a></i><br>
+
+<pre>(define <a href="xlink-parser.html#codefunc36765">xlink:linkbase-uri</a> &quot;http://www.w3.org/1999/xlink/properties/linkbase&quot;)
+</pre>
+<h4><a name='codefunc63011' href='#docfunc63011'>xlink:make-small-seed</a></h4>
+<i><a href='#tocfunc63011'>Index</a></i><br>
+
+<pre> This function constructs a seed consisting only of six compulsory elements
+</pre>
+<pre>(define (<a href="xlink-parser.html#codefunc63011">xlink:make-small-seed</a> mode sxlink-arcs sxpointer stack)
+  (list mode sxlink-arcs sxpointer stack))
+</pre>
+<h4><a name='codefunc42509' href='#docfunc42509'>xlink:make-full-seed</a></h4>
+<i><a href='#tocfunc42509'>Index</a></i><br>
+
+<pre> The similar function which makes a full-length seed
+</pre>
+<pre>(define (<a href="xlink-parser.html#codefunc42509">xlink:make-full-seed</a> mode sxlink-arcs sxpointer stack
+                              locators+resources arcs declared-labels)
+  (list mode sxlink-arcs sxpointer stack
+        locators+resources arcs declared-labels))
+</pre>
+<h4><a name='codefunc45351' href='#docfunc45351'>xlink:seed-mode</a></h4>
+<i><a href='#tocfunc45351'>Index</a></i><br>
+
+<pre>(define (<a href="xlink-parser.html#codefunc45351">xlink:seed-mode</a> seed)
+  (car seed))
+</pre>
+<h4><a name='codefunc16485' href='#docfunc16485'>xlink:seed-sxlink-arcs</a></h4>
+<i><a href='#tocfunc16485'>Index</a></i><br>
+
+<pre>(define (<a href="xlink-parser.html#codefunc16485">xlink:seed-sxlink-arcs</a> seed)
+  (cadr seed))
+</pre>
+<h4><a name='codefunc4879' href='#docfunc4879'>xlink:seed-sxpointer</a></h4>
+<i><a href='#tocfunc4879'>Index</a></i><br>
+
+<pre>(define (<a href="xlink-parser.html#codefunc4879">xlink:seed-sxpointer</a> seed)
+  (list-ref seed 2))
+</pre>
+<h4><a name='codefunc7979' href='#docfunc7979'>xlink:seed-stack</a></h4>
+<i><a href='#tocfunc7979'>Index</a></i><br>
+
+<pre>(define (<a href="xlink-parser.html#codefunc7979">xlink:seed-stack</a> seed)
+  (list-ref seed 3))
+</pre>
+<h4><a name='codefunc28216' href='#docfunc28216'>xlink:seed-locators+resources</a></h4>
+<i><a href='#tocfunc28216'>Index</a></i><br>
+
+<pre> We assume that the seed has the full length for the latter four functions
+</pre>
+<pre>(define (<a href="xlink-parser.html#codefunc28216">xlink:seed-locators+resources</a> seed)
+  (list-ref seed 4))
+</pre>
+<h4><a name='codefunc42040' href='#docfunc42040'>xlink:seed-arcs</a></h4>
+<i><a href='#tocfunc42040'>Index</a></i><br>
+
+<pre>(define (<a href="xlink-parser.html#codefunc42040">xlink:seed-arcs</a> seed)
+  (list-ref seed 5))
+</pre>
+<h4><a name='codefunc54582' href='#docfunc54582'>xlink:seed-declared-labels</a></h4>
+<i><a href='#tocfunc54582'>Index</a></i><br>
+
+<pre>(define (<a href="xlink-parser.html#codefunc54582">xlink:seed-declared-labels</a> seed)
+  (list-ref seed 6))
+</pre>
+<h4><a name='codefunc58975' href='#docfunc58975'>xlink:add-simple</a></h4>
+<i><a href='#tocfunc58975'>Index</a></i><br>
+
+<pre> Adds the arc defined by the XLink simple link to 'sxlink-arcs'
+</pre>
+<pre>(define (<a href="xlink-parser.html#codefunc58975">xlink:add-simple</a>
+         xlink-values element position sxpointer sxlink-arcs)
+  (let ((href (<a href="xlink-parser.html#codefunc11675">xlink:values-href</a> xlink-values))
+        (role (<a href="xlink-parser.html#codefunc16023">xlink:values-role</a> xlink-values))
+        (arcrole (<a href="xlink-parser.html#codefunc63763">xlink:values-arcrole</a> xlink-values))
+        (title (<a href="xlink-parser.html#codefunc44440">xlink:values-title</a> xlink-values))
+        (show (<a href="xlink-parser.html#codefunc17058">xlink:values-show</a> xlink-values))
+        (actuate (<a href="xlink-parser.html#codefunc64527">xlink:values-actuate</a> xlink-values)))
+    (if
+     (not href)   ; the link is untraversable
+     sxlink-arcs  ; no arc added
+     (call-with-values
+      (lambda ()
+        (let ((lst (<a href="util.html#codefunc39259">string-split</a> href (list #\#) 2)))
+          (cond
+            ((= (length lst) 1)  ; no XPointer fragment identifier
+             (values (car lst) #f))
+            ((= (string-length (car lst)) 0)  ; addresses the same document
+             (values #f (cadr lst)))
+            (else
+             (values (car lst) (cadr lst))))))
+      (lambda (uri-ending fragment)
+        (cons
+         `(,(if (equal? arcrole <a href="xlink-parser.html#codefunc36765">xlink:linkbase-uri</a>)
+                'linkbase 'simple)
+           (from
+            (uri)  ; goes from this document
+            (nodes ,element)
+            (xpointer ,(<a href="xlink-parser.html#codefunc38264">xlink:sxpointer-&gt;childseq</a> sxpointer)))
+           (to
+            (uri ,@(if uri-ending (list uri-ending) '()))
+            ,@(if fragment `((xpointer ,fragment)) '())
+            ,@(if role `((role ,role)) '())
+            ,@(if title `((title ,title)) '()))
+           ,@(if arcrole `((arcrole ,arcrole)) '())
+           ,@(if show `((show ,show)) '())
+           ,@(if actuate `((actuate ,actuate)) '())
+           (declaration
+            (uri)  ; in this document
+            (nodes ,element)
+            (xpointer ,(<a href="xlink-parser.html#codefunc38264">xlink:sxpointer-&gt;childseq</a> sxpointer))
+            (position ,position)))
+         sxlink-arcs))))))
+</pre>
+<h4><a name='codefunc19904' href='#docfunc19904'>xlink:add-extended</a></h4>
+<i><a href='#tocfunc19904'>Index</a></i><br>
+
+<pre> This function appends information to 'sxlink-arcs' according to
+ 'locators+resources' and 'arcs' parameters.
+ The function is called at the end-tag of an extended link element.
+</pre>
+<pre>(define (<a href="xlink-parser.html#codefunc19904">xlink:add-extended</a>
+         locators+resources arcs sxlink-arcs declaration)
+  (let (; like map, but applies the function to each pair of the arguments
+        (map-join
+         (lambda (func arg-lst1 arg-lst2)
+           (let ((arg-lst1 (reverse arg-lst1)))
+             (let iterate-second ((lst2 (reverse arg-lst2))
+                                  (res '()))
+               (if
+                (null? lst2)  ; everyone processed
+                res
+                (let iterate-first ((lst1 arg-lst1)
+                                    (res res))
+                  (if
+                   (null? lst1)  ; the iteration loop finished
+                   (iterate-second (cdr lst2) res)
+                   (iterate-first
+                    (cdr lst1)
+                    (cons (func (car lst1) (car lst2)) res)))))))))
+        ; a stub for determining whether a locator-or-resouces is a local
+        ; or remote one
+        (resource?
+         (lambda (locator-or-resource)
+           ; Resource iff info contains subelement 'nodes
+           (assq 'nodes (<a href="xlink-parser.html#codefunc39675">xlink:resource-data</a> locator-or-resource)))))    
+    (let loop ((arcs arcs)
+               (sxlink-arcs sxlink-arcs))
+      (if
+       (null? arcs)  ; all arcs processed
+       sxlink-arcs
+       (loop
+        (cdr arcs)
+        (let ((arc-info (car arcs)))
+          (append
+           (map-join
+            (lambda (starting ending)
+              `(,(cond  ; determining arc name
+                   ((<a href="xlink-parser.html#codefunc17322">xlink:arc-info-linkbase</a> arc-info)                    
+                    'linkbase)
+                   ((and (resource? starting)
+                         (not (resource? ending)))
+                    'outbound)
+                   ((and (not (resource? starting))
+                         (resource? ending))
+                    'inbound)
+                   ((and (resource? starting) (resource? ending))
+                    'local-to-local)
+                   (else
+                    'third-party))
+                (from ,@(<a href="xlink-parser.html#codefunc39675">xlink:resource-data</a> starting))
+                (to ,@(<a href="xlink-parser.html#codefunc39675">xlink:resource-data</a> ending))
+                ,@(<a href="xlink-parser.html#codefunc27601">xlink:arc-info-data</a> arc-info)
+                ,declaration))
+            (let ((from (<a href="xlink-parser.html#codefunc26862">xlink:arc-info-from</a> arc-info)))
+              (if
+               (not from)  ; arc outgoes from every resource
+               locators+resources
+               (<a href="common.html#codefunc20536">filter</a>
+                (lambda (locator-or-resource)
+                  (equal? from
+                          (<a href="xlink-parser.html#codefunc64767">xlink:resource-label</a> locator-or-resource)))
+                locators+resources)))
+            (let ((to (<a href="xlink-parser.html#codefunc1918">xlink:arc-info-to</a> arc-info)))
+              (if
+               (not to)  ; arc comes to every resource
+               locators+resources
+               (<a href="common.html#codefunc20536">filter</a>
+                (lambda (locator-or-resource)
+                  (equal? to
+                          (<a href="xlink-parser.html#codefunc64767">xlink:resource-label</a> locator-or-resource)))
+                locators+resources))))
+           sxlink-arcs)))))))
+</pre>
+<h4><a name='codefunc38264' href='#docfunc38264'>xlink:sxpointer->childseq</a></h4>
+<i><a href='#tocfunc38264'>Index</a></i><br>
+
+<pre>(define (<a href="xlink-parser.html#codefunc38264">xlink:sxpointer-&gt;childseq</a> sxpointer)
+  (apply
+   string-append
+   (map
+    (lambda (num) (string-append &quot;/&quot; (number-&gt;string num)))
+    (reverse sxpointer))))
+</pre>
+<h4><a name='codefunc18983' href='#docfunc18983'>xlink:sxpointer4sibling</a></h4>
+<i><a href='#tocfunc18983'>Index</a></i><br>
+
+<pre> Forms sxpointer for the following sibling element of the current element
+</pre>
+<pre>(define (<a href="xlink-parser.html#codefunc18983">xlink:sxpointer4sibling</a> sxpointer)
+  (cons (+ 1 (car sxpointer)) (cdr sxpointer)))
+</pre>
+<h4><a name='codefunc56305' href='#docfunc56305'>xlink:make-locator-or-resource</a></h4>
+<i><a href='#tocfunc56305'>Index</a></i><br>
+
+<pre> Constructor
+</pre>
+<pre>(define (<a href="xlink-parser.html#codefunc56305">xlink:make-locator-or-resource</a> label resource-info)
+  (list label resource-info))
+</pre>
+<h4><a name='codefunc64767' href='#docfunc64767'>xlink:resource-label</a></h4>
+<i><a href='#tocfunc64767'>Index</a></i><br>
+
+<pre> Accessors
+ NOTE: We don't apply teta-reduction for the sake of easier bug detection
+</pre>
+<pre>(define (<a href="xlink-parser.html#codefunc64767">xlink:resource-label</a> locator-or-resource)
+  (car locator-or-resource))
+</pre>
+<h4><a name='codefunc39675' href='#docfunc39675'>xlink:resource-data</a></h4>
+<i><a href='#tocfunc39675'>Index</a></i><br>
+
+<pre>(define (<a href="xlink-parser.html#codefunc39675">xlink:resource-data</a> locator-or-resource)
+  (cadr locator-or-resource))
+</pre>
+<h4><a name='codefunc59336' href='#docfunc59336'>xlink:add-locator</a></h4>
+<i><a href='#tocfunc59336'>Index</a></i><br>
+
+<pre> If the following XLink constraint is fulfilled, adds information about the
+ XLink locator element to 'locators+resources'. Otherwise, displays an error
+ message and doesn't add anything.
+  Constraint: Attributes on Locator Element
+  The locator-type element must have the locator attribute (see 5.4 Locator
+  Attribute (href)). The locator attribute (href) must have a value supplied.
+</pre>
+<pre>(define (<a href="xlink-parser.html#codefunc59336">xlink:add-locator</a> xlink-values position element locators+resources)
+  (let ((href (<a href="xlink-parser.html#codefunc11675">xlink:values-href</a> xlink-values))
+        (role (<a href="xlink-parser.html#codefunc16023">xlink:values-role</a> xlink-values))
+        (title (<a href="xlink-parser.html#codefunc44440">xlink:values-title</a> xlink-values))
+        (label (<a href="xlink-parser.html#codefunc39561">xlink:values-label</a> xlink-values)))
+    (cond
+      ((not href)
+       (<a href="xlink-parser.html#codefunc42660">xlink:parser-error</a>
+        position &quot;locator element doesn't have an xlink:href attribute&quot;)
+       locators+resources)
+      (else
+       (let ((lst (<a href="util.html#codefunc39259">string-split</a> href (list #\#) 2)))
+         (call-with-values
+          (lambda ()
+            (cond
+              ((= (length lst) 1) (values (car lst) #f))
+              ((= (string-length (car lst)) 0) (values #f (cadr lst)))
+              (else (values (car lst) (cadr lst)))))
+          (lambda (uri fragment)
+            (cons
+             (<a href="xlink-parser.html#codefunc56305">xlink:make-locator-or-resource</a>
+              label
+              `((uri ,@(if uri (list uri) '()))
+                ,@(if fragment `((xpointer ,fragment)) '())
+                ,@(if role `((role ,role)) '())
+                ,@(if title `((title ,title)) '())))
+             locators+resources))))))))
+</pre>
+<h4><a name='codefunc21457' href='#docfunc21457'>xlink:add-resource</a></h4>
+<i><a href='#tocfunc21457'>Index</a></i><br>
+
+<pre> Adds information concerning XLink resource element to 'locators+resources'
+</pre>
+<pre>(define (<a href="xlink-parser.html#codefunc21457">xlink:add-resource</a> xlink-values element sxpointer locators+resources)
+  (let ((role (<a href="xlink-parser.html#codefunc16023">xlink:values-role</a> xlink-values))
+        (label (<a href="xlink-parser.html#codefunc39561">xlink:values-label</a> xlink-values))
+        (title (<a href="xlink-parser.html#codefunc44440">xlink:values-title</a> xlink-values)))
+    (cons
+     (<a href="xlink-parser.html#codefunc56305">xlink:make-locator-or-resource</a>
+      label
+      `((uri)
+        (nodes ,element)
+        (xpointer ,(<a href="xlink-parser.html#codefunc38264">xlink:sxpointer-&gt;childseq</a> sxpointer))
+        ,@(if role `((role ,role)) '())
+        ,@(if title `((title ,title)) '())))
+     locators+resources)))
+</pre>
+<h4><a name='codefunc28880' href='#docfunc28880'>xlink:make-arc-info</a></h4>
+<i><a href='#tocfunc28880'>Index</a></i><br>
+
+<pre> Constructor
+</pre>
+<pre>(define (<a href="xlink-parser.html#codefunc28880">xlink:make-arc-info</a> from to linkbase position data)
+  (list from to linkbase position data))
+</pre>
+<h4><a name='codefunc26862' href='#docfunc26862'>xlink:arc-info-from</a></h4>
+<i><a href='#tocfunc26862'>Index</a></i><br>
+
+<pre> Accessors
+ NOTE: We don't apply teta-reduction for the sake of easier bug detection
+</pre>
+<pre>(define (<a href="xlink-parser.html#codefunc26862">xlink:arc-info-from</a> arc-info)
+  (car arc-info))
+</pre>
+<h4><a name='codefunc1918' href='#docfunc1918'>xlink:arc-info-to</a></h4>
+<i><a href='#tocfunc1918'>Index</a></i><br>
+
+<pre>(define (<a href="xlink-parser.html#codefunc1918">xlink:arc-info-to</a> arc-info)
+  (cadr arc-info))
+</pre>
+<h4><a name='codefunc17322' href='#docfunc17322'>xlink:arc-info-linkbase</a></h4>
+<i><a href='#tocfunc17322'>Index</a></i><br>
+
+<pre>(define (<a href="xlink-parser.html#codefunc17322">xlink:arc-info-linkbase</a> arc-info)
+  (list-ref arc-info 2))
+</pre>
+<h4><a name='codefunc23231' href='#docfunc23231'>xlink:arc-info-position</a></h4>
+<i><a href='#tocfunc23231'>Index</a></i><br>
+
+<pre>(define (<a href="xlink-parser.html#codefunc23231">xlink:arc-info-position</a> arc-info)
+  (list-ref arc-info 3))
+</pre>
+<h4><a name='codefunc27601' href='#docfunc27601'>xlink:arc-info-data</a></h4>
+<i><a href='#tocfunc27601'>Index</a></i><br>
+
+<pre>(define (<a href="xlink-parser.html#codefunc27601">xlink:arc-info-data</a> arc-info)
+  (list-ref arc-info 4))
+</pre>
+<h4><a name='codefunc6615' href='#docfunc6615'>xlink:add-arc</a></h4>
+<i><a href='#tocfunc6615'>Index</a></i><br>
+
+<pre> Adds arc information to 'arcs' datatype. A side effect - checks the following
+ XLink constraint:
+  Constraint: No Arc Duplication
+  Each arc-type element must have a pair of from and to xlink-values that does
+  not  repeat the from and to xlink-values (respectively) for any other
+  arc-type element in the same extended link; that is, each pair in a link
+  must be unique.
+</pre>
+<pre>(define (<a href="xlink-parser.html#codefunc6615">xlink:add-arc</a> xlink-values position element arcs)
+  (let ((arcrole (<a href="xlink-parser.html#codefunc63763">xlink:values-arcrole</a> xlink-values))
+        (title (<a href="xlink-parser.html#codefunc44440">xlink:values-title</a> xlink-values))
+        (show (<a href="xlink-parser.html#codefunc17058">xlink:values-show</a> xlink-values))
+        (actuate (<a href="xlink-parser.html#codefunc64527">xlink:values-actuate</a> xlink-values))
+        (from (<a href="xlink-parser.html#codefunc13730">xlink:values-from</a> xlink-values))
+        (to (<a href="xlink-parser.html#codefunc54321">xlink:values-to</a> xlink-values)))
+    (let loop ((as arcs))
+      (if
+       (null? as)
+       (cons
+        (<a href="xlink-parser.html#codefunc28880">xlink:make-arc-info</a>
+         from to
+         (equal? arcrole <a href="xlink-parser.html#codefunc36765">xlink:linkbase-uri</a>)
+         position
+         `(,@(if arcrole `((arcrole ,arcrole)) '())
+           ,@(if title `((title ,title)) '())
+           ,@(if show `((show ,show)) '())
+           ,@(if actuate `((actuate ,actuate)) '())))
+        arcs)
+       (let ((from2 (<a href="xlink-parser.html#codefunc26862">xlink:arc-info-from</a> (car as)))
+             (to2 (<a href="xlink-parser.html#codefunc1918">xlink:arc-info-to</a> (car as))))
+         (when
+             (and (or (not from) (not from2) (equal? from from2))
+                  (or (not to) (not to2) (equal? to to2)))
+           (<a href="xlink-parser.html#codefunc42660">xlink:parser-error</a> position &quot;duplicate arcs - xlink:from&quot;
+                        (if from (string-append &quot;=&quot; from) &quot; - omitted&quot;)
+                        &quot;, xlink:to&quot;
+                        (if to (string-append &quot;=&quot; to) &quot; - omitted&quot;)))
+         (loop (cdr as)))))))
+</pre>
+<h4><a name='codefunc31371' href='#docfunc31371'>xlink:add-default-arc</a></h4>
+<i><a href='#tocfunc31371'>Index</a></i><br>
+
+<pre> XLink specification, 5.1.3:
+  If no arc-type elements are provided in an extended link, then by extension
+  the missing from and to xlink-values are interpreted as standing for all the
+  labels in that link.
+ Inserts such a default arc if 'arcs' are empty
+</pre>
+<pre>(define (<a href="xlink-parser.html#codefunc31371">xlink:add-default-arc</a> element arcs)
+  (if (null? arcs)
+      (list (<a href="xlink-parser.html#codefunc28880">xlink:make-arc-info</a>
+             #f #f #f
+             0  ; position is dummy here, since it will never be used
+             '()  ; none of the attributes arcrole, title, show, actuate
+             ))
+      arcs))
+</pre>
+<h4><a name='codefunc35477' href='#docfunc35477'>xlink:add-declared-label</a></h4>
+<i><a href='#tocfunc35477'>Index</a></i><br>
+
+<pre> If an xlink:label attribute is presented in 'xlink-values', it's value is added
+ to 'declared-labels'. Otherwise, 'declared-labels' remain unchainged
+</pre>
+<pre>(define (<a href="xlink-parser.html#codefunc35477">xlink:add-declared-label</a> xlink-values declared-labels)
+  (let((label (<a href="xlink-parser.html#codefunc39561">xlink:values-label</a> xlink-values)))
+    (if(not label)
+       declared-labels
+       (cons label declared-labels))))
+</pre>
+<h4><a name='codefunc30763' href='#docfunc30763'>xlink:all-labels-declared</a></h4>
+<i><a href='#tocfunc30763'>Index</a></i><br>
+
+<pre> The function checks the following XLink constraint
+  Constraint: label, from, and to xlink-values
+  The value of a label, from, or to attribute must be an NCName. If a value 
+  is supplied for a from or to attribute, it must correspond to the same value
+  for some label attribute on a locator- or resource-type element that appears
+  as a direct child inside the same extended-type element as does the arc-type 
+  element. 
+ Error message is displayed if some label was undeclared.
+ The function always returns #t.
+ It is called at the end-tag of an extended link element
+</pre>
+<pre>(define (<a href="xlink-parser.html#codefunc30763">xlink:all-labels-declared</a> arcs declared-labels)
+  (let loop ((arcs arcs))
+    (if
+     (null? arcs)
+     #t
+     (let((arc-info (car arcs)))
+       (let((from (<a href="xlink-parser.html#codefunc26862">xlink:arc-info-from</a> arc-info))
+            (to (<a href="xlink-parser.html#codefunc1918">xlink:arc-info-to</a> arc-info))
+            (position (<a href="xlink-parser.html#codefunc23231">xlink:arc-info-position</a> arc-info)))       
+         (when (and from (not (member from declared-labels)))
+           (<a href="xlink-parser.html#codefunc42660">xlink:parser-error</a> position &quot;label not defined - xlink:from=&quot; from))
+         (when (and to (not (member to declared-labels)))
+           (<a href="xlink-parser.html#codefunc42660">xlink:parser-error</a> position &quot;label not defined - xlink:to=&quot; to))
+         (loop (cdr arcs)))))))
+</pre>
+<h4><a name='codefunc19986' href='#docfunc19986'>xlink:construct-xlink-values</a></h4>
+<i><a href='#tocfunc19986'>Index</a></i><br>
+
+<pre> Constructs a datatype (just a list in a current implementation) which
+ contains xlink-values of all xlink-related attributes. For example, 'type'
+ is the value of xlink:type attribute or #f if there is no such attribute.
+ This datatype will be called 'xlink-values' in the latter text
+</pre>
+<pre>(define (<a href="xlink-parser.html#codefunc19986">xlink:construct-xlink-values</a>
+         type href role arcrole title show actuate label from to)
+  (list type href role arcrole title show actuate label from to))
+</pre>
+<h4><a name='codefunc17569' href='#docfunc17569'>xlink:values-type</a></h4>
+<i><a href='#tocfunc17569'>Index</a></i><br>
+
+<pre> Accessors
+ NOTE: We don't apply teta-reduction for the sake of easier bug detection
+</pre>
+<pre>(define (<a href="xlink-parser.html#codefunc17569">xlink:values-type</a> xlink-values)
+  (car xlink-values))
+</pre>
+<h4><a name='codefunc11675' href='#docfunc11675'>xlink:values-href</a></h4>
+<i><a href='#tocfunc11675'>Index</a></i><br>
+
+<pre>(define (<a href="xlink-parser.html#codefunc11675">xlink:values-href</a> xlink-values)
+  (cadr xlink-values))
+</pre>
+<h4><a name='codefunc16023' href='#docfunc16023'>xlink:values-role</a></h4>
+<i><a href='#tocfunc16023'>Index</a></i><br>
+
+<pre>(define (<a href="xlink-parser.html#codefunc16023">xlink:values-role</a> xlink-values)
+  (list-ref xlink-values 2))
+</pre>
+<h4><a name='codefunc63763' href='#docfunc63763'>xlink:values-arcrole</a></h4>
+<i><a href='#tocfunc63763'>Index</a></i><br>
+
+<pre>(define (<a href="xlink-parser.html#codefunc63763">xlink:values-arcrole</a> xlink-values)
+  (list-ref xlink-values 3))
+</pre>
+<h4><a name='codefunc44440' href='#docfunc44440'>xlink:values-title</a></h4>
+<i><a href='#tocfunc44440'>Index</a></i><br>
+
+<pre>(define (<a href="xlink-parser.html#codefunc44440">xlink:values-title</a> xlink-values)
+  (list-ref xlink-values 4))
+</pre>
+<h4><a name='codefunc17058' href='#docfunc17058'>xlink:values-show</a></h4>
+<i><a href='#tocfunc17058'>Index</a></i><br>
+
+<pre>(define (<a href="xlink-parser.html#codefunc17058">xlink:values-show</a> xlink-values)
+  (list-ref xlink-values 5))
+</pre>
+<h4><a name='codefunc64527' href='#docfunc64527'>xlink:values-actuate</a></h4>
+<i><a href='#tocfunc64527'>Index</a></i><br>
+
+<pre>(define (<a href="xlink-parser.html#codefunc64527">xlink:values-actuate</a> xlink-values)
+  (list-ref xlink-values 6))
+</pre>
+<h4><a name='codefunc39561' href='#docfunc39561'>xlink:values-label</a></h4>
+<i><a href='#tocfunc39561'>Index</a></i><br>
+
+<pre>(define (<a href="xlink-parser.html#codefunc39561">xlink:values-label</a> xlink-values)
+  (list-ref xlink-values 7))
+</pre>
+<h4><a name='codefunc13730' href='#docfunc13730'>xlink:values-from</a></h4>
+<i><a href='#tocfunc13730'>Index</a></i><br>
+
+<pre>(define (<a href="xlink-parser.html#codefunc13730">xlink:values-from</a> xlink-values)
+  (list-ref xlink-values 8))
+</pre>
+<h4><a name='codefunc54321' href='#docfunc54321'>xlink:values-to</a></h4>
+<i><a href='#tocfunc54321'>Index</a></i><br>
+
+<pre>(define (<a href="xlink-parser.html#codefunc54321">xlink:values-to</a> xlink-values)
+  (list-ref xlink-values 9))
+</pre>
+<h4><a name='codefunc63870' href='#docfunc63870'>xlink:read-attributes</a></h4>
+<i><a href='#tocfunc63870'>Index</a></i><br>
+
+<pre> The function is given a list called 'attributes' (in SSAX parser). This list
+ has the form
+  attributes = (list  attribute  
+                      attribute
+                      ...)
+  attribute = (cons  (cons  namespace-prefix  attribute-name)
+                     attribute-value )
+           or (cons  attribute-name  attribute-value )
+  namespaces - defined in &quot;ssax.scm&quot;
+ reads XLink attributes' values and returns a 'xlink-values' datatype
+ (the result of 'xlink:construct-xlink-values' function)
+</pre>
+<pre>(define (<a href="xlink-parser.html#codefunc63870">xlink:read-attributes</a> attributes namespaces)
+  (let loop ((attributes attributes)
+             (type #f) (href #f) (role #f) (arcrole #f) (title #f) (show #f)
+             (actuate #f) (label #f) (from #f) (to #f))
+    (if(null? attributes)  ; the attribute list is over
+       (<a href="xlink-parser.html#codefunc19986">xlink:construct-xlink-values</a>
+        type href role arcrole title show actuate label from to)
+       (let ((attribute (car attributes)))                  
+         (if
+          (not (pair? (car attribute)))  ; attribute doesn't have namespace
+          (loop (cdr attributes) 
+                type href role arcrole title show actuate label from to)
+          (let ((namespace-prefix (caar attribute))
+                (attribute-name (cdar attribute))
+                (attribute-value (cdr attribute)))
+            (let ((namespace-uri
+                   (let rpt ((ns namespaces))
+                     (cond
+                       ((null? ns) namespace-prefix)
+                       ((equal? (cadar ns) namespace-prefix) (cddar ns))
+                       (else (rpt (cdr ns)))))))
+              (if
+               (not (equal? namespace-uri <a href="xlink-parser.html#codefunc20545">xlink:namespace-uri</a>))
+               (loop (cdr attributes)
+                     type href role arcrole title show actuate label from to)
+               (case attribute-name
+                 ((type) (loop (cdr attributes) attribute-value href role 
+                               arcrole title show actuate label from to))
+                 ((href) (loop (cdr attributes) type attribute-value role
+                               arcrole title show actuate label from to))
+                 ((role) (loop (cdr attributes) type href attribute-value 
+                               arcrole title show actuate label from to))
+                 ((arcrole)
+                  (loop (cdr attributes) type href role attribute-value title
+                        show actuate label from to))
+                 ((title) (loop (cdr attributes) type href role arcrole
+                                attribute-value show actuate label from to))
+                 ((show) (loop (cdr attributes) type href role arcrole title
+                               attribute-value actuate label from to))
+                 ((actuate) (loop (cdr attributes) type href role arcrole
+                                  title show attribute-value label from to))
+                 ((label) (loop (cdr attributes) type href role arcrole title
+                                show actuate attribute-value from to))
+                 ((from) (loop (cdr attributes) type href role arcrole title
+                               show actuate label attribute-value to))
+                 ((to) (loop (cdr attributes) type href role arcrole title
+                             show actuate label from attribute-value))
+                 (else (loop (cdr attributes) type href role arcrole title
+                             show actuate label from to)))))))))))
+</pre>
+<h4><a name='codefunc56844' href='#docfunc56844'>xlink:read-SXML-attributes</a></h4>
+<i><a href='#tocfunc56844'>Index</a></i><br>
+
+<pre> Reads SXML element's attributes
+  element - an SXML node representing an element
+  ns-prefixes = (list  (list  prefix  namespace-uri)
+                       (list  prefix  namespace-uri)
+                       ...)
+  prefix - a symbol
+  namespace-uri - a string
+ An 'xlink-values' datatype is returned
+</pre>
+<pre>(define (<a href="xlink-parser.html#codefunc56844">xlink:read-SXML-attributes</a> element ns-prefixes)
+  (let ((attr-node ((<a href="sxpathlib.html#codefunc3917">select-kids</a> (<a href="sxpathlib.html#codefunc9356">ntype??</a> '@)) element)))
+    (if
+     (null? attr-node)  ; no attributes
+     (<a href="xlink-parser.html#codefunc19986">xlink:construct-xlink-values</a> #f #f #f #f #f #f #f #f #f #f)
+     (let loop ((attr-list (cdar attr-node))
+                (type #f) (href #f) (role #f) (arcrole #f) (title #f)
+                (show #f) (actuate #f) (label #f) (from #f) (to #f))
+       (if
+        (null? attr-list)
+        (<a href="xlink-parser.html#codefunc19986">xlink:construct-xlink-values</a>
+         type href role arcrole title show actuate label from to)
+        (let ((attribute-name (symbol-&gt;string (caar attr-list)))
+              (attribute-value (cadar attr-list)))
+          (call-with-values
+           (lambda ()
+             (cond
+               ((<a href="util.html#codefunc35783">string-rindex</a> attribute-name #\:)
+                =&gt; (lambda (pos)
+                     (values
+                      (string-&gt;symbol (substring attribute-name 0 pos))
+                      (string-&gt;symbol
+                       (substring attribute-name (+ pos 1)
+                                  (string-length attribute-name))))))
+               (else
+                (values #f attribute-name))))
+           (lambda (prefix local)
+             (if
+              (not prefix)   ; this is a non-qualified name
+              (loop (cdr attr-list)
+                    type href role arcrole title show actuate label from to)
+              (let ((namespace-uri
+                     (cond
+                       ((assoc prefix ns-prefixes)
+                        =&gt; (lambda (pair)
+                             (string-&gt;symbol (cadr pair))))
+                       (else
+                        prefix))))
+                (if
+                 (not (equal? namespace-uri <a href="xlink-parser.html#codefunc20545">xlink:namespace-uri</a>))
+                 (loop (cdr attr-list)
+                       type href role arcrole title show actuate label from to)
+                 (case local
+                   ((type) (loop (cdr attr-list) attribute-value href role 
+                                 arcrole title show actuate label from to))
+                   ((href) (loop (cdr attr-list) type attribute-value role
+                                 arcrole title show actuate label from to))
+                   ((role) (loop (cdr attr-list) type href attribute-value
+                                 arcrole title show actuate label from to))
+                   ((arcrole)
+                    (loop (cdr attr-list) type href role attribute-value title
+                          show actuate label from to))
+                   ((title) (loop (cdr attr-list) type href role arcrole
+                                  attribute-value show actuate label from to))
+                   ((show) (loop (cdr attr-list) type href role arcrole title
+                                 attribute-value actuate label from to))
+                   ((actuate) (loop (cdr attr-list) type href role arcrole title
+                                    show attribute-value label from to))
+                   ((label) (loop (cdr attr-list) type href role arcrole title
+                                  show actuate attribute-value from to))
+                   ((from) (loop (cdr attr-list) type href role arcrole title
+                                 show actuate label attribute-value to))
+                   ((to) (loop (cdr attr-list) type href role arcrole title show 
+                               actuate label from attribute-value))
+                   (else (loop (cdr attr-list) type href role arcrole title show 
+                               actuate label from to))))))))))))))
+</pre>
+<h4><a name='codefunc22203' href='#docfunc22203'>xlink:check-helper</a></h4>
+<i><a href='#tocfunc22203'>Index</a></i><br>
+
+<pre> A helper function which is used by the next one
+  value - a value of an attribute (#f if there is no such attribute)
+  valid-xlink-values - a list of xlink-values which are allowed for this attribute
+  attr-name - a string denotating a name of an attribute (for a message)
+  position - position within a file
+ Function always returns #t. 
+ Side effects: function &quot;cerr&quot;s a message if 'value' is not #f and not within
+ 'valid-xlink-values'
+</pre>
+<pre>(define (<a href="xlink-parser.html#codefunc22203">xlink:check-helper</a> value valid-xlink-values attr-name position)
+  (cond
+    ((not value) )  ; a value is #f - a correct situation
+    ((not (member value valid-xlink-values))
+     (<a href="xlink-parser.html#codefunc42660">xlink:parser-error</a> position &quot;unexpected attribute value - &quot; 
+                  attr-name &quot;=&quot; value))
+    (else #t)))
+</pre>
+<h4><a name='codefunc43928' href='#docfunc43928'>xlink:check-type-show-actuate-constraints</a></h4>
+<i><a href='#tocfunc43928'>Index</a></i><br>
+
+<pre>  xlink-values = (type href role arcrole show actuate label from to)
+ where, for example, 'type' is the value of xlink:type attribute or #f if 
+ there is no such attribute (this datatype is a result 
+ of 'read-xlink-attributes' function)
+  position - position within a file
+
+ The function checks the three similar XLink constraints:
+  1. Constraint: type Value
+  The value of the type attribute must be supplied. The value must be one of
+  &quot;simple&quot;, &quot;extended&quot;, &quot;locator&quot;, &quot;arc&quot;, &quot;resource&quot;, &quot;title&quot;, or &quot;none&quot;.
+  2. Constraint: show Value
+  If a value is supplied for a show attribute, it must be one of the xlink-values
+  &quot;new&quot;, &quot;replace&quot;, &quot;embed&quot;, &quot;other&quot;, and &quot;none&quot;.
+  3. Constraint: actuate Value
+  If a value is supplied for an actuate attribute, it must be be one of the 
+  xlink-values &quot;onLoad&quot;, &quot;onRequest&quot;, &quot;other&quot;, and &quot;none&quot;.
+ 
+ The result is always #t
+ Side effects - error messages (printed by
+ an 'xlink:check-helper' function above)
+</pre>
+<pre>(define (<a href="xlink-parser.html#codefunc43928">xlink:check-type-show-actuate-constraints</a> xlink-values position)
+  (<a href="xlink-parser.html#codefunc22203">xlink:check-helper</a> (<a href="xlink-parser.html#codefunc17569">xlink:values-type</a> xlink-values)
+                      '(&quot;simple&quot; &quot;extended&quot; &quot;locator&quot; &quot;arc&quot; &quot;resource&quot;
+                        &quot;title&quot; &quot;none&quot;)
+                      &quot;xlink:type&quot;
+                      position)
+  (<a href="xlink-parser.html#codefunc22203">xlink:check-helper</a> (<a href="xlink-parser.html#codefunc17058">xlink:values-show</a> xlink-values)
+                      '(&quot;new&quot; &quot;replace&quot; &quot;embed&quot; &quot;other&quot; &quot;none&quot;)
+                      &quot;xlink:show&quot;
+                      position)
+  (<a href="xlink-parser.html#codefunc22203">xlink:check-helper</a> (<a href="xlink-parser.html#codefunc64527">xlink:values-actuate</a> xlink-values)
+                      '(&quot;onLoad&quot; &quot;onRequest&quot; &quot;other&quot; &quot;none&quot;)
+                      &quot;xlink:actuate&quot;
+                      position))
+</pre>
+<h4><a name='codefunc22090' href='#docfunc22090'>xlink:general-start</a></h4>
+<i><a href='#tocfunc22090'>Index</a></i><br>
+
+<pre>(define (<a href="xlink-parser.html#codefunc22090">xlink:general-start</a> position xlink-values seed)
+  (let((sxlink-arcs (<a href="xlink-parser.html#codefunc16485">xlink:seed-sxlink-arcs</a> seed))       
+       (sxpointer (<a href="xlink-parser.html#codefunc4879">xlink:seed-sxpointer</a> seed))
+       (stack (cons (list position xlink-values) (<a href="xlink-parser.html#codefunc7979">xlink:seed-stack</a> seed))))
+    (<a href="xlink-parser.html#codefunc63011">xlink:make-small-seed</a>
+     'general sxlink-arcs (cons 1 sxpointer) stack)))
+</pre>
+<h4><a name='codefunc56778' href='#docfunc56778'>xlink:general-end</a></h4>
+<i><a href='#tocfunc56778'>Index</a></i><br>
+
+<pre>(define (<a href="xlink-parser.html#codefunc56778">xlink:general-end</a> parent-seed seed element)
+  (let ((mode (<a href="xlink-parser.html#codefunc45351">xlink:seed-mode</a> parent-seed))
+        (sxlink-arcs (<a href="xlink-parser.html#codefunc16485">xlink:seed-sxlink-arcs</a> seed))
+        (sxpointer
+             (<a href="xlink-parser.html#codefunc18983">xlink:sxpointer4sibling</a> (<a href="xlink-parser.html#codefunc4879">xlink:seed-sxpointer</a> parent-seed)))
+        (stack (<a href="xlink-parser.html#codefunc7979">xlink:seed-stack</a> parent-seed)))
+    (<a href="xlink-parser.html#codefunc63011">xlink:make-small-seed</a> mode sxlink-arcs sxpointer stack)))
+</pre>
+<h4><a name='codefunc13118' href='#docfunc13118'>xlink:none-start</a></h4>
+<i><a href='#tocfunc13118'>Index</a></i><br>
+
+<pre>(define (<a href="xlink-parser.html#codefunc13118">xlink:none-start</a> position xlink-values seed)
+  (let ((stack (cons (list position xlink-values) (<a href="xlink-parser.html#codefunc7979">xlink:seed-stack</a> seed))))
+    (<a href="xlink-parser.html#codefunc63011">xlink:make-small-seed</a> 'none '() '() stack)))
+</pre>
+<h4><a name='codefunc46021' href='#docfunc46021'>xlink:none-end</a></h4>
+<i><a href='#tocfunc46021'>Index</a></i><br>
+
+<pre>(define (<a href="xlink-parser.html#codefunc46021">xlink:none-end</a> parent-seed seed element)
+  parent-seed)
+</pre>
+<h4><a name='codefunc40366' href='#docfunc40366'>xlink:simple-start</a></h4>
+<i><a href='#tocfunc40366'>Index</a></i><br>
+
+<pre>(define (<a href="xlink-parser.html#codefunc40366">xlink:simple-start</a> position xlink-values seed)
+  (let ((stack (cons (list position xlink-values) (<a href="xlink-parser.html#codefunc7979">xlink:seed-stack</a> seed))))
+    (<a href="xlink-parser.html#codefunc63011">xlink:make-small-seed</a> 'none '() '() stack)))
+</pre>
+<h4><a name='codefunc7734' href='#docfunc7734'>xlink:simple-end</a></h4>
+<i><a href='#tocfunc7734'>Index</a></i><br>
+
+<pre>(define (<a href="xlink-parser.html#codefunc7734">xlink:simple-end</a> parent-seed seed element)
+  (let ((stack-element (car (<a href="xlink-parser.html#codefunc7979">xlink:seed-stack</a> seed))))
+    (let ((position (car stack-element))
+          (xlink-values (cadr stack-element)))
+      (let ((mode (<a href="xlink-parser.html#codefunc45351">xlink:seed-mode</a> parent-seed))
+            (sxlink-arcs (<a href="xlink-parser.html#codefunc58975">xlink:add-simple</a> 
+                             xlink-values element position
+                             (<a href="xlink-parser.html#codefunc4879">xlink:seed-sxpointer</a> parent-seed)
+                             (<a href="xlink-parser.html#codefunc16485">xlink:seed-sxlink-arcs</a> parent-seed)))
+            (sxpointer
+             (<a href="xlink-parser.html#codefunc18983">xlink:sxpointer4sibling</a> (<a href="xlink-parser.html#codefunc4879">xlink:seed-sxpointer</a> parent-seed)))
+            (stack (<a href="xlink-parser.html#codefunc7979">xlink:seed-stack</a> parent-seed)))
+        (<a href="xlink-parser.html#codefunc63011">xlink:make-small-seed</a>
+         mode sxlink-arcs sxpointer stack)))))          
+</pre>
+<h4><a name='codefunc1295' href='#docfunc1295'>xlink:extended-start</a></h4>
+<i><a href='#tocfunc1295'>Index</a></i><br>
+
+<pre>(define (<a href="xlink-parser.html#codefunc1295">xlink:extended-start</a> position xlink-values seed)
+  (let ((sxlink-arcs (<a href="xlink-parser.html#codefunc16485">xlink:seed-sxlink-arcs</a> seed))
+        (sxpointer (cons 1 (<a href="xlink-parser.html#codefunc4879">xlink:seed-sxpointer</a> seed)))
+        (stack (cons (list position xlink-values) (<a href="xlink-parser.html#codefunc7979">xlink:seed-stack</a> seed))))
+    (<a href="xlink-parser.html#codefunc42509">xlink:make-full-seed</a> 'extended sxlink-arcs sxpointer stack
+                          '() '() '())))
+</pre>
+<h4><a name='codefunc34198' href='#docfunc34198'>xlink:extended-end</a></h4>
+<i><a href='#tocfunc34198'>Index</a></i><br>
+
+<pre>(define (<a href="xlink-parser.html#codefunc34198">xlink:extended-end</a> parent-seed seed element)
+  (let ((stack-element (car (<a href="xlink-parser.html#codefunc7979">xlink:seed-stack</a> seed))))
+    (let ((position (car stack-element))
+          (xlink-values (cadr stack-element)))
+      (let ((locators+resources (<a href="xlink-parser.html#codefunc28216">xlink:seed-locators+resources</a> seed))
+            (arcs (<a href="xlink-parser.html#codefunc31371">xlink:add-default-arc</a> element (<a href="xlink-parser.html#codefunc42040">xlink:seed-arcs</a> seed)))
+            (declared-labels (<a href="xlink-parser.html#codefunc54582">xlink:seed-declared-labels</a> seed)))           
+        (<a href="xlink-parser.html#codefunc30763">xlink:all-labels-declared</a> arcs declared-labels)      
+        (let ((mode (<a href="xlink-parser.html#codefunc45351">xlink:seed-mode</a> parent-seed))
+              (sxlink-arcs
+               (<a href="xlink-parser.html#codefunc19904">xlink:add-extended</a>
+                locators+resources arcs (<a href="xlink-parser.html#codefunc16485">xlink:seed-sxlink-arcs</a> seed)
+                `(declaration
+                  (uri)  ; declared in this document
+                  (nodes ,element)
+                  (xpointer ,(<a href="xlink-parser.html#codefunc38264">xlink:sxpointer-&gt;childseq</a>
+                              (<a href="xlink-parser.html#codefunc4879">xlink:seed-sxpointer</a> parent-seed)))
+                  (position ,position))))
+              (sxpointer
+               (<a href="xlink-parser.html#codefunc18983">xlink:sxpointer4sibling</a> (<a href="xlink-parser.html#codefunc4879">xlink:seed-sxpointer</a> parent-seed)))
+              (stack (<a href="xlink-parser.html#codefunc7979">xlink:seed-stack</a> parent-seed)))
+          (<a href="xlink-parser.html#codefunc63011">xlink:make-small-seed</a> mode sxlink-arcs sxpointer stack))))))
+</pre>
+<h4><a name='codefunc27212' href='#docfunc27212'>xlink:locator-start</a></h4>
+<i><a href='#tocfunc27212'>Index</a></i><br>
+
+<pre>(define (<a href="xlink-parser.html#codefunc27212">xlink:locator-start</a> position xlink-values seed)
+  (let ((stack (cons (list position xlink-values) (<a href="xlink-parser.html#codefunc7979">xlink:seed-stack</a> seed))))
+    (<a href="xlink-parser.html#codefunc63011">xlink:make-small-seed</a> 'none '() '() stack)))  
+</pre>
+<h4><a name='codefunc61900' href='#docfunc61900'>xlink:locator-end</a></h4>
+<i><a href='#tocfunc61900'>Index</a></i><br>
+
+<pre>(define (<a href="xlink-parser.html#codefunc61900">xlink:locator-end</a> parent-seed seed element)
+  (let ((stack-element (car (<a href="xlink-parser.html#codefunc7979">xlink:seed-stack</a> seed))))
+    (let ((position (car stack-element))
+          (xlink-values (cadr stack-element)))
+      (let ((mode (<a href="xlink-parser.html#codefunc45351">xlink:seed-mode</a> parent-seed))
+            (sxlink-arcs (<a href="xlink-parser.html#codefunc16485">xlink:seed-sxlink-arcs</a> parent-seed))
+            (sxpointer
+             (<a href="xlink-parser.html#codefunc18983">xlink:sxpointer4sibling</a> (<a href="xlink-parser.html#codefunc4879">xlink:seed-sxpointer</a> parent-seed)))
+            (stack (<a href="xlink-parser.html#codefunc7979">xlink:seed-stack</a> parent-seed))
+            (locators+resources 
+             (<a href="xlink-parser.html#codefunc59336">xlink:add-locator</a> xlink-values position element
+                                (<a href="xlink-parser.html#codefunc28216">xlink:seed-locators+resources</a> parent-seed)))
+            (arcs (<a href="xlink-parser.html#codefunc42040">xlink:seed-arcs</a> parent-seed))
+            (declared-labels 
+             (<a href="xlink-parser.html#codefunc35477">xlink:add-declared-label</a> 
+              xlink-values (<a href="xlink-parser.html#codefunc54582">xlink:seed-declared-labels</a> parent-seed))))
+        (<a href="xlink-parser.html#codefunc42509">xlink:make-full-seed</a> mode sxlink-arcs sxpointer stack
+                              locators+resources arcs declared-labels)))))
+</pre>
+<h4><a name='codefunc2848' href='#docfunc2848'>xlink:resource-start</a></h4>
+<i><a href='#tocfunc2848'>Index</a></i><br>
+
+<pre>(define (<a href="xlink-parser.html#codefunc2848">xlink:resource-start</a> position xlink-values seed)
+  (let ((stack (cons (list position xlink-values) (<a href="xlink-parser.html#codefunc7979">xlink:seed-stack</a> seed))))
+    (<a href="xlink-parser.html#codefunc63011">xlink:make-small-seed</a> 'none '() '() stack)))
+</pre>
+<h4><a name='codefunc35751' href='#docfunc35751'>xlink:resource-end</a></h4>
+<i><a href='#tocfunc35751'>Index</a></i><br>
+
+<pre>(define (<a href="xlink-parser.html#codefunc35751">xlink:resource-end</a> parent-seed seed element)
+  (let((stack-element (car (<a href="xlink-parser.html#codefunc7979">xlink:seed-stack</a> seed))))
+    (let ((position (car stack-element))
+          (xlink-values (cadr stack-element)))
+      (let* ((mode (<a href="xlink-parser.html#codefunc45351">xlink:seed-mode</a> parent-seed))
+             (sxlink-arcs (<a href="xlink-parser.html#codefunc16485">xlink:seed-sxlink-arcs</a> parent-seed))
+             (sxpointer
+              (<a href="xlink-parser.html#codefunc18983">xlink:sxpointer4sibling</a> (<a href="xlink-parser.html#codefunc4879">xlink:seed-sxpointer</a> parent-seed)))
+             (stack (<a href="xlink-parser.html#codefunc7979">xlink:seed-stack</a> parent-seed))
+             (locators+resources 
+              (<a href="xlink-parser.html#codefunc21457">xlink:add-resource</a> xlink-values element sxpointer
+                                  (<a href="xlink-parser.html#codefunc28216">xlink:seed-locators+resources</a> parent-seed)))
+             (arcs (<a href="xlink-parser.html#codefunc42040">xlink:seed-arcs</a> parent-seed))
+             (declared-labels
+              (<a href="xlink-parser.html#codefunc35477">xlink:add-declared-label</a>
+               xlink-values (<a href="xlink-parser.html#codefunc54582">xlink:seed-declared-labels</a> parent-seed))))
+        (<a href="xlink-parser.html#codefunc42509">xlink:make-full-seed</a> mode sxlink-arcs sxpointer stack
+                              locators+resources arcs declared-labels)))))
+</pre>
+<h4><a name='codefunc40026' href='#docfunc40026'>xlink:arc-start</a></h4>
+<i><a href='#tocfunc40026'>Index</a></i><br>
+
+<pre>(define (<a href="xlink-parser.html#codefunc40026">xlink:arc-start</a> position xlink-values seed)
+  (let ((stack (cons (list position xlink-values) (<a href="xlink-parser.html#codefunc7979">xlink:seed-stack</a> seed))))
+    (<a href="xlink-parser.html#codefunc63011">xlink:make-small-seed</a> 'none '() '() stack)))
+</pre>
+<h4><a name='codefunc9179' href='#docfunc9179'>xlink:arc-end</a></h4>
+<i><a href='#tocfunc9179'>Index</a></i><br>
+
+<pre>(define (<a href="xlink-parser.html#codefunc9179">xlink:arc-end</a> parent-seed seed element)
+  (let ((stack-element (car (<a href="xlink-parser.html#codefunc7979">xlink:seed-stack</a> seed))))
+    (let ((position (car stack-element))
+          (xlink-values (cadr stack-element)))
+      (let ((mode (<a href="xlink-parser.html#codefunc45351">xlink:seed-mode</a> parent-seed))
+            (sxlink-arcs (<a href="xlink-parser.html#codefunc16485">xlink:seed-sxlink-arcs</a> parent-seed))
+            (sxpointer
+             (<a href="xlink-parser.html#codefunc18983">xlink:sxpointer4sibling</a> (<a href="xlink-parser.html#codefunc4879">xlink:seed-sxpointer</a> parent-seed)))
+            (stack (<a href="xlink-parser.html#codefunc7979">xlink:seed-stack</a> parent-seed))
+            (locators+resources (<a href="xlink-parser.html#codefunc28216">xlink:seed-locators+resources</a> parent-seed))           
+            (arcs (<a href="xlink-parser.html#codefunc6615">xlink:add-arc</a> xlink-values position element
+                                 (<a href="xlink-parser.html#codefunc42040">xlink:seed-arcs</a> parent-seed)))
+            (declared-labels
+             (<a href="xlink-parser.html#codefunc54582">xlink:seed-declared-labels</a> parent-seed)))
+        (<a href="xlink-parser.html#codefunc42509">xlink:make-full-seed</a> mode sxlink-arcs sxpointer stack
+                              locators+resources arcs declared-labels)))))
+</pre>
+<h4><a name='codefunc21481' href='#docfunc21481'>xlink:get-port-position</a></h4>
+<i><a href='#tocfunc21481'>Index</a></i><br>
+
+<pre> Returns posiotion of a port
+ NOTE: Specific for different Scheme implementations
+</pre>
+<pre>(define (<a href="xlink-parser.html#codefunc21481">xlink:get-port-position</a> port)
+  (<a href="myenv.html#codemacro6205">cond-expand</a>         
+   (bigloo
+    (string-append &quot;position &quot; (number-&gt;string (input-port-position port))))
+   (chicken
+    (string-append
+     &quot;line &quot; (number-&gt;string (receive (row col) (port-position port) row))))
+   (gambit
+    ; DL: was
+    ;(string-append &quot;line &quot; (number-&gt;string (port-input-line-count port)))
+    (string-append &quot;position &quot;
+                   (number-&gt;string (input-port-byte-position port))))
+   (guile
+    (string-append &quot;line &quot; (number-&gt;string (port-line port))))
+   (plt
+    (string-append &quot;position &quot; (number-&gt;string (file-position port))))
+   (else &quot;unknown&quot;)))
+</pre>
+<h4><a name='codefunc42660' href='#docfunc42660'>xlink:parser-error</a></h4>
+<i><a href='#tocfunc42660'>Index</a></i><br>
+
+<pre> This function displays an error message. #t is returned
+  position - position within a file
+  text - a message to display
+</pre>
+<pre>(define (<a href="xlink-parser.html#codefunc42660">xlink:parser-error</a> position . text)
+  (apply
+   <a href="myenv.html#codefunc55253">cerr</a>
+   (if
+    (string=? position &quot;unknown&quot;)
+    (append (list <a href="myenv.html#codefunc27758">nl</a> &quot;XLink error:&quot; <a href="myenv.html#codefunc27758">nl</a>) text (list <a href="myenv.html#codefunc27758">nl</a>))
+    (append (list <a href="myenv.html#codefunc27758">nl</a> &quot;XLink error in &quot; position &quot;:&quot; <a href="myenv.html#codefunc27758">nl</a>) text (list <a href="myenv.html#codefunc27758">nl</a>)))))
+</pre>
+<h4><a name='codefunc39145' href='#docfunc39145'>xlink:branch-helper</a></h4>
+<i><a href='#tocfunc39145'>Index</a></i><br>
+
+<pre> Helper is used by the following functions in this section
+  action-on-branch ::= (lambda (elem content-nodeset) ...)
+  elem - SXML element that corresponds to the branch
+  content-nodeset - new content
+ The lambda should return the new elem
+</pre>
+<pre>(define (<a href="xlink-parser.html#codefunc39145">xlink:branch-helper</a> action-on-branch)
+  (lambda (document branch-lpath content-nodeset)
+    (letrec
+        (; Constructs a new branch if it doesn't exist in a document
+         (make-new-branch
+          (lambda (lpath)
+            (if (null? (cdr lpath))  ; lpath consists of a single member
+                (cons (car lpath) content-nodeset)
+                (list (car lpath) (make-new-branch (cdr lpath))))))
+         ; Walks a document
+         (tree-walk
+          (lambda (elem lpath)
+            (if
+             (null? lpath)  ; we have reached the desired node
+             (action-on-branch elem content-nodeset)
+             (let loop ((foll-siblings elem)
+                        (prec-siblings '()))
+               (cond
+                 ((null? foll-siblings)  ; no such branch
+                  (<a href="myenv.html#codefunc58107">cons*</a>
+                   (car elem)
+                   (make-new-branch lpath)
+                   (cdr elem)))
+                 ((and (pair? (car foll-siblings))
+                       (eq? (caar foll-siblings) (car lpath)))
+                  ; match found
+                  (append
+                   (reverse prec-siblings)
+                   (list
+                    (tree-walk (car foll-siblings) (cdr lpath)))
+                   (cdr foll-siblings)))
+                 (else
+                  (loop (cdr foll-siblings)
+                        (cons (car foll-siblings) prec-siblings)))))))))
+      (tree-walk document branch-lpath))))
+</pre>
+<h4><a name='codefunc49437' href='#docfunc49437'>xlink:replace-branch</a></h4>
+<i><a href='#tocfunc49437'>Index</a></i><br>
+
+<pre> Replaces the content of the branch with a new content
+  document - SXML document
+  branch-lpath ::= (listof symbol)
+  branch-lpath - is like an sxpath location path. There must be no more than
+ one branch in an SXML tree with this location path. If this branch doesn't
+ exist, it will be created as the first branch in a document
+  content-nodeset ::= (listof node)
+  content-nodeset - defines the content of the branch
+</pre>
+<pre>(define <a href="xlink-parser.html#codefunc49437">xlink:replace-branch</a>
+  (<a href="xlink-parser.html#codefunc39145">xlink:branch-helper</a>
+   (lambda (elem content-nodeset) (cons (car elem) content-nodeset))))
+</pre>
+<h4><a name='codefunc30467' href='#docfunc30467'>xlink:append-branch</a></h4>
+<i><a href='#tocfunc30467'>Index</a></i><br>
+
+<pre> Appends 'content-nodeset' to the content of the given branch
+</pre>
+<pre>(define <a href="xlink-parser.html#codefunc30467">xlink:append-branch</a>
+  (<a href="xlink-parser.html#codefunc39145">xlink:branch-helper</a>
+   (lambda (elem content-nodeset) (append elem content-nodeset))))
+</pre>
+<h4><a name='codefunc6919' href='#docfunc6919'>xlink:get-uri</a></h4>
+<i><a href='#tocfunc6919'>Index</a></i><br>
+
+<pre> Given a document, returns its URI (a string)
+ #f is returned if there is no &quot;@@/uri&quot; subtree in the document
+</pre>
+<pre>(define (<a href="xlink-parser.html#codefunc6919">xlink:get-uri</a> doc)
+  (let ((nodeset ((<a href="sxpathlib.html#codefunc3917">select-kids</a> (<a href="sxpathlib.html#codefunc9356">ntype??</a> 'uri))
+                  ((<a href="sxpathlib.html#codefunc3917">select-kids</a> (<a href="sxpathlib.html#codefunc9356">ntype??</a> '@@)) doc))))
+    (if (null? nodeset)  ; there is no &quot;@@/uri&quot; subtree
+        #f
+        (cadar nodeset))))
+</pre>
+<h4><a name='codefunc63308' href='#docfunc63308'>xlink:set-uri-for-sxlink-arcs</a></h4>
+<i><a href='#tocfunc63308'>Index</a></i><br>
+
+<pre> Adds the URI of the document where the arcs were declared, to sxlink-arcs
+ Returns modified sxlink-arcs
+</pre>
+<pre>(define (<a href="xlink-parser.html#codefunc63308">xlink:set-uri-for-sxlink-arcs</a> uri sxlink-arcs)
+  (letrec
+      ((process-arc
+        ; uri-alist ::= (listof (cons uri resolved-uri))
+        ; association between the URI and the corresponding resolved one
+        ; Returns: (values new-node new-uri-alist)
+        (lambda (node uri-alist)
+          (case (car node)  ; a node is always an SXML element
+            ((linkbase simple inbound outbound third-party local-to-local
+              from to declaration)
+             ; Recursive application to children
+             (call-with-values
+              (lambda () (process-nodeset (cdr node) uri-alist))
+              (lambda (new-children new-uri-alist)
+                (values (cons (car node) new-children)
+                        new-uri-alist))))
+            ((uri)
+             (cond
+               ((null? (cdr node))  ; no URI is set
+                (values `(uri ,uri) uri-alist))
+               ((assoc (cadr node) uri-alist)
+                =&gt; (lambda (pair)
+                     (values `(uri ,(cdr pair)) uri-alist)))
+               (else
+                (let ((resolved-uri
+                       (<a href="access-remote.html#codefunc58957">ar:resolve-uri-according-base</a> uri (cadr node))))
+                  (values `(uri ,resolved-uri)
+                          (cons
+                           (cons (cadr node) resolved-uri)
+                           uri-alist))))))
+            (else
+             (values node uri-alist)))))
+       ; Applies the previous function to a nodeset
+       (process-nodeset
+        (lambda (nodeset uri-alist)
+          (let loop ((nset nodeset)
+                     (res '())
+                     (uri-alist uri-alist))
+            (if
+             (null? nset)
+             (values (reverse res) uri-alist)
+             (call-with-values
+              (lambda () (process-arc (car nset) uri-alist))
+              (lambda (new-node new-uri-alist)
+                (loop (cdr nset)
+                      (cons new-node res)
+                      new-uri-alist))))))))
+    (call-with-values
+     (lambda () (process-nodeset sxlink-arcs '()))
+     (lambda (new-sxlink-arcs dummy)
+       new-sxlink-arcs))))
+</pre>
+<h4><a name='codefunc8115' href='#docfunc8115'>xlink:new-level-seed-handler</a></h4>
+<i><a href='#tocfunc8115'>Index</a></i><br>
+
+<pre> This function is called by the NEW-LEVEL-SEED handler
+ A new 'xlink:seed' is returned
+</pre>
+<pre>(define (<a href="xlink-parser.html#codefunc8115">xlink:new-level-seed-handler</a> port attributes namespaces seed)
+  (let ((position (<a href="xlink-parser.html#codefunc21481">xlink:get-port-position</a> port))
+        (xlink-values (<a href="xlink-parser.html#codefunc63870">xlink:read-attributes</a> attributes namespaces)))
+    (<a href="xlink-parser.html#codefunc43928">xlink:check-type-show-actuate-constraints</a> xlink-values position)
+    (let((mode (<a href="xlink-parser.html#codefunc45351">xlink:seed-mode</a> seed))
+         (type (<a href="xlink-parser.html#codefunc17569">xlink:values-type</a> xlink-values)))
+      (case mode
+        ((general)
+         (case (if type (string-&gt;symbol type) type)
+           ((simple) (<a href="xlink-parser.html#codefunc40366">xlink:simple-start</a> position xlink-values seed))
+           ((extended) (<a href="xlink-parser.html#codefunc1295">xlink:extended-start</a> position xlink-values seed))
+           ((none) (<a href="xlink-parser.html#codefunc13118">xlink:none-start</a> position xlink-values seed))
+           (else (<a href="xlink-parser.html#codefunc22090">xlink:general-start</a> position xlink-values seed))))
+        ((extended)
+         (case (if type (string-&gt;symbol type) type)
+           ((locator) (<a href="xlink-parser.html#codefunc27212">xlink:locator-start</a> position xlink-values seed))
+           ((resource) (<a href="xlink-parser.html#codefunc2848">xlink:resource-start</a> position xlink-values seed))
+           ((arc) (<a href="xlink-parser.html#codefunc40026">xlink:arc-start</a> position xlink-values seed))
+           (else (<a href="xlink-parser.html#codefunc13118">xlink:none-start</a> position xlink-values seed))))
+        ((none) (<a href="xlink-parser.html#codefunc13118">xlink:none-start</a> position xlink-values seed))
+        (else 
+         (<a href="xlink-parser.html#codefunc42660">xlink:parser-error</a> position &quot;internal processor error - mode=&quot; 
+                      mode)
+         (<a href="xlink-parser.html#codefunc13118">xlink:none-start</a> position xlink-values seed))))))
+</pre>
+<h4><a name='codefunc43619' href='#docfunc43619'>xlink:finish-element-handler</a></h4>
+<i><a href='#tocfunc43619'>Index</a></i><br>
+
+<pre> This function is called by the FINISH-ELEMENT handler
+ A new 'xlink:seed' is returned
+</pre>
+<pre>(define (<a href="xlink-parser.html#codefunc43619">xlink:finish-element-handler</a> parent-seed seed element)
+  (let((xlink-values (cadar (<a href="xlink-parser.html#codefunc7979">xlink:seed-stack</a> seed))))
+    (let((mode (<a href="xlink-parser.html#codefunc45351">xlink:seed-mode</a> parent-seed))
+         (type (<a href="xlink-parser.html#codefunc17569">xlink:values-type</a> xlink-values)))
+      (case mode
+        ((general)
+         (case (if type (string-&gt;symbol type) type)
+           ((simple) (<a href="xlink-parser.html#codefunc7734">xlink:simple-end</a> parent-seed seed element))
+           ((extended) (<a href="xlink-parser.html#codefunc34198">xlink:extended-end</a> parent-seed 
+                                           seed element))
+           ((none) (<a href="xlink-parser.html#codefunc46021">xlink:none-end</a> parent-seed seed element))
+           (else (<a href="xlink-parser.html#codefunc56778">xlink:general-end</a> parent-seed seed element))))
+        ((extended)
+         (case (if type (string-&gt;symbol type) type)
+           ((locator) (<a href="xlink-parser.html#codefunc61900">xlink:locator-end</a> parent-seed 
+                                         seed element))
+           ((resource) (<a href="xlink-parser.html#codefunc35751">xlink:resource-end</a> parent-seed 
+                                           seed element))
+           ((arc) (<a href="xlink-parser.html#codefunc9179">xlink:arc-end</a> parent-seed seed element))
+           (else (<a href="xlink-parser.html#codefunc46021">xlink:none-end</a> parent-seed seed element))))
+        ((none) (<a href="xlink-parser.html#codefunc46021">xlink:none-end</a> parent-seed seed element))
+        (else 
+         (<a href="xlink-parser.html#codefunc42660">xlink:parser-error</a> 0 &quot;internal processor error - mode=&quot; 
+                      mode)
+         (<a href="xlink-parser.html#codefunc46021">xlink:none-end</a> parent-seed seed element))))))
+</pre>
+<h4><a name='codefunc39405' href='#docfunc39405'>xlink:ending-action</a></h4>
+<i><a href='#tocfunc39405'>Index</a></i><br>
+
+<pre> Constructs the member of an axuiliary list
+</pre>
+<pre>(define (<a href="xlink-parser.html#codefunc39405">xlink:ending-action</a> xlink:seed)
+  (let ((sxlink-arcs (reverse (<a href="xlink-parser.html#codefunc16485">xlink:seed-sxlink-arcs</a> xlink:seed))))    
+    `(sxlink
+      (declared-here ,@sxlink-arcs))))
+</pre>
+<h4><a name='codefunc54388' href='#docfunc54388'>SXML->SXML+xlink</a></h4>
+<i><a href='#tocfunc54388'>Index</a></i><br>
+
+<pre>  document - an SXML document
+ The function emulates a 'fold-ts' operation.
+ A new SXML document is returned. It contains an auxiliary list with an
+ 'sxlink' subtree. If the source document already contains such a
+ subtree, it will be replaced. Other subtrees in an auxiliary list will
+ remain unchanged.
+</pre>
+<pre>(define (<a href="xlink-parser.html#codefunc54388">SXML-&gt;SXML+xlink</a> document)
+  (letrec
+      ((fold-ts
+        (lambda (node ns-prefixes seed)
+          (let ((xlink-values (<a href="xlink-parser.html#codefunc56844">xlink:read-SXML-attributes</a> node ns-prefixes)))
+            (let ((mode (<a href="xlink-parser.html#codefunc45351">xlink:seed-mode</a> seed))
+                  (type (<a href="xlink-parser.html#codefunc17569">xlink:values-type</a> xlink-values))
+                  (pos &quot;unknown&quot;))
+              (let rpt
+                ((kids ((<a href="sxpathlib.html#codefunc3917">select-kids</a> (<a href="sxpathlib.html#codefunc9356">ntype??</a> '*)) node))
+                 (new-seed
+                  (case mode
+                    ((general)
+                     (case (if type (string-&gt;symbol type) type)
+                       ((simple)
+                        (<a href="xlink-parser.html#codefunc40366">xlink:simple-start</a> pos xlink-values seed))
+                       ((extended)
+                        (<a href="xlink-parser.html#codefunc1295">xlink:extended-start</a> pos xlink-values seed))
+                       ((none)
+                        (<a href="xlink-parser.html#codefunc13118">xlink:none-start</a> pos xlink-values seed))
+                       (else
+                        (<a href="xlink-parser.html#codefunc22090">xlink:general-start</a> pos xlink-values seed))))
+                    ((extended)
+                     (case (if type (string-&gt;symbol type) type)
+                       ((locator)
+                        (<a href="xlink-parser.html#codefunc27212">xlink:locator-start</a> pos xlink-values seed))
+                       ((resource)
+                        (<a href="xlink-parser.html#codefunc2848">xlink:resource-start</a> pos xlink-values seed))
+                       ((arc)
+                        (<a href="xlink-parser.html#codefunc40026">xlink:arc-start</a> pos xlink-values seed))
+                       (else
+                        (<a href="xlink-parser.html#codefunc13118">xlink:none-start</a> pos xlink-values seed))))
+                    ((none)
+                     (<a href="xlink-parser.html#codefunc13118">xlink:none-start</a> pos xlink-values seed))
+                    (else
+                     (<a href="xlink-parser.html#codefunc42660">xlink:parser-error</a> pos &quot;internal processor error - mode=&quot; mode)
+                     (<a href="xlink-parser.html#codefunc13118">xlink:none-start</a> pos xlink-values seed)))))
+                (if
+                 (not (null? kids))
+                 (rpt (cdr kids)
+                      (fold-ts (car kids) ns-prefixes new-seed))
+                 (case mode
+                   ((general)
+                    (case (if type (string-&gt;symbol type) type)
+                      ((simple) (<a href="xlink-parser.html#codefunc7734">xlink:simple-end</a> seed new-seed node))
+                      ((extended) (<a href="xlink-parser.html#codefunc34198">xlink:extended-end</a> seed new-seed node))
+                      ((none) (<a href="xlink-parser.html#codefunc46021">xlink:none-end</a> seed new-seed node))
+                      (else (<a href="xlink-parser.html#codefunc56778">xlink:general-end</a> seed new-seed node))))
+                   ((extended)
+                    (case (if type (string-&gt;symbol type) type)
+                      ((locator) (<a href="xlink-parser.html#codefunc61900">xlink:locator-end</a> seed new-seed node))
+                      ((resource) (<a href="xlink-parser.html#codefunc35751">xlink:resource-end</a> seed new-seed node))
+                      ((arc) (<a href="xlink-parser.html#codefunc9179">xlink:arc-end</a> seed new-seed node))
+                      (else (<a href="xlink-parser.html#codefunc46021">xlink:none-end</a> seed new-seed node))))
+                   ((none) (<a href="xlink-parser.html#codefunc46021">xlink:none-end</a> seed new-seed node))
+                   (else
+                    (<a href="xlink-parser.html#codefunc42660">xlink:parser-error</a> pos
+                     &quot;internal processor error - mode=&quot; mode)
+                    (<a href="xlink-parser.html#codefunc46021">xlink:none-end</a> seed new-seed node))))))))))
+  (let* ((ns-prefixes
+          (let ((ns-node ((<a href="sxpathlib.html#codefunc3917">select-kids</a> (<a href="sxpathlib.html#codefunc9356">ntype??</a> '*NAMESPACES*))
+                          ((<a href="sxpathlib.html#codefunc3917">select-kids</a> (<a href="sxpathlib.html#codefunc9356">ntype??</a> '@@)) document))))
+            (if (null? ns-node)
+                '()
+                (cdar ns-node))))
+         (sxlink-arcs
+          (<a href="xlink-parser.html#codefunc16485">xlink:seed-sxlink-arcs</a>
+           (fold-ts ((<a href="sxpathlib.html#codefunc3917">select-kids</a> (<a href="sxpathlib.html#codefunc9356">ntype??</a> '*)) document)
+                    ns-prefixes
+                    (<a href="xlink-parser.html#codefunc63011">xlink:make-small-seed</a> 'general '() '(1) '()))))
+         (uri (<a href="xlink-parser.html#codefunc6919">xlink:get-uri</a> document)))
+    (<a href="xlink-parser.html#codefunc30467">xlink:append-branch</a>
+     document
+     '(@@ sxlink declared-here)
+     (if uri  ; URI for the document supplied
+         (<a href="xlink-parser.html#codefunc63308">xlink:set-uri-for-sxlink-arcs</a> uri sxlink-arcs)
+         sxlink-arcs)))))
+</pre>
+<h4><a name='codefunc974' href='#docfunc974'>SHTML->SHTML+xlink</a></h4>
+<i><a href='#tocfunc974'>Index</a></i><br>
+
+<pre>(define (<a href="xlink-parser.html#codefunc974">SHTML-&gt;SHTML+xlink</a> document)
+  (letrec
+      ((tree-walk
+        ; Returns (listof sxlink-arc)
+        (lambda (node sxpointer)          
+          (let loop
+            ((sxlink-arcs
+              (if
+               (not (and (pair? node) (eq? (car node) 'a)))
+               '()  ; it is not an &lt;A&gt; element
+               (let ((href ((<a href="sxpathlib.html#codefunc3917">select-kids</a> (<a href="sxpathlib.html#codefunc9356">ntype??</a> '*text*))
+                            ((<a href="sxpathlib.html#codefunc3917">select-kids</a> (<a href="sxpathlib.html#codefunc9356">ntype??</a> 'href))
+                             ((<a href="sxpathlib.html#codefunc3917">select-kids</a> (<a href="sxpathlib.html#codefunc9356">ntype??</a> '@)) node)))))
+                 (if
+                  (null? href)  ; &lt;A&gt; doesn't contain href attribute
+                  '()
+                  (call-with-values
+                   (lambda ()
+                     (let ((lst (<a href="util.html#codefunc39259">string-split</a> (car href) (list #\#) 2)))
+                       (cond
+                         ((null? lst)  ; (car href)=&quot;&quot;  - the real situation
+                          (values (car href) #f))
+                         ((= (length lst) 1)  ; no anchor
+                          (values (car lst) #f))
+                         ((= (string-length (car lst)) 0)
+                          (values #f (cadr lst)))
+                         (else
+                          (values (car lst) (cadr lst))))))
+                   (lambda (uri-ending fragment)
+                     `((simple
+                        (from
+                         (uri)  ; from this document
+                         (nodes ,node)
+                         (xpointer ,(<a href="xlink-parser.html#codefunc38264">xlink:sxpointer-&gt;childseq</a> sxpointer)))
+                        (to
+                         (uri ,@(if uri-ending (list uri-ending) '()))
+                         ,@(if fragment
+                               `((xpointer
+                                  ,(string-append
+                                    &quot;xpointer(descendant::*[a/@name='&quot;
+                                    fragment &quot;'])&quot;)))
+                               '()))
+                        (declaration
+                         (uri)
+                         (nodes ,node)
+                         (xpointer
+                          ,(<a href="xlink-parser.html#codefunc38264">xlink:sxpointer-&gt;childseq</a> sxpointer))))))
+                   )))))
+             (kids ((<a href="sxpathlib.html#codefunc3917">select-kids</a> (<a href="sxpathlib.html#codefunc9356">ntype??</a> '*)) node))
+             (kid-pos 1))
+            (if (null? kids)  ; every child node processed
+                sxlink-arcs
+                (loop
+                 (append sxlink-arcs
+                         (tree-walk (car kids) (cons kid-pos sxpointer)))
+                 (cdr kids)
+                 (+ kid-pos 1)))))))
+    (let ((sxlink-arcs (tree-walk document '()))
+          (uri (<a href="xlink-parser.html#codefunc6919">xlink:get-uri</a> document)))
+      (<a href="xlink-parser.html#codefunc30467">xlink:append-branch</a>
+       document
+       '(@@ sxlink declared-here)
+       (if uri  ; URI for the document supplied
+           (<a href="xlink-parser.html#codefunc63308">xlink:set-uri-for-sxlink-arcs</a> uri sxlink-arcs)
+           sxlink-arcs)))))
+</pre></body></html>

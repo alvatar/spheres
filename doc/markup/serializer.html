@@ -1,0 +1,2236 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN""http://www.w3.org/TR/html401/loose.dtd"><html><head><meta name="GENERATOR" content="Mole: The Scheme Source Code Digger"><title>Module: serializer</title><meta name='keywords' content=''></head><body bgcolor='#ffffff' text='#384412'  link='#11af05' vlink='#728b09'>
+<center><h1>Module: serializer</h1></center>
+
+<pre> SXML serializer into XML and HTML
+
+ Partial conformance with
+ [1] XSLT 2.0 and XQuery 1.0 Serialization
+ W3C Candidate Recommendation 3 November 2005
+ http://www.w3.org/TR/2005/CR-xslt-xquery-serialization-20051103/
+
+ This software is in Public Domain.
+ IT IS PROVIDED &quot;AS IS&quot;, WITHOUT WARRANTY OF ANY KIND.
+
+ Please send bug reports and comments to:
+   lizorkin@ispras.ru    Dmitry Lizorkin
+</pre><p><br>
+<!-- Table of content -->
+<p><dl>
+
+f:  <a name='tocfunc30205' href='#docfunc30205' style='text-decoration:none'>srl:map-append</a><br>
+
+f:  <a name='tocfunc38014' href='#docfunc38014' style='text-decoration:none'>srl:assoc-cdr-string=</a><br>
+
+f:  <a name='tocfunc19126' href='#docfunc19126' style='text-decoration:none'>srl:member-ci</a><br>
+
+f:  <a name='tocfunc5776' href='#docfunc5776' style='text-decoration:none'>srl:mem-pred</a><br>
+
+<dl><dt><a name='tocsect13526' href='#sect13526'><b>Borrowed from "char-encoding.scm"</b></a><dd>
+
+f:  <a name='tocfunc60819' href='#docfunc60819' style='text-decoration:none'>srl:newline</a><br>
+</dl>
+
+<dl><dt><a name='tocsect47883' href='#sect47883'><b>Borrowed from "sxpathlib.scm"</b></a><dd>
+
+f:  <a name='tocfunc48172' href='#docfunc48172' style='text-decoration:none'>srl:select-kids</a><br>
+</dl>
+
+<dl><dt><a name='tocsect52280' href='#sect52280'><b>Borrowed from "modif.scm"</b></a><dd>
+
+f:  <a name='tocfunc6837' href='#docfunc6837' style='text-decoration:none'>srl:separate-list</a><br>
+</dl>
+
+<dl><dt><a name='tocsect43795' href='#sect43795'><b>Borrowed from "fragments.scm"</b></a><dd>
+
+f:  <a name='tocfunc23597' href='#docfunc23597' style='text-decoration:none'>srl:clean-fragments</a><br>
+
+f:  <a name='tocfunc43310' href='#docfunc43310' style='text-decoration:none'>srl:display-fragments-2nesting</a><br>
+</dl>
+<p><dt><a name='tocchapt50179' href='#chapt50179'><b>Helper SXML utilities</b></a><dd>
+
+f:  <a name='tocfunc31503' href='#docfunc31503' style='text-decoration:none'>srl:split-name</a><br>
+
+f:  <a name='tocfunc30107' href='#docfunc30107' style='text-decoration:none'>srl:atomic->string</a><br>
+
+f:  <a name='tocfunc38456' href='#docfunc38456' style='text-decoration:none'>srl:empty-elem?</a><br>
+
+<dl><dt><a name='tocsect25964' href='#sect25964'><b>Handling SXML namespaces</b></a><dd>
+
+f:  <a name='tocfunc42401' href='#docfunc42401' style='text-decoration:none'>srl:conventional-ns-prefixes</a><br>
+
+f:  <a name='tocfunc64464' href='#docfunc64464' style='text-decoration:none'>srl:namespace-assoc-for-elem</a><br>
+
+f:  <a name='tocfunc5528' href='#docfunc5528' style='text-decoration:none'>srl:ns-assoc-for-top</a><br>
+
+f:  <a name='tocfunc34386' href='#docfunc34386' style='text-decoration:none'>srl:extract-original-prefix-binding</a><br>
+</dl>
+
+<dl><dt><a name='tocsect53003' href='#sect53003'><b>Handling xml:space attribute</b></a><dd>
+
+f:  <a name='tocfunc15356' href='#docfunc15356' style='text-decoration:none'>srl:update-space-specifier</a><br>
+</dl>
+<p><dt><a name='tocchapt37717' href='#chapt37717'><b>Sequence normalization</b></a><dd>
+
+f:  <a name='tocfunc19614' href='#docfunc19614' style='text-decoration:none'>srl:normalize-sequence</a><br>
+<p><dt><a name='tocchapt65032' href='#chapt65032'><b>Character escaping during string serialization</b></a><dd>
+
+<dl><dt><a name='tocsect30068' href='#sect30068'><b>CDATA sections</b></a><dd>
+
+f:  <a name='tocfunc49136' href='#docfunc49136' style='text-decoration:none'>srl:xml-char-escaped</a><br>
+
+f:  <a name='tocfunc32821' href='#docfunc32821' style='text-decoration:none'>srl:string->cdata-section</a><br>
+</dl>
+
+<dl><dt><a name='tocsect44700' href='#sect44700'><b>Character data and attribute values</b></a><dd>
+
+f:  <a name='tocfunc56070' href='#docfunc56070' style='text-decoration:none'>srl:escape-alist-char-data</a><br>
+
+f:  <a name='tocfunc17356' href='#docfunc17356' style='text-decoration:none'>srl:escape-alist-att-value</a><br>
+
+f:  <a name='tocfunc40457' href='#docfunc40457' style='text-decoration:none'>srl:escape-alist-html-att</a><br>
+
+f:  <a name='tocfunc27390' href='#docfunc27390' style='text-decoration:none'>srl:string->escaped</a><br>
+
+f:  <a name='tocfunc58389' href='#docfunc58389' style='text-decoration:none'>srl:string->char-data</a><br>
+
+f:  <a name='tocfunc43390' href='#docfunc43390' style='text-decoration:none'>srl:string->att-value</a><br>
+
+f:  <a name='tocfunc59096' href='#docfunc59096' style='text-decoration:none'>srl:string->html-att</a><br>
+</dl>
+
+<dl><dt><a name='tocsect46352' href='#sect46352'><b>Serializing entities produced by HtmlPrag</b></a><dd>
+
+f:  <a name='tocfunc62307' href='#docfunc62307' style='text-decoration:none'>srl:shtml-entity->char-data</a><br>
+</dl>
+<p><dt><a name='tocchapt34551' href='#chapt34551'><b>Serialization for markup</b></a><dd>
+
+f:  <a name='tocfunc2715' href='#docfunc2715' style='text-decoration:none'>srl:qname->string</a><br>
+
+<dl><dt><a name='tocsect31910' href='#sect31910'><b>Different types of nodes</b></a><dd>
+
+f:  <a name='tocfunc24141' href='#docfunc24141' style='text-decoration:none'>srl:attribute->str-lst</a><br>
+
+f:  <a name='tocfunc39600' href='#docfunc39600' style='text-decoration:none'>srl:namespace-decl->str-lst</a><br>
+
+f:  <a name='tocfunc60381' href='#docfunc60381' style='text-decoration:none'>srl:comment->str-lst</a><br>
+
+f:  <a name='tocfunc42339' href='#docfunc42339' style='text-decoration:none'>srl:processing-instruction->str-lst</a><br>
+</dl>
+
+<dl><dt><a name='tocsect18697' href='#sect18697'><b>SXML element</b></a><dd>
+
+f:  <a name='tocfunc60218' href='#docfunc60218' style='text-decoration:none'>srl:name->qname-components</a><br>
+
+f:  <a name='tocfunc6142' href='#docfunc6142' style='text-decoration:none'>srl:construct-start-end-tags</a><br>
+</dl>
+<p><dt><a name='tocchapt59098' href='#chapt59098'><b>Recursively walking the tree of SXML elements</b></a><dd>
+
+f:  <a name='tocfunc56155' href='#docfunc56155' style='text-decoration:none'>srl:node->nested-str-lst-recursive</a><br>
+
+f:  <a name='tocfunc58628' href='#docfunc58628' style='text-decoration:none'>srl:display-node-out-recursive</a><br>
+
+<dl><dt><a name='tocsect11415' href='#sect11415'><b>Serializing the document node - start of recursion</b></a><dd>
+
+f:  <a name='tocfunc8274' href='#docfunc8274' style='text-decoration:none'>srl:make-xml-decl</a><br>
+
+f:  <a name='tocfunc54278' href='#docfunc54278' style='text-decoration:none'>srl:top->nested-str-lst</a><br>
+
+f:  <a name='tocfunc10341' href='#docfunc10341' style='text-decoration:none'>srl:display-top-out</a><br>
+</dl>
+<p><dt><a name='tocchapt40438' href='#chapt40438'><b>Interface</b></a><dd>
+
+<dl><dt><a name='tocsect5640' href='#sect5640'><b>Calling the serializer with all the serialization parameters supported</b></a><dd>
+
+f:  <a name='tocfunc5442' href='#docfunc5442' style='text-decoration:none'>srl:sxml->string</a><br>
+
+f:  <a name='tocfunc64125' href='#docfunc64125' style='text-decoration:none'>srl:display-sxml</a><br>
+</dl>
+
+<dl><dt><a name='tocsect10491' href='#sect10491'><b>Generalized serialization procedure, parameterizable with all the</b></a><dd>
+
+f:  <a name='tocfunc29272' href='#docfunc29272' style='text-decoration:none'>srl:parameterizable</a><br>
+</dl>
+
+<dl><dt><a name='tocsect62129' href='#sect62129'><b>High-level functions for popular serialization use-cases</b></a><dd>
+
+f:  <a name='tocfunc15826' href='#docfunc15826' style='text-decoration:none'>srl:sxml->xml</a><br>
+
+f:  <a name='tocfunc8829' href='#docfunc8829' style='text-decoration:none'>srl:sxml->xml-noindent</a><br>
+
+f:  <a name='tocfunc45251' href='#docfunc45251' style='text-decoration:none'>srl:sxml->html</a><br>
+
+f:  <a name='tocfunc23464' href='#docfunc23464' style='text-decoration:none'>srl:sxml->html-noindent</a><br>
+</dl>
+</dl>
+
+<h4><a name='docfunc30205' href='#tocfunc30205'>srl:map-append</a></h4>
+(define (srl:map-append func lst)<i><br> ... <a href='#codefunc30205'>Full Code</a> ... )</i>
+<pre> (srl:map-append func lst) = (apply append (map func lst))
+ A simplified analogue of `map-union' from &quot;sxpathlib.scm&quot;
+</pre><p><br>
+
+<h4><a name='docfunc38014' href='#tocfunc38014'>srl:assoc-cdr-string=</a></h4>
+(define (srl:assoc-cdr-string= item alist)<i><br> ... <a href='#codefunc38014'>Full Code</a> ... )</i>
+<pre> Analogue of `assoc'
+ However, search is performed by `cdr' of each alist member and `string=?' is
+ used for comparison
+</pre><p><br>
+
+<h4><a name='docfunc19126' href='#tocfunc19126'>srl:member-ci</a></h4>
+(define (srl:member-ci str lst)<i><br> ... <a href='#codefunc19126'>Full Code</a> ... )</i>
+<pre> Analogue of `member' for strings that uses case insensitive comparison
+</pre><p><br>
+
+<h4><a name='docfunc5776' href='#tocfunc5776'>srl:mem-pred</a></h4>
+(define (srl:mem-pred pred? lst)<i><br> ... <a href='#codefunc5776'>Full Code</a> ... )</i>
+<pre> Analogue of `member'
+ The end of the `lst' is returned, from the first member that satisfies
+ the `pred?'
+</pre><p><br>
+
+<hr width='40%' align='center'><center><h3><a name='sect13526' href='#tocsect13526'>Borrowed from "char-encoding.scm"</a></h3></center>
+
+<pre></pre>
+<h4><a name='docfunc60819' href='#tocfunc60819'>srl:newline</a></h4>
+(define srl:newline <i><br> ... <a href='#codefunc60819'>Full Code</a> ... )</i>
+<pre> A string consisting of a single newline character
+</pre><p><br>
+
+<hr width='40%' align='center'><center><h3><a name='sect47883' href='#tocsect47883'>Borrowed from "sxpathlib.scm"</a></h3></center>
+
+<pre></pre>
+<h4><a name='docfunc48172' href='#tocfunc48172'>srl:select-kids</a></h4>
+(define (srl:select-kids test-pred?)<i><br> ... <a href='#codefunc48172'>Full Code</a> ... )</i>
+<pre> A simplified implementation of `select-kids' is sufficienf for the serializer
+</pre><p><br>
+
+<hr width='40%' align='center'><center><h3><a name='sect52280' href='#tocsect52280'>Borrowed from "modif.scm"</a></h3></center>
+
+<pre></pre>
+<h4><a name='docfunc6837' href='#tocfunc6837'>srl:separate-list</a></h4>
+(define (srl:separate-list pred? lst)<i><br> ... <a href='#codefunc6837'>Full Code</a> ... )</i>
+<pre>  Separates the list into two lists with respect to the predicate
+  Returns:  (values  res-lst1  res-lst2)
+ res-lst1 - contains all members from the input lst that satisfy the pred?
+ res-lst2 - contains the remaining members of the input lst
+</pre><p><br>
+
+<hr width='40%' align='center'><center><h3><a name='sect43795' href='#tocsect43795'>Borrowed from "fragments.scm"</a></h3></center>
+
+<pre></pre>
+<h4><a name='docfunc23597' href='#tocfunc23597'>srl:clean-fragments</a></h4>
+(define (srl:clean-fragments fragments)<i><br> ... <a href='#codefunc23597'>Full Code</a> ... )</i>
+<pre> A simplified implementation of `sxml:clean-fragments'
+</pre><p><br>
+
+<h4><a name='docfunc43310' href='#tocfunc43310'>srl:display-fragments-2nesting</a></h4>
+(define (srl:display-fragments-2nesting fragments-level2 port)<i><br> ... <a href='#codefunc43310'>Full Code</a> ... )</i>
+<pre> A very much simplified analogue of `sxml:display-fragments' for fragments
+ that have no more than two levels of nesting
+ fragments-level2 ::= (listof fragments-level1)
+ fragments-level1 ::= string | (listof string)
+</pre><p><br>
+<hr height='5'><center><h3><a name='chapt50179' href='#tocchapt50179'>Helper SXML utilities</a></h3></center>
+
+<pre></pre>
+<h4><a name='docfunc31503' href='#tocfunc31503'>srl:split-name</a></h4>
+(define (srl:split-name name)<i><br> ... <a href='#codefunc31503'>Full Code</a> ... )</i>
+<pre> Splits an SXML `name' into namespace id/uri and local part
+ Returns: (cons  namespace-id  local-part)
+ local-part - string
+ namespace-id - string or #f if the `name' does not have a prefix
+</pre><p><br>
+
+<h4><a name='docfunc30107' href='#tocfunc30107'>srl:atomic->string</a></h4>
+(define (srl:atomic-&gt;string obj)<i><br> ... <a href='#codefunc30107'>Full Code</a> ... )</i>
+<pre> Converts SXML atomic object to a string. Keeps non-atomic object unchanged.
+ A simplified analogue of applying the XPath `string(.)' function to atomic
+ object.
+</pre><p><br>
+
+<h4><a name='docfunc38456' href='#tocfunc38456'>srl:empty-elem?</a></h4>
+(define (srl:empty-elem? elem)<i><br> ... <a href='#codefunc38456'>Full Code</a> ... )</i>
+<pre> Whether an SXML element is empty
+</pre><p><br>
+
+<hr width='40%' align='center'><center><h3><a name='sect25964' href='#tocsect25964'>Handling SXML namespaces</a></h3></center>
+
+<pre> &lt;namespace-assoc&gt; is defined in the SXML specification as
+ &lt;namespace-assoc&gt; ::=  ( &lt;namespace-id&gt; &quot;URI&quot; original-prefix? ) 
+</pre>
+<h4><a name='docfunc42401' href='#tocfunc42401'>srl:conventional-ns-prefixes</a></h4>
+(define srl:conventional-ns-prefixes <i><br> ... <a href='#codefunc42401'>Full Code</a> ... )</i>
+<pre> Conventional namespace prefix referred to in XML-related specifications
+ These prefixes are used for serializing the corresponding namespace URIs by
+ default, unless a different prefix is supplied
+</pre><p><br>
+
+<h4><a name='docfunc64464' href='#tocfunc64464'>srl:namespace-assoc-for-elem</a></h4>
+(define (srl:namespace-assoc-for-elem elem)<i><br> ... <a href='#codefunc64464'>Full Code</a> ... )</i>
+<pre> Returns (listof &lt;namespace-assoc&gt;) for the given SXML element
+</pre><p><br>
+
+<h4><a name='docfunc5528' href='#tocfunc5528'>srl:ns-assoc-for-top</a></h4>
+(define (srl:ns-assoc-for-top doc)<i><br> ... <a href='#codefunc5528'>Full Code</a> ... )</i>
+<pre> Returns (listof &lt;namespace-assoc&gt;) for the SXML document node
+</pre><p><br>
+
+<h4><a name='docfunc34386' href='#tocfunc34386'>srl:extract-original-prefix-binding</a></h4>
+(define (srl:extract-original-prefix-binding namespace-assoc-lst)<i><br> ... <a href='#codefunc34386'>Full Code</a> ... )</i>
+<pre> Extract original prefix-binding from `namespace-assoc-lst'
+ namespace-assoc-lst ::= (listof &lt;namespace-assoc&gt;)
+ &lt;namespace-assoc&gt; ::=  ( &lt;namespace-id&gt; &quot;URI&quot; original-prefix? )
+ Returns:  (listof (cons original-prefix &quot;URI&quot;))
+</pre><p><br>
+
+<hr width='40%' align='center'><center><h3><a name='sect53003' href='#tocsect53003'>Handling xml:space attribute</a></h3></center>
+
+<pre></pre>
+<h4><a name='docfunc15356' href='#tocfunc15356'>srl:update-space-specifier</a></h4>
+(define (srl:update-space-specifier elem space-preserve?)<i><br> ... <a href='#codefunc15356'>Full Code</a> ... )</i>
+<pre> Returns the new value of `space-preserve?' in accordance with the value of
+ xml:space attribute probably presented for the given SXML element `elem'
+ space-preserve? ::= #t | #f  - whether the SXML subtree inherits the
+  xml:space attribute with the value &quot;preserve&quot;
+</pre><p><br>
+<hr height='5'><center><h3><a name='chapt37717' href='#tocchapt37717'>Sequence normalization</a></h3></center>
+
+<pre> Sect. 2 in [1]
+</pre>
+<h4><a name='docfunc19614' href='#tocfunc19614'>srl:normalize-sequence</a></h4>
+(define (srl:normalize-sequence node-or-sequence)<i><br> ... <a href='#codefunc19614'>Full Code</a> ... )</i>
+<pre> Performs sequence normalization in accordance with [1]
+ Returns the SXML document node
+</pre><p><br>
+<hr height='5'><center><h3><a name='chapt65032' href='#tocchapt65032'>Character escaping during string serialization</a></h3></center>
+
+<pre> Escaping in accordance with [1] and [2]:
+
+ [2] Extensible Markup Language (XML) 1.0 (Third Edition)
+ W3C Recommendation 04 February 2004
+ http://www.w3.org/TR/2004/REC-xml-20040204
+</pre>
+<hr width='40%' align='center'><center><h3><a name='sect30068' href='#tocsect30068'>CDATA sections</a></h3></center>
+
+<pre></pre>
+<h4><a name='docfunc49136' href='#tocfunc49136'>srl:xml-char-escaped</a></h4>
+(define (srl:xml-char-escaped ch)<i><br> ... <a href='#codefunc49136'>Full Code</a> ... )</i>
+<pre> Returns #f if a given character `ch' is in XML character range [2]
+ Otherwise, returns a string representing the character reference for that
+ character
+</pre><p><br>
+
+<h4><a name='docfunc32821' href='#tocfunc32821'>srl:string->cdata-section</a></h4>
+(define (srl:string-&gt;cdata-section str)<i><br> ... <a href='#codefunc32821'>Full Code</a> ... )</i>
+<pre> Represents a given string `str' as a CDATA section
+</pre><p><br>
+
+<hr width='40%' align='center'><center><h3><a name='sect44700' href='#tocsect44700'>Character data and attribute values</a></h3></center>
+
+<pre></pre>
+<h4><a name='docfunc56070' href='#tocfunc56070'>srl:escape-alist-char-data</a></h4>
+(define srl:escape-alist-char-data <i><br> ... <a href='#codefunc56070'>Full Code</a> ... )</i>
+<pre> Associative lists of characters to be escaped in XML character data and
+ attribute values respectively [2]
+</pre><p><br>
+
+<h4><a name='docfunc17356' href='#tocfunc17356'>srl:escape-alist-att-value</a></h4>
+(define srl:escape-alist-att-value <i><br> ... <a href='#codefunc17356'>Full Code</a> ... )</i><p><br>
+
+<h4><a name='docfunc40457' href='#tocfunc40457'>srl:escape-alist-html-att</a></h4>
+(define srl:escape-alist-html-att <i><br> ... <a href='#codefunc40457'>Full Code</a> ... )</i><p><br>
+
+<h4><a name='docfunc27390' href='#tocfunc27390'>srl:string->escaped</a></h4>
+(define (srl:string-&gt;escaped str escape-alist html-method?)<i><br> ... <a href='#codefunc27390'>Full Code</a> ... )</i>
+<pre> Escape a string with the `srl:xml-char-escaped' and with the `escape-alist'
+ supplied
+ escape-alist ::= (listof (cons char string))
+ html-method? ::= #t | #f
+ Returns the escaped string
+</pre><p><br>
+
+<h4><a name='docfunc58389' href='#tocfunc58389'>srl:string->char-data</a></h4>
+(define (srl:string-&gt;char-data str)<i><br> ... <a href='#codefunc58389'>Full Code</a> ... )</i><p><br>
+
+<h4><a name='docfunc43390' href='#tocfunc43390'>srl:string->att-value</a></h4>
+(define (srl:string-&gt;att-value str)<i><br> ... <a href='#codefunc43390'>Full Code</a> ... )</i><p><br>
+
+<h4><a name='docfunc59096' href='#tocfunc59096'>srl:string->html-att</a></h4>
+(define (srl:string-&gt;html-att str)<i><br> ... <a href='#codefunc59096'>Full Code</a> ... )</i><p><br>
+
+<hr width='40%' align='center'><center><h3><a name='sect46352' href='#tocsect46352'>Serializing entities produced by HtmlPrag</a></h3></center>
+
+<pre>
+ [3] Neil W. Van Dyke.
+ HtmlPrag: Pragmatic Parsing and Emitting of HTML using SXML and SHTML
+ Version 0.16, 2005-12-18, http://www.neilvandyke.org/htmlprag/
+</pre>
+<h4><a name='docfunc62307' href='#tocfunc62307'>srl:shtml-entity->char-data</a></h4>
+(define (srl:shtml-entity-&gt;char-data entity)<i><br> ... <a href='#codefunc62307'>Full Code</a> ... )</i>
+<pre> &quot;..SHTML adds a special &amp; syntax for non-ASCII (or non-Extended-ASCII)
+ characters. The syntax is (&amp; val), where val is a symbol or string naming
+ with the symbolic name of the character, or an integer with the numeric
+ value of the character.&quot; [3]
+  entity ::= `(&amp; ,val)
+  val ::= symbol | string | number
+ Returns the string representation for the entity
+</pre><p><br>
+<hr height='5'><center><h3><a name='chapt34551' href='#tocchapt34551'>Serialization for markup</a></h3></center>
+
+<pre> declared-ns-prefixes ::= (listof (cons prefix-string namespace-uri))
+ prefix-string, namespace-uri - strings
+</pre>
+<h4><a name='docfunc2715' href='#tocfunc2715'>srl:qname->string</a></h4>
+(define (srl:qname-&gt;string prefix-string local-part)<i><br> ... <a href='#codefunc2715'>Full Code</a> ... )</i>
+<pre> Returns the string representation for a QName
+ prefix-string ::= string or #f if the name contains no prefix
+ TODO: should check names for proper characters
+</pre><p><br>
+
+<hr width='40%' align='center'><center><h3><a name='sect31910' href='#tocsect31910'>Different types of nodes</a></h3></center>
+
+<pre></pre>
+<h4><a name='docfunc24141' href='#tocfunc24141'>srl:attribute->str-lst</a></h4>
+(define (srl:attribute-&gt;str-lst prefix-string local-part att-value method)<i><br> ... <a href='#codefunc24141'>Full Code</a> ... )</i>
+<pre> Returns the list of strings that constitute the serialized representation
+ for the attribute. Inserts a whitespace symbol in the beginning
+ method ::= 'xml | 'html
+</pre><p><br>
+
+<h4><a name='docfunc39600' href='#tocfunc39600'>srl:namespace-decl->str-lst</a></h4>
+(define (srl:namespace-decl-&gt;str-lst prefix-string namespace-uri)<i><br> ... <a href='#codefunc39600'>Full Code</a> ... )</i>
+<pre> Returns the list of strings that constitute the serialized representation
+ for the namespace declaration. Inserts a whitespace symbol in the beginning
+ ATTENTION: character escaping for namespace URI may be improper, study this
+  issue
+</pre><p><br>
+
+<h4><a name='docfunc60381' href='#tocfunc60381'>srl:comment->str-lst</a></h4>
+(define (srl:comment-&gt;str-lst comment-node)<i><br> ... <a href='#codefunc60381'>Full Code</a> ... )</i>
+<pre> According to SXML specification,
+  &lt;comment&gt; ::=  ( *COMMENT* &quot;comment string&quot; )
+ ATTENTION: in the case of ill-formed comment, should probably report an error
+ instead of recovering
+</pre><p><br>
+
+<h4><a name='docfunc42339' href='#tocfunc42339'>srl:processing-instruction->str-lst</a></h4>
+(define (srl:processing-instruction-&gt;str-lst pi-node method)<i><br> ... <a href='#codefunc42339'>Full Code</a> ... )</i>
+<pre> According to SXML specification,
+ &lt;PI&gt; ::=  ( *PI* pi-target
+                   &lt;annotations&gt;? &quot;processing instruction content string&quot; ) 
+ method ::= 'xml | 'html
+ Subsect 7.3 in [1]: &quot;The HTML output method MUST terminate processing
+ instructions with &gt; rather than ?&gt;.&quot; 
+ ATTENTION: in the case of ill-formed PI content string, should probably
+ report an error instead of recovering
+</pre><p><br>
+
+<hr width='40%' align='center'><center><h3><a name='sect18697' href='#tocsect18697'>SXML element</a></h3></center>
+
+<pre></pre>
+<h4><a name='docfunc60218' href='#tocfunc60218'>srl:name->qname-components</a></h4>
+(define (srl:name-&gt;qname-components name ns-prefix-assig namespace-assoc declared-ns-prefixes)<i><br> ... <a href='#codefunc60218'>Full Code</a> ... )</i>
+<pre> Returns: (values
+            prefix-string namespace-uri local-part declaration-required?)
+ prefix-string - namespace prefix to be given to the serialized name: a string
+  or #f if no prefix is required
+ namespace-uri - the namespace URI for the given `name', #f if the name has no
+  namespace URI
+ local-part - local part of the name
+ declaration-required ::= #t | #f  - whether `prefix' has to be declared
+</pre><p><br>
+
+<h4><a name='docfunc6142' href='#tocfunc6142'>srl:construct-start-end-tags</a></h4>
+(define (srl:construct-start-end-tags elem method ns-prefix-assig namespace-assoc declared-ns-prefixes)<i><br> ... <a href='#codefunc6142'>Full Code</a> ... )</i>
+<pre> Constructs start and end tags for an SXML element `elem'
+ method ::= 'xml | 'html
+ Returns: (values start-tag end-tag
+                  ns-prefix-assig namespace-assoc declared-ns-prefixes)
+ start-tag ::= (listof string)
+ end-tag ::= (listof string) or #f for empty element
+ TODO: escape URI attributes for HTML
+ TODO: indentation probably should be made between attribute declarations
+</pre><p><br>
+<hr height='5'><center><h3><a name='chapt59098' href='#tocchapt59098'>Recursively walking the tree of SXML elements</a></h3></center>
+
+<pre></pre>
+<h4><a name='docfunc56155' href='#tocfunc56155'>srl:node->nested-str-lst-recursive</a></h4>
+(define (srl:node-&gt;nested-str-lst-recursive node method ns-prefix-assig namespace-assoc declared-ns-prefixes indentation space-preserve? cdata-section-elements text-node-handler)<i><br> ... <a href='#codefunc56155'>Full Code</a> ... )</i>
+<pre> indentation ::= (listof string) or #f  - a list of whitespace strings
+  depending on the node nesting or #f if no indent is required
+ space-preserve? ::= #t | #f  - whether the subtree inherits the xml:space
+  attribute with the value &quot;preserve&quot;
+ cdata-section-elements ::= (listof symbol)  - list of element names whose
+  child nodes are to be output with CDATA section
+ text-node-handler :: string -&gt; string  - a function that performs a proper
+  character escaping for the given node if it is a text node
+ TODO: do not insert whitespaces adjacent to HTML %inline elements in HTML
+ output method
+</pre><p><br>
+
+<h4><a name='docfunc58628' href='#tocfunc58628'>srl:display-node-out-recursive</a></h4>
+(define (srl:display-node-out-recursive node port method ns-prefix-assig namespace-assoc declared-ns-prefixes indentation space-preserve? cdata-section-elements text-node-handler)<i><br> ... <a href='#codefunc58628'>Full Code</a> ... )</i><p><br>
+
+<hr width='40%' align='center'><center><h3><a name='sect11415' href='#tocsect11415'>Serializing the document node - start of recursion</a></h3></center>
+
+<pre></pre>
+<h4><a name='docfunc8274' href='#tocfunc8274'>srl:make-xml-decl</a></h4>
+(define (srl:make-xml-decl version standalone)<i><br> ... <a href='#codefunc8274'>Full Code</a> ... )</i>
+<pre> Creates the serialized representation for the XML declaration
+ Returns: (listof string)
+ version ::= string | number
+ standalone ::= 'yes | 'no | 'omit
+</pre><p><br>
+
+<h4><a name='docfunc54278' href='#tocfunc54278'>srl:top->nested-str-lst</a></h4>
+(define (srl:top-&gt;nested-str-lst doc cdata-section-elements indent method ns-prefix-assig omit-xml-declaration? standalone version)<i><br> ... <a href='#codefunc54278'>Full Code</a> ... )</i>
+<pre> omit-xml-declaration? ::= #t | #f
+ standalone ::= 'yes | 'no | 'omit
+ version ::= string | number
+</pre><p><br>
+
+<h4><a name='docfunc10341' href='#tocfunc10341'>srl:display-top-out</a></h4>
+(define (srl:display-top-out doc port cdata-section-elements indent method ns-prefix-assig omit-xml-declaration? standalone version)<i><br> ... <a href='#codefunc10341'>Full Code</a> ... )</i><p><br>
+<hr height='5'><center><h3><a name='chapt40438' href='#tocchapt40438'>Interface</a></h3></center>
+
+<pre></pre>
+<hr width='40%' align='center'><center><h3><a name='sect5640' href='#tocsect5640'>Calling the serializer with all the serialization parameters supported</a></h3></center>
+
+<pre> and with no overhead of parameters parsing.
+ ATTENTION: As future versions of this library may provide support for
+ additional serialization parameters, the functions `srl:sxml-&gt;string' and
+ `srl:display-sxml' specified in this subsections may have a different number
+ of their arguments in the future versions of the library.
+</pre>
+<h4><a name='docfunc5442' href='#tocfunc5442'>srl:sxml->string</a></h4>
+(define (srl:sxml-&gt;string sxml-obj cdata-section-elements indent method ns-prefix-assig omit-xml-declaration? standalone version)<i><br> ... <a href='#codefunc5442'>Full Code</a> ... )</i>
+<pre> Returns a string that contains the serialized representation for `sxml-obj'.
+ cdata-section-elements ::= (listof sxml-name)
+ indent ::= #t | #f | whitespace-string
+ method = 'xml | 'html
+ ns-prefix-assign ::= (listof (cons prefix-symbol namespace-uri-string))
+ omit-xml-declaration? ::= #t | #f
+ standalone ::= 'yes | 'no | 'omit
+ version ::= number | string
+</pre><p><br>
+
+<h4><a name='docfunc64125' href='#tocfunc64125'>srl:display-sxml</a></h4>
+(define (srl:display-sxml sxml-obj port-or-filename cdata-section-elements indent method ns-prefix-assig omit-xml-declaration? standalone version)<i><br> ... <a href='#codefunc64125'>Full Code</a> ... )</i>
+<pre> Writes the serialized representation of the `sxml-obj' to an output port
+ `port'. The result returned by the function is unspecified.
+</pre><p><br>
+
+<hr width='40%' align='center'><center><h3><a name='sect10491' href='#tocsect10491'>Generalized serialization procedure, parameterizable with all the</a></h3></center>
+
+<pre> serialization params supported by this implementation
+</pre>
+<h4><a name='docfunc29272' href='#tocfunc29272'>srl:parameterizable</a></h4>
+(define (srl:parameterizable sxml-obj . port-or-filename+params)<i><br> ... <a href='#codefunc29272'>Full Code</a> ... )</i>
+<pre> procedure srl:parameterizable :: SXML-OBJ [PORT] {PARAM}* -&gt;
+                                    -&gt; STRING|unspecified
+ sxml-obj - an SXML object to serialize
+ param ::= (cons param-name param-value)
+ param-name ::= symbol
+ 
+ 1. cdata-section-elements
+ value ::= (listof sxml-elem-name)
+ sxml-elem-name ::= symbol
+
+ 2. indent
+ value ::= 'yes | #t | 'no | #f | whitespace-string
+
+ 3. method
+ value ::= 'xml | 'html
+
+ 4. ns-prefix-assig
+ value ::= (listof (cons prefix namespace-uri))
+ prefix ::= symbol
+ namespace-uri ::= string
+
+ 5. omit-xml-declaration?
+ value ::= 'yes | #t | 'no | #f
+
+ 6. standalone
+ value ::= 'yes | #t | 'no | #f | 'omit
+
+ 7. version
+ value ::= string | number
+
+ ATTENTION: If a parameter name is unexpected or a parameter value is
+ ill-formed, the parameter is silently ignored. Probably, a warning message
+ in such a case would be more appropriate.
+
+ Example:
+ (srl:parameterizable 
+   '(tag (@ (attr &quot;value&quot;)) (nested &quot;text node&quot;) (empty))
+   (current-output-port)
+   '(method . xml)  ; XML output method is used by default
+   '(indent . &quot;\t&quot;)  ; use a single tabulation to indent nested elements
+   '(omit-xml-declaration . #f)  ; add XML declaration
+   '(standalone . yes)  ; denote a standalone XML document
+   '(version . &quot;1.0&quot;))  ; XML version
+</pre><p><br>
+
+<hr width='40%' align='center'><center><h3><a name='sect62129' href='#tocsect62129'>High-level functions for popular serialization use-cases</a></h3></center>
+
+<pre> These functions use only a subset of serializer functionality, however, this
+ subset seems sufficient for most practical purposes.
+</pre>
+<h4><a name='docfunc15826' href='#tocfunc15826'>srl:sxml->xml</a></h4>
+(define (srl:sxml-&gt;xml sxml-obj . port-or-filename)<i><br> ... <a href='#codefunc15826'>Full Code</a> ... )</i>
+<pre> procedure srl:sxml-&gt;xml :: SXML-OBJ [PORT-OR-FILENAME] -&gt; STRING|unspecified
+
+ Serializes the `sxml-obj' into XML, with indentation to facilitate
+ readability by a human.
+
+ sxml-obj - an SXML object (a node or a nodeset) to be serialized
+ port-or-filename - an output port or an output file name, an optional
+  argument
+ If `port-or-filename' is not supplied, the functions return a string that
+ contains the serialized representation of the `sxml-obj'.
+ If `port-or-filename' is supplied and is a port, the functions write the
+ serialized representation of `sxml-obj' to this port and return an
+ unspecified result.
+ If `port-or-filename' is supplied and is a string, this string is treated as
+ an output filename, the serialized representation of `sxml-obj' is written to
+ that filename and an unspecified result is returned. If a file with the given
+ name already exists, the effect is unspecified.
+</pre><p><br>
+
+<h4><a name='docfunc8829' href='#tocfunc8829'>srl:sxml->xml-noindent</a></h4>
+(define (srl:sxml-&gt;xml-noindent sxml-obj . port-or-filename)<i><br> ... <a href='#codefunc8829'>Full Code</a> ... )</i>
+<pre> procedure srl:sxml-&gt;xml-noindent :: SXML-OBJ [PORT-OR-FILENAME] -&gt;
+                                      -&gt; STRING|unspecified
+
+ Serializes the `sxml-obj' into XML, without indentation.
+</pre><p><br>
+
+<h4><a name='docfunc45251' href='#tocfunc45251'>srl:sxml->html</a></h4>
+(define (srl:sxml-&gt;html sxml-obj . port-or-filename)<i><br> ... <a href='#codefunc45251'>Full Code</a> ... )</i>
+<pre> procedure srl:sxml-&gt;html :: SXML-OBJ [PORT-OR-FILENAME] -&gt; STRING|unspecified
+
+ Serializes the `sxml-obj' into HTML, with indentation to facilitate
+ readability by a human.
+
+ sxml-obj - an SXML object (a node or a nodeset) to be serialized
+ port-or-filename - an output port or an output file name, an optional
+  argument
+ If `port-or-filename' is not supplied, the functions return a string that
+ contains the serialized representation of the `sxml-obj'.
+ If `port-or-filename' is supplied and is a port, the functions write the
+ serialized representation of `sxml-obj' to this port and return an
+ unspecified result.
+ If `port-or-filename' is supplied and is a string, this string is treated as
+ an output filename, the serialized representation of `sxml-obj' is written to
+ that filename and an unspecified result is returned. If a file with the given
+ name already exists, the effect is unspecified.
+</pre><p><br>
+
+<h4><a name='docfunc23464' href='#tocfunc23464'>srl:sxml->html-noindent</a></h4>
+(define (srl:sxml-&gt;html-noindent sxml-obj . port-or-filename)<i><br> ... <a href='#codefunc23464'>Full Code</a> ... )</i>
+<pre> procedure srl:sxml-&gt;html-noindent :: SXML-OBJ [PORT-OR-FILENAME] -&gt;
+                                       -&gt; STRING|unspecified
+
+ Serializes the `sxml-obj' into HTML, without indentation.
+</pre><p><br>
+<center><h1>Code</h1></center>
+
+<h4><a name='codefunc30205' href='#docfunc30205'>srl:map-append</a></h4>
+<i><a href='#tocfunc30205'>Index</a></i><br>
+
+<pre> (srl:map-append func lst) = (apply append (map func lst))
+ A simplified analogue of `map-union' from &quot;sxpathlib.scm&quot;
+</pre>
+<pre>(define (<a href="serializer.html#codefunc30205">srl:map-append</a> func lst)
+  (if (null? lst)
+      lst
+      (append (func (car lst))
+              (<a href="serializer.html#codefunc30205">srl:map-append</a> func (cdr lst)))))
+</pre>
+<h5><a name='codeapp6205' href='#docapp6205'>cond-expand</a></h5>
+<i><a href='#tocapp6205'>Index</a></i><br>
+
+<pre> procedure srl:apply-string-append :: STR-LST -&gt; STRING
+ str-lst ::= (listof string)
+ Concatenates `str-lst' members into a single string
+ (srl:apply-string-append str-lst) = (apply string-append str-lst)
+</pre>
+<pre>(cond-expand
+ (chicken
+  ; In Chicken, procedures are generally limited to 126 arguments
+  ; http://www.call-with-current-continuation.org/
+  ; Due to this Chicken limitation, we cannot apply `string-append' directly
+  ; for a potentially long `str-lst'
+  
+  ; Similar to R5RS 'list-tail' but returns the new list consisting of the
+  ; first 'k' members of 'lst'
+  (define (srl:list-head lst k)
+    (if (or (null? lst) (zero? k))
+        '()
+        (cons (car lst) (srl:list-head (cdr lst) (- k 1)))))
+
+  ; Because of Chicken 126-argument limitation, I do not care of intermediate
+  ; garbage produced in the following solution:
+  (define (srl:apply-string-append str-lst)
+    (cond
+      ((null? str-lst) &quot;&quot;)
+      ((null? (cdr str-lst)) (car str-lst))
+      (else  ; at least two members
+       (let ((middle (inexact-&gt;exact (round (/ (length str-lst) 2)))))
+         (string-append
+          (srl:apply-string-append (srl:list-head str-lst middle))
+          (srl:apply-string-append (list-tail str-lst middle)))))))
+  )
+ (else
+  (define (srl:apply-string-append str-lst)
+    (apply string-append str-lst))
+  ))
+</pre>
+<h4><a name='codefunc38014' href='#docfunc38014'>srl:assoc-cdr-string=</a></h4>
+<i><a href='#tocfunc38014'>Index</a></i><br>
+
+<pre> Analogue of `assoc'
+ However, search is performed by `cdr' of each alist member and `string=?' is
+ used for comparison
+</pre>
+<pre>(define (<a href="serializer.html#codefunc38014">srl:assoc-cdr-string=</a> item alist)
+  (cond
+    ((null? alist) #f)
+    ((string=? (cdar alist) item) (car alist))
+    (else (<a href="serializer.html#codefunc38014">srl:assoc-cdr-string=</a> item (cdr alist)))))
+</pre>
+<h4><a name='codefunc19126' href='#docfunc19126'>srl:member-ci</a></h4>
+<i><a href='#tocfunc19126'>Index</a></i><br>
+
+<pre> Analogue of `member' for strings that uses case insensitive comparison
+</pre>
+<pre>(define (<a href="serializer.html#codefunc19126">srl:member-ci</a> str lst)
+  (cond
+    ((null? lst) #f)
+    ((string-ci=? str (car lst)) lst)
+    (else (<a href="serializer.html#codefunc19126">srl:member-ci</a> str (cdr lst)))))
+</pre>
+<h4><a name='codefunc5776' href='#docfunc5776'>srl:mem-pred</a></h4>
+<i><a href='#tocfunc5776'>Index</a></i><br>
+
+<pre> Analogue of `member'
+ The end of the `lst' is returned, from the first member that satisfies
+ the `pred?'
+</pre>
+<pre>(define (<a href="serializer.html#codefunc5776">srl:mem-pred</a> pred? lst)
+  (cond
+    ((null? lst) #f)
+    ((pred? (car lst)) lst)
+    (else (<a href="serializer.html#codefunc5776">srl:mem-pred</a> pred? (cdr lst)))))
+</pre>
+<h5><a name='codeapp6205' href='#docapp6205'>cond-expand</a></h5>
+<i><a href='#tocapp6205'>Index</a></i><br>
+
+<pre> The newline character
+</pre>
+<pre>(cond-expand
+ ((or scheme48 scsh)
+  (define srl:char-nl (ascii-&gt;char 10)))
+ (else
+  (define srl:char-nl (integer-&gt;char 10))))
+</pre>
+<h4><a name='codefunc60819' href='#docfunc60819'>srl:newline</a></h4>
+<i><a href='#tocfunc60819'>Index</a></i><br>
+
+<pre> A string consisting of a single newline character
+</pre>
+<pre>(define <a href="serializer.html#codefunc60819">srl:newline</a> (string srl:char-nl))
+</pre>
+<h4><a name='codefunc48172' href='#docfunc48172'>srl:select-kids</a></h4>
+<i><a href='#tocfunc48172'>Index</a></i><br>
+
+<pre> A simplified implementation of `select-kids' is sufficienf for the serializer
+</pre>
+<pre>(define (<a href="serializer.html#codefunc48172">srl:select-kids</a> test-pred?)
+  (lambda (node)		; node or node-set
+    (cond 
+     ((null? node) node)
+     ((not (pair? node)) '())   ; No children
+     ((symbol? (car node))
+      (<a href="common.html#codefunc20536">filter</a> test-pred? (cdr node)))
+     (else
+      (<a href="serializer.html#codefunc30205">srl:map-append</a> (<a href="serializer.html#codefunc48172">srl:select-kids</a> test-pred?) node)))))
+</pre>
+<h4><a name='codefunc6837' href='#docfunc6837'>srl:separate-list</a></h4>
+<i><a href='#tocfunc6837'>Index</a></i><br>
+
+<pre>  Separates the list into two lists with respect to the predicate
+  Returns:  (values  res-lst1  res-lst2)
+ res-lst1 - contains all members from the input lst that satisfy the pred?
+ res-lst2 - contains the remaining members of the input lst
+</pre>
+<pre>(define (<a href="serializer.html#codefunc6837">srl:separate-list</a> pred? lst)
+  (let loop ((lst lst)
+             (satisfy '())
+             (rest '()))
+    (cond
+      ((null? lst)
+       (values (reverse satisfy) (reverse rest)))
+      ((pred? (car lst))   ; the first member satisfies the predicate
+       (loop (cdr lst)
+             (cons (car lst) satisfy) rest))
+      (else
+       (loop (cdr lst)
+             satisfy (cons (car lst) rest))))))
+</pre>
+<h4><a name='codefunc23597' href='#docfunc23597'>srl:clean-fragments</a></h4>
+<i><a href='#tocfunc23597'>Index</a></i><br>
+
+<pre> A simplified implementation of `sxml:clean-fragments'
+</pre>
+<pre>(define (<a href="serializer.html#codefunc23597">srl:clean-fragments</a> fragments)
+  (reverse
+    (let loop ((fragments fragments) (result '()))
+      (cond
+	((null? fragments) result)
+	((null? (car fragments)) (loop (cdr fragments) result))
+	((pair? (car fragments))
+	 (loop (cdr fragments) 
+	       (loop (car fragments) result)))
+	(else
+	  (loop (cdr fragments) 
+		(cons (car fragments) result)))))))
+</pre>
+<h4><a name='codefunc43310' href='#docfunc43310'>srl:display-fragments-2nesting</a></h4>
+<i><a href='#tocfunc43310'>Index</a></i><br>
+
+<pre> A very much simplified analogue of `sxml:display-fragments' for fragments
+ that have no more than two levels of nesting
+ fragments-level2 ::= (listof fragments-level1)
+ fragments-level1 ::= string | (listof string)
+</pre>
+<pre>(define (<a href="serializer.html#codefunc43310">srl:display-fragments-2nesting</a> fragments-level2 port)
+  (for-each
+   (lambda (level1)
+     (if (pair? level1)
+         (for-each (lambda (x) (display x port))
+                   level1)
+         (display level1 port)))
+   fragments-level2))
+</pre>
+<h4><a name='codefunc31503' href='#docfunc31503'>srl:split-name</a></h4>
+<i><a href='#tocfunc31503'>Index</a></i><br>
+
+<pre> Splits an SXML `name' into namespace id/uri and local part
+ Returns: (cons  namespace-id  local-part)
+ local-part - string
+ namespace-id - string or #f if the `name' does not have a prefix
+</pre>
+<pre>(define (<a href="serializer.html#codefunc31503">srl:split-name</a> name)
+  (let* ((name-str (symbol-&gt;string name))
+         (lng (string-length name-str)))
+  (let iter ((i (- lng 1)))
+    (cond
+      ((&lt; i 0)  ; name scanned, #\: not found
+       (cons #f name-str))
+      ((char=? (string-ref name-str i) #\:)
+       (cons (substring name-str 0 i)
+             (substring name-str (+ i 1) lng)))
+      (else
+       (iter (- i 1)))))))
+</pre>
+<h4><a name='codefunc30107' href='#docfunc30107'>srl:atomic->string</a></h4>
+<i><a href='#tocfunc30107'>Index</a></i><br>
+
+<pre> Converts SXML atomic object to a string. Keeps non-atomic object unchanged.
+ A simplified analogue of applying the XPath `string(.)' function to atomic
+ object.
+</pre>
+<pre>(define (<a href="serializer.html#codefunc30107">srl:atomic-&gt;string</a> obj)
+  (cond
+    ((or (pair? obj)  ; non-atomic type
+         (string? obj)) obj)
+    ((number? obj)
+     (number-&gt;string obj))
+    ((boolean? obj)
+     (if obj &quot;true&quot; &quot;false&quot;))
+    (else  ; unexpected type
+     ; ATTENTION: should probably raise an error here
+     obj)))
+</pre>
+<h4><a name='codefunc38456' href='#docfunc38456'>srl:empty-elem?</a></h4>
+<i><a href='#tocfunc38456'>Index</a></i><br>
+
+<pre> Whether an SXML element is empty
+</pre>
+<pre>(define (<a href="serializer.html#codefunc38456">srl:empty-elem?</a> elem)
+  (or (null? (cdr elem))  ; just the name      
+      (and (null? (cddr elem))  ; just the name and attributes
+           (pair? (cadr elem)) (eq? (caadr elem) '@))
+      (and (not (null? (cddr elem)))  ; name, attributes, and SXML 2.X aux-list
+           (null? (cdddr elem))
+           (pair? (caddr elem)) (eq? (caaddr elem) '@@))))
+</pre>
+<h4><a name='codefunc19614' href='#docfunc19614'>srl:normalize-sequence</a></h4>
+<i><a href='#tocfunc19614'>Index</a></i><br>
+
+<pre> Performs sequence normalization in accordance with [1]
+ Returns the SXML document node
+</pre>
+<pre>(define (<a href="serializer.html#codefunc19614">srl:normalize-sequence</a> node-or-sequence)
+  (letrec
+      ((normaliz-step-1
+        ; &quot;If the sequence that is input to serialization is empty, create a
+        ; sequence S1 that consists of a zero-length string. Otherwise, copy
+        ; each item in the sequence that is input to serialization to create
+        ; the new sequence S1.&quot; [1]
+        (lambda (node-or-seq)
+          (cond
+            ((null? node-or-seq)  ; empty sequence
+             '(&quot;&quot;))
+            ; Effect of `as-nodeset' from &quot;sxpathlib.scm&quot;
+            ((or (not (pair? node-or-seq))  ; single item
+                 (symbol? (car node-or-seq)))  ; single node
+             (list node-or-seq))
+            (else
+             node-or-seq))))
+       (normaliz-step-2
+        ; &quot;For each item in S1, if the item is atomic, obtain the lexical
+        ; representation of the item by casting it to an xs:string and copy
+        ; the string representation to the new sequence; otherwise, copy the
+        ; item, which will be a node, to the new sequence. The new sequence is
+        ; S2.&quot; [1]
+        (lambda (seq)
+          (map
+           (lambda (item) (<a href="serializer.html#codefunc30107">srl:atomic-&gt;string</a> item))
+           seq)))
+       (normaliz-step-3
+        ; &quot;For each subsequence of adjacent strings in S2, copy a single
+        ; string to the new sequence equal to the values of the strings in the
+        ; subsequence concatenated in order, each separated by a single space.
+        ; Copy all other items to the new sequence. The new sequence is S3.&quot;
+        (lambda (seq)
+          (let loop ((src (reverse seq))
+                     (res '()))
+            (cond
+              ((null? src)
+               res)
+              ((string? (car src))
+               (let adjacent ((src (cdr src))
+                              (adj-strs (list (car src))))
+                 (cond
+                   ((null? src)  ; source sequence is over
+                    (cons (srl:apply-string-append adj-strs) res))
+                   ((string? (car src))
+                    (adjacent (cdr src)
+                              (cons (car src) (cons &quot; &quot; adj-strs))))
+                   (else
+                    (loop (cdr src)
+                          (cons (car src)
+                                (cons (srl:apply-string-append adj-strs)
+                                      res)))))))
+              (else
+               (loop (cdr src)
+                     (cons (car src) res)))))))
+       ; Step 4 from [1] is redundant for SXML, since SXML text nodes are not
+       ; distinquished from strings
+       (normaliz-step-5
+        ; &quot;For each item in S4, if the item is a document node, copy its
+        ; children to the new sequence; otherwise, copy the item to the new
+        ; sequence. The new sequence is S5.&quot; [1]
+        (lambda (seq)
+          (cond            
+            ((null? seq)
+             seq)
+            ((and (pair? (car seq)) (eq? (caar seq) '*TOP*))
+             ; Document node
+             (append (cdar seq) (normaliz-step-5 (cdr seq))))
+            (else
+             (cons (car seq) (normaliz-step-5 (cdr seq)))))))
+       (normaliz-step-6
+        ; &quot;For each subsequence of adjacent text nodes in S5, copy a single
+        ; text node to the new sequence equal to the values of the text nodes
+        ; in the subsequence concatenated in order. Any text nodes with values
+        ; of zero length are dropped. Copy all other items to the new sequence.
+        ; The new sequence is S6.&quot; [1]
+        ; Much like Step 3; however, a space between adjacent strings is not
+        ; inserted and the zero-length strings are removed
+        (lambda (seq)
+          (let loop ((src (reverse seq))
+                     (res '()))
+            (cond
+              ((null? src)
+               res)
+              ((string? (car src))
+               (if
+                (string=? (car src) &quot;&quot;)  ; empty string
+                (loop (cdr src) res)
+                (let adjacent ((src (cdr src))
+                               (adj-strs (list (car src))))
+                  (cond
+                    ((null? src)  ; source sequence is over
+                     (cons (srl:apply-string-append adj-strs) res))
+                    ((string? (car src))
+                     ; If it is an empty string, the effect of its presense
+                     ; will be removed by string concatenation
+                     (adjacent (cdr src)
+                               (cons (car src) adj-strs)))
+                    (else
+                     (loop (cdr src)
+                           (cons (car src)
+                                 (cons
+                                  (srl:apply-string-append adj-strs)
+                                  res))))))))
+              (else
+               (loop (cdr src)
+                     (cons (car src) res)))))))
+       (normaliz-step-7
+        ; &quot;It is a serialization error [err:SENR0001] if an item in S6 is an
+        ; attribute node or a namespace node. Otherwise, construct a new
+        ; sequence, S7, that consists of a single document node and copy all
+        ; the items in the sequence, which are all nodes, as children of that
+        ; document node.&quot; [1]
+        ; On this step, we should take care of SXML aux-lists
+        ; ATTENTION: should generally raise an error in the presense of
+        ;  attribute nodes in a sequence. By nature of SXML 3.0, however,
+        ;  attribute nodes on the top level are treated as aux-nodes
+        (lambda (seq)
+          (call-with-values
+           (lambda ()
+             (<a href="serializer.html#codefunc6837">srl:separate-list</a>
+              (lambda (item)
+                (and (pair? item)
+                     (or (eq? (car item) '@@)  ; aux-list in SXML 2.X
+                         (eq? (car item) '@)  ; aux-list in SXML 3.0
+                         )))
+              seq))
+           (lambda (aux-lists body)
+             (if
+              (null? aux-lists)
+              `(*TOP* ,@body)
+              `(*TOP*
+                (@ ,@(<a href="serializer.html#codefunc30205">srl:map-append</a> cdr aux-lists))
+                ,@body)))))))
+    ; TODO: According to [1], if the normalized sequence does not have exactly
+    ; one element node node child or has text node children, then the
+    ; serialized output should be an XML external general parsed entity.
+    ; However, external parsed entities are not currently handled by SSAX
+    ; parser. Should think of a compromise between conformance and practical
+    ; usability.
+    (normaliz-step-7
+     (normaliz-step-6
+      (normaliz-step-5
+       (normaliz-step-3
+        (normaliz-step-2
+         (normaliz-step-1 node-or-sequence))))))))
+</pre>
+<h4><a name='codefunc2715' href='#docfunc2715'>srl:qname->string</a></h4>
+<i><a href='#tocfunc2715'>Index</a></i><br>
+
+<pre> Returns the string representation for a QName
+ prefix-string ::= string or #f if the name contains no prefix
+ TODO: should check names for proper characters
+</pre>
+<pre>(define (<a href="serializer.html#codefunc2715">srl:qname-&gt;string</a> prefix-string local-part)
+  (if prefix-string
+      (string-append prefix-string &quot;:&quot; local-part)
+      local-part))
+</pre>
+<h4><a name='codefunc56155' href='#docfunc56155'>srl:node->nested-str-lst-recursive</a></h4>
+<i><a href='#tocfunc56155'>Index</a></i><br>
+
+<pre> indentation ::= (listof string) or #f  - a list of whitespace strings
+  depending on the node nesting or #f if no indent is required
+ space-preserve? ::= #t | #f  - whether the subtree inherits the xml:space
+  attribute with the value &quot;preserve&quot;
+ cdata-section-elements ::= (listof symbol)  - list of element names whose
+  child nodes are to be output with CDATA section
+ text-node-handler :: string -&gt; string  - a function that performs a proper
+  character escaping for the given node if it is a text node
+ TODO: do not insert whitespaces adjacent to HTML %inline elements in HTML
+ output method
+</pre>
+<pre>(define (<a href="serializer.html#codefunc56155">srl:node-&gt;nested-str-lst-recursive</a>
+         node method
+         ns-prefix-assig namespace-assoc declared-ns-prefixes
+         indentation space-preserve?
+         cdata-section-elements text-node-handler)
+  (if
+   (not (pair? node))  ; text node
+   (text-node-handler (<a href="serializer.html#codefunc30107">srl:atomic-&gt;string</a> node))
+   (case (car node)  ; node name
+     ((*COMMENT*)
+      (<a href="serializer.html#codefunc60381">srl:comment-&gt;str-lst</a> node))     
+     ((*PI*)
+      (<a href="serializer.html#codefunc42339">srl:processing-instruction-&gt;str-lst</a> node method))
+     ((&amp;)
+      (<a href="serializer.html#codefunc62307">srl:shtml-entity-&gt;char-data</a> node))
+     ((*DECL*)  ; recovering for non-SXML nodes
+      '())
+     (else  ; otherwise - an element node
+      (call-with-values
+       (lambda ()
+         (<a href="serializer.html#codefunc6142">srl:construct-start-end-tags</a>
+          node method
+          ns-prefix-assig namespace-assoc declared-ns-prefixes))
+       (lambda (start-tag end-tag
+                          ns-prefix-assig namespace-assoc declared-ns-prefixes)
+         (if
+          (not end-tag)  ; empty element =&gt; recursion stops
+          start-tag
+          (let ((space-preserve?
+                 (<a href="serializer.html#codefunc15356">srl:update-space-specifier</a> node space-preserve?))
+                (text-node-handler
+                 (cond
+                   ((memq (car node) cdata-section-elements)
+                    <a href="serializer.html#codefunc32821">srl:string-&gt;cdata-section</a>)
+                   ((and (eq? method 'html)
+                         (<a href="serializer.html#codefunc19126">srl:member-ci</a> (symbol-&gt;string (car node))
+                                        '(&quot;script&quot; &quot;style&quot;)))
+                    ; No escaping for strings inside these HTML elements
+                    (lambda (str) str))
+                   (else
+                    <a href="serializer.html#codefunc58389">srl:string-&gt;char-data</a>)))
+                (content ((<a href="serializer.html#codefunc48172">srl:select-kids</a>
+                           (lambda (node)  ; TODO: support SXML entities
+                             (not (and (pair? node)
+                                       (memq (car node) '(@ @@ *ENTITY*))))))
+                          node)))
+            (call-with-values
+             (lambda ()
+               (cond
+                 ((or (not indentation)
+                      (and (eq? method 'html)
+                           (<a href="serializer.html#codefunc19126">srl:member-ci</a>
+                            (symbol-&gt;string (car node))
+                            '(&quot;pre&quot; &quot;script&quot; &quot;style&quot; &quot;textarea&quot;))))
+                  ; No indent - on this level and subsequent levels
+                  (values #f #f))
+                 ((or space-preserve?
+                      (<a href="serializer.html#codefunc5776">srl:mem-pred</a>  ; at least a single text node
+                       (lambda (node) (not (pair? node)))
+                       content))
+                  ; No indent on this level, possible indent on nested levels
+                  (values #f indentation))
+                 (else
+                  (values (cons <a href="serializer.html#codefunc60819">srl:newline</a> indentation)
+                          (cons (car indentation) indentation)))))
+             (lambda (indent-here indent4recursive)
+               (if
+                indent-here
+                (append
+                 start-tag
+                 (map
+                  (lambda (kid)
+                    (list
+                     indent-here
+                     (<a href="serializer.html#codefunc56155">srl:node-&gt;nested-str-lst-recursive</a>
+                      kid method
+                      ns-prefix-assig namespace-assoc declared-ns-prefixes
+                      indent4recursive space-preserve?
+                      cdata-section-elements text-node-handler)))
+                  content)
+                 (cons <a href="serializer.html#codefunc60819">srl:newline</a>
+                       (cons (cdr indentation) end-tag)))
+                (append
+                 start-tag
+                 (map
+                  (lambda (kid)
+                    (<a href="serializer.html#codefunc56155">srl:node-&gt;nested-str-lst-recursive</a>
+                     kid method
+                     ns-prefix-assig namespace-assoc declared-ns-prefixes
+                     indent4recursive space-preserve?
+                     cdata-section-elements text-node-handler))
+                  content)
+                 end-tag))))))))))))
+</pre>
+<h4><a name='codefunc58628' href='#docfunc58628'>srl:display-node-out-recursive</a></h4>
+<i><a href='#tocfunc58628'>Index</a></i><br>
+
+<pre>(define (<a href="serializer.html#codefunc58628">srl:display-node-out-recursive</a>
+         node port method
+         ns-prefix-assig namespace-assoc declared-ns-prefixes
+         indentation space-preserve?
+         cdata-section-elements text-node-handler)
+  (if
+   (not (pair? node))  ; text node
+   (display (text-node-handler (<a href="serializer.html#codefunc30107">srl:atomic-&gt;string</a> node)) port)
+   (case (car node)  ; node name
+     ((*COMMENT*)
+      (for-each
+       (lambda (x) (display x port))
+       (<a href="serializer.html#codefunc60381">srl:comment-&gt;str-lst</a> node)))
+     ((*PI*)
+      (for-each
+       (lambda (x) (display x port))
+       (<a href="serializer.html#codefunc42339">srl:processing-instruction-&gt;str-lst</a> node method)))
+     ((&amp;)
+      (display (<a href="serializer.html#codefunc62307">srl:shtml-entity-&gt;char-data</a> node) port))
+     ((*DECL*)  ; recovering for non-SXML nodes
+      #f)
+     (else  ; otherwise - an element node
+      (call-with-values
+       (lambda ()
+         (<a href="serializer.html#codefunc6142">srl:construct-start-end-tags</a>
+          node method
+          ns-prefix-assig namespace-assoc declared-ns-prefixes))
+       (lambda (start-tag end-tag
+                          ns-prefix-assig namespace-assoc declared-ns-prefixes)
+         (begin
+           (<a href="serializer.html#codefunc43310">srl:display-fragments-2nesting</a> start-tag port)
+           (if
+            end-tag  ; there exists content
+            (let ((space-preserve?
+                   (<a href="serializer.html#codefunc15356">srl:update-space-specifier</a> node space-preserve?))
+                  (text-node-handler
+                   (cond
+                     ((memq (car node) cdata-section-elements)
+                      <a href="serializer.html#codefunc32821">srl:string-&gt;cdata-section</a>)
+                     ((and (eq? method 'html)
+                           (<a href="serializer.html#codefunc19126">srl:member-ci</a> (symbol-&gt;string (car node))
+                                          '(&quot;script&quot; &quot;style&quot;)))
+                      ; No escaping for strings inside these HTML elements
+                      (lambda (str) str))
+                     (else
+                      <a href="serializer.html#codefunc58389">srl:string-&gt;char-data</a>)))
+                  (content ((<a href="serializer.html#codefunc48172">srl:select-kids</a>
+                             (lambda (node)  ; TODO: support SXML entities
+                               (not (and (pair? node)
+                                         (memq (car node) '(@ @@ *ENTITY*))))))
+                            node)))
+              (call-with-values
+               (lambda ()
+                 (cond
+                   ((or (not indentation)
+                        (and (eq? method 'html)
+                             (<a href="serializer.html#codefunc19126">srl:member-ci</a>
+                              (symbol-&gt;string (car node))
+                              '(&quot;pre&quot; &quot;script&quot; &quot;style&quot; &quot;textarea&quot;))))
+                    ; No indent - on this level and subsequent levels
+                    (values #f #f))
+                   ((or space-preserve?
+                        (<a href="serializer.html#codefunc5776">srl:mem-pred</a>  ; at least a single text node
+                         (lambda (node) (not (pair? node)))
+                         content))
+                    ; No indent on this level, possible indent on nested levels
+                    (values #f indentation))
+                   (else
+                    (values (cons <a href="serializer.html#codefunc60819">srl:newline</a> indentation)
+                            (cons (car indentation) indentation)))))
+               (lambda (indent-here indent4recursive)
+                 (begin
+                   (for-each  ; display content
+                    (if
+                     indent-here
+                     (lambda (kid)
+                       (begin
+                         (for-each
+                          (lambda (x) (display x port))
+                          indent-here)
+                         (<a href="serializer.html#codefunc58628">srl:display-node-out-recursive</a>
+                          kid port method
+                          ns-prefix-assig namespace-assoc declared-ns-prefixes
+                          indent4recursive space-preserve?
+                          cdata-section-elements text-node-handler)))
+                     (lambda (kid)
+                       (<a href="serializer.html#codefunc58628">srl:display-node-out-recursive</a>
+                        kid port method
+                        ns-prefix-assig namespace-assoc declared-ns-prefixes
+                        indent4recursive space-preserve?
+                        cdata-section-elements text-node-handler)))
+                    content)
+                   (if indent-here
+                       (begin
+                         (display <a href="serializer.html#codefunc60819">srl:newline</a> port)
+                         (for-each
+                          (lambda (x) (display x port))
+                          (cdr indentation))))
+                   (for-each
+                    (lambda (x) (display x port))
+                    end-tag)))))))))))))
+</pre>
+<h4><a name='codefunc42401' href='#docfunc42401'>srl:conventional-ns-prefixes</a></h4>
+<i><a href='#tocfunc42401'>Index</a></i><br>
+
+<pre> Conventional namespace prefix referred to in XML-related specifications
+ These prefixes are used for serializing the corresponding namespace URIs by
+ default, unless a different prefix is supplied
+</pre>
+<pre>(define <a href="serializer.html#codefunc42401">srl:conventional-ns-prefixes</a>
+  '((dc . &quot;http://purl.org/dc/elements/1.1/&quot;)
+    (fo . &quot;http://www.w3.org/1999/XSL/Format&quot;)
+    (rdf . &quot;http://www.w3.org/1999/02/22-rdf-syntax-ns#&quot;)
+    (rng . &quot;http://relaxng.org/ns/structure/1.0&quot;)
+    (xlink . &quot;http://www.w3.org/1999/xlink&quot;)
+    (xqx . &quot;http://www.w3.org/2005/XQueryX&quot;)
+    (xsd . &quot;http://www.w3.org/2001/XMLSchema&quot;)
+    (xsi . &quot;http://www.w3.org/2001/XMLSchema-instance&quot;)
+    (xsl . &quot;http://www.w3.org/1999/XSL/Transform&quot;)))
+</pre>
+<h4><a name='codefunc64464' href='#docfunc64464'>srl:namespace-assoc-for-elem</a></h4>
+<i><a href='#tocfunc64464'>Index</a></i><br>
+
+<pre> Returns (listof &lt;namespace-assoc&gt;) for the given SXML element
+</pre>
+<pre>(define (<a href="serializer.html#codefunc64464">srl:namespace-assoc-for-elem</a> elem)
+  ((<a href="serializer.html#codefunc48172">srl:select-kids</a> (lambda (node) (pair? node)))
+   ((<a href="serializer.html#codefunc48172">srl:select-kids</a>
+     (lambda (node) (and (pair? node) (eq? (car node) '*NAMESPACES*))))
+    (append
+     ((<a href="serializer.html#codefunc48172">srl:select-kids</a>  ; compatibility with SXML 3.0
+       (lambda (node) (and (pair? node) (eq? (car node) '@))))
+      ((<a href="serializer.html#codefunc48172">srl:select-kids</a>
+        (lambda (node) (and (pair? node) (eq? (car node) '@))))
+       elem))
+     ((<a href="serializer.html#codefunc48172">srl:select-kids</a>  ; compatibility with SXML 2.X
+       (lambda (node) (and (pair? node) (eq? (car node) '@@))))
+      elem)))))
+</pre>
+<h4><a name='codefunc5528' href='#docfunc5528'>srl:ns-assoc-for-top</a></h4>
+<i><a href='#tocfunc5528'>Index</a></i><br>
+
+<pre> Returns (listof &lt;namespace-assoc&gt;) for the SXML document node
+</pre>
+<pre>(define (<a href="serializer.html#codefunc5528">srl:ns-assoc-for-top</a> doc)
+  ((<a href="serializer.html#codefunc48172">srl:select-kids</a> (lambda (node) (pair? node)))
+   ((<a href="serializer.html#codefunc48172">srl:select-kids</a>
+     (lambda (node) (and (pair? node) (eq? (car node) '*NAMESPACES*))))
+    ((<a href="serializer.html#codefunc48172">srl:select-kids</a>
+      (lambda (node)
+        ; After sequence normalization [1], the SXML 3.0 aux-list is used
+        ; at the top-level
+        (and (pair? node) (eq? (car node) '@))))
+     doc))))
+</pre>
+<h4><a name='codefunc34386' href='#docfunc34386'>srl:extract-original-prefix-binding</a></h4>
+<i><a href='#tocfunc34386'>Index</a></i><br>
+
+<pre> Extract original prefix-binding from `namespace-assoc-lst'
+ namespace-assoc-lst ::= (listof &lt;namespace-assoc&gt;)
+ &lt;namespace-assoc&gt; ::=  ( &lt;namespace-id&gt; &quot;URI&quot; original-prefix? )
+ Returns:  (listof (cons original-prefix &quot;URI&quot;))
+</pre>
+<pre>(define (<a href="serializer.html#codefunc34386">srl:extract-original-prefix-binding</a> namespace-assoc-lst)
+  (map
+   (lambda (triple) (cons (caddr triple) (cadr triple)))
+   (<a href="common.html#codefunc20536">filter</a>  ; specifies original prefix
+    (lambda (memb) (= (length memb) 3))
+    namespace-assoc-lst)))
+</pre>
+<h4><a name='codefunc15356' href='#docfunc15356'>srl:update-space-specifier</a></h4>
+<i><a href='#tocfunc15356'>Index</a></i><br>
+
+<pre> Returns the new value of `space-preserve?' in accordance with the value of
+ xml:space attribute probably presented for the given SXML element `elem'
+ space-preserve? ::= #t | #f  - whether the SXML subtree inherits the
+  xml:space attribute with the value &quot;preserve&quot;
+</pre>
+<pre>(define (<a href="serializer.html#codefunc15356">srl:update-space-specifier</a> elem space-preserve?)
+  (let ((xml-space-val
+         ((<a href="serializer.html#codefunc48172">srl:select-kids</a> string?)
+          ((<a href="serializer.html#codefunc48172">srl:select-kids</a>
+            (lambda (node) (and (pair? node) (eq? (car node) 'xml:space))))
+           ((<a href="serializer.html#codefunc48172">srl:select-kids</a>
+             (lambda (node) (and (pair? node) (eq? (car node) '@))))
+            elem)))))
+    (cond
+      ((null? xml-space-val)  ; no xml:space attribute
+       space-preserve?)
+      ((string=? (car xml-space-val) &quot;preserve&quot;)
+       #t)
+      ((string=? (car xml-space-val) &quot;default&quot;)
+       #f)
+      (else space-preserve?))))
+</pre>
+<h4><a name='codefunc49136' href='#docfunc49136'>srl:xml-char-escaped</a></h4>
+<i><a href='#tocfunc49136'>Index</a></i><br>
+
+<pre> Returns #f if a given character `ch' is in XML character range [2]
+ Otherwise, returns a string representing the character reference for that
+ character
+</pre>
+<pre>(define (<a href="serializer.html#codefunc49136">srl:xml-char-escaped</a> ch)
+  (let ((code (char-&gt;integer ch)))
+    (if (or (= code 9) (= code 10) (= code 13)
+            (and (&gt;= code 32) (&lt;= code 55295))
+            (and (&gt;= code 57344) (&lt;= code 65533))
+            (&gt;= code 65536))
+        #f
+        (string-append &quot;&amp;#&quot; (number-&gt;string code) &quot;;&quot;
+                       ))))
+</pre>
+<h4><a name='codefunc32821' href='#docfunc32821'>srl:string->cdata-section</a></h4>
+<i><a href='#tocfunc32821'>Index</a></i><br>
+
+<pre> Represents a given string `str' as a CDATA section
+</pre>
+<pre>(define (<a href="serializer.html#codefunc32821">srl:string-&gt;cdata-section</a> str)
+  (let ((flush-buffer
+         ; If a `buffer' is non-empty, converts it to a CDATA string and
+         ; cons'es this string to `res'. Returns a new res
+         (lambda (buffer res)
+           (if (null? buffer)
+               res
+               (cons
+                (string-append
+                 &quot;&lt;![CDATA[&quot; (list-&gt;string (reverse buffer)) &quot;]]&gt;&quot;)
+                res)))))
+    (let loop ((src (string-&gt;list str))
+               (buffer '())
+               (res '(&quot;&quot;)))
+    (cond
+      ((null? src)
+       (srl:apply-string-append
+        (reverse (flush-buffer buffer res))))
+      ((<a href="serializer.html#codefunc49136">srl:xml-char-escaped</a> (car src))
+       =&gt; (lambda (charref)
+            (loop (cdr src)
+                  '()
+                  (cons charref (flush-buffer buffer res)))))
+      ((and (char=? (car src) #\])
+            (not (null? buffer))
+            (char=? (car buffer) #\]))
+       (loop (cdr src)
+             '()
+             (cons (string (car buffer) (car src))  ;= &quot;]]&quot;
+                   (flush-buffer (cdr buffer) res))))
+      (else  ; any other character
+       (loop (cdr src)
+             (cons (car src) buffer)
+             res))))))
+</pre>
+<h4><a name='codefunc56070' href='#docfunc56070'>srl:escape-alist-char-data</a></h4>
+<i><a href='#tocfunc56070'>Index</a></i><br>
+
+<pre> Associative lists of characters to be escaped in XML character data and
+ attribute values respectively [2]
+</pre>
+<pre>(define <a href="serializer.html#codefunc56070">srl:escape-alist-char-data</a>
+  '((#\&amp; . &quot;&amp;amp;&quot;) (#\&lt; . &quot;&amp;lt;&quot;) (#\&gt; . &quot;&amp;gt;&quot;)))
+</pre>
+<h4><a name='codefunc17356' href='#docfunc17356'>srl:escape-alist-att-value</a></h4>
+<i><a href='#tocfunc17356'>Index</a></i><br>
+
+<pre>(define <a href="serializer.html#codefunc17356">srl:escape-alist-att-value</a>
+  (append `((#\' . &quot;&amp;apos;&quot;) (#\&quot; . &quot;&amp;quot;&quot;)
+            ; Escaping the newline character in attribute value
+            (,srl:char-nl . &quot;&amp;#10;&quot;))
+          <a href="serializer.html#codefunc56070">srl:escape-alist-char-data</a>))
+</pre>
+<h4><a name='codefunc40457' href='#docfunc40457'>srl:escape-alist-html-att</a></h4>
+<i><a href='#tocfunc40457'>Index</a></i><br>
+
+<pre>(define <a href="serializer.html#codefunc40457">srl:escape-alist-html-att</a>
+  '((#\&amp; . &quot;&amp;amp;&quot;) (#\&gt; . &quot;&amp;gt;&quot;) (#\' . &quot;&amp;apos;&quot;) (#\&quot; . &quot;&amp;quot;&quot;)))
+</pre>
+<h4><a name='codefunc27390' href='#docfunc27390'>srl:string->escaped</a></h4>
+<i><a href='#tocfunc27390'>Index</a></i><br>
+
+<pre> Escape a string with the `srl:xml-char-escaped' and with the `escape-alist'
+ supplied
+ escape-alist ::= (listof (cons char string))
+ html-method? ::= #t | #f
+ Returns the escaped string
+</pre>
+<pre>(define (<a href="serializer.html#codefunc27390">srl:string-&gt;escaped</a> str escape-alist html-method?)
+  (let loop ((src (string-&gt;list str))
+             (adj-chars '())
+             (res '()))
+    (cond
+      ((null? src)
+       (srl:apply-string-append
+        (reverse (cons (list-&gt;string (reverse adj-chars))
+                       res))))
+      ((assv (car src) escape-alist)  ; current character matches the alist
+       =&gt; (lambda (pair)
+            (if
+             ; Subsect. 7.2 in [1]:
+             ; &quot;The HTML output method MUST NOT escape a &amp; character occurring
+             ; in an attribute value immediately followed by a { character&quot;
+             (and (char=? (car src) #\&amp;)
+                  html-method?
+                  (not (null? (cdr src))) (char=? (cadr src) #\{))
+             (loop (cdr src)
+                   (cons (car src) adj-chars)
+                   res)
+             (loop (cdr src)
+                   '()
+                   (cons (cdr pair)
+                         (cons (list-&gt;string (reverse adj-chars))
+                               res))))))
+      ((<a href="serializer.html#codefunc49136">srl:xml-char-escaped</a> (car src))
+       =&gt; (lambda (esc)
+            (loop (cdr src)
+                  '()
+                  (cons esc
+                        (cons (list-&gt;string (reverse adj-chars))
+                              res)))))      
+      (else
+       (loop (cdr src)
+             (cons (car src) adj-chars)
+             res)))))
+</pre>
+<h4><a name='codefunc58389' href='#docfunc58389'>srl:string->char-data</a></h4>
+<i><a href='#tocfunc58389'>Index</a></i><br>
+
+<pre>(define (<a href="serializer.html#codefunc58389">srl:string-&gt;char-data</a> str)
+  (<a href="serializer.html#codefunc27390">srl:string-&gt;escaped</a> str <a href="serializer.html#codefunc56070">srl:escape-alist-char-data</a> #f))
+</pre>
+<h4><a name='codefunc43390' href='#docfunc43390'>srl:string->att-value</a></h4>
+<i><a href='#tocfunc43390'>Index</a></i><br>
+
+<pre>(define (<a href="serializer.html#codefunc43390">srl:string-&gt;att-value</a> str)
+  (<a href="serializer.html#codefunc27390">srl:string-&gt;escaped</a> str <a href="serializer.html#codefunc17356">srl:escape-alist-att-value</a> #f))
+</pre>
+<h4><a name='codefunc59096' href='#docfunc59096'>srl:string->html-att</a></h4>
+<i><a href='#tocfunc59096'>Index</a></i><br>
+
+<pre>(define (<a href="serializer.html#codefunc59096">srl:string-&gt;html-att</a> str)
+  (<a href="serializer.html#codefunc27390">srl:string-&gt;escaped</a> str <a href="serializer.html#codefunc40457">srl:escape-alist-html-att</a> #t))
+</pre>
+<h4><a name='codefunc62307' href='#docfunc62307'>srl:shtml-entity->char-data</a></h4>
+<i><a href='#tocfunc62307'>Index</a></i><br>
+
+<pre> &quot;..SHTML adds a special &amp; syntax for non-ASCII (or non-Extended-ASCII)
+ characters. The syntax is (&amp; val), where val is a symbol or string naming
+ with the symbolic name of the character, or an integer with the numeric
+ value of the character.&quot; [3]
+  entity ::= `(&amp; ,val)
+  val ::= symbol | string | number
+ Returns the string representation for the entity
+</pre>
+<pre>(define (<a href="serializer.html#codefunc62307">srl:shtml-entity-&gt;char-data</a> entity)
+  ; TODO: think of an appropriate error message for an ill-formed entity
+  (if
+   (= (length entity) 2)
+   (let ((val (cadr entity)))
+     (cond
+       ((symbol? val) (string-append &quot;&amp;&quot; (symbol-&gt;string val) &quot;;&quot;)
+        )
+       ((string? val) (string-append &quot;&amp;&quot; val &quot;;&quot;)
+        )
+       ((and (number? val) (integer? val) (&gt; val 0))
+        ; to guarantee well-formedness of the result produced
+        (string-append &quot;&amp;#&quot; (number-&gt;string val) &quot;;&quot;)
+        )
+       (else  ; should signal of an error
+        &quot;&quot;)))
+   &quot;&quot;))
+</pre>
+<h4><a name='codefunc24141' href='#docfunc24141'>srl:attribute->str-lst</a></h4>
+<i><a href='#tocfunc24141'>Index</a></i><br>
+
+<pre> Returns the list of strings that constitute the serialized representation
+ for the attribute. Inserts a whitespace symbol in the beginning
+ method ::= 'xml | 'html
+</pre>
+<pre>(define (<a href="serializer.html#codefunc24141">srl:attribute-&gt;str-lst</a> prefix-string local-part att-value method)
+  (let ((attval (<a href="serializer.html#codefunc30107">srl:atomic-&gt;string</a> att-value)))
+    (cond
+      (prefix-string
+       (list &quot; &quot; prefix-string &quot;:&quot; local-part &quot;=\&quot;&quot;
+             ((if (eq? method 'html)
+                  <a href="serializer.html#codefunc59096">srl:string-&gt;html-att</a>
+                  <a href="serializer.html#codefunc43390">srl:string-&gt;att-value</a>) attval)
+             &quot;\&quot;&quot;))
+      ((eq? method 'html)
+       (if (string=? local-part attval)  ; boolean attribute
+           (list &quot; &quot; local-part)
+           (list &quot; &quot; local-part &quot;=\&quot;&quot; (<a href="serializer.html#codefunc59096">srl:string-&gt;html-att</a> attval) &quot;\&quot;&quot;)))
+      (else  ; unprefixed attribute, XML output method
+       (list &quot; &quot; local-part &quot;=\&quot;&quot; (<a href="serializer.html#codefunc43390">srl:string-&gt;att-value</a> attval) &quot;\&quot;&quot;)))))
+</pre>
+<h4><a name='codefunc39600' href='#docfunc39600'>srl:namespace-decl->str-lst</a></h4>
+<i><a href='#tocfunc39600'>Index</a></i><br>
+
+<pre> Returns the list of strings that constitute the serialized representation
+ for the namespace declaration. Inserts a whitespace symbol in the beginning
+ ATTENTION: character escaping for namespace URI may be improper, study this
+  issue
+</pre>
+<pre>(define (<a href="serializer.html#codefunc39600">srl:namespace-decl-&gt;str-lst</a> prefix-string namespace-uri)
+  (list &quot; xmlns:&quot; prefix-string &quot;=\&quot;&quot;
+        (<a href="serializer.html#codefunc43390">srl:string-&gt;att-value</a> namespace-uri) &quot;\&quot;&quot;))
+</pre>
+<h4><a name='codefunc60381' href='#docfunc60381'>srl:comment->str-lst</a></h4>
+<i><a href='#tocfunc60381'>Index</a></i><br>
+
+<pre> According to SXML specification,
+  &lt;comment&gt; ::=  ( *COMMENT* &quot;comment string&quot; )
+ ATTENTION: in the case of ill-formed comment, should probably report an error
+ instead of recovering
+</pre>
+<pre>(define (<a href="serializer.html#codefunc60381">srl:comment-&gt;str-lst</a> comment-node)
+  (let ((proper-string-in-comment?
+         ; Whether a proper string occurs in the comment node. Thus,
+         ; &quot;For compatibility, the string '<a href="myenv.html#codemacro11565">--</a>' (double-hyphen) MUST NOT occur
+         ; within comments. ... Note that the grammar does not allow a comment
+         ; ending in ---&gt;.&quot; [2]
+         (lambda (str)
+           (let ((lng (string-length str)))
+             (or
+              (zero? lng)  ; empty string allowed in comment [2]
+              (and
+               (not (char=? (string-ref str 0) #\-))
+               (let iter ((i 1)
+                          (prev-hyphen? #f))
+                 (cond
+                   ((&gt;= i lng)
+                    (not prev-hyphen?)  ; string must not end with hyphen
+                    )
+                   ((char=? (string-ref str i) #\-)
+                    (if prev-hyphen?
+                        #f
+                        (iter (+ i 1) #t)))
+                   (else
+                    (iter (+ i 1) #f))))))))))
+    (if (and (= (length comment-node) 2)
+             (string? (cadr comment-node))
+             (proper-string-in-comment? (cadr comment-node)))
+        (list &quot;&lt;!--&quot; (cadr comment-node) &quot;--&gt;&quot;)
+        (list &quot;&lt;!--&quot; &quot;--&gt;&quot;)  ; should probably report of an error
+        )))
+</pre>
+<h4><a name='codefunc42339' href='#docfunc42339'>srl:processing-instruction->str-lst</a></h4>
+<i><a href='#tocfunc42339'>Index</a></i><br>
+
+<pre> According to SXML specification,
+ &lt;PI&gt; ::=  ( *PI* pi-target
+                   &lt;annotations&gt;? &quot;processing instruction content string&quot; ) 
+ method ::= 'xml | 'html
+ Subsect 7.3 in [1]: &quot;The HTML output method MUST terminate processing
+ instructions with &gt; rather than ?&gt;.&quot; 
+ ATTENTION: in the case of ill-formed PI content string, should probably
+ report an error instead of recovering
+</pre>
+<pre>(define (<a href="serializer.html#codefunc42339">srl:processing-instruction-&gt;str-lst</a> pi-node method)
+  (let ((string-not-contain-charlist?
+         ; Whether `str' does not contain a sequence of characters from
+         ; `char-lst' as its substring
+         (lambda (str char-lst)
+           (let ((lng (string-length str)))
+             (or
+              (zero? lng)  ; empty string doesn't contain
+              (let iter ((i 0)
+                         (pattern char-lst))
+                (cond                  
+                  ((&gt;= i lng) #t)
+                  ((char=? (string-ref str i) (car pattern))
+                   (if (null? (cdr pattern))  ; it is the last member
+                       #f  ; contains
+                       (iter (+ i 1) (cdr pattern))))
+                  (else
+                   (iter (+ i 1) char-lst)))))))))
+    (if
+     (or (null? (cdr pi-node))
+         (not (symbol? (cadr pi-node))))  ; no target =&gt; ill-formed PI
+     '()  ; should probably raise an error
+     (let ((content (<a href="common.html#codefunc20536">filter</a> string? (cddr pi-node))))
+       (cond
+         ((null? content)  ; PI with no content - correct situation
+          (list &quot;&lt;?&quot; (symbol-&gt;string (cadr pi-node))
+                (if (eq? method 'html) &quot;&gt;&quot; &quot;?&gt;&quot;)))
+         ; Subsect. 7.3 in [1]: &quot;It is a serialization error to use the HTML
+         ; output method when &gt; appears within a processing instruction in
+         ; the data model instance being serialized.&quot;
+         ((and (null? (cdr content))  ; only a single member
+               (string-not-contain-charlist?
+                (car content)
+                (if (eq? method 'html) '(#\&gt;) '(#\? #\&gt;))))
+          (list &quot;&lt;?&quot; (symbol-&gt;string (cadr pi-node)) &quot; &quot; (car content)
+                (if (eq? method 'html) &quot;&gt;&quot; &quot;?&gt;&quot;)))
+         (else  ; should probably signal of an error
+          '()))))))
+</pre>
+<h4><a name='codefunc60218' href='#docfunc60218'>srl:name->qname-components</a></h4>
+<i><a href='#tocfunc60218'>Index</a></i><br>
+
+<pre> Returns: (values
+            prefix-string namespace-uri local-part declaration-required?)
+ prefix-string - namespace prefix to be given to the serialized name: a string
+  or #f if no prefix is required
+ namespace-uri - the namespace URI for the given `name', #f if the name has no
+  namespace URI
+ local-part - local part of the name
+ declaration-required ::= #t | #f  - whether `prefix' has to be declared
+</pre>
+<pre>(define (<a href="serializer.html#codefunc60218">srl:name-&gt;qname-components</a>
+         name ns-prefix-assig namespace-assoc declared-ns-prefixes)
+  (let ((use-ns-id-or-generate-prefix
+         (lambda (ns-id)
+           (if
+            (and ns-id  ; try to use namespace-id as a prefix
+                 (not (assq (string-&gt;symbol ns-id) ns-prefix-assig))
+                 (not (assoc ns-id declared-ns-prefixes)))
+            ns-id
+            ; Otherwise - generate unique prefix
+            ; Returns a prefix-string not presented in ns-prefix-assig and
+            ; declared-ns-prefixes
+            (let loop ((i 1))
+              (let ((candidate (string-append &quot;prfx&quot; (number-&gt;string i))))
+                (if (or (assoc candidate declared-ns-prefixes)
+                        (assq (string-&gt;symbol candidate) ns-prefix-assig))
+                    (loop (+ i 1))
+                    candidate))))))
+        (n-parts (<a href="serializer.html#codefunc31503">srl:split-name</a> name)))
+    (cond
+      ((not (car n-parts))  ; no namespace-id =&gt; no namespace
+       (values #f #f (cdr n-parts)  ; name as a string
+               #f))
+      ((string-ci=? (car n-parts) &quot;xml&quot;)  ; reserved XML namespace
+       (values (car n-parts) &quot;http://www.w3.org/XML/1998/namespace&quot;
+               (cdr n-parts) #f))
+      (else
+       (call-with-values
+        (lambda ()
+          (cond
+            ((assq (string-&gt;symbol (car n-parts))  ; suppose a namespace-id
+                   namespace-assoc)
+             =&gt; (lambda (lst)
+                  (values (cadr lst) (car n-parts))))
+            (else  ; first part of a name is a namespace URI
+             (values (car n-parts) #f))))
+        (lambda (namespace-uri ns-id)
+          (cond
+            ((<a href="serializer.html#codefunc38014">srl:assoc-cdr-string=</a> namespace-uri declared-ns-prefixes)
+             =&gt; (lambda (pair)
+                  ; Prefix for that namespace URI already declared
+                  (values (car pair) namespace-uri (cdr n-parts) #f)))
+            (else  ; namespace undeclared
+             (values
+              (cond
+                ((<a href="serializer.html#codefunc38014">srl:assoc-cdr-string=</a> namespace-uri ns-prefix-assig)
+                 =&gt; (lambda (pair)
+                      ; A candidate namespace prefix is supplied from the user
+                      (let ((candidate (symbol-&gt;string (car pair))))
+                        (if
+                         (assoc candidate declared-ns-prefixes)
+                         ; The prefix already bound to a different namespace
+                         ; Avoid XML prefix re-declaration
+                         (use-ns-id-or-generate-prefix ns-id)
+                         candidate))))
+                (else
+                 (use-ns-id-or-generate-prefix ns-id)))
+              namespace-uri
+              (cdr n-parts)
+              #t  ; in any case, prefix declaration is required
+              )))))))))
+</pre>
+<h4><a name='codefunc6142' href='#docfunc6142'>srl:construct-start-end-tags</a></h4>
+<i><a href='#tocfunc6142'>Index</a></i><br>
+
+<pre> Constructs start and end tags for an SXML element `elem'
+ method ::= 'xml | 'html
+ Returns: (values start-tag end-tag
+                  ns-prefix-assig namespace-assoc declared-ns-prefixes)
+ start-tag ::= (listof string)
+ end-tag ::= (listof string) or #f for empty element
+ TODO: escape URI attributes for HTML
+ TODO: indentation probably should be made between attribute declarations
+</pre>
+<pre>(define (<a href="serializer.html#codefunc6142">srl:construct-start-end-tags</a>
+         elem method
+         ns-prefix-assig namespace-assoc declared-ns-prefixes)
+  (let ((ns-assoc-here (<a href="serializer.html#codefunc64464">srl:namespace-assoc-for-elem</a> elem))
+        (empty? (<a href="serializer.html#codefunc38456">srl:empty-elem?</a> elem)))
+    (let ((ns-prefix-assig
+           (append
+            (<a href="serializer.html#codefunc34386">srl:extract-original-prefix-binding</a> ns-assoc-here)
+            ns-prefix-assig))
+          (namespace-assoc
+           (append ns-assoc-here namespace-assoc)))
+      (call-with-values
+       (lambda ()           
+         (<a href="serializer.html#codefunc60218">srl:name-&gt;qname-components</a>  ; element name
+          (car elem) ns-prefix-assig namespace-assoc declared-ns-prefixes))
+       (lambda (elem-prefix elem-uri elem-local elem-decl-required?)
+         (let loop ((attrs
+                     (reverse
+                      ((<a href="serializer.html#codefunc48172">srl:select-kids</a> 
+                        (lambda (node)  ; not SXML 3.0 aux-list
+                          (and (pair? node) (not (eq? (car node) '@)))))
+                       ((<a href="serializer.html#codefunc48172">srl:select-kids</a>
+                         (lambda (node)
+                           (and (pair? node) (eq? (car node) '@))))
+                        elem))))
+                    (start-tag
+                     (if
+                      (or (not empty?)
+                          (and (eq? method 'html)
+                               (not elem-prefix)
+                               (<a href="serializer.html#codefunc19126">srl:member-ci</a>
+                                elem-local
+                                ; ATTENTION: should probably move this list
+                                ; to a global const
+                                '(&quot;area&quot; &quot;base&quot; &quot;basefont&quot; &quot;br&quot; &quot;col&quot;
+                                  &quot;frame&quot; &quot;hr&quot; &quot;img&quot; &quot;input&quot; &quot;isindex&quot;
+                                  &quot;link&quot; &quot;meta&quot; &quot;param&quot;))))
+                      '(&quot;&gt;&quot;) '(&quot;/&gt;&quot;)))
+                    (ns-prefix-assig ns-prefix-assig)
+                    (namespace-assoc namespace-assoc)
+                    (declared-ns-prefixes
+                     ; As if element namespace already declared
+                     (if elem-decl-required?
+                         (cons (cons elem-prefix elem-uri)
+                               declared-ns-prefixes)
+                         declared-ns-prefixes)))
+           (if
+            (null? attrs)  ; attributes scanned
+            (let ((elem-name (<a href="serializer.html#codefunc2715">srl:qname-&gt;string</a> elem-prefix elem-local)))
+              (values
+               (cons &quot;&lt;&quot;
+                     (cons elem-name
+                           (if
+                            elem-decl-required?
+                            (cons
+                             (<a href="serializer.html#codefunc39600">srl:namespace-decl-&gt;str-lst</a> elem-prefix elem-uri)
+                             start-tag)
+                            start-tag)))
+               (if empty? #f
+                   (list &quot;&lt;/&quot; elem-name &quot;&gt;&quot;))
+               ns-prefix-assig
+               namespace-assoc
+               declared-ns-prefixes))
+            (call-with-values
+             (lambda ()
+               (<a href="serializer.html#codefunc60218">srl:name-&gt;qname-components</a>
+                (caar attrs)  ; attribute name
+                ns-prefix-assig namespace-assoc declared-ns-prefixes))
+             (lambda (attr-prefix attr-uri attr-local attr-decl-required?)
+               (let ((start-tag
+                      (cons
+                       (<a href="serializer.html#codefunc24141">srl:attribute-&gt;str-lst</a>
+                        attr-prefix attr-local
+                        ; TODO: optimize for HTML output method
+                        (if (null? (cdar attrs))  ; no attribute value
+                            attr-local
+                            (cadar attrs))
+                        method)
+                       start-tag)))
+                 (loop
+                  (cdr attrs)
+                  (if attr-decl-required?
+                      (cons (<a href="serializer.html#codefunc39600">srl:namespace-decl-&gt;str-lst</a> attr-prefix attr-uri)
+                            start-tag)
+                      start-tag)
+                  ns-prefix-assig
+                  namespace-assoc
+                  (if attr-decl-required?                      
+                      (cons (cons attr-prefix attr-uri) declared-ns-prefixes)
+                      declared-ns-prefixes))))))))))))
+</pre>
+<h4><a name='codefunc8274' href='#docfunc8274'>srl:make-xml-decl</a></h4>
+<i><a href='#tocfunc8274'>Index</a></i><br>
+
+<pre> Creates the serialized representation for the XML declaration
+ Returns: (listof string)
+ version ::= string | number
+ standalone ::= 'yes | 'no | 'omit
+</pre>
+<pre>(define (<a href="serializer.html#codefunc8274">srl:make-xml-decl</a> version standalone)
+  (let ((version (if (number? version) (number-&gt;string version) version)))
+    (if (eq? standalone 'omit)
+        (list &quot;&lt;?xml version='&quot; version &quot;'?&gt;&quot;)
+        (list &quot;&lt;?xml version='&quot; version &quot;' standalone='&quot;
+              (symbol-&gt;string standalone) &quot;'?&gt;&quot;))))
+</pre>
+<h4><a name='codefunc54278' href='#docfunc54278'>srl:top->nested-str-lst</a></h4>
+<i><a href='#tocfunc54278'>Index</a></i><br>
+
+<pre> omit-xml-declaration? ::= #t | #f
+ standalone ::= 'yes | 'no | 'omit
+ version ::= string | number
+</pre>
+<pre>(define (<a href="serializer.html#codefunc54278">srl:top-&gt;nested-str-lst</a> doc
+                                 cdata-section-elements indent
+                                 method ns-prefix-assig
+                                 omit-xml-declaration? standalone version)
+  (let* ((namespace-assoc (<a href="serializer.html#codefunc5528">srl:ns-assoc-for-top</a> doc))
+         (ns-prefix-assig
+          (append
+           (<a href="serializer.html#codefunc34386">srl:extract-original-prefix-binding</a> namespace-assoc)
+           ns-prefix-assig))
+         (serialized-content
+          (map
+           (if
+            indent  ; =&gt; output each member from the newline
+            (let ((indentation (list indent)))  ; for nested elements
+              (lambda (kid)
+                (list
+                 <a href="serializer.html#codefunc60819">srl:newline</a>
+                 (<a href="serializer.html#codefunc56155">srl:node-&gt;nested-str-lst-recursive</a>
+                  kid method
+                  ns-prefix-assig namespace-assoc '()
+                  indentation #f
+                  cdata-section-elements <a href="serializer.html#codefunc58389">srl:string-&gt;char-data</a>))))
+            (lambda (kid)
+              (<a href="serializer.html#codefunc56155">srl:node-&gt;nested-str-lst-recursive</a>
+               kid method
+               ns-prefix-assig namespace-assoc '()
+               indent #f
+               cdata-section-elements <a href="serializer.html#codefunc58389">srl:string-&gt;char-data</a>)))
+           ((<a href="serializer.html#codefunc48172">srl:select-kids</a>  ; document node content
+             (lambda (node)  ; TODO: support SXML entities
+               (not (and
+                     (pair? node) (memq (car node) '(@ @@ *ENTITY*))))))
+            doc))))
+    (if (or (eq? method 'html) omit-xml-declaration?)
+        (if (and indent (not (null? serialized-content)))
+            ; Remove the starting newline
+            ; ATTENTION: beware of `Gambit cadar bug':
+            ; http://mailman.iro.umontreal.ca/pipermail/gambit-list/
+            ;   2005-July/000315.html
+            (cons (cadar serialized-content) (cdr serialized-content))
+            serialized-content)
+        (list (<a href="serializer.html#codefunc8274">srl:make-xml-decl</a> version standalone) serialized-content))))
+</pre>
+<h4><a name='codefunc10341' href='#docfunc10341'>srl:display-top-out</a></h4>
+<i><a href='#tocfunc10341'>Index</a></i><br>
+
+<pre>(define (<a href="serializer.html#codefunc10341">srl:display-top-out</a> doc port
+                             cdata-section-elements indent
+                             method ns-prefix-assig
+                             omit-xml-declaration? standalone version)  
+  (let ((no-xml-decl?  ; no XML declaration was displayed?
+         (if (not (or (eq? method 'html) omit-xml-declaration?))
+             (begin
+               (for-each  ; display xml declaration
+                (lambda (x) (display x port))
+                (<a href="serializer.html#codefunc8274">srl:make-xml-decl</a> version standalone))
+               #f)
+             #t))
+        (content  ; document node content
+         ((<a href="serializer.html#codefunc48172">srl:select-kids</a>
+           (lambda (node)  ; TODO: support SXML entities
+             (not (and
+                   (pair? node) (memq (car node) '(@ @@ *ENTITY*))))))
+          doc))
+        (namespace-assoc (<a href="serializer.html#codefunc5528">srl:ns-assoc-for-top</a> doc)))
+    (let ((ns-prefix-assig
+           (append
+            (<a href="serializer.html#codefunc34386">srl:extract-original-prefix-binding</a> namespace-assoc)
+            ns-prefix-assig)))
+      (cond
+        ((null? content)  ; generally a rare practical situation
+         #t)  ; nothing more to do
+        ((and indent no-xml-decl?)
+         ; We'll not display newline before (car content)
+         (let ((indentation (list indent)))  ; for nested elements
+           (for-each
+            (lambda (kid put-newline?)
+              (begin
+                (if put-newline?
+                    (display <a href="serializer.html#codefunc60819">srl:newline</a> port))
+                (<a href="serializer.html#codefunc58628">srl:display-node-out-recursive</a>
+                 kid port method
+                 ns-prefix-assig namespace-assoc '()
+                 indentation #f
+                 cdata-section-elements <a href="serializer.html#codefunc58389">srl:string-&gt;char-data</a>)))
+            content
+            ; After sequence normalization, content does not contain #f
+            (cons #f (cdr content)))))
+        (else
+         (for-each
+          (if
+           indent  ; =&gt; output each member from the newline
+           (let ((indentation (list indent)))  ; for nested elements
+             (lambda (kid)
+               (begin
+                 (display <a href="serializer.html#codefunc60819">srl:newline</a> port)
+                 (<a href="serializer.html#codefunc58628">srl:display-node-out-recursive</a>
+                  kid port method
+                  ns-prefix-assig namespace-assoc '()
+                  indentation #f
+                  cdata-section-elements <a href="serializer.html#codefunc58389">srl:string-&gt;char-data</a>))))
+           (lambda (kid)
+             (<a href="serializer.html#codefunc58628">srl:display-node-out-recursive</a>
+              kid port method
+              ns-prefix-assig namespace-assoc '()
+              indent #f
+              cdata-section-elements <a href="serializer.html#codefunc58389">srl:string-&gt;char-data</a>)))
+          content))))))
+</pre>
+<h4><a name='codefunc5442' href='#docfunc5442'>srl:sxml->string</a></h4>
+<i><a href='#tocfunc5442'>Index</a></i><br>
+
+<pre> Returns a string that contains the serialized representation for `sxml-obj'.
+ cdata-section-elements ::= (listof sxml-name)
+ indent ::= #t | #f | whitespace-string
+ method = 'xml | 'html
+ ns-prefix-assign ::= (listof (cons prefix-symbol namespace-uri-string))
+ omit-xml-declaration? ::= #t | #f
+ standalone ::= 'yes | 'no | 'omit
+ version ::= number | string
+</pre>
+<pre>(define (<a href="serializer.html#codefunc5442">srl:sxml-&gt;string</a> sxml-obj
+                          cdata-section-elements indent
+                          method ns-prefix-assig
+                          omit-xml-declaration? standalone version)
+  (srl:apply-string-append
+   (<a href="serializer.html#codefunc23597">srl:clean-fragments</a>
+    (<a href="serializer.html#codefunc54278">srl:top-&gt;nested-str-lst</a> (<a href="serializer.html#codefunc19614">srl:normalize-sequence</a> sxml-obj)
+                             cdata-section-elements
+                             (if (and indent (not (string? indent)))
+                                 &quot;  &quot; indent)
+                             method ns-prefix-assig
+                             omit-xml-declaration? standalone version))))
+</pre>
+<h4><a name='codefunc64125' href='#docfunc64125'>srl:display-sxml</a></h4>
+<i><a href='#tocfunc64125'>Index</a></i><br>
+
+<pre> Writes the serialized representation of the `sxml-obj' to an output port
+ `port'. The result returned by the function is unspecified.
+</pre>
+<pre>(define (<a href="serializer.html#codefunc64125">srl:display-sxml</a> sxml-obj port-or-filename
+                          cdata-section-elements indent
+                          method ns-prefix-assig
+                          omit-xml-declaration? standalone version)
+  (if
+   (string? port-or-filename)  ; a filename?
+   (let ((out (open-output-file port-or-filename)))
+     (begin
+       (<a href="serializer.html#codefunc10341">srl:display-top-out</a> (<a href="serializer.html#codefunc19614">srl:normalize-sequence</a> sxml-obj) out
+                            cdata-section-elements
+                            (if (and indent (not (string? indent)))
+                                &quot;  &quot; indent)
+                            method ns-prefix-assig
+                            omit-xml-declaration? standalone version)
+       (display <a href="serializer.html#codefunc60819">srl:newline</a> out)  ; newline at the end of file
+       (close-output-port out)))
+   (<a href="serializer.html#codefunc10341">srl:display-top-out</a> (<a href="serializer.html#codefunc19614">srl:normalize-sequence</a> sxml-obj) port-or-filename
+                        cdata-section-elements
+                        (if (and indent (not (string? indent))) &quot;  &quot; indent)
+                        method ns-prefix-assig
+                        omit-xml-declaration? standalone version)))
+</pre>
+<h4><a name='codefunc29272' href='#docfunc29272'>srl:parameterizable</a></h4>
+<i><a href='#tocfunc29272'>Index</a></i><br>
+
+<pre> procedure srl:parameterizable :: SXML-OBJ [PORT] {PARAM}* -&gt;
+                                    -&gt; STRING|unspecified
+ sxml-obj - an SXML object to serialize
+ param ::= (cons param-name param-value)
+ param-name ::= symbol
+ 
+ 1. cdata-section-elements
+ value ::= (listof sxml-elem-name)
+ sxml-elem-name ::= symbol
+
+ 2. indent
+ value ::= 'yes | #t | 'no | #f | whitespace-string
+
+ 3. method
+ value ::= 'xml | 'html
+
+ 4. ns-prefix-assig
+ value ::= (listof (cons prefix namespace-uri))
+ prefix ::= symbol
+ namespace-uri ::= string
+
+ 5. omit-xml-declaration?
+ value ::= 'yes | #t | 'no | #f
+
+ 6. standalone
+ value ::= 'yes | #t | 'no | #f | 'omit
+
+ 7. version
+ value ::= string | number
+
+ ATTENTION: If a parameter name is unexpected or a parameter value is
+ ill-formed, the parameter is silently ignored. Probably, a warning message
+ in such a case would be more appropriate.
+
+ Example:
+ (srl:parameterizable 
+   '(tag (@ (attr &quot;value&quot;)) (nested &quot;text node&quot;) (empty))
+   (current-output-port)
+   '(method . xml)  ; XML output method is used by default
+   '(indent . &quot;\t&quot;)  ; use a single tabulation to indent nested elements
+   '(omit-xml-declaration . #f)  ; add XML declaration
+   '(standalone . yes)  ; denote a standalone XML document
+   '(version . &quot;1.0&quot;))  ; XML version
+</pre>
+<pre>(define (<a href="serializer.html#codefunc29272">srl:parameterizable</a> sxml-obj . port-or-filename+params)
+  (call-with-values
+   (lambda ()
+     (if (and (not (null? port-or-filename+params))
+              (or (output-port? (car port-or-filename+params))
+                  (string? (car port-or-filename+params))))
+         (values (car port-or-filename+params) (cdr port-or-filename+params))
+         (values #f port-or-filename+params)))
+   (lambda (port-or-filename params)
+     (let loop ((params params)
+                (cdata-section-elements '())
+                (indent &quot;  &quot;)
+                (method 'xml)
+                (ns-prefix-assig <a href="serializer.html#codefunc42401">srl:conventional-ns-prefixes</a>)
+                (omit-xml-declaration? #t)
+                (standalone 'omit)
+                (version &quot;1.0&quot;))
+       (cond
+         ((null? params)  ; all parameters parsed
+          (if port-or-filename
+              (<a href="serializer.html#codefunc64125">srl:display-sxml</a> sxml-obj port-or-filename
+                                cdata-section-elements indent
+                                method ns-prefix-assig
+                                omit-xml-declaration? standalone version)
+              (<a href="serializer.html#codefunc5442">srl:sxml-&gt;string</a> sxml-obj
+                                cdata-section-elements indent
+                                method ns-prefix-assig
+                                omit-xml-declaration? standalone version)))
+         ((or (not (pair? (car params)))  ; not a pair or has no param value
+              (null? (cdar params)))
+          (loop (cdr params)
+                cdata-section-elements indent
+                method ns-prefix-assig
+                omit-xml-declaration? standalone version))
+         (else
+          (let ((prm-value (cdar params)))
+            (case (caar params)
+              ((cdata-section-elements)
+               (loop (cdr params)
+                     (if (list? prm-value) prm-value cdata-section-elements)
+                     indent method ns-prefix-assig
+                     omit-xml-declaration? standalone version))
+              ((indent)
+               (loop (cdr params)
+                     cdata-section-elements
+                     (cond
+                       ((boolean? prm-value)
+                        (if prm-value &quot;  &quot; prm-value))
+                       ((string? prm-value) prm-value)
+                       ((eq? prm-value 'yes) &quot;  &quot;)
+                       ((eq? prm-value 'no) #f)
+                       (else indent))
+                     method ns-prefix-assig
+                     omit-xml-declaration? standalone version))
+              ((method)
+               (loop (cdr params)
+                     cdata-section-elements indent
+                     (if (or (eq? prm-value 'xml) (eq? prm-value 'html))
+                         prm-value method)
+                     ns-prefix-assig
+                     omit-xml-declaration? standalone version))
+              ((ns-prefix-assig)
+               (loop (cdr params)
+                     cdata-section-elements indent method
+                     (if (and (list? prm-value)
+                              (not (<a href="serializer.html#codefunc5776">srl:mem-pred</a>  ; no non-pair members
+                                    (lambda (x) (not (pair? x)))
+                                    prm-value)))
+                         (append prm-value ns-prefix-assig)
+                         ns-prefix-assig)
+                     omit-xml-declaration? standalone version))
+              ((omit-xml-declaration)
+               (loop (cdr params)
+                     cdata-section-elements indent
+                     method ns-prefix-assig
+                     (cond
+                       ((boolean? prm-value) prm-value)                       
+                       ((eq? prm-value 'yes) #t)
+                       ((eq? prm-value 'no) #f)
+                       (else indent))
+                     standalone version))
+              ((standalone)
+               (loop (cdr params)
+                     cdata-section-elements indent
+                     method ns-prefix-assig omit-xml-declaration?
+                     (cond
+                       ((memv prm-value '(yes no omit))
+                        prm-value)
+                       ((boolean? prm-value)
+                        (if prm-value 'yes 'no))
+                       (else standalone))
+                     version))
+              ((version)
+               (loop (cdr params)
+                     cdata-section-elements indent
+                     method ns-prefix-assig
+                     omit-xml-declaration? standalone
+                     (if (or (string? prm-value) (number? prm-value))
+                         prm-value version)))
+              (else
+               (loop (cdr params)
+                     cdata-section-elements indent
+                     method ns-prefix-assig
+                     omit-xml-declaration? standalone version))))))))))
+</pre>
+<h4><a name='codefunc15826' href='#docfunc15826'>srl:sxml->xml</a></h4>
+<i><a href='#tocfunc15826'>Index</a></i><br>
+
+<pre> procedure srl:sxml-&gt;xml :: SXML-OBJ [PORT-OR-FILENAME] -&gt; STRING|unspecified
+
+ Serializes the `sxml-obj' into XML, with indentation to facilitate
+ readability by a human.
+
+ sxml-obj - an SXML object (a node or a nodeset) to be serialized
+ port-or-filename - an output port or an output file name, an optional
+  argument
+ If `port-or-filename' is not supplied, the functions return a string that
+ contains the serialized representation of the `sxml-obj'.
+ If `port-or-filename' is supplied and is a port, the functions write the
+ serialized representation of `sxml-obj' to this port and return an
+ unspecified result.
+ If `port-or-filename' is supplied and is a string, this string is treated as
+ an output filename, the serialized representation of `sxml-obj' is written to
+ that filename and an unspecified result is returned. If a file with the given
+ name already exists, the effect is unspecified.
+</pre>
+<pre>(define (<a href="serializer.html#codefunc15826">srl:sxml-&gt;xml</a> sxml-obj . port-or-filename)
+  (if (null? port-or-filename)
+      (<a href="serializer.html#codefunc5442">srl:sxml-&gt;string</a> sxml-obj '() #t 'xml
+                        <a href="serializer.html#codefunc42401">srl:conventional-ns-prefixes</a> #t 'omit &quot;1.0&quot;)
+      (<a href="serializer.html#codefunc64125">srl:display-sxml</a> sxml-obj (car port-or-filename) '() #t 'xml
+                        <a href="serializer.html#codefunc42401">srl:conventional-ns-prefixes</a> #t 'omit &quot;1.0&quot;)))
+</pre>
+<h4><a name='codefunc8829' href='#docfunc8829'>srl:sxml->xml-noindent</a></h4>
+<i><a href='#tocfunc8829'>Index</a></i><br>
+
+<pre> procedure srl:sxml-&gt;xml-noindent :: SXML-OBJ [PORT-OR-FILENAME] -&gt;
+                                      -&gt; STRING|unspecified
+
+ Serializes the `sxml-obj' into XML, without indentation.
+</pre>
+<pre>(define (<a href="serializer.html#codefunc8829">srl:sxml-&gt;xml-noindent</a> sxml-obj . port-or-filename)
+  (if (null? port-or-filename)
+      (<a href="serializer.html#codefunc5442">srl:sxml-&gt;string</a> sxml-obj '() #f 'xml
+                        <a href="serializer.html#codefunc42401">srl:conventional-ns-prefixes</a> #t 'omit &quot;1.0&quot;)
+      (<a href="serializer.html#codefunc64125">srl:display-sxml</a> sxml-obj (car port-or-filename) '() #f 'xml
+                        <a href="serializer.html#codefunc42401">srl:conventional-ns-prefixes</a> #t 'omit &quot;1.0&quot;)))
+</pre>
+<h4><a name='codefunc45251' href='#docfunc45251'>srl:sxml->html</a></h4>
+<i><a href='#tocfunc45251'>Index</a></i><br>
+
+<pre> procedure srl:sxml-&gt;html :: SXML-OBJ [PORT-OR-FILENAME] -&gt; STRING|unspecified
+
+ Serializes the `sxml-obj' into HTML, with indentation to facilitate
+ readability by a human.
+
+ sxml-obj - an SXML object (a node or a nodeset) to be serialized
+ port-or-filename - an output port or an output file name, an optional
+  argument
+ If `port-or-filename' is not supplied, the functions return a string that
+ contains the serialized representation of the `sxml-obj'.
+ If `port-or-filename' is supplied and is a port, the functions write the
+ serialized representation of `sxml-obj' to this port and return an
+ unspecified result.
+ If `port-or-filename' is supplied and is a string, this string is treated as
+ an output filename, the serialized representation of `sxml-obj' is written to
+ that filename and an unspecified result is returned. If a file with the given
+ name already exists, the effect is unspecified.
+</pre>
+<pre>(define (<a href="serializer.html#codefunc45251">srl:sxml-&gt;html</a> sxml-obj . port-or-filename)
+  (if (null? port-or-filename)
+      (<a href="serializer.html#codefunc5442">srl:sxml-&gt;string</a> sxml-obj '() #t 'html '() #t 'omit &quot;4.0&quot;)
+      (<a href="serializer.html#codefunc64125">srl:display-sxml</a> sxml-obj (car port-or-filename)
+                        '() #t 'html '() #t 'omit &quot;4.0&quot;)))
+</pre>
+<h4><a name='codefunc23464' href='#docfunc23464'>srl:sxml->html-noindent</a></h4>
+<i><a href='#tocfunc23464'>Index</a></i><br>
+
+<pre> procedure srl:sxml-&gt;html-noindent :: SXML-OBJ [PORT-OR-FILENAME] -&gt;
+                                       -&gt; STRING|unspecified
+
+ Serializes the `sxml-obj' into HTML, without indentation.
+</pre>
+<pre>(define (<a href="serializer.html#codefunc23464">srl:sxml-&gt;html-noindent</a> sxml-obj . port-or-filename)
+  (if (null? port-or-filename)
+      (<a href="serializer.html#codefunc5442">srl:sxml-&gt;string</a> sxml-obj '() #f 'html '() #t 'omit &quot;4.0&quot;)
+      (<a href="serializer.html#codefunc64125">srl:display-sxml</a> sxml-obj (car port-or-filename)
+                        '() #f 'html '() #t 'omit &quot;4.0&quot;)))
+</pre></body></html>

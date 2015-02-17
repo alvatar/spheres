@@ -1,0 +1,546 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN""http://www.w3.org/TR/html401/loose.dtd"><html><head><meta name="GENERATOR" content="Mole: The Scheme Source Code Digger"><title>API documentation for SSAX-SXML</title><meta name='keywords' content=''></head><body bgcolor='#ffffff' text='#384412'  link='#11af05' vlink='#728b09'>
+<center><h1>API documentation for SSAX-SXML</h1></center>
+
+<pre>On the index page, the primary high-level API functions are presented:</pre><p><br>
+<!-- Table of content -->
+<p><dl>
+<p><dt><a name='tocchapt14158' href='#chapt14158'><b>Obtaining the SXML document from XML (HTML) by URI</b></a><dd>
+
+f:  <a name='tocfunc35033' href='#docfunc35033' style='text-decoration:none'>sxml:document</a><br>
+
+<dl><dt><a name='tocsect11048' href='#sect11048'><b>High-level functions called by `sxml:document'</b></a><dd>
+
+f:  <a name='tocfunc62346' href='#docfunc62346' style='text-decoration:none'>ssax:xml->sxml</a><br>
+
+f:  <a name='tocfunc996' href='#docfunc996' style='text-decoration:none'>html->sxml</a><br>
+
+f:  <a name='tocfunc60351' href='#docfunc60351' style='text-decoration:none'>open-input-resource</a><br>
+</dl>
+<p><dt><a name='tocchapt23533' href='#chapt23533'><b>SXPath: XPath for SXML</b></a><dd>
+
+f:  <a name='tocfunc16985' href='#docfunc16985' style='text-decoration:none'>txpath</a><br>
+
+f:  <a name='tocfunc16984' href='#docfunc16984' style='text-decoration:none'>sxpath</a><br>
+<p><dt><a name='tocchapt436' href='#chapt436'><b>SXML Transformations</b></a><dd>
+
+<dl><dt><a name='tocsect60942' href='#sect60942'><b>STX: Scheme-enabled XSLT Processor</b></a><dd>
+
+f:  <a name='tocfunc33217' href='#docfunc33217' style='text-decoration:none'>stx:make-stx-stylesheet</a><br>
+
+f:  <a name='tocfunc55988' href='#docfunc55988' style='text-decoration:none'>stx:transform-dynamic</a><br>
+</dl>
+
+<dl><dt><a name='tocsect18098' href='#sect18098'><b>Pre-post-order transformations</b></a><dd>
+
+f:  <a name='tocfunc51646' href='#docfunc51646' style='text-decoration:none'>pre-post-order</a><br>
+</dl>
+<p><dt><a name='tocchapt51470' href='#chapt51470'><b>XPathLink: a Query Language with XLink support</b></a><dd>
+
+f:  <a name='tocfunc54371' href='#docfunc54371' style='text-decoration:none'>xlink:documents</a><br>
+
+f:  <a name='tocfunc42375' href='#docfunc42375' style='text-decoration:none'>sxpath/c</a><br>
+<p><dt><a name='tocchapt38716' href='#chapt38716'><b>SXML modifications</b></a><dd>
+
+f:  <a name='tocfunc7533' href='#docfunc7533' style='text-decoration:none'>sxml:modify</a><br>
+
+f:  <a name='tocfunc15981' href='#docfunc15981' style='text-decoration:none'>sxml:modify!</a><br>
+<p><dt><a name='tocchapt5044' href='#chapt5044'><b>DDO SXPath: the Polynomial-Time XPath Implementation</b></a><dd>
+
+f:  <a name='tocfunc57643' href='#docfunc57643' style='text-decoration:none'>ddo:sxpath</a><br>
+<p><dt><a name='tocchapt46514' href='#chapt46514'><b>Lazy SXML processing</b></a><dd>
+
+f:  <a name='tocfunc58012' href='#docfunc58012' style='text-decoration:none'>lazy:xml->sxml</a><br>
+
+f:  <a name='tocfunc13155' href='#docfunc13155' style='text-decoration:none'>lazy:sxpath</a><br>
+
+<dl><dt><a name='tocsect40428' href='#sect40428'><b>Lower-level infrastructure for lazy SXML processing</b></a><dd>
+
+f:  <a name='tocfunc14988' href='#docfunc14988' style='text-decoration:none'>lazy:result->list</a><br>
+
+f:  <a name='tocfunc48152' href='#docfunc48152' style='text-decoration:none'>lazy:node->sxml</a><br>
+</dl>
+<p><dt><a name='tocchapt28250' href='#chapt28250'><b>SXML Serialization</b></a><dd>
+
+f:  <a name='tocfunc15826' href='#docfunc15826' style='text-decoration:none'>srl:sxml->xml</a><br>
+
+f:  <a name='tocfunc8829' href='#docfunc8829' style='text-decoration:none'>srl:sxml->xml-noindent</a><br>
+
+f:  <a name='tocfunc45251' href='#docfunc45251' style='text-decoration:none'>srl:sxml->html</a><br>
+
+f:  <a name='tocfunc23464' href='#docfunc23464' style='text-decoration:none'>srl:sxml->html-noindent</a><br>
+
+<dl><dt><a name='tocsect35427' href='#sect35427'><b>Parameterizing the SXML serializer</b></a><dd>
+
+f:  <a name='tocfunc29272' href='#docfunc29272' style='text-decoration:none'>srl:parameterizable</a><br>
+</dl>
+</dl>
+<hr height='5'><center><h3><a name='chapt14158' href='#tocchapt14158'>Obtaining the SXML document from XML (HTML) by URI</a></h3></center>
+
+<h4><a name='docfunc35033' href='#tocfunc35033'>sxml:document</a></h4>
+(define (sxml:document req-uri . namespace-prefix-assig)<i><br> ... <a href='xlink.html#codefunc35033'>Full Code</a> ... )</i>
+<pre> procedure sxml:document :: REQ-URI [NAMESPACE-PREFIX-ASSIG] -&gt;
+                             -&gt; SXML-TREE
+
+ Obtain a [possibly, remote] document by its URI
+ Supported URI formats:  local file and HTTP schema
+ Supported document formats:  XML and HTML
+
+ REQ-URI - a string that contains the URI of the requested document
+ NAMESPACE-PREFIX-ASSIG - is passed as-is to the SSAX parser: there it is
+  used for assigning certain user prefixes to certain namespaces.
+  NAMESPACE-PREFIX-ASSIG is an optional argument and has an effect for an
+  XML resource only. For an HTML resource requested, NAMESPACE-PREFIX-ASSIG
+  is silently ignored.
+
+ Result: the SXML representation for the requested document
+</pre><p><br>
+
+<hr width='40%' align='center'><center><h3><a name='sect11048' href='#tocsect11048'>High-level functions called by `sxml:document'</a></h3></center>
+
+<h4><a name='docfunc62346' href='#tocfunc62346'>ssax:xml->sxml</a></h4>
+(define (ssax:xml-&gt;sxml port namespace-prefix-assig)<i><br> ... <a href='SSAX-code.html#codefunc62346'>Full Code</a> ... )</i><p><br>
+
+<h4><a name='docfunc996' href='#tocfunc996'>html->sxml</a></h4>
+(define html-&gt;sxml <i><br> ... <a href='htmlprag.html#codefunc996'>Full Code</a> ... )</i><p><br>
+
+<h4><a name='docfunc60351' href='#tocfunc60351'>open-input-resource</a></h4>
+(define (open-input-resource req-uri)<i><br> ... <a href='access-remote.html#codefunc60351'>Full Code</a> ... )</i>
+<pre> Opens an input port for a resource
+  REQ-URI - a string representing a URI of the resource
+ An input port is returned if there were no errors. In case of an error,
+ the function returns #f and displays an error message as a side effect.
+ Doesn't raise any exceptions.
+</pre><p><br>
+<hr height='5'><center><h3><a name='chapt23533' href='#tocchapt23533'>SXPath: XPath for SXML</a></h3></center>
+
+<h4><a name='docfunc16985' href='#tocfunc16985'>txpath</a></h4>
+(define txpath <i><br> ... <a href='txpath.html#codefunc16985'>Full Code</a> ... )</i>
+<pre>
+  xpath-string - an XPath location path (a string)
+  ns-binding - declared namespace prefixes (an optional argument)
+  ns-binding = (list  (prefix . uri)
+                      (prefix . uri)
+                      ...)
+  prefix - a symbol
+  uri - a string
+
+ The returned result:   (lambda (node . var-binding) ...)  
+                   or   #f
+  #f - signals of a parse error (error message is printed as a side effect
+ during parsing)
+  (lambda (node . var-binding) ...)  - an SXPath function
+  node - a node (or a node-set) of the SXML document
+  var-binding - XPath variable bindings (an optional argument)
+  var-binding = (list  (var-name . value)
+                       (var-name . value)
+                       ...)
+  var-name - (a symbol) a name of a variable
+  value - its value. The value can have the following type: boolean, number,
+ string, nodeset. NOTE: a node must be represented as a singleton nodeset
+ 
+ Administrative SXPath variables:
+  *root* - if presented in the 'var-binding', its value (a node or a nodeset)
+ specifies the root of the SXML document
+</pre><p><br>
+
+<h4><a name='docfunc16984' href='#tocfunc16984'>sxpath</a></h4>
+(define (sxpath path . ns-binding)<i><br> ... <a href='sxpath.html#codefunc16984'>Full Code</a> ... )</i>
+<pre> Evaluate an abbreviated SXPath
+	sxpath:: AbbrPath -&gt; Converter, or
+	sxpath:: AbbrPath -&gt; Node|Nodeset -&gt; Nodeset
+ AbbrPath is a list. It is translated to the full SXPath according
+ to the following rewriting rules
+ (sxpath '()) -&gt; (node-join)
+ (sxpath '(path-component ...)) -&gt;
+		(node-join (sxpath1 path-component) (sxpath '(...)))
+ (sxpath1 '//) -&gt; (sxml:descendant-or-self sxml:node?)
+ (sxpath1 '(equal? x)) -&gt; (select-kids (node-equal? x))
+ (sxpath1 '(eq? x))    -&gt; (select-kids (node-eq? x))
+ (sxpath1 '(*or* ...))  -&gt; (select-kids (ntype-names??
+                                          (cdr '(*or* ...))))
+ (sxpath1 '(*not* ...)) -&gt; (select-kids (sxml:complement 
+                                         (ntype-names??
+                                          (cdr '(*not* ...)))))
+ (sxpath1 '(ns-id:* x)) -&gt; (select-kids 
+                                      (ntype-namespace-id?? x))
+ (sxpath1 ?symbol)     -&gt; (select-kids (ntype?? ?symbol))
+ (sxpath1 ?string)     -&gt; (txpath ?string)
+ (sxpath1 procedure)   -&gt; procedure
+ (sxpath1 '(?symbol ...)) -&gt; (sxpath1 '((?symbol) ...))
+ (sxpath1 '(path reducer ...)) -&gt;
+		(node-reduce (sxpath path) (sxpathr reducer) ...)
+ (sxpathr number)      -&gt; (node-pos number)
+ (sxpathr path-filter) -&gt; (filter (sxpath path-filter))
+</pre><p><br>
+<hr height='5'><center><h3><a name='chapt436' href='#tocchapt436'>SXML Transformations</a></h3></center>
+
+<hr width='40%' align='center'><center><h3><a name='sect60942' href='#tocsect60942'>STX: Scheme-enabled XSLT Processor</a></h3></center>
+
+<h4><a name='docfunc33217' href='#tocfunc33217'>stx:make-stx-stylesheet</a></h4>
+(define (stx:make-stx-stylesheet stx-tree)<i><br> ... <a href='stx-engine.html#codefunc33217'>Full Code</a> ... )</i>
+<pre> Generates an stx:stylesheet from a stylesheet represented as &lt;stx-tree&gt;
+ in SXML format
+</pre><p><br>
+
+<h4><a name='docfunc55988' href='#tocfunc55988'>stx:transform-dynamic</a></h4>
+(define (stx:transform-dynamic doc sst-sxml)<i><br> ... <a href='stx-engine.html#codefunc55988'>Full Code</a> ... )</i>
+<pre> transformate given SXML document &lt;doc&gt; using stylesheet &lt;sst&gt; in SXML
+ format
+</pre><p><br>
+
+<hr width='40%' align='center'><center><h3><a name='sect18098' href='#tocsect18098'>Pre-post-order transformations</a></h3></center>
+
+<h4><a name='docfunc51646' href='#tocfunc51646'>pre-post-order</a></h4>
+(define (pre-post-order tree bindings)<i><br> ... <a href='SXML-tree-trans.html#codefunc51646'>Full Code</a> ... )</i>
+<pre> procedure: pre-post-order TREE BINDINGS
+
+	          Traversal of an SXML tree or a grove:
+			a &lt;Node&gt; or a &lt;Nodelist&gt;
+
+ A &lt;Node&gt; and a &lt;Nodelist&gt; are mutually-recursive datatypes that
+ underlie the SXML tree:
+	&lt;Node&gt; ::= (name . &lt;Nodelist&gt;) | &quot;text string&quot;
+ An (ordered) set of nodes is just a list of the constituent nodes:
+ 	&lt;Nodelist&gt; ::= (&lt;Node&gt; ...)
+ Nodelists, and Nodes other than text strings are both lists. A
+ &lt;Nodelist&gt; however is either an empty list, or a list whose head is
+ not a symbol (an atom in general). A symbol at the head of a node is
+ either an XML name (in which case it's a tag of an XML element), or
+ an administrative name such as '@'.
+ See SXPath.scm and SSAX.scm for more information on SXML.
+
+
+ Pre-Post-order traversal of a tree and creation of a new tree:
+	pre-post-order:: &lt;tree&gt; x &lt;bindings&gt; -&gt; &lt;new-tree&gt;
+ where
+ &lt;bindings&gt; ::= (&lt;binding&gt; ...)
+ &lt;binding&gt; ::= (&lt;trigger-symbol&gt; *preorder* . &lt;handler&gt;) |
+               (&lt;trigger-symbol&gt; *macro* . &lt;handler&gt;) |
+		(&lt;trigger-symbol&gt; &lt;new-bindings&gt; . &lt;handler&gt;) |
+		(&lt;trigger-symbol&gt; . &lt;handler&gt;)
+ &lt;trigger-symbol&gt; ::= XMLname | *text* | *default*
+ &lt;handler&gt; :: &lt;trigger-symbol&gt; x [&lt;tree&gt;] -&gt; &lt;new-tree&gt;
+
+ The pre-post-order function visits the nodes and nodelists
+ pre-post-order (depth-first).  For each &lt;Node&gt; of the form (name
+ &lt;Node&gt; ...) it looks up an association with the given 'name' among
+ its &lt;bindings&gt;. If failed, pre-post-order tries to locate a
+ *default* binding. It's an error if the latter attempt fails as
+ well.  Having found a binding, the pre-post-order function first
+ checks to see if the binding is of the form
+	(&lt;trigger-symbol&gt; *preorder* . &lt;handler&gt;)
+ If it is, the handler is 'applied' to the current node. Otherwise,
+ the pre-post-order function first calls itself recursively for each
+ child of the current node, with &lt;new-bindings&gt; prepended to the
+ &lt;bindings&gt; in effect. The result of these calls is passed to the
+ &lt;handler&gt; (along with the head of the current &lt;Node&gt;). To be more
+ precise, the handler is _applied_ to the head of the current node
+ and its processed children. The result of the handler, which should
+ also be a &lt;tree&gt;, replaces the current &lt;Node&gt;. If the current &lt;Node&gt;
+ is a text string or other atom, a special binding with a symbol
+ *text* is looked up.
+
+ A binding can also be of a form
+	(&lt;trigger-symbol&gt; *macro* . &lt;handler&gt;)
+ This is equivalent to *preorder* described above. However, the result
+ is re-processed again, with the current stylesheet.
+
+</pre><p><br>
+<hr height='5'><center><h3><a name='chapt51470' href='#tocchapt51470'>XPathLink: a Query Language with XLink support</a></h3></center>
+
+<h4><a name='docfunc54371' href='#tocfunc54371'>xlink:documents</a></h4>
+(define xlink:documents <i><br> ... <a href='xlink.html#codefunc54371'>Full Code</a> ... )</i>
+<pre> procedure xlink:documents :: {REQ-URI}+  -&gt; (listof SXML-TREE)
+ procedure xlink:documents-embed :: {REQ-URI}+  -&gt; (listof SXML-TREE)
+
+ Both `xlink:documents' and `xlink:documents-embed' accept one or more
+ strings as their arguments. Each string supplied denotes the URI of the
+ requested document to be loaded. The requested document(s) are loaded
+ and are represented in SXML. All XLink links declared in these document(s)
+ are represented as a set of SXLink arcs. If any XLink links refer to XLink
+ linkbases [&lt;a href=&quot;http://www.w3.org/TR/xlink/#xlg&quot;&gt;XLink&lt;/a&gt;],
+ these linkbases are additionally loaded, for additional SXLink arcs
+ declared there.
+
+ The starting resource for each SXLink arc is determined:
+ 1. For each SXML document loaded, the function `xlink:document' adds all
+    SXLink arcs whose starting resource is located within this document, to
+    the auxiliary list of its document node (*TOP*).
+ 2. The function 'xlink:documents-embed' embeds each SXLink arc into its
+    starting resource-node, via auxiliary list of that node. For text nodes
+    serving for starting resources, their SXLink arcs are stored in the
+    auxiliary list of the document node (*TOP*), since SXML text nodes do
+    not support their own auxiliary lists.
+
+ Supported URI formats:
+  + local file
+  + http:// schema
+
+ Supported document formats: XML and HTML. In the case of HTML,
+ &lt;A&gt; hyperlinks are considered as XLink simple links.
+
+ Result: (listof SXML-TREE)
+ A particular SXML document can be located in this list using the
+ function `xlink:find-doc'.
+</pre><p><br>
+
+<h4><a name='docfunc42375' href='#tocfunc42375'>sxpath/c</a></h4>
+(define sxpath/c <i><br> ... <a href='xpath-context.html#codefunc42375'>Full Code</a> ... )</i>
+<pre> xpath-string - an XPath location path (a string)
+ ns+na - can contain 'ns-binding' and/or 'num-ancestors' and/or none of them
+ ns-binding - declared namespace prefixes (an optional argument)
+  ns-binding ::= (listof (prefix . uri))
+  prefix - a symbol
+  uri - a string
+ num-ancestors - number of ancestors required for resulting nodeset. Can
+  generally be omitted and is than defaulted to 0, which denotes a _usual_
+  nodeset. If a negative number, this signals that all ancestors should be
+  remembered in the context
+
+ Returns: (lambda (nodeset position+size var-binding) ...)
+ position+size - the same to what was called 'context' in TXPath-1
+ var-binding - XPath variable bindings (an optional argument)
+  var-binding = (listof (var-name . value))
+  var-name - (a symbol) a name of a variable
+  value - its value. The value can have the following type: boolean, number,
+  string, nodeset. NOTE: a node must be represented as a singleton nodeset
+</pre><p><br>
+<hr height='5'><center><h3><a name='chapt38716' href='#tocchapt38716'>SXML modifications</a></h3></center>
+
+<h4><a name='docfunc7533' href='#tocfunc7533'>sxml:modify</a></h4>
+(define (sxml:modify . update-specifiers)<i><br> ... <a href='modif.html#codefunc7533'>Full Code</a> ... )</i>
+<pre> update-specifiers ::= (listof  update-specifier)
+ update-specifier ::= (list  xpath-location-path  action  [action-parametes])
+ xpath-location-path - addresses the node(s) to be transformed, in the form of
+  XPath location path. If the location path is absolute, it addresses the
+  node(s) with respect to the root of the document being transformed. If the
+  location path is relative, it addresses the node(s) with respect to the
+  node selected by the previous update-specifier. The location path in the
+  first update-specifier always addresses the node(s) with respect to the
+  root of the document. We'll further refer to the node with respect of which
+  the location path is evaluated as to the base-node for this location path.
+ action - specifies the modification to be made over each of the node(s)
+  addressed by the location path. Possible actions are described below.
+ action-parameters - additional parameters supplied for the action. The number
+  of parameters and their semantics depend on the definite action.
+
+ action ::= 'delete | 'delete-undeep |
+            'insert-into | 'insert-following | 'insert-preceding |
+            'replace |
+            'move-into | 'move-following | 'move-preceding |
+            handler
+ 'delete - deletes the node. Expects no action-parameters
+ 'delete-undeep - deletes the node, but keeps all its content (which thus
+   moves to one level upwards in the document tree). Expects no
+   action-parameters
+ 'insert-into - inserts the new node(s) as the last children of the given
+   node. The new node(s) are specified in SXML as action-parameters
+ 'insert-following, 'insert-preceding - inserts the new node(s) after (before)
+   the given node. Action-parameters are the same as for 'insert-into
+ 'replace - replaces the given node with the new node(s). Action-parameters
+   are the same as for 'insert-into
+ 'rename - renames the given node. The node to be renamed must be a pair (i.e.
+   not a text node). A single action-parameter is expected, which is to be
+   a Scheme symbol to specify the new name of the given node
+ 'move-into - moves the given node to a new location. The single
+   action-parameter is the location path, which addresses the new location
+   with respect to the given node as the base node. The given node becomes
+   the last child of the node selected by the parameter location path.
+ 'move-following, 'move-preceding - the given node is moved to the location
+   respectively after (before) the node selected by the parameter location
+   path
+ handler ::= (lambda (node context base-node) ...)
+ handler - specifies the required transformation. It is an arbitrary lambda
+  that consumes the node and its context (the latter can be used for addressing
+  the other node of the source document relative to the given node). The hander
+  can return one of the following 2 things: a node or a nodeset.
+   1. If a node is returned, than it replaces the source node in the result
+  document
+   2. If a nodeset is returned, than the source node is replaced by (multiple)
+  nodes from this nodeset, in the same order in which they appear in the
+  nodeset. In particular, if the empty nodeset is returned by the handler, the
+  source node is removed from the result document and nothing is inserted
+  instead.
+
+  Returns either (lambda (doc) ...) or #f
+  The latter signals of an error, an the error message is printed into stderr
+  as a side effect. In the former case, the lambda can be applied to an SXML
+  document and produces the new SXML document being the result of the
+  modification specified.
+</pre><p><br>
+
+<h4><a name='docfunc15981' href='#tocfunc15981'>sxml:modify!</a></h4>
+(define (sxml:modify! . update-specifiers)<i><br> ... <a href='modif.html#codefunc15981'>Full Code</a> ... )</i>
+<pre> A highest-level function
+</pre><p><br>
+<hr height='5'><center><h3><a name='chapt5044' href='#tocchapt5044'>DDO SXPath: the Polynomial-Time XPath Implementation</a></h3></center>
+
+<h4><a name='docfunc57643' href='#tocfunc57643'>ddo:sxpath</a></h4>
+(define ddo:sxpath <i><br> ... <a href='ddo-txpath.html#codefunc57643'>Full Code</a> ... )</i>
+<pre>
+ procedure ddo:sxpath :: query [ns-binding] [num-ancestors] -&gt;
+                          -&gt; node-or-nodeset [var-binding] -&gt; nodeset
+ procedure ddo:txpath :: location-path [ns-binding] [num-ancestors] -&gt;
+                          -&gt; node-or-nodeset [var-binding] -&gt; nodeset
+
+ Polynomial-time XPath implementation with distinct document order support.
+
+ The API is identical to the API of a context-based SXPath (here we even use
+ API helpers from &quot;xpath-context.scm&quot;). For convenience, below we repeat
+ comments for the API (borrowed from &quot;xpath-context.scm&quot;).
+
+ query - a query in SXPath native syntax
+ location-path - XPath location path represented as a string
+ ns-binding - declared namespace prefixes (an optional argument)
+  ns-binding ::= (listof (prefix . uri))
+  prefix - a symbol
+  uri - a string
+ num-ancestors - number of ancestors required for resulting nodeset. Can
+  generally be omitted and is than defaulted to 0, which denotes a
+  _conventional_  nodeset. If a negative number, this signals that all
+  ancestors should be remembered in the context.
+
+ Returns: (lambda (node-or-nodeset . var-binding) ...)
+ var-binding - XPath variable bindings (an optional argument)
+  var-binding = (listof (var-name . value))
+  var-name - (a symbol) a name of a variable
+  value - its value. The value can have the following type: boolean, number,
+  string, nodeset. NOTE: a node must be represented as a singleton nodeset.
+
+ The result of applying the latter lambda to an SXML node or nodeset is the
+ result of evaluating the query / location-path for that node / nodeset.
+</pre><p><br>
+<hr height='5'><center><h3><a name='chapt46514' href='#tocchapt46514'>Lazy SXML processing</a></h3></center>
+
+<h4><a name='docfunc58012' href='#tocfunc58012'>lazy:xml->sxml</a></h4>
+(define (lazy:xml-&gt;sxml port namespace-prefix-assig)<i><br> ... <a href='lazy-ssax.html#codefunc58012'>Full Code</a> ... )</i>
+<pre> Produces a lazy SXML document, which corresponds to reading a source
+ document in a stream-wise fashion
+</pre><p><br>
+
+<h4><a name='docfunc13155' href='#tocfunc13155'>lazy:sxpath</a></h4>
+(define lazy:sxpath <i><br> ... <a href='lazy-xpath.html#codefunc13155'>Full Code</a> ... )</i>
+<pre> Support for native sxpath syntax
+</pre><p><br>
+
+<hr width='40%' align='center'><center><h3><a name='sect40428' href='#tocsect40428'>Lower-level infrastructure for lazy SXML processing</a></h3></center>
+
+<h4><a name='docfunc14988' href='#tocfunc14988'>lazy:result->list</a></h4>
+(define (lazy:result-&gt;list nodeset)<i><br> ... <a href='lazy-xpath.html#codefunc14988'>Full Code</a> ... )</i>
+<pre> Converts the lazy result into a list, by forcing all the promises one by one
+</pre><p><br>
+
+<h4><a name='docfunc48152' href='#tocfunc48152'>lazy:node->sxml</a></h4>
+(define (lazy:node-&gt;sxml node)<i><br> ... <a href='lazy-xpath.html#codefunc48152'>Full Code</a> ... )</i>
+<pre> Converts the lazy node to SXML, by forcing all of its descendants
+ The node itself is not a promise
+</pre><p><br>
+<hr height='5'><center><h3><a name='chapt28250' href='#tocchapt28250'>SXML Serialization</a></h3></center>
+
+<h4><a name='docfunc15826' href='#tocfunc15826'>srl:sxml->xml</a></h4>
+(define (srl:sxml-&gt;xml sxml-obj . port-or-filename)<i><br> ... <a href='serializer.html#codefunc15826'>Full Code</a> ... )</i>
+<pre> procedure srl:sxml-&gt;xml :: SXML-OBJ [PORT-OR-FILENAME] -&gt; STRING|unspecified
+
+ Serializes the `sxml-obj' into XML, with indentation to facilitate
+ readability by a human.
+
+ sxml-obj - an SXML object (a node or a nodeset) to be serialized
+ port-or-filename - an output port or an output file name, an optional
+  argument
+ If `port-or-filename' is not supplied, the functions return a string that
+ contains the serialized representation of the `sxml-obj'.
+ If `port-or-filename' is supplied and is a port, the functions write the
+ serialized representation of `sxml-obj' to this port and return an
+ unspecified result.
+ If `port-or-filename' is supplied and is a string, this string is treated as
+ an output filename, the serialized representation of `sxml-obj' is written to
+ that filename and an unspecified result is returned. If a file with the given
+ name already exists, the effect is unspecified.
+</pre><p><br>
+
+<h4><a name='docfunc8829' href='#tocfunc8829'>srl:sxml->xml-noindent</a></h4>
+(define (srl:sxml-&gt;xml-noindent sxml-obj . port-or-filename)<i><br> ... <a href='serializer.html#codefunc8829'>Full Code</a> ... )</i>
+<pre> procedure srl:sxml-&gt;xml-noindent :: SXML-OBJ [PORT-OR-FILENAME] -&gt;
+                                      -&gt; STRING|unspecified
+
+ Serializes the `sxml-obj' into XML, without indentation.
+</pre><p><br>
+
+<h4><a name='docfunc45251' href='#tocfunc45251'>srl:sxml->html</a></h4>
+(define (srl:sxml-&gt;html sxml-obj . port-or-filename)<i><br> ... <a href='serializer.html#codefunc45251'>Full Code</a> ... )</i>
+<pre> procedure srl:sxml-&gt;html :: SXML-OBJ [PORT-OR-FILENAME] -&gt; STRING|unspecified
+
+ Serializes the `sxml-obj' into HTML, with indentation to facilitate
+ readability by a human.
+
+ sxml-obj - an SXML object (a node or a nodeset) to be serialized
+ port-or-filename - an output port or an output file name, an optional
+  argument
+ If `port-or-filename' is not supplied, the functions return a string that
+ contains the serialized representation of the `sxml-obj'.
+ If `port-or-filename' is supplied and is a port, the functions write the
+ serialized representation of `sxml-obj' to this port and return an
+ unspecified result.
+ If `port-or-filename' is supplied and is a string, this string is treated as
+ an output filename, the serialized representation of `sxml-obj' is written to
+ that filename and an unspecified result is returned. If a file with the given
+ name already exists, the effect is unspecified.
+</pre><p><br>
+
+<h4><a name='docfunc23464' href='#tocfunc23464'>srl:sxml->html-noindent</a></h4>
+(define (srl:sxml-&gt;html-noindent sxml-obj . port-or-filename)<i><br> ... <a href='serializer.html#codefunc23464'>Full Code</a> ... )</i>
+<pre> procedure srl:sxml-&gt;html-noindent :: SXML-OBJ [PORT-OR-FILENAME] -&gt;
+                                       -&gt; STRING|unspecified
+
+ Serializes the `sxml-obj' into HTML, without indentation.
+</pre><p><br>
+
+<hr width='40%' align='center'><center><h3><a name='sect35427' href='#tocsect35427'>Parameterizing the SXML serializer</a></h3></center>
+
+<h4><a name='docfunc29272' href='#tocfunc29272'>srl:parameterizable</a></h4>
+(define (srl:parameterizable sxml-obj . port-or-filename+params)<i><br> ... <a href='serializer.html#codefunc29272'>Full Code</a> ... )</i>
+<pre> procedure srl:parameterizable :: SXML-OBJ [PORT] {PARAM}* -&gt;
+                                    -&gt; STRING|unspecified
+ sxml-obj - an SXML object to serialize
+ param ::= (cons param-name param-value)
+ param-name ::= symbol
+ 
+ 1. cdata-section-elements
+ value ::= (listof sxml-elem-name)
+ sxml-elem-name ::= symbol
+
+ 2. indent
+ value ::= 'yes | #t | 'no | #f | whitespace-string
+
+ 3. method
+ value ::= 'xml | 'html
+
+ 4. ns-prefix-assig
+ value ::= (listof (cons prefix namespace-uri))
+ prefix ::= symbol
+ namespace-uri ::= string
+
+ 5. omit-xml-declaration?
+ value ::= 'yes | #t | 'no | #f
+
+ 6. standalone
+ value ::= 'yes | #t | 'no | #f | 'omit
+
+ 7. version
+ value ::= string | number
+
+ ATTENTION: If a parameter name is unexpected or a parameter value is
+ ill-formed, the parameter is silently ignored. Probably, a warning message
+ in such a case would be more appropriate.
+
+ Example:
+ (srl:parameterizable 
+   '(tag (@ (attr &quot;value&quot;)) (nested &quot;text node&quot;) (empty))
+   (current-output-port)
+   '(method . xml)  ; XML output method is used by default
+   '(indent . &quot;\t&quot;)  ; use a single tabulation to indent nested elements
+   '(omit-xml-declaration . #f)  ; add XML declaration
+   '(standalone . yes)  ; denote a standalone XML document
+   '(version . &quot;1.0&quot;))  ; XML version
+</pre><p><br>
+</body></html>

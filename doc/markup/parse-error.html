@@ -1,0 +1,72 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN""http://www.w3.org/TR/html401/loose.dtd"><html><head><meta name="GENERATOR" content="Mole: The Scheme Source Code Digger"><title>Module: parse-error</title><meta name='keywords' content=''></head><body bgcolor='#ffffff' text='#384412'  link='#11af05' vlink='#728b09'>
+<center><h1>Module: parse-error</h1></center>
+<p><br>
+<!-- Table of content -->
+<p><dl>
+
+f:  <a name='tocfunc37207' href='#docfunc37207' style='text-decoration:none'>parser-error</a><br>
+
+f:  <a name='tocfunc38302' href='#docfunc38302' style='text-decoration:none'>SSAX:warn</a><br>
+
+f:  <a name='tocfunc54750' href='#docfunc54750' style='text-decoration:none'>ssax:warn</a><br>
+</dl>
+
+<h4><a name='docfunc37207' href='#tocfunc37207'>parser-error</a></h4>
+(define parser-error (lambda args<i><br> ... <a href='#codefunc37207'>Full Code</a> ... )</i>
+<pre> accepts the port as its first argument which is used for
+ location of the error in input file.
+ Other parameters are considered as error messages,
+  they are printed to stderr as is.
+</pre><p><br>
+
+<h4><a name='docfunc38302' href='#tocfunc38302'>SSAX:warn</a></h4>
+(define SSAX:warn (lambda args<i><br> ... <a href='#codefunc38302'>Full Code</a> ... )</i><p><br>
+
+<h4><a name='docfunc54750' href='#tocfunc54750'>ssax:warn</a></h4>
+(define ssax:warn <i><br> ... <a href='#codefunc54750'>Full Code</a> ... )</i>
+<pre> Alias
+</pre><p><br>
+<center><h1>Code</h1></center>
+
+<h4><a name='codefunc37207' href='#docfunc37207'>parser-error</a></h4>
+<i><a href='#tocfunc37207'>Index</a></i><br>
+
+<pre> accepts the port as its first argument which is used for
+ location of the error in input file.
+ Other parameters are considered as error messages,
+  they are printed to stderr as is.
+</pre>
+<pre>(define <a href="parse-error.html#codefunc37207">parser-error</a>
+  (lambda  args
+    (if
+      (port? (car args))
+      (<a href="myenv.html#codefunc55253">cerr</a> <a href="myenv.html#codefunc27758">nl</a> &quot;Error at position &quot; 
+	    (file-position (car args)) <a href="myenv.html#codefunc27758">nl</a>
+	    (cdr args))
+      (<a href="myenv.html#codefunc55253">cerr</a> <a href="myenv.html#codefunc27758">nl</a> &quot;Error in error handler: its first parameter is not a port&quot; 
+	    <a href="myenv.html#codefunc27758">nl</a> args))
+    (<a href="myenv.html#codefunc55253">cerr</a> <a href="myenv.html#codefunc27758">nl</a>)
+    ; (exit -1)  ; this exit makes me completely insane!
+    (raise -1)
+))
+</pre>
+<h4><a name='codefunc38302' href='#docfunc38302'>SSAX:warn</a></h4>
+<i><a href='#tocfunc38302'>Index</a></i><br>
+
+<pre>(define <a href="parse-error.html#codefunc38302">SSAX:warn</a>
+  (lambda  args
+    (if
+      (port? (car args))
+      (<a href="myenv.html#codefunc55253">cerr</a> <a href="myenv.html#codefunc27758">nl</a> &quot;Warning at position &quot; 
+	    (file-position (car args)) <a href="myenv.html#codefunc27758">nl</a>
+	    (cdr args) <a href="myenv.html#codefunc27758">nl</a>)
+      #f)
+    ))
+</pre>
+<h4><a name='codefunc54750' href='#docfunc54750'>ssax:warn</a></h4>
+<i><a href='#tocfunc54750'>Index</a></i><br>
+
+<pre> Alias
+</pre>
+<pre>(define <a href="parse-error.html#codefunc54750">ssax:warn</a> <a href="parse-error.html#codefunc38302">SSAX:warn</a>)
+</pre></body></html>

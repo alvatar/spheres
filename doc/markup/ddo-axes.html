@@ -1,0 +1,2617 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN""http://www.w3.org/TR/html401/loose.dtd"><html><head><meta name="GENERATOR" content="Mole: The Scheme Source Code Digger"><title>Module: ddo-axes</title><meta name='keywords' content=''></head><body bgcolor='#ffffff' text='#384412'  link='#11af05' vlink='#728b09'>
+<center><h1>Module: ddo-axes</h1></center>
+
+<pre> The implementation of SXPath axes with support for distinct document order
+
+ This software is in Public Domain.
+ IT IS PROVIDED &quot;AS IS&quot;, WITHOUT WARRANTY OF ANY KIND.
+
+ Please send bug reports and comments to:
+   lizorkin@hotbox.ru    Dmitry Lizorkin
+
+ The implementation of axes is based on the idea of context
+</pre><p><br>
+<!-- Table of content -->
+<p><dl>
+<p><dt><a name='tocchapt56976' href='#chapt56976'><b>Miscellaneous helpers</b></a><dd>
+
+f:  <a name='tocfunc23734' href='#docfunc23734' style='text-decoration:none'>ddo:list-last</a><br>
+
+f:  <a name='tocfunc46763' href='#docfunc46763' style='text-decoration:none'>ddo:attr-child</a><br>
+
+f:  <a name='tocfunc39210' href='#docfunc39210' style='text-decoration:none'>ddo:attrs-and-values</a><br>
+
+f:  <a name='tocfunc15499' href='#docfunc15499' style='text-decoration:none'>ddo:discard-attributes</a><br>
+<p><dt><a name='tocchapt59018' href='#chapt59018'><b>XPath axes for location steps not involving position-based predicates</b></a><dd>
+
+f:  <a name='tocfunc22907' href='#docfunc22907' style='text-decoration:none'>ddo:ancestor</a><br>
+
+f:  <a name='tocfunc49658' href='#docfunc49658' style='text-decoration:none'>ddo:ancestor-or-self</a><br>
+
+f:  <a name='tocfunc23789' href='#docfunc23789' style='text-decoration:none'>ddo:attribute</a><br>
+
+f:  <a name='tocfunc29700' href='#docfunc29700' style='text-decoration:none'>ddo:child</a><br>
+
+f:  <a name='tocfunc44003' href='#docfunc44003' style='text-decoration:none'>ddo:descendant</a><br>
+
+f:  <a name='tocfunc5219' href='#docfunc5219' style='text-decoration:none'>ddo:descendant-or-self</a><br>
+
+f:  <a name='tocfunc24806' href='#docfunc24806' style='text-decoration:none'>ddo:following</a><br>
+
+f:  <a name='tocfunc53900' href='#docfunc53900' style='text-decoration:none'>ddo:following-sibling</a><br>
+
+f:  <a name='tocfunc14825' href='#docfunc14825' style='text-decoration:none'>ddo:namespace</a><br>
+
+f:  <a name='tocfunc55844' href='#docfunc55844' style='text-decoration:none'>ddo:parent</a><br>
+
+f:  <a name='tocfunc18399' href='#docfunc18399' style='text-decoration:none'>ddo:preceding</a><br>
+
+f:  <a name='tocfunc47493' href='#docfunc47493' style='text-decoration:none'>ddo:preceding-sibling</a><br>
+
+f:  <a name='tocfunc27315' href='#docfunc27315' style='text-decoration:none'>ddo:self</a><br>
+
+<dl><dt><a name='tocsect29653' href='#sect29653'><b>Particular case: all nodes in the input node-set are on the same level of</b></a><dd>
+
+f:  <a name='tocfunc4909' href='#docfunc4909' style='text-decoration:none'>ddo:following-single-level</a><br>
+
+f:  <a name='tocfunc34003' href='#docfunc34003' style='text-decoration:none'>ddo:following-sibling-single-level</a><br>
+
+f:  <a name='tocfunc8407' href='#docfunc8407' style='text-decoration:none'>ddo:parent-single-level</a><br>
+
+f:  <a name='tocfunc64037' href='#docfunc64037' style='text-decoration:none'>ddo:preceding-single-level</a><br>
+
+f:  <a name='tocfunc27596' href='#docfunc27596' style='text-decoration:none'>ddo:preceding-sibling-single-level</a><br>
+</dl>
+<p><dt><a name='tocchapt20015' href='#chapt20015'><b>XPath axes for location steps probably involving position-based predicates</b></a><dd>
+
+f:  <a name='tocfunc15640' href='#docfunc15640' style='text-decoration:none'>ddo:ancestor-pos</a><br>
+
+f:  <a name='tocfunc42391' href='#docfunc42391' style='text-decoration:none'>ddo:ancestor-or-self-pos</a><br>
+
+f:  <a name='tocfunc4328' href='#docfunc4328' style='text-decoration:none'>ddo:child-pos</a><br>
+
+f:  <a name='tocfunc36736' href='#docfunc36736' style='text-decoration:none'>ddo:descendant-pos</a><br>
+
+f:  <a name='tocfunc63487' href='#docfunc63487' style='text-decoration:none'>ddo:descendant-or-self-pos</a><br>
+
+f:  <a name='tocfunc28528' href='#docfunc28528' style='text-decoration:none'>ddo:following-sibling-pos</a><br>
+
+f:  <a name='tocfunc48577' href='#docfunc48577' style='text-decoration:none'>ddo:parent-pos</a><br>
+
+f:  <a name='tocfunc22121' href='#docfunc22121' style='text-decoration:none'>ddo:preceding-sibling-pos</a><br>
+
+<dl><dt><a name='tocsect29653' href='#sect29653'><b>Particular case: all nodes in the input node-set are on the same level of</b></a><dd>
+
+f:  <a name='tocfunc63177' href='#docfunc63177' style='text-decoration:none'>ddo:following-single-level-pos</a><br>
+
+f:  <a name='tocfunc26736' href='#docfunc26736' style='text-decoration:none'>ddo:following-sibling-single-level-pos</a><br>
+
+f:  <a name='tocfunc48570' href='#docfunc48570' style='text-decoration:none'>ddo:parent-single-level-pos</a><br>
+
+f:  <a name='tocfunc56770' href='#docfunc56770' style='text-decoration:none'>ddo:preceding-single-level-pos</a><br>
+
+f:  <a name='tocfunc20329' href='#docfunc20329' style='text-decoration:none'>ddo:preceding-sibling-single-level-pos</a><br>
+</dl>
+</dl>
+<hr height='5'><center><h3><a name='chapt56976' href='#tocchapt56976'>Miscellaneous helpers</a></h3></center>
+
+<pre></pre>
+<h4><a name='docfunc23734' href='#tocfunc23734'>ddo:list-last</a></h4>
+(define (ddo:list-last lst)<i><br> ... <a href='#codefunc23734'>Full Code</a> ... )</i>
+<pre> Returns the last member of the lst
+ lst is expected to be non-empty
+</pre><p><br>
+
+<h4><a name='docfunc46763' href='#tocfunc46763'>ddo:attr-child</a></h4>
+(define (ddo:attr-child node)<i><br> ... <a href='#codefunc46763'>Full Code</a> ... )</i>
+<pre> Selects all attribute and child nodes of a given 'node'
+ Node is not supposed to be a context
+</pre><p><br>
+
+<h4><a name='docfunc39210' href='#tocfunc39210'>ddo:attrs-and-values</a></h4>
+(define (ddo:attrs-and-values node)<i><br> ... <a href='#codefunc39210'>Full Code</a> ... )</i>
+<pre> For a given node, returns its attribute nodes and attribute value nodes in
+ document order
+ Node is not supposed to be a context
+</pre><p><br>
+
+<h4><a name='docfunc15499' href='#tocfunc15499'>ddo:discard-attributes</a></h4>
+(define (ddo:discard-attributes node nodeset)<i><br> ... <a href='#codefunc15499'>Full Code</a> ... )</i>
+<pre> Removes those members of the input 'nodeset' that are attributes or
+ attribute values of a given 'node'. Nodeset is supposed to be in distinct
+ document order. The order of attribute nodes in the 'nodeset' is supposed
+ to be the same as in the original SXML document
+ Works for ordinary nodes are well as for contexts
+</pre><p><br>
+<hr height='5'><center><h3><a name='chapt59018' href='#tocchapt59018'>XPath axes for location steps not involving position-based predicates</a></h3></center>
+
+<pre> In this section, all axes expect the argument node-set in distinct document
+ order, and return the result in distinct document order
+</pre>
+<h4><a name='docfunc22907' href='#tocfunc22907'>ddo:ancestor</a></h4>
+(define (ddo:ancestor test-pred? . num-ancestors)<i><br> ... <a href='#codefunc22907'>Full Code</a> ... )</i>
+<pre> Ancestor axis
+ In general, every two nodes have have some common ancestors (at least the
+ root of the document). When we obtain ancestors of the context node, only
+ those of them must be added to the result which are different from the
+ ancestors of the previous node in the input node-set
+</pre><p><br>
+
+<h4><a name='docfunc49658' href='#tocfunc49658'>ddo:ancestor-or-self</a></h4>
+(define (ddo:ancestor-or-self test-pred? . num-ancestors)<i><br> ... <a href='#codefunc49658'>Full Code</a> ... )</i>
+<pre> Ancestor-or-self axis
+ See the comment for ddo:ancestor
+</pre><p><br>
+
+<h4><a name='docfunc23789' href='#tocfunc23789'>ddo:attribute</a></h4>
+(define ddo:attribute <i><br> ... <a href='#codefunc23789'>Full Code</a> ... )</i>
+<pre> Attribute axis
+ The alias for drart:attribute, since no reordering or duplicate elimination
+ is required
+</pre><p><br>
+
+<h4><a name='docfunc29700' href='#tocfunc29700'>ddo:child</a></h4>
+(define (ddo:child test-pred? . num-ancestors)<i><br> ... <a href='#codefunc29700'>Full Code</a> ... )</i>
+<pre> Child axis
+ If the input node is such that node of the nodes is the descendant of
+ another, draft:child will produce the result in distinct document
+ order
+ In the general case, the implementation for child axis is more
+ complicated, since it must provide the correct ordering
+</pre><p><br>
+
+<h4><a name='docfunc44003' href='#tocfunc44003'>ddo:descendant</a></h4>
+(define (ddo:descendant test-pred? . num-ancestors)<i><br> ... <a href='#codefunc44003'>Full Code</a> ... )</i>
+<pre> Descendant axis
+ We should take into account that one node in the input node set may be the
+ descendant of the other node in the input node-set. Evaluation of descendant
+ axis should not take the former node into account then, since its descendants
+ won't add any new nodes to the result with respects to descendants of the
+ latter node.
+ Note that if the input node is such that node of the nodes is the descendant
+ of another, draft:descendant will produce the result in distinct document
+ order
+</pre><p><br>
+
+<h4><a name='docfunc5219' href='#tocfunc5219'>ddo:descendant-or-self</a></h4>
+(define (ddo:descendant-or-self test-pred? . num-ancestors)<i><br> ... <a href='#codefunc5219'>Full Code</a> ... )</i>
+<pre> Descendant-or-self axis
+ See the comment for ddo:descendant
+ Note that if the input node is such that node of the nodes is the descendant
+ of another, draft:descendant-or-self will produce the result in distinct
+ document order
+</pre><p><br>
+
+<h4><a name='docfunc24806' href='#tocfunc24806'>ddo:following</a></h4>
+(define (ddo:following test-pred? . num-ancestors)<i><br> ... <a href='#codefunc24806'>Full Code</a> ... )</i>
+<pre> Following axis
+ The implementation exploits the idea expressed in
+ http://pi3.informatik.uni-mannheim.de/publications/TR-02-011.pdf,
+ that is, it is sufficient to calculate following for the first_dmax
+ member of the input nodeset
+</pre><p><br>
+
+<h4><a name='docfunc53900' href='#tocfunc53900'>ddo:following-sibling</a></h4>
+(define (ddo:following-sibling test-pred? . num-ancestors)<i><br> ... <a href='#codefunc53900'>Full Code</a> ... )</i>
+<pre> Following-sibling axis
+</pre><p><br>
+
+<h4><a name='docfunc14825' href='#tocfunc14825'>ddo:namespace</a></h4>
+(define ddo:namespace <i><br> ... <a href='#codefunc14825'>Full Code</a> ... )</i>
+<pre> Namespace axis
+ The alias for drart:namespace, since no reordering or duplicate elimination
+ is required
+</pre><p><br>
+
+<h4><a name='docfunc55844' href='#tocfunc55844'>ddo:parent</a></h4>
+(define (ddo:parent test-pred? . num-ancestors)<i><br> ... <a href='#codefunc55844'>Full Code</a> ... )</i>
+<pre> Parent axis
+ When locating a parent, the thing we should care about is that several nodes
+ in the input node-set may have the same parent node
+</pre><p><br>
+
+<h4><a name='docfunc18399' href='#tocfunc18399'>ddo:preceding</a></h4>
+(define (ddo:preceding test-pred? . num-ancestors)<i><br> ... <a href='#codefunc18399'>Full Code</a> ... )</i>
+<pre> Preceding axis
+ The implementation exploits the idea expressed in
+ http://pi3.informatik.uni-mannheim.de/publications/TR-02-011.pdf,
+ that is, it is sufficient to calculate preceding for the last_dmin member
+ of the input nodeset
+</pre><p><br>
+
+<h4><a name='docfunc47493' href='#tocfunc47493'>ddo:preceding-sibling</a></h4>
+(define (ddo:preceding-sibling test-pred? . num-ancestors)<i><br> ... <a href='#codefunc47493'>Full Code</a> ... )</i>
+<pre> Preceding-sibling axis
+</pre><p><br>
+
+<h4><a name='docfunc27315' href='#tocfunc27315'>ddo:self</a></h4>
+(define ddo:self <i><br> ... <a href='#codefunc27315'>Full Code</a> ... )</i>
+<pre> Self axis
+ The alias for drart:self, since no reordering or duplicate elimination
+ is required
+ num-ancestors is not used here
+</pre><p><br>
+
+<hr width='40%' align='center'><center><h3><a name='sect29653' href='#tocsect29653'>Particular case: all nodes in the input node-set are on the same level of</a></h3></center>
+
+<pre> hierarchy within a document
+ In this case, some axes can be implemented more effectively
+</pre>
+<h4><a name='docfunc4909' href='#tocfunc4909'>ddo:following-single-level</a></h4>
+(define (ddo:following-single-level test-pred? . num-ancestors)<i><br> ... <a href='#codefunc4909'>Full Code</a> ... )</i>
+<pre> Following axis for special case
+ According to
+ http://pi3.informatik.uni-mannheim.de/publications/TR-02-011.pdf,
+ it is sufficient to calculate following for the first member of the input
+ nodeset
+</pre><p><br>
+
+<h4><a name='docfunc34003' href='#tocfunc34003'>ddo:following-sibling-single-level</a></h4>
+(define (ddo:following-sibling-single-level test-pred? . num-ancestors)<i><br> ... <a href='#codefunc34003'>Full Code</a> ... )</i>
+<pre> Following-sibling axis for the special case
+ We need only to care of duplicates removal, and ordering would be
+ achieved automatically
+</pre><p><br>
+
+<h4><a name='docfunc8407' href='#tocfunc8407'>ddo:parent-single-level</a></h4>
+(define (ddo:parent-single-level test-pred? . num-ancestors)<i><br> ... <a href='#codefunc8407'>Full Code</a> ... )</i>
+<pre> Parent axis for the case when all nodes in the input node-set are located
+ on the same level of hierarchy within a document
+ In this case the parent axis can be computed with the O(n) complexity, n
+ is the number of nodes in the document, compared to O(n^2) complexity for
+ ddo:parent
+</pre><p><br>
+
+<h4><a name='docfunc64037' href='#tocfunc64037'>ddo:preceding-single-level</a></h4>
+(define (ddo:preceding-single-level test-pred? . num-ancestors)<i><br> ... <a href='#codefunc64037'>Full Code</a> ... )</i>
+<pre> Preceding axis for the special case
+ The implementation exploits the idea expressed in
+ http://pi3.informatik.uni-mannheim.de/publications/TR-02-011.pdf,
+ that is, it is sufficient to calculate preceding for the last member of the
+ input nodeset
+</pre><p><br>
+
+<h4><a name='docfunc27596' href='#tocfunc27596'>ddo:preceding-sibling-single-level</a></h4>
+(define (ddo:preceding-sibling-single-level test-pred? . num-ancestors)<i><br> ... <a href='#codefunc27596'>Full Code</a> ... )</i>
+<pre> Preceding-sibling axis for the special case
+</pre><p><br>
+<hr height='5'><center><h3><a name='chapt20015' href='#tocchapt20015'>XPath axes for location steps probably involving position-based predicates</a></h3></center>
+
+<pre> Result is represented in the form of
+  pos-result ::= (listof pos-nodeset)
+  pos-nodeset ::= (listof (cons node order-num))
+ Each pos-nodeset is a result of applying the axis to a single node in the
+ input nodeset. Pos-result can be informally considered as
+  (map axis-pos input-nodeset)
+ Each node in the pos-nodeset comes with its order number. An order-num is
+ an integer, possibly a negative one. A node precedes another node in
+ document order if the order-num of the former node is less than the order-num
+ of the latter node. Equal order-nums (in different pos-nodesets) correspond
+ to equal nodes.
+ Each pos-nodeset is sorted in accordance with the position() of each of its
+ members. Consequently, order-nums increase within pos-nodeset for forward
+ XPath axes and decrease for reverse XPath axes.
+</pre>
+<h4><a name='docfunc15640' href='#tocfunc15640'>ddo:ancestor-pos</a></h4>
+(define (ddo:ancestor-pos test-pred? . num-ancestors)<i><br> ... <a href='#codefunc15640'>Full Code</a> ... )</i>
+<pre> Ancestor axis, for position-based filtering
+</pre><p><br>
+
+<h4><a name='docfunc42391' href='#tocfunc42391'>ddo:ancestor-or-self-pos</a></h4>
+(define (ddo:ancestor-or-self-pos test-pred? . num-ancestors)<i><br> ... <a href='#codefunc42391'>Full Code</a> ... )</i>
+<pre> Ancestor-or-self axis, for position-based filtering
+</pre><p><br>
+
+<h4><a name='docfunc4328' href='#tocfunc4328'>ddo:child-pos</a></h4>
+(define (ddo:child-pos test-pred? . num-ancestors)<i><br> ... <a href='#codefunc4328'>Full Code</a> ... )</i>
+<pre> Child axis, for position-based filtering
+</pre><p><br>
+
+<h4><a name='docfunc36736' href='#tocfunc36736'>ddo:descendant-pos</a></h4>
+(define (ddo:descendant-pos test-pred? . num-ancestors)<i><br> ... <a href='#codefunc36736'>Full Code</a> ... )</i>
+<pre> Descendant axis, for position-based filtering
+ When no node in the input node-set is a descendant of another node in the
+ input node-set, the ordinary draft:descendant function can be used
+</pre><p><br>
+
+<h4><a name='docfunc63487' href='#tocfunc63487'>ddo:descendant-or-self-pos</a></h4>
+(define (ddo:descendant-or-self-pos test-pred? . num-ancestors)<i><br> ... <a href='#codefunc63487'>Full Code</a> ... )</i>
+<pre> Descendant-or-selt axis, for position-based filtering
+ When no node in the input node-set is a descendant of another node in the
+ input node-set, the ordinary draft:descendant function can be used
+</pre><p><br>
+
+<h4><a name='docfunc28528' href='#tocfunc28528'>ddo:following-sibling-pos</a></h4>
+(define (ddo:following-sibling-pos test-pred? . num-ancestors)<i><br> ... <a href='#codefunc28528'>Full Code</a> ... )</i>
+<pre> Following-sibling axis, for position-based filtering
+</pre><p><br>
+
+<h4><a name='docfunc48577' href='#tocfunc48577'>ddo:parent-pos</a></h4>
+(define (ddo:parent-pos test-pred? . num-ancestors)<i><br> ... <a href='#codefunc48577'>Full Code</a> ... )</i>
+<pre> Parent axis, for position-based filtering
+ We won't reinvent the wheel here. We'll use ddo:parent and apply the fact
+ that for every single input node the parent axis produces no more than a
+ single result node
+</pre><p><br>
+
+<h4><a name='docfunc22121' href='#tocfunc22121'>ddo:preceding-sibling-pos</a></h4>
+(define (ddo:preceding-sibling-pos test-pred? . num-ancestors)<i><br> ... <a href='#codefunc22121'>Full Code</a> ... )</i>
+<pre> Preceding-sibling axis, for position-based filtering
+</pre><p><br>
+
+<hr width='40%' align='center'><center><h3><a name='sect29653' href='#tocsect29653'>Particular case: all nodes in the input node-set are on the same level of</a></h3></center>
+
+<pre> hierarchy within a document
+ In this case, some axes can be implemented more effectively
+</pre>
+<h4><a name='docfunc63177' href='#tocfunc63177'>ddo:following-single-level-pos</a></h4>
+(define (ddo:following-single-level-pos test-pred? . num-ancestors)<i><br> ... <a href='#codefunc63177'>Full Code</a> ... )</i>
+<pre> Following axis for the special case
+</pre><p><br>
+
+<h4><a name='docfunc26736' href='#tocfunc26736'>ddo:following-sibling-single-level-pos</a></h4>
+(define (ddo:following-sibling-single-level-pos test-pred? . num-ancestors)<i><br> ... <a href='#codefunc26736'>Full Code</a> ... )</i>
+<pre> Following-sibling axis for the special case
+</pre><p><br>
+
+<h4><a name='docfunc48570' href='#tocfunc48570'>ddo:parent-single-level-pos</a></h4>
+(define (ddo:parent-single-level-pos test-pred? . num-ancestors)<i><br> ... <a href='#codefunc48570'>Full Code</a> ... )</i>
+<pre> Parent axis, for position-based filtering
+ This function has very much the same with ddo:parent-pos. In future, we
+ should use a meta-function for paremetrization of these two
+</pre><p><br>
+
+<h4><a name='docfunc56770' href='#tocfunc56770'>ddo:preceding-single-level-pos</a></h4>
+(define (ddo:preceding-single-level-pos test-pred? . num-ancestors)<i><br> ... <a href='#codefunc56770'>Full Code</a> ... )</i>
+<pre> Preceding axis for the special case
+</pre><p><br>
+
+<h4><a name='docfunc20329' href='#tocfunc20329'>ddo:preceding-sibling-single-level-pos</a></h4>
+(define (ddo:preceding-sibling-single-level-pos test-pred? . num-ancestors)<i><br> ... <a href='#codefunc20329'>Full Code</a> ... )</i>
+<pre> Preceding-sibling axis for the special case
+</pre><p><br>
+<center><h1>Code</h1></center>
+
+<h4><a name='codefunc23734' href='#docfunc23734'>ddo:list-last</a></h4>
+<i><a href='#tocfunc23734'>Index</a></i><br>
+
+<pre> Returns the last member of the lst
+ lst is expected to be non-empty
+</pre>
+<pre>(define (<a href="ddo-axes.html#codefunc23734">ddo:list-last</a> lst)
+  (if (null? (cdr lst))
+      (car lst)
+      (<a href="ddo-axes.html#codefunc23734">ddo:list-last</a> (cdr lst))))
+</pre>
+<h4><a name='codefunc46763' href='#docfunc46763'>ddo:attr-child</a></h4>
+<i><a href='#tocfunc46763'>Index</a></i><br>
+
+<pre> Selects all attribute and child nodes of a given 'node'
+ Node is not supposed to be a context
+</pre>
+<pre>(define (<a href="ddo-axes.html#codefunc46763">ddo:attr-child</a> node)
+  (cond
+    ((or (not (pair? node))  ; Leaf node
+         (null? (cdr node))  ; empty element
+         (memq (car node) '(*PI* *COMMENT* *ENTITY*))   ; PI, Comment or Entity
+         )  ; =&gt; no children
+     '())
+    ((and (pair? (cadr node))
+          (eq? '@ (caadr node)))
+     ; attribute node presented
+     (append (cdadr node)  ; attributes
+             (<a href="common.html#codefunc20536">filter</a> <a href="sxpathlib.html#codefunc63215">sxml:node?</a> (cddr node))))
+    (else  ; no attributes
+     (<a href="common.html#codefunc20536">filter</a> <a href="sxpathlib.html#codefunc63215">sxml:node?</a> (cdr node)))))
+</pre>
+<h4><a name='codefunc39210' href='#docfunc39210'>ddo:attrs-and-values</a></h4>
+<i><a href='#tocfunc39210'>Index</a></i><br>
+
+<pre> For a given node, returns its attribute nodes and attribute value nodes in
+ document order
+ Node is not supposed to be a context
+</pre>
+<pre>(define (<a href="ddo-axes.html#codefunc39210">ddo:attrs-and-values</a> node)
+  (apply append
+         (map  ; attribute and its content
+          (lambda (a) (cons a (cdr a)))
+          (<a href="sxpathlib.html#codefunc50657">sxml:attr-list</a> node))))
+</pre>
+<h4><a name='codefunc15499' href='#docfunc15499'>ddo:discard-attributes</a></h4>
+<i><a href='#tocfunc15499'>Index</a></i><br>
+
+<pre> Removes those members of the input 'nodeset' that are attributes or
+ attribute values of a given 'node'. Nodeset is supposed to be in distinct
+ document order. The order of attribute nodes in the 'nodeset' is supposed
+ to be the same as in the original SXML document
+ Works for ordinary nodes are well as for contexts
+</pre>
+<pre>(define (<a href="ddo-axes.html#codefunc15499">ddo:discard-attributes</a> node nodeset)
+  (let loop ((attrs (<a href="ddo-axes.html#codefunc39210">ddo:attrs-and-values</a> (<a href="xpath-context.html#codefunc41847">sxml:context-&gt;node</a> node)))
+             (nset nodeset))
+    (if (or (null? attrs) (null? nset))
+        nset
+        (loop (cdr attrs)
+              (if (eq? (car attrs) (<a href="xpath-context.html#codefunc41847">sxml:context-&gt;node</a> (car nset)))
+                  (cdr nset) nset)))))
+</pre>
+<h4><a name='codefunc22907' href='#docfunc22907'>ddo:ancestor</a></h4>
+<i><a href='#tocfunc22907'>Index</a></i><br>
+
+<pre> Ancestor axis
+ In general, every two nodes have have some common ancestors (at least the
+ root of the document). When we obtain ancestors of the context node, only
+ those of them must be added to the result which are different from the
+ ancestors of the previous node in the input node-set
+</pre>
+<pre>(define (<a href="ddo-axes.html#codefunc22907">ddo:ancestor</a> test-pred? . num-ancestors)
+  (let ((num-anc (if (null? num-ancestors) 0 (car num-ancestors))))
+    (lambda (node)   ; node or nodeset
+      (let loop ((src (<a href="sxpathlib.html#codefunc11721">as-nodeset</a> node))
+                 (prev-ancestors '())
+                 (res '()))
+        (if
+         (null? src)  ; everyone processed
+         (reverse res)
+         (let ((curr (car src)))
+           (if
+            (<a href="xpath-context.html#codefunc37046">sxml:context?</a> curr)
+            (let rpt ((curr-ancs (reverse
+                                  (<a href="xpath-context.html#codefunc46900">sxml:context-&gt;ancestors-u</a> curr)))
+                      (dupl '()))
+              (cond
+                ((null? curr-ancs)  ; no new ancestors
+                 (loop (cdr src) prev-ancestors res))
+                ((memq (car curr-ancs) prev-ancestors)
+                 ; member of the ancestorial chain
+                 (rpt (cdr curr-ancs)
+                      (cons (car curr-ancs) dupl)))
+                (else  ; the first different ancestor in a chain found
+                 (let creat ((new-ancestors dupl)
+                             (curr-ancs curr-ancs)
+                             (res res))
+                   (cond
+                     ((null? curr-ancs)  ; everyone processed
+                      (loop (cdr src)
+                            new-ancestors
+                            res))
+                     ((test-pred? (car curr-ancs))
+                      ; add to the result
+                      (creat (cons (car curr-ancs) new-ancestors)
+                             (cdr curr-ancs)
+                             (cons
+                              (<a href="xpath-context.html#codefunc37605">draft:smart-make-context</a>
+                               (car curr-ancs)
+                               new-ancestors
+                               num-anc)
+                              res)))
+                     (else  ; this node doesn't satisfy the node test
+                      (creat (cons (car curr-ancs) new-ancestors)
+                             (cdr curr-ancs)
+                             res)))))))
+            ; no ancestors for this node
+            (loop (cdr src) prev-ancestors res))))))))
+</pre>
+<h4><a name='codefunc49658' href='#docfunc49658'>ddo:ancestor-or-self</a></h4>
+<i><a href='#tocfunc49658'>Index</a></i><br>
+
+<pre> Ancestor-or-self axis
+ See the comment for ddo:ancestor
+</pre>
+<pre>(define (<a href="ddo-axes.html#codefunc49658">ddo:ancestor-or-self</a> test-pred? . num-ancestors)
+  (let ((num-anc (if (null? num-ancestors) 0 (car num-ancestors))))
+    (lambda (node)   ; node or nodeset
+      (let loop ((src (<a href="sxpathlib.html#codefunc11721">as-nodeset</a> node))
+                 (prev-ancestors '())
+                 (res '()))
+        (if
+         (null? src)  ; everyone processed
+         (reverse res)
+         (let rpt ((curr-ancs (reverse
+                               (<a href="xpath-context.html#codefunc8528">sxml:context-&gt;content</a> (car src))))
+                   (dupl '()))
+           (cond
+             ((null? curr-ancs)  ; no new ancestors
+              (loop (cdr src) prev-ancestors res))
+             ((memq (car curr-ancs) prev-ancestors)
+              ; member of the ancestorial chain
+              (rpt (cdr curr-ancs)
+                   (cons (car curr-ancs) dupl)))
+             (else  ; the first different ancestor in a chain found
+              (let creat ((new-ancestors dupl)
+                          (curr-ancs curr-ancs)
+                          (res res))
+                (cond
+                  ((null? curr-ancs)  ; everyone processed
+                   (loop (cdr src)
+                         new-ancestors
+                         res))
+                  ((test-pred? (car curr-ancs))
+                   ; add to the result
+                   (creat (cons (car curr-ancs) new-ancestors)
+                          (cdr curr-ancs)
+                          (cons
+                           (<a href="xpath-context.html#codefunc37605">draft:smart-make-context</a>
+                            (car curr-ancs)
+                            new-ancestors
+                            num-anc)
+                           res)))
+                  (else  ; this node doesn't satisfy the node test
+                   (creat (cons (car curr-ancs) new-ancestors)
+                          (cdr curr-ancs)
+                          res))))))))))))
+</pre>
+<h4><a name='codefunc23789' href='#docfunc23789'>ddo:attribute</a></h4>
+<i><a href='#tocfunc23789'>Index</a></i><br>
+
+<pre> Attribute axis
+ The alias for drart:attribute, since no reordering or duplicate elimination
+ is required
+</pre>
+<pre>(define <a href="ddo-axes.html#codefunc23789">ddo:attribute</a> <a href="xpath-context.html#codefunc53587">draft:attribute</a>)
+</pre>
+<h4><a name='codefunc29700' href='#docfunc29700'>ddo:child</a></h4>
+<i><a href='#tocfunc29700'>Index</a></i><br>
+
+<pre> Child axis
+ If the input node is such that node of the nodes is the descendant of
+ another, draft:child will produce the result in distinct document
+ order
+ In the general case, the implementation for child axis is more
+ complicated, since it must provide the correct ordering
+</pre>
+<pre>(define (<a href="ddo-axes.html#codefunc29700">ddo:child</a> test-pred? . num-ancestors)
+  (let ((num-anc (if (null? num-ancestors) 0 (car num-ancestors)))
+        (child (<a href="sxpathlib.html#codefunc5616">sxml:child</a> <a href="sxpathlib.html#codefunc63215">sxml:node?</a>)))
+    (letrec
+        ((child4this
+          ; Arguments
+          ;  curr-node - current node (or context) to process
+          ;  src - the remaining nodes of the input node-set
+          ; Returns: (values res src)
+          (lambda (curr-node src)
+            (let iter-attrs ((src src)
+                             (res '()))
+              (cond
+                ((null? src)  ; the zoo is completely over
+                 (values
+                  (append res
+                          ((<a href="xpath-context.html#codefunc59498">draft:child</a> test-pred? num-anc) curr-node))
+                  src  ; null
+                  ))
+                ((memq (<a href="xpath-context.html#codefunc41847">sxml:context-&gt;node</a> (car src))
+                       (<a href="sxpathlib.html#codefunc50657">sxml:attr-list</a> (<a href="xpath-context.html#codefunc41847">sxml:context-&gt;node</a> curr-node)))
+                 ; next in src is the attribute of the curr-node
+                 (iter-attrs
+                  (cdr src)
+                  (append res ((<a href="xpath-context.html#codefunc59498">draft:child</a> test-pred? num-anc) (car src)))))
+                (else   ; normal behaviour
+                 (let ((res-ancestors
+                        (<a href="xpath-context.html#codefunc8528">sxml:context-&gt;content</a> curr-node)))
+                   (let iter-cands ((res-candidates
+                                     (child (<a href="xpath-context.html#codefunc41847">sxml:context-&gt;node</a> curr-node)))
+                                    (src src)
+                                    (res res))
+                     (cond
+                       ((null? src)  ; this zoo is over
+                        (values
+                         (append
+                          res
+                          (<a href="xpath-context.html#codefunc63648">draft:siblings-&gt;context-set</a>
+                           ((<a href="sxpathlib.html#codefunc7531">sxml:filter</a> test-pred?) res-candidates)
+                           (<a href="xpath-context.html#codefunc47888">draft:list-head</a> res-ancestors num-anc)))
+                         src  ; always null
+                         ))
+                       ((null? res-candidates)
+                        (values res src))
+                       (else  ; processing the current res-candidate
+                        (let rpt ((more (list (car res-candidates)))
+                                  (next (<a href="xpath-context.html#codefunc41847">sxml:context-&gt;node</a> (car src)))
+                                  (src src)
+                                  (res
+                                   (if
+                                    (test-pred? (car res-candidates))
+                                    (append
+                                     res
+                                     (list
+                                      (<a href="xpath-context.html#codefunc37605">draft:smart-make-context</a>
+                                       (car res-candidates)
+                                       res-ancestors num-anc)))
+                                    res)))
+                          (cond
+                            ((null? more)
+                             ; no more src members
+                             (iter-cands (cdr res-candidates) src res))
+                            ((eq? (car more) next)
+                             ; next node is a descendant-or-self candidate
+                             ; or the attribute of its descendants
+                             (call-with-values
+                              (lambda () (child4this (car src) (cdr src)))
+                              (lambda (add-res new-src)
+                                (if
+                                 (null? new-src)
+                                 (iter-cands   ; will exit there
+                                  (cdr res-candidates)
+                                  new-src
+                                  (append res add-res))
+                                 (rpt
+                                  (cdr more)  ; kids processed by recursive
+                                  (<a href="xpath-context.html#codefunc41847">sxml:context-&gt;node</a> (car new-src))
+                                  new-src
+                                  (append res add-res))))))
+                            (else
+                             (rpt
+                              (append (<a href="ddo-axes.html#codefunc46763">ddo:attr-child</a> (car more))
+                                      (cdr more))
+                              next src res))))))))))))))
+      (lambda (node)   ; node or nodeset
+        (if
+         (<a href="sxpathlib.html#codefunc31162">nodeset?</a> node)
+         (let iter ((nset node)
+                    (res '()))
+           (if
+            (null? nset)
+            res
+            (call-with-values
+             (lambda () (child4this (car nset) (cdr nset)))
+             (lambda (add-res new-nset)
+               (iter new-nset (append res add-res))))))
+         ((<a href="xpath-context.html#codefunc59498">draft:child</a> test-pred? num-anc) node))))))
+</pre>
+<h4><a name='codefunc44003' href='#docfunc44003'>ddo:descendant</a></h4>
+<i><a href='#tocfunc44003'>Index</a></i><br>
+
+<pre> Descendant axis
+ We should take into account that one node in the input node set may be the
+ descendant of the other node in the input node-set. Evaluation of descendant
+ axis should not take the former node into account then, since its descendants
+ won't add any new nodes to the result with respects to descendants of the
+ latter node.
+ Note that if the input node is such that node of the nodes is the descendant
+ of another, draft:descendant will produce the result in distinct document
+ order
+</pre>
+<pre>(define (<a href="ddo-axes.html#codefunc44003">ddo:descendant</a> test-pred? . num-ancestors)
+  (let* ((num-anc (if (null? num-ancestors) 0 (car num-ancestors)))
+         (child (<a href="sxpathlib.html#codefunc5616">sxml:child</a> <a href="sxpathlib.html#codefunc63215">sxml:node?</a>))
+         (desc (<a href="xpath-context.html#codefunc8266">draft:descendant</a> test-pred? num-anc)))
+    (lambda (node)   ; node or nodeset
+      (let loop ((src (<a href="sxpathlib.html#codefunc11721">as-nodeset</a> node))
+                 (next-node #f)
+                 (content-to-scan '())
+                 (res '()))
+        (if
+         (null? content-to-scan)
+         (cond
+           ((null? src)  ; everyone processed
+            (reverse res))
+           ((null? (cdr src))  ; of length 1 =&gt; never produces duplicates
+            (append (reverse res)
+                    (desc (car src))))
+           (else
+            (loop (cdr src)
+                  (<a href="xpath-context.html#codefunc41847">sxml:context-&gt;node</a> (cadr src))
+                  (let ((cntnt (<a href="xpath-context.html#codefunc8528">sxml:context-&gt;content</a> (car src))))
+                    (map
+                     (lambda (c) (cons c cntnt))
+                     (child (<a href="xpath-context.html#codefunc41847">sxml:context-&gt;node</a> (car src)))))
+                  res)))
+         (let ((curr-cntnt (car content-to-scan)))
+           (call-with-values
+            (lambda ()
+              (if
+               ; next input node should be removed from consideration
+               (eq? (car curr-cntnt) next-node)
+               (values
+                (cdr src)
+                (if (null? (cdr src))  ; no next node
+                    #f 
+                    (<a href="xpath-context.html#codefunc41847">sxml:context-&gt;node</a> (cadr src))))
+               (values src next-node)))
+            (lambda (new-src new-next)
+              (loop new-src
+                    new-next
+                    (append
+                     (map
+                      (lambda (c) (cons c curr-cntnt))
+                      (child (car curr-cntnt)))
+                     (cdr content-to-scan))
+                    (if
+                     (test-pred? (car curr-cntnt))  ; satisfies the node test
+                     (cons
+                      (<a href="xpath-context.html#codefunc37605">draft:smart-make-context</a>
+                       (car curr-cntnt) (cdr curr-cntnt) num-anc)
+                      res)
+                     res))))))))))
+</pre>
+<h4><a name='codefunc5219' href='#docfunc5219'>ddo:descendant-or-self</a></h4>
+<i><a href='#tocfunc5219'>Index</a></i><br>
+
+<pre> Descendant-or-self axis
+ See the comment for ddo:descendant
+ Note that if the input node is such that node of the nodes is the descendant
+ of another, draft:descendant-or-self will produce the result in distinct
+ document order
+</pre>
+<pre>(define (<a href="ddo-axes.html#codefunc5219">ddo:descendant-or-self</a> test-pred? . num-ancestors)
+  (let* ((num-anc (if (null? num-ancestors) 0 (car num-ancestors)))
+         (child (<a href="sxpathlib.html#codefunc5616">sxml:child</a> <a href="sxpathlib.html#codefunc63215">sxml:node?</a>))
+         (desc-os (<a href="xpath-context.html#codefunc35017">draft:descendant-or-self</a> test-pred? num-anc)))
+    (lambda (node)   ; node or nodeset
+      (let loop ((src (<a href="sxpathlib.html#codefunc11721">as-nodeset</a> node))
+                 (next-node #f)
+                 (content-to-scan '())
+                 (res '()))
+        (if
+         (null? content-to-scan)
+         (cond
+           ((null? src)  ; everyone processed
+            (reverse res))
+           ((null? (cdr src))  ; of length 1 =&gt; never produces duplicates
+            (append (reverse res)
+                    (desc-os (car src))))
+           (else
+            (loop (cdr src)
+                  (<a href="xpath-context.html#codefunc41847">sxml:context-&gt;node</a> (cadr src))
+                  (list (<a href="xpath-context.html#codefunc8528">sxml:context-&gt;content</a> (car src)))
+                  res)))
+         (let ((curr-cntnt (car content-to-scan)))
+           (call-with-values
+            (lambda ()
+              (if
+               ; next input node should be removed from consideration
+               (eq? (car curr-cntnt) next-node)
+               (values
+                (cdr src)
+                (if (null? (cdr src))  ; no next node
+                    #f 
+                    (<a href="xpath-context.html#codefunc41847">sxml:context-&gt;node</a> (cadr src))))
+               (values src next-node)))
+            (lambda (new-src new-next)
+              (loop new-src
+                    new-next
+                    (append
+                     (map
+                      (lambda (c) (cons c curr-cntnt))
+                      (child (car curr-cntnt)))
+                     (cdr content-to-scan))
+                    (if
+                     (test-pred? (car curr-cntnt))  ; satisfies the node test
+                     (cons
+                      (<a href="xpath-context.html#codefunc37605">draft:smart-make-context</a>
+                       (car curr-cntnt) (cdr curr-cntnt) num-anc)
+                      res)
+                     res))))))))))
+</pre>
+<h4><a name='codefunc24806' href='#docfunc24806'>ddo:following</a></h4>
+<i><a href='#tocfunc24806'>Index</a></i><br>
+
+<pre> Following axis
+ The implementation exploits the idea expressed in
+ http://pi3.informatik.uni-mannheim.de/publications/TR-02-011.pdf,
+ that is, it is sufficient to calculate following for the first_dmax
+ member of the input nodeset
+</pre>
+<pre>(define (<a href="ddo-axes.html#codefunc24806">ddo:following</a> test-pred? . num-ancestors)
+  (let ((child (<a href="sxpathlib.html#codefunc5616">sxml:child</a> <a href="sxpathlib.html#codefunc63215">sxml:node?</a>))
+        (foll (apply <a href="xpath-context.html#codefunc54604">draft:following</a> (cons test-pred? num-ancestors))))
+    (lambda (node)   ; node or nodeset
+      (cond
+        ((null? node)  ; empty nodeset - nothing to do
+         '())
+        ((and (pair? node) (not (symbol? (car node))))  ; non-empty nodeset
+         (if
+          (null? (cdr node))  ; a singleton nodeset
+          (foll (car node))
+          (let loop ((candidate (car node))
+                     (next (<a href="xpath-context.html#codefunc41847">sxml:context-&gt;node</a> (cadr node)))
+                     (more (cdr node))
+                     (descendants (list (<a href="xpath-context.html#codefunc41847">sxml:context-&gt;node</a> (car node)))))
+            (cond
+              ((null? descendants)
+               ; none of the node-set members are descendants of the candidate
+               ; =&gt; apply following axis
+               (foll candidate))
+              ((eq? (car descendants) next)
+               ; the next node is the new candidate
+               (if (null? (cdr more))  ; the next node is the final candidate
+                   (foll (car more))
+                   (loop (car more)
+                         (<a href="xpath-context.html#codefunc41847">sxml:context-&gt;node</a> (cadr more))
+                         (cdr more)
+                         (list next))))
+              ((memq next (<a href="ddo-axes.html#codefunc39210">ddo:attrs-and-values</a> (car descendants)))
+               ; next node in src is an attribute node or attribute value node
+               (foll (car more)))
+              (else  ; proceed deeper in a tree
+               (loop candidate next more
+                     (append (child (car descendants)) (cdr descendants))))))))
+        (else  ; a single node
+         (foll node))))))
+</pre>
+<h4><a name='codefunc53900' href='#docfunc53900'>ddo:following-sibling</a></h4>
+<i><a href='#tocfunc53900'>Index</a></i><br>
+
+<pre> Following-sibling axis
+</pre>
+<pre>(define (<a href="ddo-axes.html#codefunc53900">ddo:following-sibling</a> test-pred? . num-ancestors)
+  (let ((num-anc (if (null? num-ancestors) 0 (car num-ancestors)))
+        (child (<a href="sxpathlib.html#codefunc5616">sxml:child</a> <a href="sxpathlib.html#codefunc63215">sxml:node?</a>))
+        (all-following-siblings
+         (lambda (node)  ; not a nodeset
+           (if
+            (and (<a href="xpath-context.html#codefunc37046">sxml:context?</a> node)                  
+                 (not (null? (<a href="xpath-context.html#codefunc46900">sxml:context-&gt;ancestors-u</a> node))))
+            (cond
+              ((memq (<a href="xpath-context.html#codefunc6309">sxml:context-&gt;node-u</a> node)
+                     (cdr  ; parent is an element =&gt; cdr gives its children
+                      (car (<a href="xpath-context.html#codefunc46900">sxml:context-&gt;ancestors-u</a> node))))
+               =&gt; (lambda (x) x))
+              (else  ; no following siblings
+               '()))
+            '()  ; no parent =&gt; no siblings
+            ))))
+    (letrec
+        ((reordering
+          ; Arguments
+          ;  res-candidates = (listof node) - candidates for the result, not
+          ; yet filtered with a node test
+          ;  res-ancestors - ancestors of res-candidates
+          ;  src - the remaining nodes of the input node-set
+          ; Returns: (values res src)
+          (lambda (res-candidates res-ancestors src)
+            (let loop ((res-candidates res-candidates)
+                       (src src)
+                       (res '())
+                       (nonself? #f))
+              (cond
+                ((null? res-candidates)
+                 (values res src))
+                ((null? src)  ; this zoo is over
+                 (values
+                  (append
+                   res
+                   (<a href="xpath-context.html#codefunc63648">draft:siblings-&gt;context-set</a>
+                    ((<a href="sxpathlib.html#codefunc7531">sxml:filter</a> test-pred?)
+                     (if nonself?
+                         res-candidates
+                         (cdr res-candidates)))
+                    (<a href="xpath-context.html#codefunc47888">draft:list-head</a> res-ancestors num-anc)))
+                  src  ; always null
+                  ))
+                ((eq? (car res-candidates) (<a href="xpath-context.html#codefunc41847">sxml:context-&gt;node</a> (car src)))
+                 (loop res-candidates (cdr src) res nonself?))
+                (else  ; processing the current res-candidate
+                 (let ((res-candidate (car res-candidates)))
+                   (let rpt ((more (list res-candidate))
+                             (next (<a href="xpath-context.html#codefunc41847">sxml:context-&gt;node</a> (car src)))
+                             (src src)
+                             (res (if
+                                   (and nonself? (test-pred? res-candidate))
+                                   (append
+                                    res
+                                    (list
+                                      (<a href="xpath-context.html#codefunc37605">draft:smart-make-context</a>
+                                       res-candidate res-ancestors num-anc)))
+                                   res)))
+                     (cond
+                       ((null? more)
+                        ; no more src members among res-candidate descendants
+                        (loop (cdr res-candidates) src res #t))
+                       ((eq? (car more) next)
+                        ; next node is a descendant-or-self of res-candidate
+                        (call-with-values
+                         (lambda ()
+                           (reordering
+                            (all-following-siblings (car src))
+                            (<a href="xpath-context.html#codefunc35263">sxml:context-&gt;ancestors</a> (car src))
+                            (cdr src)))
+                         (lambda (add-res new-src)
+                           (if
+                            (null? new-src)
+                            (loop (cdr res-candidates)
+                                  new-src
+                                  (append res add-res)
+                                  #t)
+                            (rpt (cdr more)  ; kids processed by recursive
+                                 (<a href="xpath-context.html#codefunc41847">sxml:context-&gt;node</a> (car new-src))
+                                 new-src
+                                 (append res add-res))))))
+                       ((memq next (<a href="ddo-axes.html#codefunc39210">ddo:attrs-and-values</a> (car more)))
+                        ; the next node is the attribute node or
+                        ; attribute value node =&gt; it has no siblings
+                        (if
+                          (null? (cdr src))
+                          (loop (cdr res-candidates)
+                                (cdr src)  ; null
+                                res
+                                #t)
+                          (rpt more  ; check for the other attributes
+                               (<a href="xpath-context.html#codefunc41847">sxml:context-&gt;node</a> (car src))
+                               (cdr src)
+                               res)))
+                       (else
+                        (rpt (append (child (car more)) (cdr more))
+                             next src res)))))))))))
+      (lambda (node)   ; node or nodeset
+        (if
+         (<a href="sxpathlib.html#codefunc31162">nodeset?</a> node)        
+         (let iter ((nset node)
+                    (res '()))
+           (if
+            (null? nset)
+            res
+            (call-with-values
+             (lambda ()
+               (reordering (all-following-siblings (car nset))
+                           (<a href="xpath-context.html#codefunc35263">sxml:context-&gt;ancestors</a> (car nset))
+                           (cdr nset)))
+             (lambda (add-res new-nset)
+               (iter new-nset (append res add-res))))))
+         ((<a href="xpath-context.html#codefunc18163">draft:following-sibling</a> test-pred? num-anc) node))))))
+</pre>
+<h4><a name='codefunc14825' href='#docfunc14825'>ddo:namespace</a></h4>
+<i><a href='#tocfunc14825'>Index</a></i><br>
+
+<pre> Namespace axis
+ The alias for drart:namespace, since no reordering or duplicate elimination
+ is required
+</pre>
+<pre>(define <a href="ddo-axes.html#codefunc14825">ddo:namespace</a> <a href="xpath-context.html#codefunc44623">draft:namespace</a>)
+</pre>
+<h4><a name='codefunc55844' href='#docfunc55844'>ddo:parent</a></h4>
+<i><a href='#tocfunc55844'>Index</a></i><br>
+
+<pre> Parent axis
+ When locating a parent, the thing we should care about is that several nodes
+ in the input node-set may have the same parent node
+</pre>
+<pre>(define (<a href="ddo-axes.html#codefunc55844">ddo:parent</a> test-pred? . num-ancestors)
+  (let ((num-anc (if (null? num-ancestors) 0 (car num-ancestors))))
+    (lambda (node)   ; node or nodeset
+      (let loop ((src (<a href="sxpathlib.html#codefunc11721">as-nodeset</a> node))
+                 (prev-parents '())
+                 (res '()))
+        (if
+         (null? src)
+         (reverse res)
+         (let ((curr (car src)))
+           (if
+            (and (<a href="xpath-context.html#codefunc37046">sxml:context?</a> curr)
+                 (not (null? (<a href="xpath-context.html#codefunc46900">sxml:context-&gt;ancestors-u</a> curr))))
+            (let ((curr-parent (car (<a href="xpath-context.html#codefunc46900">sxml:context-&gt;ancestors-u</a> curr))))
+              (if
+               (memq curr-parent prev-parents)  ; a duplicate node               
+               ; this node is already in the result
+               (loop (cdr src) prev-parents res)
+               (loop (cdr src)
+                     (cons curr-parent prev-parents)
+                     (if
+                      (test-pred? curr-parent)
+                      (cons
+                        (<a href="xpath-context.html#codefunc37605">draft:smart-make-context</a>
+                         curr-parent
+                         (cdr (<a href="xpath-context.html#codefunc46900">sxml:context-&gt;ancestors-u</a> curr))
+                         num-anc)
+                        res)
+                      res))))
+            ; no parent
+            (loop (cdr src) prev-parents res))))))))
+</pre>
+<h4><a name='codefunc18399' href='#docfunc18399'>ddo:preceding</a></h4>
+<i><a href='#tocfunc18399'>Index</a></i><br>
+
+<pre> Preceding axis
+ The implementation exploits the idea expressed in
+ http://pi3.informatik.uni-mannheim.de/publications/TR-02-011.pdf,
+ that is, it is sufficient to calculate preceding for the last_dmin member
+ of the input nodeset
+</pre>
+<pre>(define (<a href="ddo-axes.html#codefunc18399">ddo:preceding</a> test-pred? . num-ancestors)
+  (let ((prec (apply <a href="xpath-context.html#codefunc48197">draft:preceding</a> (cons test-pred? num-ancestors))))
+    (lambda (node)   ; node or nodeset
+      (cond
+        ((null? node)  ; empty nodeset - nothing to do
+         '())        
+        ((and (pair? node) (not (symbol? (car node))))  ; non-empty nodeset
+         (if
+          (null? (cdr node))  ; a singleton nodeset
+          (prec (car node))
+          (let ((node (reverse node)))
+            (let loop ((candidate (car node))
+                       (next (<a href="xpath-context.html#codefunc41847">sxml:context-&gt;node</a> (cadr node)))
+                       (more (cdr node))
+                       (descendants
+                        (reverse
+                         (<a href="ddo-axes.html#codefunc46763">ddo:attr-child</a> (<a href="xpath-context.html#codefunc41847">sxml:context-&gt;node</a> (car node))))))
+              (cond
+                ((null? descendants)
+                 ; none of the node-set members are descendants of the candidate
+                 ; =&gt; apply following axis
+                 (reverse (prec candidate)))
+                ((eq? (car descendants) next)
+                 ; the next node is the new candidate
+                 (if (null? (cdr more))  ; the next node is the final candidate
+                     (reverse (prec (car more)))
+                     (loop (car more)
+                           (<a href="xpath-context.html#codefunc41847">sxml:context-&gt;node</a> (cadr more))
+                           (cdr more)
+                           (reverse (<a href="ddo-axes.html#codefunc46763">ddo:attr-child</a> next)))))
+                (else  ; proceed deeper in a tree
+                 (loop candidate next more
+                       (append (reverse (<a href="ddo-axes.html#codefunc46763">ddo:attr-child</a> (car descendants)))
+                               (cdr descendants)))))))))
+         (else  ; a single node
+          (reverse (prec node)))))))
+</pre>
+<h4><a name='codefunc47493' href='#docfunc47493'>ddo:preceding-sibling</a></h4>
+<i><a href='#tocfunc47493'>Index</a></i><br>
+
+<pre> Preceding-sibling axis
+</pre>
+<pre>(define (<a href="ddo-axes.html#codefunc47493">ddo:preceding-sibling</a> test-pred? . num-ancestors)
+  (let ((num-anc (if (null? num-ancestors) 0 (car num-ancestors)))
+        (child (<a href="sxpathlib.html#codefunc5616">sxml:child</a> <a href="sxpathlib.html#codefunc63215">sxml:node?</a>))
+        (all-preceding-siblings
+         ; Selects preceding siblings of the node (should be context)
+         (lambda (node)  ; not a nodeset
+            (if
+             (and (<a href="xpath-context.html#codefunc37046">sxml:context?</a> node)                  
+                  (not (null? (<a href="xpath-context.html#codefunc46900">sxml:context-&gt;ancestors-u</a> node))))
+             (cond
+               ((memq (<a href="xpath-context.html#codefunc6309">sxml:context-&gt;node-u</a> node)
+                      (reverse
+                       (cdr  ; parent is an element =&gt; cdr gives its children
+                        (car (<a href="xpath-context.html#codefunc46900">sxml:context-&gt;ancestors-u</a> node)))))
+                =&gt; cdr)
+               (else  ; no preceding siblings
+                '()))
+             '()  ; no parent =&gt; no siblings
+             ))))
+    (letrec
+        ((reordering
+          ; Arguments
+          ;  res-candidates = (listof node) - candidates for the result, not
+          ; yet filtered with a node test
+          ;  res-ancestors - ancestors of res-candidates
+          ;  src - the remaining nodes of the input node-set
+          ; Returns: (values res src)
+          (lambda (res-candidates res-ancestors src)
+            (let loop ((res-candidates res-candidates)
+                       (src src)
+                       (res '()))              
+              (cond
+                ((null? res-candidates)
+                 (values res src))
+                ((null? src)  ; this zoo is over
+                 (values
+                  (append
+                   res
+                   (<a href="xpath-context.html#codefunc63648">draft:siblings-&gt;context-set</a>
+                    ((<a href="sxpathlib.html#codefunc7531">sxml:filter</a> test-pred?) res-candidates)
+                    (<a href="xpath-context.html#codefunc47888">draft:list-head</a> res-ancestors num-anc)))
+                  src  ; always null
+                  ))
+                ((eq? (car res-candidates) (<a href="xpath-context.html#codefunc41847">sxml:context-&gt;node</a> (car src)))
+                 (loop res-candidates (cdr src) res))
+                (else  ; processing the current res-candidate
+                 (let ((res-candidate (car res-candidates)))
+                   (let rpt ((more (reverse (child res-candidate)))
+                             (next (<a href="xpath-context.html#codefunc41847">sxml:context-&gt;node</a> (car src)))
+                             (src src)
+                             (res res))
+                     (cond
+                       ((null? more)
+                        ; no more src members among res-candidate descendants
+                        (loop
+                         (cdr res-candidates)
+                         src
+                         (if (test-pred? res-candidate)
+                             (append res
+                                     (list
+                                      (<a href="xpath-context.html#codefunc37605">draft:smart-make-context</a>
+                                       res-candidate res-ancestors num-anc)))
+                             res)))
+                       ((eq? (car more) next)
+                        ; next node is a descendant-or-self of res-candidate
+                        (call-with-values
+                         (lambda ()
+                           (reordering
+                            (all-preceding-siblings (car src))
+                            (<a href="xpath-context.html#codefunc35263">sxml:context-&gt;ancestors</a> (car src))
+                            (cdr src)))
+                         (lambda (add-res new-src)
+                           (let ((new-src
+                                  (cond
+                                    ((null? new-src) new-src)
+                                    ((eq? res-candidate
+                                          (<a href="xpath-context.html#codefunc41847">sxml:context-&gt;node</a> (car new-src)))
+                                     (cdr new-src))
+                                    (else new-src))))
+                             (if
+                              (null? new-src)
+                              (loop (cdr res-candidates)
+                                    new-src
+                                    (if
+                                     (test-pred? res-candidate)
+                                     (append
+                                      res
+                                      add-res                                 
+                                      (list
+                                       (<a href="xpath-context.html#codefunc37605">draft:smart-make-context</a>
+                                        res-candidate res-ancestors num-anc)))
+                                     (append res add-res)))
+                              (rpt (cdr more)  ; kids processed by recursive
+                                   (<a href="xpath-context.html#codefunc41847">sxml:context-&gt;node</a> (car new-src))
+                                   new-src
+                                   (append res add-res)))))))
+                       (else
+                        (rpt (append (reverse (child (car more))) (cdr more))
+                             next src res)))))))))))
+      (lambda (node)   ; node or nodeset
+        (if
+         (<a href="sxpathlib.html#codefunc31162">nodeset?</a> node)
+         (let iter ((nset (reverse node))
+                    (res '()))
+           (if
+            (null? nset)
+            (reverse res)
+            (call-with-values
+             (lambda ()
+               (reordering (all-preceding-siblings (car nset))
+                           (<a href="xpath-context.html#codefunc35263">sxml:context-&gt;ancestors</a> (car nset))
+                           (cdr nset)))
+             (lambda (add-res new-nset)
+               (iter new-nset (append res add-res))))))
+         ((<a href="xpath-context.html#codefunc18163">draft:following-sibling</a> test-pred? num-anc) node))))))
+</pre>
+<h4><a name='codefunc27315' href='#docfunc27315'>ddo:self</a></h4>
+<i><a href='#tocfunc27315'>Index</a></i><br>
+
+<pre> Self axis
+ The alias for drart:self, since no reordering or duplicate elimination
+ is required
+ num-ancestors is not used here
+</pre>
+<pre>(define <a href="ddo-axes.html#codefunc27315">ddo:self</a> <a href="xpath-context.html#codefunc57113">draft:self</a>)
+</pre>
+<h4><a name='codefunc15640' href='#docfunc15640'>ddo:ancestor-pos</a></h4>
+<i><a href='#tocfunc15640'>Index</a></i><br>
+
+<pre> Ancestor axis, for position-based filtering
+</pre>
+<pre>(define (<a href="ddo-axes.html#codefunc15640">ddo:ancestor-pos</a> test-pred? . num-ancestors)
+  (let ((num-anc (if (null? num-ancestors) 0 (car num-ancestors))))
+    (letrec
+        (; A hybrid of assq and memq
+         (assmemq
+          (lambda (key lst)
+            (cond
+              ((null? lst) #f)
+              ((eq? key (caar lst)) lst)
+              (else (assmemq key (cdr lst)))))))
+      (lambda (node)   ; node or nodeset
+        (let loop ((src (<a href="sxpathlib.html#codefunc11721">as-nodeset</a> node))
+                   (prev-ancestors '())
+                   (ancs-alist '())
+                   (pos-res '())
+                   (vacant-num 1))
+          ; ancs-alist ::= (listof (cons node pos-nodeset))                
+          (if
+           (null? src)  ; everyone processed
+           pos-res
+           (let ((curr (car src)))
+             (cond
+               ((or (not (<a href="xpath-context.html#codefunc37046">sxml:context?</a> curr))
+                    (null? (<a href="xpath-context.html#codefunc46900">sxml:context-&gt;ancestors-u</a> curr)))
+                ; no ancestors for this node
+                (loop (cdr src) prev-ancestors ancs-alist pos-res vacant-num))
+               ((and (not (null? prev-ancestors))
+                     (eq? (car (<a href="xpath-context.html#codefunc46900">sxml:context-&gt;ancestors-u</a> curr))
+                          (car prev-ancestors)))
+                ; The common case of removing (some) duplicate result node-sets
+                ; from consideration.
+                (loop (cdr src) prev-ancestors ancs-alist pos-res vacant-num))
+               (else
+                (let rpt ((curr-ancs (<a href="xpath-context.html#codefunc46900">sxml:context-&gt;ancestors-u</a> curr))
+                          (new-content '()))
+                  ; new content - that didn't repeat with the previous
+                  ; ancestors
+                  (cond
+                    ((or (null? curr-ancs)  ; all ancestors are new
+                         ; the first repeated found
+                         (memq (car curr-ancs) prev-ancestors))
+                     =&gt; (lambda (prev-tail)
+                          (call-with-values
+                           (lambda()
+                             (if
+                              (pair? prev-tail)
+                              (let ((t
+                                     (assmemq (car prev-tail) ancs-alist)))
+                                (values prev-tail t (cdar t)))
+                              (values '() '() '())))
+                           (lambda (prev-ancestors ancs-alist this-nset)
+                             (let creat ((prev-ancestors prev-ancestors)
+                                       (ancs-alist ancs-alist)
+                                       (vacant-num vacant-num)
+                                       (this-nset this-nset)
+                                       (new-content new-content))
+                             (if
+                              (null? new-content)  ; everyone processed
+                              (loop (cdr src)
+                                    prev-ancestors
+                                    ancs-alist
+                                    (cons this-nset pos-res)
+                                    vacant-num)
+                              (let ((new-this-nset
+                                     (if
+                                      (test-pred? (caar new-content))
+                                      ; add to the result
+                                      (cons
+                                       (cons
+                                        (<a href="xpath-context.html#codefunc37605">draft:smart-make-context</a>
+                                         (caar new-content)
+                                         (cdar new-content)
+                                         num-anc)
+                                        vacant-num)
+                                       this-nset)
+                                      this-nset)))
+                                (creat (car new-content)
+                                       (cons
+                                        (cons
+                                         (caar new-content)
+                                         new-this-nset)
+                                        ancs-alist)
+                                       (+ vacant-num 1)
+                                       new-this-nset
+                                       (cdr new-content)))))))))
+                    (else
+                     (rpt (cdr curr-ancs)
+                          (cons curr-ancs new-content))))))))))))))
+</pre>
+<h4><a name='codefunc42391' href='#docfunc42391'>ddo:ancestor-or-self-pos</a></h4>
+<i><a href='#tocfunc42391'>Index</a></i><br>
+
+<pre> Ancestor-or-self axis, for position-based filtering
+</pre>
+<pre>(define (<a href="ddo-axes.html#codefunc42391">ddo:ancestor-or-self-pos</a> test-pred? . num-ancestors)
+  (let ((num-anc (if (null? num-ancestors) 0 (car num-ancestors))))
+    (letrec
+        (; A hybrid of assq and memq
+         (assmemq
+          (lambda (key lst)
+            (cond
+              ((null? lst) #f)
+              ((eq? key (caar lst)) lst)
+              (else (assmemq key (cdr lst)))))))
+      (lambda (node)   ; node or nodeset
+        (let loop ((src (<a href="sxpathlib.html#codefunc11721">as-nodeset</a> node))
+                   (prev-ancestors '())
+                   (ancs-alist '())
+                   (pos-res '())
+                   (vacant-num 1))
+          ; ancs-alist ::= (listof (cons node pos-nodeset))                
+          (if
+           (null? src)  ; everyone processed
+           pos-res
+           (let rpt ((curr-ancs (<a href="xpath-context.html#codefunc8528">sxml:context-&gt;content</a> (car src)))
+                     (new-content '()))
+             ; new content - that didn't repeat with the previous
+             ; ancestors
+             (cond
+               ((or (null? curr-ancs)  ; all ancestors are new
+                    ; or the first repeated found
+                    (memq (car curr-ancs) prev-ancestors))
+                =&gt; (lambda (prev-tail)                     
+                     (call-with-values
+                      (lambda ()
+                        (if
+                         (pair? prev-tail)
+                         (let ((t (assmemq (car prev-tail) ancs-alist)))
+                           (values prev-tail t (cdar t)))
+                         (values '() '() '())))
+                      (lambda (prev-ancestors ancs-alist this-nset)
+                        (let creat ((prev-ancestors prev-ancestors)
+                                    (ancs-alist ancs-alist)
+                                    (vacant-num vacant-num)
+                                    (this-nset this-nset)
+                                    (new-content new-content))
+                          (if
+                           (null? new-content)  ; everyone processed
+                           (loop (cdr src)
+                                 prev-ancestors
+                                 ancs-alist
+                                 (cons this-nset pos-res)
+                                 vacant-num)
+                           (let ((new-this-nset
+                                  (if
+                                   (test-pred? (caar new-content))
+                                   ; add to the result
+                                   (cons
+                                    (cons
+                                     (<a href="xpath-context.html#codefunc37605">draft:smart-make-context</a>
+                                      (caar new-content)
+                                      (cdar new-content)
+                                      num-anc)
+                                     vacant-num)
+                                    this-nset)
+                                   this-nset)))
+                             (creat (car new-content)
+                                    (cons
+                                     (cons
+                                      (caar new-content)
+                                      new-this-nset)
+                                     ancs-alist)
+                                    (+ vacant-num 1)
+                                    new-this-nset
+                                    (cdr new-content)))))))))
+               (else
+                (rpt (cdr curr-ancs)
+                     (cons curr-ancs new-content)))))))))))
+</pre>
+<h4><a name='codefunc4328' href='#docfunc4328'>ddo:child-pos</a></h4>
+<i><a href='#tocfunc4328'>Index</a></i><br>
+
+<pre> Child axis, for position-based filtering
+</pre>
+<pre>(define (<a href="ddo-axes.html#codefunc4328">ddo:child-pos</a> test-pred? . num-ancestors)
+  (let ((num-anc (if (null? num-ancestors) 0 (car num-ancestors)))
+        (child (<a href="sxpathlib.html#codefunc5616">sxml:child</a> <a href="sxpathlib.html#codefunc63215">sxml:node?</a>)))
+    (letrec
+        (; Creates a pos-nodeset
+         (create-pos-nset
+          (lambda (nset ancestors vacant-num)
+            (if (null? nset)
+                '()
+                (cons
+                 (cons (if (null? ancestors)
+                           (car nset)
+                           (<a href="xpath-context.html#codefunc34204">draft:make-context</a> (car nset) ancestors))
+                       vacant-num)
+                 (create-pos-nset (cdr nset) ancestors (+ vacant-num 1))))))
+         (src-walk
+          ; curr-node - current input node (probably context)
+          ; src - the remaining nodes in the input nodeset
+          ; order-num - the order number of the current result node
+          ; Returns: (values pos-result new-src new-order-num)
+          (lambda (curr-node src order-num)
+            (let ((curr-children
+                   (child (<a href="xpath-context.html#codefunc41847">sxml:context-&gt;node</a> curr-node))))
+              (if
+               (null? curr-children)  ; nothing to do for this curr-node
+               (values '() src order-num)
+               (let ((curr-ancestors (<a href="xpath-context.html#codefunc47888">draft:list-head</a>
+                                      (<a href="xpath-context.html#codefunc8528">sxml:context-&gt;content</a> curr-node)
+                                      num-anc)))
+                 (if
+                  (null? src)  ; no searching for descendants required
+                  (values (list (create-pos-nset
+                                 ((<a href="sxpathlib.html#codefunc7531">sxml:filter</a> test-pred?) curr-children)
+                                 curr-ancestors order-num))
+                          src  ; always null
+                          #f  ; nobody cares of order-num anymore
+                          )
+                  (let loop ((src src)
+                             (next-node (<a href="xpath-context.html#codefunc41847">sxml:context-&gt;node</a> (car src)))
+                             (curr-children (cdr curr-children))
+                             (desc-to-scan (list (car curr-children)))
+                             (this-res
+                              (if
+                               (test-pred? (car curr-children))
+                               (list
+                                (cons
+                                 (if (null? curr-ancestors)
+                                     (car curr-children)
+                                     (<a href="xpath-context.html#codefunc34204">draft:make-context</a>
+                                      (car curr-children) curr-ancestors))
+                                 order-num))
+                               '()))
+                             (pos-result '())
+                             (order-num (+ order-num 1)))
+                    (cond
+                      ((null? desc-to-scan)
+                       ; we can proceed to next curr-children
+                       (if
+                        (null? curr-children)
+                        (values (cons (reverse this-res) pos-result)
+                                src
+                                order-num)
+                        (loop src next-node
+                              (cdr curr-children)
+                              (list (car curr-children))
+                              (if
+                               (test-pred? (car curr-children))
+                               (cons
+                                (cons
+                                 (if (null? curr-ancestors)
+                                     (car curr-children)
+                                     (<a href="xpath-context.html#codefunc34204">draft:make-context</a>
+                                      (car curr-children) curr-ancestors))
+                                 order-num)
+                                this-res)
+                               this-res)
+                              pos-result
+                              (+ order-num 1))))
+                      ; There are descendants to be scanned
+                      ((eq? (car desc-to-scan) next-node)
+                       (call-with-values
+                        (lambda ()
+                          (src-walk (car src)
+                                    (cdr src)
+                                    order-num))
+                        (lambda (new-pos-res new-src new-order-num)
+                          (if
+                           (null? new-src)  ; no more nodes in src nodeset
+                           (values
+                            (cons
+                             (append
+                              (reverse this-res)
+                              (create-pos-nset
+                               ((<a href="sxpathlib.html#codefunc7531">sxml:filter</a> test-pred?) curr-children)
+                               curr-ancestors order-num))
+                             (append pos-result new-pos-res))
+                            new-src  ; always null
+                            #f  ; nobody cares of this number anymore
+                            )
+                           (loop new-src
+                                 (<a href="xpath-context.html#codefunc41847">sxml:context-&gt;node</a> (car new-src))
+                                 curr-children
+                                 (cdr desc-to-scan)  ; descendants processed
+                                 this-res
+                                 (append pos-result new-pos-res)
+                                 new-order-num)))))
+                      (else  ; proceed to the next descendant
+                       (loop src next-node curr-children
+                             (append  ; content-to-scan
+                              (<a href="ddo-axes.html#codefunc46763">ddo:attr-child</a> (car desc-to-scan))
+                              (cdr desc-to-scan))
+                             this-res
+                             pos-result
+                             order-num)))))))))))
+      (lambda (node)   ; node or nodeset
+        (let rpt ((src (<a href="sxpathlib.html#codefunc11721">as-nodeset</a> node))
+                  (pos-result '())
+                  (order-num 1))
+          (if
+           (null? src)  ; all processed
+           (<a href="common.html#codefunc20536">filter</a>  ; removing empty result nodesets
+            (lambda (x) (not (null? x)))
+            pos-result)
+           (call-with-values
+            (lambda () (src-walk (car src) (cdr src) order-num))
+            (lambda (new-pos-res new-src new-order-num)
+              (rpt new-src
+                   (append pos-result new-pos-res)
+                   new-order-num)))))))))
+</pre>
+<h4><a name='codefunc36736' href='#docfunc36736'>ddo:descendant-pos</a></h4>
+<i><a href='#tocfunc36736'>Index</a></i><br>
+
+<pre> Descendant axis, for position-based filtering
+ When no node in the input node-set is a descendant of another node in the
+ input node-set, the ordinary draft:descendant function can be used
+</pre>
+<pre>(define (<a href="ddo-axes.html#codefunc36736">ddo:descendant-pos</a> test-pred? . num-ancestors)
+  (let* ((num-anc (if (null? num-ancestors) 0 (car num-ancestors)))
+         (child (<a href="sxpathlib.html#codefunc5616">sxml:child</a> <a href="sxpathlib.html#codefunc63215">sxml:node?</a>))
+         (desc (<a href="xpath-context.html#codefunc8266">draft:descendant</a> test-pred? num-anc)))
+    (letrec                 
+        ((src-walk
+          ; curr-node - current input node (probably context)
+          ; src - the remaining nodes in the input nodeset
+          ; order-num - the order number of the current result node
+          ; Returns: (values pos-result new-src new-order-num)
+          (lambda (curr-node src order-num)
+            (let loop ((src src)
+                       (next-node (if (null? src)
+                                      #f
+                                      (<a href="xpath-context.html#codefunc41847">sxml:context-&gt;node</a> (car src))))
+                       (content-to-scan
+                        (let ((cntnt (<a href="xpath-context.html#codefunc8528">sxml:context-&gt;content</a> curr-node)))
+                          (map
+                           (lambda (c) (cons c cntnt))
+                           (child (<a href="xpath-context.html#codefunc41847">sxml:context-&gt;node</a> curr-node)))))                      
+                       (this-res '())
+                       (pos-result '())
+                       (order-num order-num))
+              (if
+               (null? content-to-scan)
+               (values (cons (reverse this-res) pos-result)
+                       src
+                       (+ order-num 1))
+               (let ((curr-cntnt (car content-to-scan)))
+                 (if
+                  (eq? (car curr-cntnt) next-node)
+                  (call-with-values
+                   (lambda () (src-walk (car src)
+                                        (cdr src)
+                                        (+ order-num 1)))
+                   (lambda (new-pos-res new-src new-order-num)
+                     (loop new-src
+                           (if (null? new-src)
+                               #f
+                               (<a href="xpath-context.html#codefunc41847">sxml:context-&gt;node</a> (car new-src)))
+                           (cdr content-to-scan)  ; descendants processed
+                           (append
+                            (reverse (car new-pos-res))
+                            (if  ; this res
+                             (test-pred? (car curr-cntnt))
+                             (cons
+                              (cons
+                               (<a href="xpath-context.html#codefunc37605">draft:smart-make-context</a>
+                                (car curr-cntnt) (cdr curr-cntnt) num-anc)
+                               order-num)
+                              this-res)
+                             this-res))
+                           (append pos-result new-pos-res)
+                           new-order-num)))
+                  (loop src
+                        next-node
+                        (append  ; content-to-scan
+                         (map
+                          (lambda (c) (cons c curr-cntnt))
+                          (child (car curr-cntnt)))
+                         (cdr content-to-scan))
+                        (if  ; this res
+                         (test-pred? (car curr-cntnt))  ; satisfies the node test
+                         (cons
+                          (cons
+                           (<a href="xpath-context.html#codefunc37605">draft:smart-make-context</a>
+                            (car curr-cntnt) (cdr curr-cntnt) num-anc)
+                           order-num)
+                          this-res)
+                         this-res)
+                        pos-result
+                        (+ order-num 1)))))))))
+      (lambda (node)   ; node or nodeset
+        (let rpt ((src (<a href="sxpathlib.html#codefunc11721">as-nodeset</a> node))
+                  (pos-result '())
+                  (order-num 1))
+          (if
+           (null? src)  ; all processed
+           (<a href="common.html#codefunc20536">filter</a>  ; removing empty result nodesets
+            (lambda (x) (not (null? x)))
+            pos-result)
+           (call-with-values
+            (lambda () (src-walk (car src) (cdr src) order-num))
+            (lambda (new-pos-res new-src new-order-num)
+              (rpt new-src
+                   (append pos-result new-pos-res)
+                   new-order-num)))))))))
+</pre>
+<h4><a name='codefunc63487' href='#docfunc63487'>ddo:descendant-or-self-pos</a></h4>
+<i><a href='#tocfunc63487'>Index</a></i><br>
+
+<pre> Descendant-or-selt axis, for position-based filtering
+ When no node in the input node-set is a descendant of another node in the
+ input node-set, the ordinary draft:descendant function can be used
+</pre>
+<pre>(define (<a href="ddo-axes.html#codefunc63487">ddo:descendant-or-self-pos</a> test-pred? . num-ancestors)
+  (let* ((num-anc (if (null? num-ancestors) 0 (car num-ancestors)))
+         (child (<a href="sxpathlib.html#codefunc5616">sxml:child</a> <a href="sxpathlib.html#codefunc63215">sxml:node?</a>)))
+    (letrec                 
+        ((src-walk
+          ; curr-node - current input node (probably context)
+          ; src - the remaining nodes in the input nodeset
+          ; order-num - the order number of the current result node
+          ; Returns: (values pos-result new-src new-order-num)
+          (lambda (curr-node src order-num)
+            (let loop ((src src)
+                       (next-node (if (null? src)
+                                      #f
+                                      (<a href="xpath-context.html#codefunc41847">sxml:context-&gt;node</a> (car src))))
+                       (content-to-scan
+                        (list (<a href="xpath-context.html#codefunc8528">sxml:context-&gt;content</a> curr-node)))
+                       (this-res '())
+                       (pos-result '())
+                       (order-num order-num))
+              (if
+               (null? content-to-scan)
+               (values (cons (reverse this-res) pos-result)
+                       src
+                       (+ order-num 1))
+               (let ((curr-cntnt (car content-to-scan)))
+                 (if
+                  (eq? (car curr-cntnt) next-node)
+                  (call-with-values
+                   (lambda () (src-walk (car src) (cdr src) order-num))
+                   (lambda (new-pos-res new-src new-order-num)
+                     (loop new-src
+                           (if (null? new-src)
+                               #f
+                               (<a href="xpath-context.html#codefunc41847">sxml:context-&gt;node</a> (car new-src)))
+                           (cdr content-to-scan)  ; descendants processed
+                           (append
+                            (reverse (car new-pos-res))
+                            this-res)
+                           (append pos-result new-pos-res)
+                           new-order-num)))
+                  (loop src
+                        next-node
+                        (append  ; content-to-scan
+                         (map
+                          (lambda (c) (cons c curr-cntnt))
+                          (child (car curr-cntnt)))
+                         (cdr content-to-scan))
+                        (if  ; this res
+                         (test-pred? (car curr-cntnt))  ; satisfies the node test
+                         (cons
+                          (cons
+                           (<a href="xpath-context.html#codefunc37605">draft:smart-make-context</a>
+                            (car curr-cntnt) (cdr curr-cntnt) num-anc)
+                           order-num)
+                          this-res)
+                         this-res)
+                        pos-result
+                        (+ order-num 1)))))))))
+      (lambda (node)   ; node or nodeset
+        (let rpt ((src (<a href="sxpathlib.html#codefunc11721">as-nodeset</a> node))
+                  (pos-result '())
+                  (order-num 1))
+          (if
+           (null? src)  ; all processed
+           (<a href="common.html#codefunc20536">filter</a>  ; removing empty result nodesets
+            (lambda (x) (not (null? x)))
+            pos-result)
+           (call-with-values
+            (lambda () (src-walk (car src) (cdr src) order-num))
+            (lambda (new-pos-res new-src new-order-num)
+              (rpt new-src
+                   (append pos-result new-pos-res)
+                   new-order-num)))))))))
+</pre>
+<h4><a name='codefunc28528' href='#docfunc28528'>ddo:following-sibling-pos</a></h4>
+<i><a href='#tocfunc28528'>Index</a></i><br>
+
+<pre> Following-sibling axis, for position-based filtering
+</pre>
+<pre>(define (<a href="ddo-axes.html#codefunc28528">ddo:following-sibling-pos</a> test-pred? . num-ancestors)
+  (let ((num-anc (if (null? num-ancestors) 0 (car num-ancestors)))
+        (child (<a href="sxpathlib.html#codefunc5616">sxml:child</a> <a href="sxpathlib.html#codefunc63215">sxml:node?</a>)))
+    (letrec
+        ((associate-num
+          (lambda (nset ancestors vacant-num)
+            (if (null? nset)
+                nset
+                (cons
+                 (cons
+                  (if (null? ancestors)
+                      (car nset)
+                      (<a href="xpath-context.html#codefunc34204">draft:make-context</a> (car nset) ancestors))
+                  vacant-num)
+                 (associate-num (cdr nset) ancestors (+ vacant-num 1))))))         
+         ; curr - current context to be processed
+         ; src - remaining source contexts
+         ; vacant-num - order number for the result node
+         ; Returns:  (values pos-result new-src new-vacant-num)
+         (process-single
+          (lambda (curr src vacant-num)
+            (if
+             (or (not (<a href="xpath-context.html#codefunc37046">sxml:context?</a> curr))
+                 (null? (<a href="xpath-context.html#codefunc46900">sxml:context-&gt;ancestors-u</a> curr)))
+             ; Siblings cannot be identified
+             (values '() src vacant-num)
+             (cond
+               ((memq (<a href="xpath-context.html#codefunc6309">sxml:context-&gt;node-u</a> curr)
+                      (cdr  ; parent is an element =&gt; cdr gives its children
+                       (car (<a href="xpath-context.html#codefunc46900">sxml:context-&gt;ancestors-u</a> curr))))
+                =&gt;
+                (lambda (foll-siblings)
+                  (let ((ancestors
+                         (<a href="xpath-context.html#codefunc47888">draft:list-head</a>
+                          (<a href="xpath-context.html#codefunc46900">sxml:context-&gt;ancestors-u</a> curr) num-anc)))
+                    ; Scanning descendants of the context node
+                    (let loop ((foll-siblings (cdr foll-siblings))
+                               (descs (child (car foll-siblings)))
+                               (src (<a href="ddo-axes.html#codefunc15499">ddo:discard-attributes</a>
+                                     (car foll-siblings) src))
+                               (vacant-num vacant-num)
+                               (res '())
+                               (pos-res '()))
+                      (cond
+                        ((null? src)
+                         (values
+                          (cons
+                           (append 
+                            (reverse res)
+                            (associate-num
+                             foll-siblings ancestors vacant-num))
+                           pos-res)
+                          src  ; always null
+                          #f  ; nobody cares of this number anymore
+                          ))                        
+                        ((null? descs)  ; descendants of current foll-sibling
+                         (if
+                          (null? foll-siblings)  ; that stuff is over
+                          (values (cons (reverse res) pos-res)
+                                  src
+                                  vacant-num)                           
+                          (let ((new-res
+                                 (if (test-pred? (car foll-siblings))
+                                     (cons
+                                      (cons
+                                       (if (null? ancestors)
+                                           (car foll-siblings)
+                                           (<a href="xpath-context.html#codefunc34204">draft:make-context</a>
+                                            (car foll-siblings) ancestors))
+                                       vacant-num)
+                                      res)
+                                     res)))
+                            (if                               
+                             (eq? (car foll-siblings)
+                                  (<a href="xpath-context.html#codefunc41847">sxml:context-&gt;node</a> (car src)))
+                             (call-with-values
+                              (lambda ()
+                                (process-single
+                                 (car src) (cdr src) (+ vacant-num 1)))
+                              (lambda (new-pos-res new-src new-vacant)
+                                (values (cons
+                                         (append
+                                          (reverse new-res)
+                                          (if (null? new-pos-res)
+                                              '() (car new-pos-res)))
+                                         (append pos-res new-pos-res))
+                                        new-src
+                                        new-vacant)))
+                             (loop (cdr foll-siblings)
+                                   (<a href="ddo-axes.html#codefunc46763">ddo:attr-child</a> (car foll-siblings))
+                                   (<a href="ddo-axes.html#codefunc15499">ddo:discard-attributes</a>
+                                    (car foll-siblings) src)
+                                   (+ vacant-num 1)
+                                   new-res
+                                   pos-res)))))
+                        ((eq? (car descs) (<a href="xpath-context.html#codefunc41847">sxml:context-&gt;node</a> (car src)))
+                         ; His siblings are on the way
+                         (call-with-values
+                          (lambda ()
+                            (process-single
+                             (car src) (cdr src) vacant-num))
+                          (lambda (new-pos-res new-src new-vacant)
+                            (loop foll-siblings
+                                  (cdr descs)  ; descendants processed
+                                  new-src
+                                  new-vacant
+                                  res
+                                  (cons pos-res new-pos-res)))))
+                        (else
+                         (loop foll-siblings
+                               (append (child (car descs)) (cdr descs))
+                               (<a href="ddo-axes.html#codefunc15499">ddo:discard-attributes</a> (car descs) src)
+                               vacant-num
+                               res
+                               pos-res)))))))
+               (else
+                (values '() src vacant-num)))))))
+      (lambda (node)   ; node or nodeset
+        (if
+         (<a href="sxpathlib.html#codefunc31162">nodeset?</a> node)
+         (let iter ((src node)
+                    (pos-res '())
+                    (vacant-num 1))
+           (if
+            (null? src)
+            (<a href="common.html#codefunc20536">filter</a>  ; removing empty result nodesets
+             (lambda (x) (not (null? x)))
+             pos-res)
+            (call-with-values
+             (lambda () (process-single (car src) (cdr src) vacant-num))
+             (lambda (new-pos-res new-src new-vacant)
+               (iter new-src
+                     (append pos-res new-pos-res)
+                     new-vacant))))))))))
+</pre>
+<h4><a name='codefunc48577' href='#docfunc48577'>ddo:parent-pos</a></h4>
+<i><a href='#tocfunc48577'>Index</a></i><br>
+
+<pre> Parent axis, for position-based filtering
+ We won't reinvent the wheel here. We'll use ddo:parent and apply the fact
+ that for every single input node the parent axis produces no more than a
+ single result node
+</pre>
+<pre>(define (<a href="ddo-axes.html#codefunc48577">ddo:parent-pos</a> test-pred? . num-ancestors)
+  (let ((parent (apply <a href="ddo-axes.html#codefunc55844">ddo:parent</a> (cons test-pred? num-ancestors))))
+    (letrec
+        ((add-order-num
+          (lambda (num nset)
+            (if (null? nset)
+                nset
+                (cons (list (cons (car nset) num))
+                      (add-order-num (+ num 1) (cdr nset)))))))
+      (lambda (node)   ; node or nodeset
+        (add-order-num 1 (parent node))))))
+</pre>
+<h4><a name='codefunc22121' href='#docfunc22121'>ddo:preceding-sibling-pos</a></h4>
+<i><a href='#tocfunc22121'>Index</a></i><br>
+
+<pre> Preceding-sibling axis, for position-based filtering
+</pre>
+<pre>(define (<a href="ddo-axes.html#codefunc22121">ddo:preceding-sibling-pos</a> test-pred? . num-ancestors)
+  (let ((num-anc (if (null? num-ancestors) 0 (car num-ancestors)))
+        (child (<a href="sxpathlib.html#codefunc5616">sxml:child</a> <a href="sxpathlib.html#codefunc63215">sxml:node?</a>))
+        (reverse-desc  ; reverse descendants of node
+         (lambda (node)
+           (let scan ((more (<a href="ddo-axes.html#codefunc46763">ddo:attr-child</a> node))
+                      (res '()))
+             (if (null? more)  ; result formed
+                 res
+                 (scan (append (<a href="ddo-axes.html#codefunc46763">ddo:attr-child</a> (car more))
+                               (cdr more))
+                       (cons (car more) res)))))))
+    (letrec
+        ((associate-num
+          (lambda (nset ancestors vacant-num)
+            (if (null? nset)
+                nset
+                (cons
+                 (cons
+                  (if (null? ancestors)
+                      (car nset)
+                      (<a href="xpath-context.html#codefunc34204">draft:make-context</a> (car nset) ancestors))
+                  vacant-num)
+                 (associate-num (cdr nset) ancestors (- vacant-num 1))))))         
+         ; curr - current context to be processed
+         ; src - remaining source contexts
+         ; vacant-num - order number for the result node
+         ; Returns:  (values pos-result new-src new-vacant-num)
+         (process-single
+          (lambda (curr src vacant-num)
+            (if
+             (or (not (<a href="xpath-context.html#codefunc37046">sxml:context?</a> curr))
+                 (null? (<a href="xpath-context.html#codefunc46900">sxml:context-&gt;ancestors-u</a> curr)))
+             ; Siblings cannot be identified
+             (values '() src vacant-num)
+             (cond               
+               ((memq (<a href="xpath-context.html#codefunc6309">sxml:context-&gt;node-u</a> curr)
+                      (reverse
+                       (cdr  ; parent is an element =&gt; cdr gives its children
+                        (car (<a href="xpath-context.html#codefunc46900">sxml:context-&gt;ancestors-u</a> curr)))))
+                =&gt;
+                (lambda (prec-siblings)  ; prec-siblings + <a href="libmisc.html#codefunc52191">self</a>
+                  (if
+                   (null? (cdr prec-siblings))  ; no preceding siblings
+                   (values '() src vacant-num)
+                   (let ((ancestors
+                         (<a href="xpath-context.html#codefunc47888">draft:list-head</a>
+                          (<a href="xpath-context.html#codefunc46900">sxml:context-&gt;ancestors-u</a> curr) num-anc)))
+                    ; Scanning descendants of the context node
+                    (let loop ((prec-siblings (cdr prec-siblings))
+                               (descs (reverse-desc (cadr prec-siblings)))
+                               (src src)
+                               (vacant-num vacant-num)
+                               (res '())
+                               (pos-res '()))
+                      (cond
+                        ((null? src)
+                         (values
+                          (cons
+                           (append
+                            (reverse res)
+                            (associate-num
+                             ; DL: was: (if nonself? prec-siblings (cdr prec-siblings))
+                             prec-siblings
+                             ancestors vacant-num))
+                           pos-res)
+                          src  ; always null
+                          #f  ; nobody cares of this number anymore
+                          ))
+                        ((null? descs)  ; descendants of current prec-sibling
+                         (let ((new-res
+                                 (if (test-pred? (car prec-siblings))
+                                     (cons
+                                      (cons
+                                       (if (null? ancestors)
+                                           (car prec-siblings)
+                                           (<a href="xpath-context.html#codefunc34204">draft:make-context</a>
+                                            (car prec-siblings) ancestors))
+                                       vacant-num)
+                                      res)
+                                     res)))
+                           (cond                             
+                             ((eq? (car prec-siblings)  ; to be now added
+                                   (<a href="xpath-context.html#codefunc41847">sxml:context-&gt;node</a> (car src)))
+                              (call-with-values
+                               (lambda ()
+                                 (process-single
+                                  (car src) (cdr src) (- vacant-num 1)))
+                               (lambda (new-pos-res new-src new-vacant)
+                                 (values (cons
+                                          (append
+                                           (reverse new-res)
+                                           (if (null? new-pos-res)
+                                               '() (car new-pos-res)))
+                                          (append pos-res new-pos-res))
+                                         new-src
+                                         new-vacant))))
+                             ((null? (cdr prec-siblings))  ; that stuff is over
+                              (values (cons (reverse new-res) pos-res)
+                                      src
+                                      vacant-num))
+                             (else
+                              (loop (cdr prec-siblings)
+                                    (reverse-desc (cadr prec-siblings))
+                                    src
+                                    (- vacant-num 1)
+                                    new-res
+                                    pos-res)))))
+                        ((eq? (car descs) (<a href="xpath-context.html#codefunc41847">sxml:context-&gt;node</a> (car src)))
+                         ; His siblings are on the way
+                         (call-with-values
+                          (lambda ()
+                            (process-single
+                             (car src) (cdr src) vacant-num))
+                          (lambda (new-pos-res new-src new-vacant)
+                            (loop prec-siblings
+                                (cdr descs)  ; descendants processed
+                                new-src
+                                new-vacant
+                                res
+                                (append pos-res new-pos-res)))))
+                        (else
+                         (loop prec-siblings                               
+                               (cdr descs)
+                               src
+                               vacant-num
+                               res
+                               pos-res))))))))
+               (else
+                (values '() src vacant-num)))))))
+      (lambda (node)   ; node or nodeset
+        (if
+         (<a href="sxpathlib.html#codefunc31162">nodeset?</a> node)
+         (let iter ((src (reverse node))
+                    (pos-res '())
+                    (vacant-num -1))
+           (if
+            (null? src)
+            (<a href="common.html#codefunc20536">filter</a>  ; removing empty result nodesets
+             (lambda (x) (not (null? x)))
+             pos-res)
+            (call-with-values
+             (lambda () (process-single (car src) (cdr src) vacant-num))
+             (lambda (new-pos-res new-src new-vacant)
+               (iter new-src
+                     (append new-pos-res pos-res)
+                     new-vacant))))))))))
+</pre>
+<h4><a name='codefunc4909' href='#docfunc4909'>ddo:following-single-level</a></h4>
+<i><a href='#tocfunc4909'>Index</a></i><br>
+
+<pre> Following axis for special case
+ According to
+ http://pi3.informatik.uni-mannheim.de/publications/TR-02-011.pdf,
+ it is sufficient to calculate following for the first member of the input
+ nodeset
+</pre>
+<pre>(define (<a href="ddo-axes.html#codefunc4909">ddo:following-single-level</a> test-pred? . num-ancestors)
+  (let ((foll (apply <a href="xpath-context.html#codefunc54604">draft:following</a>
+                     (cons test-pred? num-ancestors))))
+    (lambda (node)   ; node or nodeset
+      (cond
+        ((null? node)  ; empty nodeset - nothing to do
+         '())
+        ((and (pair? node) (not (symbol? (car node))))  ; non-empty nodeset
+         (foll (car node)))
+        (else  ; a single node
+         (foll node))))))
+</pre>
+<h4><a name='codefunc34003' href='#docfunc34003'>ddo:following-sibling-single-level</a></h4>
+<i><a href='#tocfunc34003'>Index</a></i><br>
+
+<pre> Following-sibling axis for the special case
+ We need only to care of duplicates removal, and ordering would be
+ achieved automatically
+</pre>
+<pre>(define (<a href="ddo-axes.html#codefunc34003">ddo:following-sibling-single-level</a> test-pred? . num-ancestors)
+  (let ((num-anc (if (null? num-ancestors) 0 (car num-ancestors))))
+    (lambda (node)   ; node or nodeset
+      (let loop ((src (<a href="sxpathlib.html#codefunc11721">as-nodeset</a> node))    
+                 (res '()))
+        (if
+         (null? src)  ; everyone processed
+         (reverse res)
+         (let ((curr (car src)))           
+           (if
+            (and (<a href="xpath-context.html#codefunc37046">sxml:context?</a> curr)
+                 (not (null? (<a href="xpath-context.html#codefunc46900">sxml:context-&gt;ancestors-u</a> curr))))
+            (cond
+              ((memq (<a href="xpath-context.html#codefunc6309">sxml:context-&gt;node-u</a> curr)
+                     (cdr  ; parent is an element =&gt; cdr gives its children
+                      (car (<a href="xpath-context.html#codefunc46900">sxml:context-&gt;ancestors-u</a> curr))))
+               =&gt; (lambda (foll-siblings)
+                    (let rpt ((foll-siblings (cdr foll-siblings))
+                              (src (cdr src))
+                              (res res))
+                      (cond
+                        ((null? foll-siblings)
+                         (loop src res))
+                        ((null? src)  ; no more source nodes in document order
+                         (append
+                          (reverse res)
+                          (<a href="xpath-context.html#codefunc63648">draft:siblings-&gt;context-set</a>
+                           ((<a href="sxpathlib.html#codefunc7531">sxml:filter</a> test-pred?) foll-siblings)
+                           (<a href="xpath-context.html#codefunc47888">draft:list-head</a>
+                            (<a href="xpath-context.html#codefunc46900">sxml:context-&gt;ancestors-u</a> curr) num-anc))))
+                        (else                       
+                         (rpt
+                          (cdr foll-siblings)
+                          (if (eq? (car foll-siblings)
+                                   (<a href="xpath-context.html#codefunc41847">sxml:context-&gt;node</a> (car src)))
+                              (cdr src)  ; remove the first source node
+                              src)
+                          (if (test-pred? (car foll-siblings))
+                              (cons
+                               (<a href="xpath-context.html#codefunc37605">draft:smart-make-context</a>
+                                (car foll-siblings)
+                                (<a href="xpath-context.html#codefunc46900">sxml:context-&gt;ancestors-u</a> curr)
+                                num-anc)
+                               res)
+                              res)))))))
+              (else  ; no following siblings
+               (loop (cdr src) res)))
+            (loop (cdr src) res)  ; no parent =&gt; no siblings
+            )))))))
+</pre>
+<h4><a name='codefunc8407' href='#docfunc8407'>ddo:parent-single-level</a></h4>
+<i><a href='#tocfunc8407'>Index</a></i><br>
+
+<pre> Parent axis for the case when all nodes in the input node-set are located
+ on the same level of hierarchy within a document
+ In this case the parent axis can be computed with the O(n) complexity, n
+ is the number of nodes in the document, compared to O(n^2) complexity for
+ ddo:parent
+</pre>
+<pre>(define (<a href="ddo-axes.html#codefunc8407">ddo:parent-single-level</a> test-pred? . num-ancestors)
+  (let ((num-anc (if (null? num-ancestors) 0 (car num-ancestors))))
+    (lambda (node)   ; node or nodeset
+      (let loop ((src (<a href="sxpathlib.html#codefunc11721">as-nodeset</a> node))
+                 (prev-parent #f)
+                 (res '()))
+        (if
+         (null? src)
+         (reverse res)
+         (let ((curr (car src)))
+           (if
+            (and (<a href="xpath-context.html#codefunc37046">sxml:context?</a> curr)
+                 (not (null? (<a href="xpath-context.html#codefunc46900">sxml:context-&gt;ancestors-u</a> curr))))
+            (let ((curr-parent (car (<a href="xpath-context.html#codefunc46900">sxml:context-&gt;ancestors-u</a> curr))))
+              (if
+               ; this condition would never evaluate to #t when prev-parent=#f
+               (eq? curr-parent prev-parent)  ; a duplicate node
+               ; this node is already in the result
+               (loop (cdr src) prev-parent res)
+               (loop (cdr src) curr-parent
+                     (if
+                      (test-pred? curr-parent)
+                      (cons
+                       (<a href="xpath-context.html#codefunc37605">draft:smart-make-context</a>
+                        curr-parent
+                        (cdr (<a href="xpath-context.html#codefunc46900">sxml:context-&gt;ancestors-u</a> curr))
+                        num-anc)
+                       res)
+                      res))))
+            ; no parent
+            (loop (cdr src) prev-parent res))))))))
+</pre>
+<h4><a name='codefunc64037' href='#docfunc64037'>ddo:preceding-single-level</a></h4>
+<i><a href='#tocfunc64037'>Index</a></i><br>
+
+<pre> Preceding axis for the special case
+ The implementation exploits the idea expressed in
+ http://pi3.informatik.uni-mannheim.de/publications/TR-02-011.pdf,
+ that is, it is sufficient to calculate preceding for the last member of the
+ input nodeset
+</pre>
+<pre>(define (<a href="ddo-axes.html#codefunc64037">ddo:preceding-single-level</a> test-pred? . num-ancestors)
+  (let ((prec (apply <a href="xpath-context.html#codefunc48197">draft:preceding</a>
+                     (cons test-pred? num-ancestors))))
+    (lambda (node)   ; node or nodeset
+      (cond
+        ((null? node)  ; empty nodeset - nothing to do
+         '())
+        ((and (pair? node) (not (symbol? (car node))))  ; non-empty nodeset
+         (reverse  ; restore document order
+          (prec (<a href="ddo-axes.html#codefunc23734">ddo:list-last</a> node))))
+        (else  ; a single node
+         (reverse (prec node)))))))
+</pre>
+<h4><a name='codefunc27596' href='#docfunc27596'>ddo:preceding-sibling-single-level</a></h4>
+<i><a href='#tocfunc27596'>Index</a></i><br>
+
+<pre> Preceding-sibling axis for the special case
+</pre>
+<pre>(define (<a href="ddo-axes.html#codefunc27596">ddo:preceding-sibling-single-level</a> test-pred? . num-ancestors)
+  (let ((num-anc (if (null? num-ancestors) 0 (car num-ancestors))))
+    (lambda (node)   ; node or nodeset
+      (let loop ((src (reverse (<a href="sxpathlib.html#codefunc11721">as-nodeset</a> node)))
+                 (res '()))
+        (if
+         (null? src)  ; everyone processed
+         res
+         (let ((curr (car src)))           
+           (if
+            (and (<a href="xpath-context.html#codefunc37046">sxml:context?</a> curr)
+                 (not (null? (<a href="xpath-context.html#codefunc46900">sxml:context-&gt;ancestors-u</a> curr))))
+            (cond
+              ((memq (<a href="xpath-context.html#codefunc6309">sxml:context-&gt;node-u</a> curr)
+                     (reverse
+                      (cdr  ; parent is an element =&gt; cdr gives its children
+                       (car (<a href="xpath-context.html#codefunc46900">sxml:context-&gt;ancestors-u</a> curr)))))
+               =&gt; (lambda (prec-siblings)
+                    (let rpt ((prec-siblings (cdr prec-siblings))
+                              (src (cdr src))
+                              (res res))
+                      (cond
+                        ((null? prec-siblings)
+                         (loop src res))
+                        ((null? src)  ; no more source nodes
+                         (append
+                          (reverse
+                           (<a href="xpath-context.html#codefunc63648">draft:siblings-&gt;context-set</a>
+                            ((<a href="sxpathlib.html#codefunc7531">sxml:filter</a> test-pred?) prec-siblings)
+                            (<a href="xpath-context.html#codefunc47888">draft:list-head</a>
+                             (<a href="xpath-context.html#codefunc46900">sxml:context-&gt;ancestors-u</a> curr) num-anc)))
+                          res))
+                        (else                       
+                         (rpt
+                          (cdr prec-siblings)
+                          (if (eq? (car prec-siblings)
+                                   (<a href="xpath-context.html#codefunc41847">sxml:context-&gt;node</a> (car src)))
+                              (cdr src)  ; remove the first source node
+                              src)
+                          (if (test-pred? (car prec-siblings))
+                              (cons
+                               (<a href="xpath-context.html#codefunc37605">draft:smart-make-context</a>
+                                (car prec-siblings)
+                                (<a href="xpath-context.html#codefunc46900">sxml:context-&gt;ancestors-u</a> curr)
+                                num-anc)
+                               res)
+                              res)))))))
+              (else  ; no preceding siblings
+               (loop (cdr src) res)))
+            (loop (cdr src) res)  ; no parent =&gt; no siblings
+            )))))))
+</pre>
+<h4><a name='codefunc63177' href='#docfunc63177'>ddo:following-single-level-pos</a></h4>
+<i><a href='#tocfunc63177'>Index</a></i><br>
+
+<pre> Following axis for the special case
+</pre>
+<pre>(define (<a href="ddo-axes.html#codefunc63177">ddo:following-single-level-pos</a> test-pred? . num-ancestors)
+  (let* ((num-anc (if (null? num-ancestors) 0 (car num-ancestors)))
+         (descend (<a href="xpath-context.html#codefunc35017">draft:descendant-or-self</a> test-pred? num-anc))
+         (follow (<a href="xpath-context.html#codefunc54604">draft:following</a> test-pred? num-anc)))
+    (letrec
+        (; curr - current context to be processed
+         ; src - remaining source contexts
+         ; vacant-num - order number for the result node
+         ; Returns:  pos-result
+         (process-single
+          (lambda (curr src vacant-num)
+            (cond
+              ((null? src)  ; no more nodes
+               (let add-labels ((to-scan (follow curr))
+                                (res '())
+                                (vacant-num vacant-num))
+                 (if (null? to-scan)
+                     (list (reverse res))
+                     (add-labels (cdr to-scan)
+                                 (cons (cons (car to-scan) vacant-num) res)
+                                 (+ vacant-num 1)))))
+              ((not (<a href="xpath-context.html#codefunc37046">sxml:context?</a> curr))  ; can't find following nodes
+               (cons '() (process-single (car src) (cdr src) vacant-num)))
+              (else
+               (let ((next (<a href="xpath-context.html#codefunc41847">sxml:context-&gt;node</a> (car src))))
+                 (let loop ((this-level (<a href="xpath-context.html#codefunc6309">sxml:context-&gt;node-u</a> curr))
+                            (ancs-to-view (<a href="xpath-context.html#codefunc46900">sxml:context-&gt;ancestors-u</a> curr))
+                            (content-set '())
+                            (pos-nset '())
+                            (vacant-num vacant-num))
+                   (cond
+                     ((null? content-set)  ; no one to scan at this level
+                      (cond
+                        ((null? ancs-to-view)
+                         (cons
+                          (reverse pos-nset)
+                          (process-single (car src) (cdr src) vacant-num)))
+                        ((memq next (<a href="sxpathlib.html#codefunc50657">sxml:attr-list</a> (car ancs-to-view)))
+                         ; next is an attribute
+                         (let ((pos-result
+                                (process-single (car src) (cdr src) vacant-num)))
+                           (cons
+                            (append (reverse pos-nset) (car pos-result))
+                            pos-result)))
+                        (else  ; go to the next level                        
+                         (loop
+                          (car ancs-to-view)
+                          (cdr ancs-to-view)                                    
+                          (map
+                           (lambda (n) (cons n (cdr ancs-to-view)))
+                           (cond
+                             ((memq this-level
+                                    (cdr  ; parent is an element =&gt; children
+                                     (car ancs-to-view)))
+                              =&gt; cdr)
+                             (else  ; curr-node is an attribute node
+                              ((<a href="sxpathlib.html#codefunc3917">select-kids</a> <a href="sxpathlib.html#codefunc63215">sxml:node?</a>) (car ancs-to-view)))))
+                          pos-nset
+                          vacant-num))))
+                     ((memq next (<a href="sxpathlib.html#codefunc50657">sxml:attr-list</a> (caar ancs-to-view)))
+                      ; next node is an attribute of currently scanned node
+                      (let ((pos-result
+                             (process-single (car src) (cdr src) vacant-num)))
+                        (cons
+                         (append (reverse pos-nset) (car pos-result))
+                         pos-result)))                     
+                     ((eq? (caar content-set) next)
+                      ; current node is eq to the next one in src
+                      (let add-desc ((to-scan
+                                      (descend
+                                       (<a href="xpath-context.html#codefunc37605">draft:smart-make-context</a>
+                                        (caar content-set)
+                                        (cdar content-set)
+                                        num-anc)))
+                                     (pos-nset pos-nset)
+                                     (vacant-num vacant-num))
+                        (if
+                         (null? to-scan)
+                         (let ((pos-result
+                                (process-single
+                                 (car src) (cdr src) vacant-num)))
+                           (cons
+                            (append (reverse pos-nset) (car pos-result))
+                            pos-result))
+                         (add-desc (cdr to-scan)
+                                   (cons (cons (car to-scan) vacant-num)
+                                         pos-nset)                                   
+                                   (+ vacant-num 1)))))
+                     (else  ; go on to scan the next node
+                      (loop
+                       this-level
+                       ancs-to-view
+                       (append
+                        (map
+                         (lambda (n) (cons n (car content-set)))
+                         ((<a href="sxpathlib.html#codefunc5616">sxml:child</a> <a href="sxpathlib.html#codefunc63215">sxml:node?</a>) (caar content-set)))
+                        (cdr content-set))
+                       (if
+                        (test-pred? (caar content-set))
+                        (cons (cons (<a href="xpath-context.html#codefunc37605">draft:smart-make-context</a>
+                                     (caar content-set) (cdar content-set)
+                                     num-anc)
+                                    vacant-num)
+                              pos-nset)
+                        pos-nset)                           
+                       (+ vacant-num 1)))))))))))
+      (lambda (node)  ; node or nodeset
+        (let ((nset (<a href="sxpathlib.html#codefunc11721">as-nodeset</a> node)))
+          (if (null? nset)  ; nothing to be done
+              nset
+              (<a href="common.html#codefunc20536">filter</a>  ; removing empty result nodesets
+               (lambda (x) (not (null? x)))
+               (process-single (car nset) (cdr nset) 1))))))))
+</pre>
+<h4><a name='codefunc26736' href='#docfunc26736'>ddo:following-sibling-single-level-pos</a></h4>
+<i><a href='#tocfunc26736'>Index</a></i><br>
+
+<pre> Following-sibling axis for the special case
+</pre>
+<pre>(define (<a href="ddo-axes.html#codefunc26736">ddo:following-sibling-single-level-pos</a> test-pred? . num-ancestors)
+  (let ((num-anc (if (null? num-ancestors) 0 (car num-ancestors))))
+    (letrec
+        (; curr - current context to be processed
+         ; src - remaining source contexts
+         ; vacant-num - order number for the result node
+         ; Returns:  pos-result
+         (process-single
+          (lambda (curr src vacant-num)
+            (if
+             (or (not (<a href="xpath-context.html#codefunc37046">sxml:context?</a> curr))
+                 (null? (<a href="xpath-context.html#codefunc46900">sxml:context-&gt;ancestors-u</a> curr)))
+             ; Siblings cannot be identified
+             (if (null? src)  ; recursion is over
+                 '()
+                 (process-single (car src) (cdr src) vacant-num))             
+             (cond
+               ((memq (<a href="xpath-context.html#codefunc6309">sxml:context-&gt;node-u</a> curr)
+                      (cdr  ; parent is an element =&gt; cdr gives its children
+                       (car (<a href="xpath-context.html#codefunc46900">sxml:context-&gt;ancestors-u</a> curr))))
+                =&gt; (lambda (foll-siblings)
+                     (let ((ancestors
+                            (<a href="xpath-context.html#codefunc47888">draft:list-head</a>
+                             (<a href="xpath-context.html#codefunc46900">sxml:context-&gt;ancestors-u</a> curr) num-anc)))
+                       (if
+                        (null? src)  ; no more nodes
+                        (let no-more ((foll-siblings (cdr foll-siblings))
+                                      (res '())
+                                      (vacant-num vacant-num))
+                          (if
+                           (null? foll-siblings)  ; everyone processed
+                           (list (reverse res))
+                           (no-more
+                            (cdr foll-siblings)
+                            (if (test-pred? (car foll-siblings))
+                                (cons
+                                 (cons
+                                  (if (null? ancestors)
+                                      (car foll-siblings)
+                                      (<a href="xpath-context.html#codefunc34204">draft:make-context</a>
+                                       (car foll-siblings) ancestors))
+                                  vacant-num)
+                                 res)
+                                res)
+                            (+ vacant-num 1))))
+                        ; else there are more nodes in src
+                        (let ((next (<a href="xpath-context.html#codefunc41847">sxml:context-&gt;node</a> (car src))))
+                          (let more ((foll-siblings (cdr foll-siblings))
+                                     (res '())
+                                     (vacant-num vacant-num))
+                            (if
+                             (null? foll-siblings)  ; everyone processed
+                             (cons
+                              (reverse res)
+                              (process-single (car src) (cdr src) vacant-num))
+                             (let ((new-res
+                                    (if (test-pred? (car foll-siblings))
+                                        (cons
+                                         (cons
+                                          (if (null? ancestors)
+                                              (car foll-siblings)
+                                              (<a href="xpath-context.html#codefunc34204">draft:make-context</a>
+                                               (car foll-siblings) ancestors))
+                                          vacant-num)
+                                         res)
+                                        res)))
+                               (if
+                                (eq? (car foll-siblings) next)  ; recursion
+                                (let ((pos-res
+                                       (process-single
+                                        (car src)
+                                        (cdr src)
+                                        (+ vacant-num 1))))
+                                  (if
+                                   (null? pos-res)  ; this shouldn't occur
+                                   (list (reverse new-res))
+                                   (cons (append
+                                          (reverse new-res) (car pos-res))
+                                         pos-res)))
+                                (more (cdr foll-siblings)
+                                      new-res
+                                      (+ vacant-num 1)))))))))))
+               (else  ; no following siblings
+                (if (null? src)  ; recursion is over
+                    '()
+                    (process-single (car src) (cdr src) vacant-num))))))))
+      (lambda (node)  ; node or nodeset
+        (let ((nset (<a href="sxpathlib.html#codefunc11721">as-nodeset</a> node)))
+          (if (null? nset)  ; nothing to be done
+              nset
+              (<a href="common.html#codefunc20536">filter</a>  ; removing empty result nodesets
+               (lambda (x) (not (null? x)))
+               (process-single (car nset) (cdr nset) 1))))))))
+</pre>
+<h4><a name='codefunc48570' href='#docfunc48570'>ddo:parent-single-level-pos</a></h4>
+<i><a href='#tocfunc48570'>Index</a></i><br>
+
+<pre> Parent axis, for position-based filtering
+ This function has very much the same with ddo:parent-pos. In future, we
+ should use a meta-function for paremetrization of these two
+</pre>
+<pre>(define (<a href="ddo-axes.html#codefunc48570">ddo:parent-single-level-pos</a> test-pred? . num-ancestors)
+  (let ((parent
+         (apply <a href="ddo-axes.html#codefunc8407">ddo:parent-single-level</a> (cons test-pred? num-ancestors))))
+    (letrec
+        ((add-order-num
+          (lambda (num nset)
+            (if (null? nset)
+                nset
+                (cons (list (cons (car nset) num))
+                      (add-order-num (+ num 1) (cdr nset)))))))
+      (lambda (node)   ; node or nodeset
+        (add-order-num 1 (parent node))))))
+</pre>
+<h4><a name='codefunc56770' href='#docfunc56770'>ddo:preceding-single-level-pos</a></h4>
+<i><a href='#tocfunc56770'>Index</a></i><br>
+
+<pre> Preceding axis for the special case
+</pre>
+<pre>(define (<a href="ddo-axes.html#codefunc56770">ddo:preceding-single-level-pos</a> test-pred? . num-ancestors)
+  (let* ((num-anc (if (null? num-ancestors) 0 (car num-ancestors)))
+         (descend (<a href="xpath-context.html#codefunc35017">draft:descendant-or-self</a> test-pred? num-anc))
+         (precede (<a href="xpath-context.html#codefunc48197">draft:preceding</a> test-pred? num-anc)))
+    (letrec
+        (; curr - current context to be processed
+         ; src - remaining source contexts
+         ; vacant-num - order number for the result node
+         ; Returns:  pos-result
+         (process-single
+          (lambda (curr src vacant-num)
+            (cond
+              ((null? src)  ; no more nodes
+               (let add-labels ((to-scan (precede curr))
+                                (res '())
+                                (vacant-num vacant-num))
+                 (if (null? to-scan)
+                     (list (reverse res))
+                     (add-labels (cdr to-scan)
+                                 (cons (cons (car to-scan) vacant-num) res)
+                                 (- vacant-num 1)))))
+              ((not (<a href="xpath-context.html#codefunc37046">sxml:context?</a> curr))  ; can't find following nodes
+               (cons '() (process-single (car src) (cdr src) vacant-num)))
+              (else
+               (let ((next (<a href="xpath-context.html#codefunc41847">sxml:context-&gt;node</a> (car src))))
+                 (let loop ((this-level (<a href="xpath-context.html#codefunc6309">sxml:context-&gt;node-u</a> curr))
+                            (ancs-to-view (<a href="xpath-context.html#codefunc46900">sxml:context-&gt;ancestors-u</a> curr))
+                            (content-set '())
+                            (pos-nset '())
+                            (vacant-num vacant-num))
+                   (cond
+                     ((null? content-set)  ; no one to scan at this level
+                      (if
+                       (null? ancs-to-view)
+                       (cons
+                        (reverse pos-nset)
+                        (process-single (car src) (cdr src) vacant-num))
+                       (loop
+                        (car ancs-to-view)
+                        (cdr ancs-to-view)                          
+                        (reverse
+                         (map
+                          <a href="xpath-context.html#codefunc8528">sxml:context-&gt;content</a>
+                          (descend
+                           (map
+                            (lambda (n)
+                              (<a href="xpath-context.html#codefunc37605">draft:smart-make-context</a>
+                               n (cdr ancs-to-view) num-anc))
+                            (cond
+                              ((memq this-level
+                                     (reverse
+                                      ((<a href="sxpathlib.html#codefunc3917">select-kids</a> <a href="sxpathlib.html#codefunc63215">sxml:node?</a>)
+                                       (car ancs-to-view))))                             
+                               =&gt; (lambda (nset) (reverse (cdr nset))))
+                              (else  ; curr-node is an attribute node
+                               '()))))))
+                          pos-nset
+                          vacant-num)))                     
+                     ((eq? (caar content-set) next)
+                      ; current node is eq to the next one in src
+                      (let ((pos-result
+                             (process-single
+                              (car src)
+                              (cdr src)
+                              (- vacant-num 1))))
+                        (cons
+                         (append
+                          (reverse
+                           (if
+                            (test-pred? (caar content-set))
+                            (cons (cons (<a href="xpath-context.html#codefunc37605">draft:smart-make-context</a>
+                                         (caar content-set) (cdar content-set)
+                                         num-anc)
+                                        vacant-num)
+                                  pos-nset)
+                            pos-nset))
+                          (car pos-result))
+                         pos-result)))
+                     (else  ; go on to scan the next node
+                      (loop
+                       this-level
+                       ancs-to-view                       
+                       (cdr content-set)
+                       (if
+                        (test-pred? (caar content-set))
+                        (cons (cons (<a href="xpath-context.html#codefunc37605">draft:smart-make-context</a>
+                                     (caar content-set) (cdar content-set)
+                                     num-anc)
+                                    vacant-num)
+                              pos-nset)
+                        pos-nset)
+                       (- vacant-num 1)))))))))))
+      (lambda (node)  ; node or nodeset
+        (let ((nset (reverse (<a href="sxpathlib.html#codefunc11721">as-nodeset</a> node))))
+          (if (null? nset)  ; nothing to be done
+              nset
+              (<a href="common.html#codefunc20536">filter</a>  ; removing empty result nodesets
+               (lambda (x) (not (null? x)))
+               (process-single (car nset) (cdr nset) -1))))))))
+</pre>
+<h4><a name='codefunc20329' href='#docfunc20329'>ddo:preceding-sibling-single-level-pos</a></h4>
+<i><a href='#tocfunc20329'>Index</a></i><br>
+
+<pre> Preceding-sibling axis for the special case
+</pre>
+<pre>(define (<a href="ddo-axes.html#codefunc20329">ddo:preceding-sibling-single-level-pos</a> test-pred? . num-ancestors)
+  (let ((num-anc (if (null? num-ancestors) 0 (car num-ancestors))))
+    (letrec
+        (; curr - current context to be processed
+         ; src - remaining source contexts
+         ; vacant-num - order number for the result node
+         ; Returns:  pos-result
+         (process-single
+          (lambda (curr src vacant-num)
+            (if
+             (or (not (<a href="xpath-context.html#codefunc37046">sxml:context?</a> curr))
+                 (null? (<a href="xpath-context.html#codefunc46900">sxml:context-&gt;ancestors-u</a> curr)))
+             ; Siblings cannot be identified
+             (if (null? src)  ; recursion is over
+                 '()
+                 (process-single (car src) (cdr src) vacant-num))             
+             (cond
+               ((memq (<a href="xpath-context.html#codefunc6309">sxml:context-&gt;node-u</a> curr)
+                      (reverse
+                       (cdr  ; parent is an element =&gt; cdr gives its children
+                        (car (<a href="xpath-context.html#codefunc46900">sxml:context-&gt;ancestors-u</a> curr)))))
+                =&gt; (lambda (prec-siblings)
+                     (let ((ancestors
+                            (<a href="xpath-context.html#codefunc47888">draft:list-head</a>
+                             (<a href="xpath-context.html#codefunc46900">sxml:context-&gt;ancestors-u</a> curr) num-anc)))
+                       (if
+                        (null? src)  ; no more nodes
+                        (let no-more ((prec-siblings (cdr prec-siblings))
+                                      (res '())
+                                      (vacant-num vacant-num))
+                          (if
+                           (null? prec-siblings)  ; everyone processed
+                           (list (reverse res))
+                           (no-more
+                            (cdr prec-siblings)
+                            (if (test-pred? (car prec-siblings))
+                                (cons
+                                 (cons
+                                  (if (null? ancestors)
+                                      (car prec-siblings)
+                                      (<a href="xpath-context.html#codefunc34204">draft:make-context</a>
+                                       (car prec-siblings) ancestors))
+                                  vacant-num)
+                                 res)
+                                res)
+                            (- vacant-num 1))))
+                        ; else there are more nodes in src
+                        (let ((next (<a href="xpath-context.html#codefunc41847">sxml:context-&gt;node</a> (car src))))
+                          (let more ((prec-siblings (cdr prec-siblings))
+                                     (res '())
+                                     (vacant-num vacant-num))
+                            (if
+                             (null? prec-siblings)  ; everyone processed
+                             (cons
+                              (reverse res)
+                              (process-single (car src) (cdr src) vacant-num))
+                             (let ((new-res
+                                    (if (test-pred? (car prec-siblings))
+                                        (cons
+                                         (cons
+                                          (if (null? ancestors)
+                                              (car prec-siblings)
+                                              (<a href="xpath-context.html#codefunc34204">draft:make-context</a>
+                                               (car prec-siblings) ancestors))
+                                          vacant-num)
+                                         res)
+                                        res)))
+                               (if
+                                (eq? (car prec-siblings) next)  ; recursion
+                                (let ((pos-res
+                                       (process-single
+                                        (car src)
+                                        (cdr src)
+                                        (- vacant-num 1))))
+                                  (if
+                                   (null? pos-res)  ; this shouldn't occur
+                                   (list (reverse new-res))
+                                   (cons (append
+                                          (reverse new-res) (car pos-res))
+                                         pos-res)))
+                                (more (cdr prec-siblings)
+                                      new-res
+                                      (- vacant-num 1)))))))))))
+               (else  ; no preceding siblings
+                (if (null? src)  ; recursion is over
+                    '()
+                    (process-single (car src) (cdr src) vacant-num))))))))
+      (lambda (node)  ; node or nodeset
+        (let ((nset (reverse (<a href="sxpathlib.html#codefunc11721">as-nodeset</a> node))))
+          (if (null? nset)  ; nothing to be done
+              nset
+              (reverse
+               (<a href="common.html#codefunc20536">filter</a>  ; removing empty result nodesets
+                (lambda (x) (not (null? x)))
+                (process-single (car nset) (cdr nset) -1)))))))))
+</pre></body></html>

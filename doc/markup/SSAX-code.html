@@ -1,0 +1,438 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN""http://www.w3.org/TR/html401/loose.dtd"><html><head><meta name="GENERATOR" content="Mole: The Scheme Source Code Digger"><title>Module: ssax-code</title><meta name='keywords' content=''></head><body bgcolor='#ffffff' text='#384412'  link='#11af05' vlink='#728b09'>
+<center><h1>Module: ssax-code</h1></center>
+<p><br>
+<!-- Table of content -->
+<p><dl>
+
+f:  <a name='tocfunc63861' href='#docfunc63861' style='text-decoration:none'>make-xml-token</a><br>
+
+f:  <a name='tocfunc44850' href='#docfunc44850' style='text-decoration:none'>xml-token?</a><br>
+
+f:  <a name='tocfunc40600' href='#docfunc40600' style='text-decoration:none'>string-whitespace?</a><br>
+
+f:  <a name='tocfunc11596' href='#docfunc11596' style='text-decoration:none'>assq-values</a><br>
+
+f:  <a name='tocfunc8658' href='#docfunc8658' style='text-decoration:none'>fold-right</a><br>
+
+f:  <a name='tocfunc54226' href='#docfunc54226' style='text-decoration:none'>fold</a><br>
+
+f:  <a name='tocfunc30487' href='#docfunc30487' style='text-decoration:none'>ssax:S-chars</a><br>
+
+f:  <a name='tocfunc63037' href='#docfunc63037' style='text-decoration:none'>ssax:skip-S</a><br>
+
+f:  <a name='tocfunc7929' href='#docfunc7929' style='text-decoration:none'>ssax:ncname-starting-char?</a><br>
+
+f:  <a name='tocfunc63202' href='#docfunc63202' style='text-decoration:none'>ssax:read-NCName</a><br>
+
+f:  <a name='tocfunc43248' href='#docfunc43248' style='text-decoration:none'>ssax:read-QName</a><br>
+
+f:  <a name='tocfunc34308' href='#docfunc34308' style='text-decoration:none'>ssax:Prefix-XML</a><br>
+
+f:  <a name='tocfunc24155' href='#docfunc24155' style='text-decoration:none'>name-compare</a><br>
+
+f:  <a name='tocfunc56128' href='#docfunc56128' style='text-decoration:none'>ssax:largest-unres-name</a><br>
+
+f:  <a name='tocfunc30768' href='#docfunc30768' style='text-decoration:none'>ssax:read-markup-token</a><br>
+
+f:  <a name='tocfunc24411' href='#docfunc24411' style='text-decoration:none'>ssax:skip-pi</a><br>
+
+f:  <a name='tocfunc4659' href='#docfunc4659' style='text-decoration:none'>ssax:read-pi-body-as-string</a><br>
+
+f:  <a name='tocfunc27966' href='#docfunc27966' style='text-decoration:none'>ssax:skip-internal-dtd</a><br>
+
+f:  <a name='tocfunc56261' href='#docfunc56261' style='text-decoration:none'>ssax:read-cdata-body</a><br>
+
+f:  <a name='tocfunc41008' href='#docfunc41008' style='text-decoration:none'>ssax:read-char-ref</a><br>
+
+f:  <a name='tocfunc4169' href='#docfunc4169' style='text-decoration:none'>ssax:predefined-parsed-entities</a><br>
+
+f:  <a name='tocfunc58368' href='#docfunc58368' style='text-decoration:none'>ssax:handle-parsed-entity</a><br>
+
+f:  <a name='tocfunc51561' href='#docfunc51561' style='text-decoration:none'>make-empty-attlist</a><br>
+
+f:  <a name='tocfunc59000' href='#docfunc59000' style='text-decoration:none'>attlist-add</a><br>
+
+f:  <a name='tocfunc25549' href='#docfunc25549' style='text-decoration:none'>attlist-null?</a><br>
+
+f:  <a name='tocfunc41126' href='#docfunc41126' style='text-decoration:none'>attlist-remove-top</a><br>
+
+f:  <a name='tocfunc49361' href='#docfunc49361' style='text-decoration:none'>attlist->alist</a><br>
+
+f:  <a name='tocfunc21894' href='#docfunc21894' style='text-decoration:none'>attlist-fold</a><br>
+
+f:  <a name='tocfunc7667' href='#docfunc7667' style='text-decoration:none'>ssax:read-attributes</a><br>
+
+f:  <a name='tocfunc32590' href='#docfunc32590' style='text-decoration:none'>ssax:resolve-name</a><br>
+
+f:  <a name='tocfunc40058' href='#docfunc40058' style='text-decoration:none'>ssax:uri-string->symbol</a><br>
+
+f:  <a name='tocfunc16606' href='#docfunc16606' style='text-decoration:none'>ssax:complete-start-tag</a><br>
+
+f:  <a name='tocfunc3864' href='#docfunc3864' style='text-decoration:none'>ssax:read-external-id</a><br>
+
+f:  <a name='tocfunc47777' href='#docfunc47777' style='text-decoration:none'>ssax:scan-Misc</a><br>
+
+f:  <a name='tocfunc41101' href='#docfunc41101' style='text-decoration:none'>ssax:read-char-data</a><br>
+
+f:  <a name='tocfunc13738' href='#docfunc13738' style='text-decoration:none'>ssax:assert-token</a><br>
+
+f:  <a name='tocfunc15196' href='#docfunc15196' style='text-decoration:none'>ssax:reverse-collect-str</a><br>
+
+f:  <a name='tocfunc45027' href='#docfunc45027' style='text-decoration:none'>ssax:reverse-collect-str-drop-ws</a><br>
+
+f:  <a name='tocfunc62346' href='#docfunc62346' style='text-decoration:none'>ssax:xml->sxml</a><br>
+</dl>
+
+<h4><a name='docfunc63861' href='#tocfunc63861'>make-xml-token</a></h4>
+(define (make-xml-token kind head)<i><br> ... <a href='#codefunc63861'>Full Code</a> ... )</i><p><br>
+
+<h4><a name='docfunc44850' href='#tocfunc44850'>xml-token?</a></h4>
+(define xml-token? <i><br> ... <a href='#codefunc44850'>Full Code</a> ... )</i><p><br>
+
+<h4><a name='docfunc40600' href='#tocfunc40600'>string-whitespace?</a></h4>
+(define (string-whitespace? str)<i><br> ... <a href='#codefunc40600'>Full Code</a> ... )</i><p><br>
+
+<h4><a name='docfunc11596' href='#tocfunc11596'>assq-values</a></h4>
+(define (assq-values val alist)<i><br> ... <a href='#codefunc11596'>Full Code</a> ... )</i><p><br>
+
+<h4><a name='docfunc8658' href='#tocfunc8658'>fold-right</a></h4>
+(define (fold-right kons knil lis1)<i><br> ... <a href='#codefunc8658'>Full Code</a> ... )</i><p><br>
+
+<h4><a name='docfunc54226' href='#tocfunc54226'>fold</a></h4>
+(define (fold kons knil lis1)<i><br> ... <a href='#codefunc54226'>Full Code</a> ... )</i><p><br>
+
+<h4><a name='docfunc30487' href='#tocfunc30487'>ssax:S-chars</a></h4>
+(define ssax:S-chars <i><br> ... <a href='#codefunc30487'>Full Code</a> ... )</i><p><br>
+
+<h4><a name='docfunc63037' href='#tocfunc63037'>ssax:skip-S</a></h4>
+(define (ssax:skip-S port)<i><br> ... <a href='#codefunc63037'>Full Code</a> ... )</i><p><br>
+
+<h4><a name='docfunc7929' href='#tocfunc7929'>ssax:ncname-starting-char?</a></h4>
+(define (ssax:ncname-starting-char? a-char)<i><br> ... <a href='#codefunc7929'>Full Code</a> ... )</i><p><br>
+
+<h4><a name='docfunc63202' href='#tocfunc63202'>ssax:read-NCName</a></h4>
+(define (ssax:read-NCName port)<i><br> ... <a href='#codefunc63202'>Full Code</a> ... )</i><p><br>
+
+<h4><a name='docfunc43248' href='#tocfunc43248'>ssax:read-QName</a></h4>
+(define (ssax:read-QName port)<i><br> ... <a href='#codefunc43248'>Full Code</a> ... )</i><p><br>
+
+<h4><a name='docfunc34308' href='#tocfunc34308'>ssax:Prefix-XML</a></h4>
+(define ssax:Prefix-XML <i><br> ... <a href='#codefunc34308'>Full Code</a> ... )</i><p><br>
+
+<h4><a name='docfunc24155' href='#tocfunc24155'>name-compare</a></h4>
+(define name-compare <i><br> ... <a href='#codefunc24155'>Full Code</a> ... )</i><p><br>
+
+<h4><a name='docfunc56128' href='#tocfunc56128'>ssax:largest-unres-name</a></h4>
+(define ssax:largest-unres-name <i><br> ... <a href='#codefunc56128'>Full Code</a> ... )</i><p><br>
+
+<h4><a name='docfunc30768' href='#tocfunc30768'>ssax:read-markup-token</a></h4>
+(define ssax:read-markup-token <i><br> ... <a href='#codefunc30768'>Full Code</a> ... )</i><p><br>
+
+<h4><a name='docfunc24411' href='#tocfunc24411'>ssax:skip-pi</a></h4>
+(define (ssax:skip-pi port)<i><br> ... <a href='#codefunc24411'>Full Code</a> ... )</i><p><br>
+
+<h4><a name='docfunc4659' href='#tocfunc4659'>ssax:read-pi-body-as-string</a></h4>
+(define (ssax:read-pi-body-as-string port)<i><br> ... <a href='#codefunc4659'>Full Code</a> ... )</i><p><br>
+
+<h4><a name='docfunc27966' href='#tocfunc27966'>ssax:skip-internal-dtd</a></h4>
+(define (ssax:skip-internal-dtd port)<i><br> ... <a href='#codefunc27966'>Full Code</a> ... )</i><p><br>
+
+<h4><a name='docfunc56261' href='#tocfunc56261'>ssax:read-cdata-body</a></h4>
+(define ssax:read-cdata-body <i><br> ... <a href='#codefunc56261'>Full Code</a> ... )</i><p><br>
+
+<h4><a name='docfunc41008' href='#tocfunc41008'>ssax:read-char-ref</a></h4>
+(define (ssax:read-char-ref port)<i><br> ... <a href='#codefunc41008'>Full Code</a> ... )</i><p><br>
+
+<h4><a name='docfunc4169' href='#tocfunc4169'>ssax:predefined-parsed-entities</a></h4>
+(define ssax:predefined-parsed-entities <i><br> ... <a href='#codefunc4169'>Full Code</a> ... )</i><p><br>
+
+<h4><a name='docfunc58368' href='#tocfunc58368'>ssax:handle-parsed-entity</a></h4>
+(define (ssax:handle-parsed-entity port name entities content-handler str-handler seed)<i><br> ... <a href='#codefunc58368'>Full Code</a> ... )</i><p><br>
+
+<h4><a name='docfunc51561' href='#tocfunc51561'>make-empty-attlist</a></h4>
+(define (make-empty-attlist)<i><br> ... <a href='#codefunc51561'>Full Code</a> ... )</i><p><br>
+
+<h4><a name='docfunc59000' href='#tocfunc59000'>attlist-add</a></h4>
+(define (attlist-add attlist name-value)<i><br> ... <a href='#codefunc59000'>Full Code</a> ... )</i><p><br>
+
+<h4><a name='docfunc25549' href='#tocfunc25549'>attlist-null?</a></h4>
+(define attlist-null? <i><br> ... <a href='#codefunc25549'>Full Code</a> ... )</i><p><br>
+
+<h4><a name='docfunc41126' href='#tocfunc41126'>attlist-remove-top</a></h4>
+(define (attlist-remove-top attlist)<i><br> ... <a href='#codefunc41126'>Full Code</a> ... )</i><p><br>
+
+<h4><a name='docfunc49361' href='#tocfunc49361'>attlist->alist</a></h4>
+(define (attlist-&gt;alist attlist)<i><br> ... <a href='#codefunc49361'>Full Code</a> ... )</i><p><br>
+
+<h4><a name='docfunc21894' href='#tocfunc21894'>attlist-fold</a></h4>
+(define attlist-fold <i><br> ... <a href='#codefunc21894'>Full Code</a> ... )</i><p><br>
+
+<h4><a name='docfunc7667' href='#tocfunc7667'>ssax:read-attributes</a></h4>
+(define ssax:read-attributes <i><br> ... <a href='#codefunc7667'>Full Code</a> ... )</i><p><br>
+
+<h4><a name='docfunc32590' href='#tocfunc32590'>ssax:resolve-name</a></h4>
+(define (ssax:resolve-name port unres-name namespaces apply-default-ns?)<i><br> ... <a href='#codefunc32590'>Full Code</a> ... )</i><p><br>
+
+<h4><a name='docfunc40058' href='#tocfunc40058'>ssax:uri-string->symbol</a></h4>
+(define (ssax:uri-string-&gt;symbol uri-str)<i><br> ... <a href='#codefunc40058'>Full Code</a> ... )</i><p><br>
+
+<h4><a name='docfunc16606' href='#tocfunc16606'>ssax:complete-start-tag</a></h4>
+(define ssax:complete-start-tag <i><br> ... <a href='#codefunc16606'>Full Code</a> ... )</i><p><br>
+
+<h4><a name='docfunc3864' href='#tocfunc3864'>ssax:read-external-id</a></h4>
+(define (ssax:read-external-id port)<i><br> ... <a href='#codefunc3864'>Full Code</a> ... )</i><p><br>
+
+<h4><a name='docfunc47777' href='#tocfunc47777'>ssax:scan-Misc</a></h4>
+(define (ssax:scan-Misc port)<i><br> ... <a href='#codefunc47777'>Full Code</a> ... )</i><p><br>
+
+<h4><a name='docfunc41101' href='#tocfunc41101'>ssax:read-char-data</a></h4>
+(define ssax:read-char-data <i><br> ... <a href='#codefunc41101'>Full Code</a> ... )</i><p><br>
+
+<h4><a name='docfunc13738' href='#tocfunc13738'>ssax:assert-token</a></h4>
+(define (ssax:assert-token token kind gi error-cont)<i><br> ... <a href='#codefunc13738'>Full Code</a> ... )</i><p><br>
+
+<h4><a name='docfunc15196' href='#tocfunc15196'>ssax:reverse-collect-str</a></h4>
+(define (ssax:reverse-collect-str fragments)<i><br> ... <a href='#codefunc15196'>Full Code</a> ... )</i><p><br>
+
+<h4><a name='docfunc45027' href='#tocfunc45027'>ssax:reverse-collect-str-drop-ws</a></h4>
+(define (ssax:reverse-collect-str-drop-ws fragments)<i><br> ... <a href='#codefunc45027'>Full Code</a> ... )</i><p><br>
+
+<h4><a name='docfunc62346' href='#tocfunc62346'>ssax:xml->sxml</a></h4>
+(define (ssax:xml-&gt;sxml port namespace-prefix-assig)<i><br> ... <a href='#codefunc62346'>Full Code</a> ... )</i><p><br>
+<center><h1>Code</h1></center>
+
+<h5><a name='codeapp30668' href='#docapp30668'>define-syntax</a></h5>
+<i><a href='#tocapp30668'>Index</a></i><br>
+
+<pre>(define-syntax run-test (syntax-rules (define) ((run-test &quot;scan-exp&quot; (define vars body)) (define vars (run-test &quot;scan-exp&quot; body))) ((run-test &quot;scan-exp&quot; ?body) (letrec-syntax ((scan-exp (syntax-rules (quote quasiquote !) ((scan-exp (quote ()) (k-head ! . args)) (k-head (quote ()) . args)) ((scan-exp (quote (hd . tl)) k) (scan-lit-lst (hd . tl) (do-wrap ! quasiquote k))) ((scan-exp (quasiquote (hd . tl)) k) (scan-lit-lst (hd . tl) (do-wrap ! quasiquote k))) ((scan-exp (quote x) (k-head ! . args)) (k-head (if (string? (quote x)) (string-&gt;symbol (quote x)) (quote x)) . args)) ((scan-exp (hd . tl) k) (scan-exp hd (do-tl ! scan-exp tl k))) ((scan-exp x (k-head ! . args)) (k-head x . args)))) (do-tl (syntax-rules (!) ((do-tl processed-hd fn () (k-head ! . args)) (k-head (processed-hd) . args)) ((do-tl processed-hd fn old-tl k) (fn old-tl (do-cons ! processed-hd k))))) (do-cons (syntax-rules (!) ((do-cons processed-tl processed-hd (k-head ! . args)) (k-head (processed-hd . processed-tl) . args)))) (do-wrap (syntax-rules (!) ((do-wrap val fn (k-head ! . args)) (k-head (fn val) . args)))) (do-finish (syntax-rules () ((do-finish new-body) new-body))) (scan-lit-lst (syntax-rules (quote unquote unquote-splicing !) ((scan-lit-lst (quote ()) (k-head ! . args)) (k-head (quote ()) . args)) ((scan-lit-lst (quote (hd . tl)) k) (do-tl quote scan-lit-lst ((hd . tl)) k)) ((scan-lit-lst (unquote x) k) (scan-exp x (do-wrap ! unquote k))) ((scan-lit-lst (unquote-splicing x) k) (scan-exp x (do-wrap ! unquote-splicing k))) ((scan-lit-lst (quote x) (k-head ! . args)) (k-head (unquote (if (string? (quote x)) (string-&gt;symbol (quote x)) (quote x))) . args)) ((scan-lit-lst (hd . tl) k) (scan-lit-lst hd (do-tl ! scan-lit-lst tl k))) ((scan-lit-lst x (k-head ! . args)) (k-head x . args))))) (scan-exp ?body (do-finish !)))) ((run-test body ...) (begin (run-test &quot;scan-exp&quot; body) ...))))
+</pre>
+<h4><a name='codefunc63861' href='#docfunc63861'>make-xml-token</a></h4>
+<i><a href='#tocfunc63861'>Index</a></i><br>
+
+<pre>(define (<a href="SSAX-code.html#codefunc63861">make-xml-token</a> kind head) (cons kind head))
+</pre>
+<h4><a name='codefunc44850' href='#docfunc44850'>xml-token?</a></h4>
+<i><a href='#tocfunc44850'>Index</a></i><br>
+
+<pre>(define <a href="SSAX-code.html#codefunc44850">xml-token?</a> pair?)
+</pre>
+<h5><a name='codeapp30668' href='#docapp30668'>define-syntax</a></h5>
+<i><a href='#tocapp30668'>Index</a></i><br>
+
+<pre>(define-syntax xml-token-kind (syntax-rules () ((xml-token-kind token) (car token))))
+</pre>
+<h5><a name='codeapp30668' href='#docapp30668'>define-syntax</a></h5>
+<i><a href='#tocapp30668'>Index</a></i><br>
+
+<pre>(define-syntax xml-token-head (syntax-rules () ((xml-token-head token) (cdr token))))
+</pre>
+<h4><a name='codefunc40600' href='#docfunc40600'>string-whitespace?</a></h4>
+<i><a href='#tocfunc40600'>Index</a></i><br>
+
+<pre>(define (<a href="SSAX-code.html#codefunc40600">string-whitespace?</a> str) (let ((len (string-length str))) (cond ((zero? len) #t) ((= 1 len) (char-whitespace? (string-ref str 0))) ((= 2 len) (and (char-whitespace? (string-ref str 0)) (char-whitespace? (string-ref str 1)))) (else (let loop ((i 0)) (or (&gt;= i len) (and (char-whitespace? (string-ref str i)) (loop (<a href="myenv.html#codemacro28364">inc</a> i)))))))))
+</pre>
+<h4><a name='codefunc11596' href='#docfunc11596'>assq-values</a></h4>
+<i><a href='#tocfunc11596'>Index</a></i><br>
+
+<pre>(define (<a href="SSAX-code.html#codefunc11596">assq-values</a> val alist) (let loop ((alist alist) (scanned (quote ()))) (cond ((null? alist) (values #f scanned)) ((equal? val (caar alist)) (values (car alist) (append scanned (cdr alist)))) (else (loop (cdr alist) (cons (car alist) scanned))))))
+</pre>
+<h4><a name='codefunc8658' href='#docfunc8658'>fold-right</a></h4>
+<i><a href='#tocfunc8658'>Index</a></i><br>
+
+<pre>(define (<a href="SSAX-code.html#codefunc8658">fold-right</a> kons knil lis1) (let recur ((lis lis1)) (if (null? lis) knil (let ((head (car lis))) (kons head (recur (cdr lis)))))))
+</pre>
+<h4><a name='codefunc54226' href='#docfunc54226'>fold</a></h4>
+<i><a href='#tocfunc54226'>Index</a></i><br>
+
+<pre>(define (<a href="SSAX-code.html#codefunc54226">fold</a> kons knil lis1) (let lp ((lis lis1) (ans knil)) (if (null? lis) ans (lp (cdr lis) (kons (car lis) ans)))))
+</pre>
+<h4><a name='codefunc30487' href='#docfunc30487'>ssax:S-chars</a></h4>
+<i><a href='#tocfunc30487'>Index</a></i><br>
+
+<pre>(define <a href="SSAX-code.html#codefunc30487">ssax:S-chars</a> (map ascii-&gt;char (quote (32 10 9 13))))
+</pre>
+<h4><a name='codefunc63037' href='#docfunc63037'>ssax:skip-S</a></h4>
+<i><a href='#tocfunc63037'>Index</a></i><br>
+
+<pre>(define (<a href="SSAX-code.html#codefunc63037">ssax:skip-S</a> port) (<a href="input-parse.html#codefunc8671">skip-while</a> <a href="SSAX-code.html#codefunc30487">ssax:S-chars</a> port))
+</pre>
+<h4><a name='codefunc7929' href='#docfunc7929'>ssax:ncname-starting-char?</a></h4>
+<i><a href='#tocfunc7929'>Index</a></i><br>
+
+<pre>(define (<a href="SSAX-code.html#codefunc7929">ssax:ncname-starting-char?</a> a-char) (and (char? a-char) (or (char-alphabetic? a-char) (char=? #\_ a-char))))
+</pre>
+<h4><a name='codefunc63202' href='#docfunc63202'>ssax:read-NCName</a></h4>
+<i><a href='#tocfunc63202'>Index</a></i><br>
+
+<pre>(define (<a href="SSAX-code.html#codefunc63202">ssax:read-NCName</a> port) (let ((first-char (peek-char port))) (or (<a href="SSAX-code.html#codefunc7929">ssax:ncname-starting-char?</a> first-char) (<a href="parse-error.html#codefunc37207">parser-error</a> port &quot;XMLNS [4] for '&quot; first-char &quot;'&quot;))) (string-&gt;symbol (<a href="input-parse.html#codefunc38780">next-token-of</a> (lambda (c) (cond ((eof-object? c) #f) ((char-alphabetic? c) c) ((string-index &quot;0123456789.-_&quot; c) c) (else #f))) port)))
+</pre>
+<h4><a name='codefunc43248' href='#docfunc43248'>ssax:read-QName</a></h4>
+<i><a href='#tocfunc43248'>Index</a></i><br>
+
+<pre>(define (<a href="SSAX-code.html#codefunc43248">ssax:read-QName</a> port) (let ((prefix-or-localpart (<a href="SSAX-code.html#codefunc63202">ssax:read-NCName</a> port))) (case (peek-char port) ((#\:) (read-char port) (cons prefix-or-localpart (<a href="SSAX-code.html#codefunc63202">ssax:read-NCName</a> port))) (else prefix-or-localpart))))
+</pre>
+<h4><a name='codefunc34308' href='#docfunc34308'>ssax:Prefix-XML</a></h4>
+<i><a href='#tocfunc34308'>Index</a></i><br>
+
+<pre>(define <a href="SSAX-code.html#codefunc34308">ssax:Prefix-XML</a> (string-&gt;symbol &quot;xml&quot;))
+</pre>
+<h4><a name='codefunc24155' href='#docfunc24155'>name-compare</a></h4>
+<i><a href='#tocfunc24155'>Index</a></i><br>
+
+<pre>(define <a href="SSAX-code.html#codefunc24155">name-compare</a> (letrec ((symbol-compare (lambda (symb1 symb2) (cond ((eq? symb1 symb2) (quote =)) ((string&lt;? (symbol-&gt;string symb1) (symbol-&gt;string symb2)) (quote &lt;)) (else (quote &gt;)))))) (lambda (name1 name2) (cond ((symbol? name1) (if (symbol? name2) (symbol-compare name1 name2) (quote &lt;))) ((symbol? name2) (quote &gt;)) ((eq? name2 <a href="SSAX-code.html#codefunc56128">ssax:largest-unres-name</a>) (quote &lt;)) ((eq? name1 <a href="SSAX-code.html#codefunc56128">ssax:largest-unres-name</a>) (quote &gt;)) ((eq? (car name1) (car name2)) (symbol-compare (cdr name1) (cdr name2))) (else (symbol-compare (car name1) (car name2)))))))
+</pre>
+<h4><a name='codefunc56128' href='#docfunc56128'>ssax:largest-unres-name</a></h4>
+<i><a href='#tocfunc56128'>Index</a></i><br>
+
+<pre>(define <a href="SSAX-code.html#codefunc56128">ssax:largest-unres-name</a> (cons (string-&gt;symbol &quot;#LARGEST-SYMBOL&quot;) (string-&gt;symbol &quot;#LARGEST-SYMBOL&quot;)))
+</pre>
+<h4><a name='codefunc30768' href='#docfunc30768'>ssax:read-markup-token</a></h4>
+<i><a href='#tocfunc30768'>Index</a></i><br>
+
+<pre>(define <a href="SSAX-code.html#codefunc30768">ssax:read-markup-token</a> (let () (define (skip-comment port) (<a href="input-parse.html#codefunc11041">assert-curr-char</a> (quote (#\-)) &quot;XML [15], second dash&quot; port) (if (not (<a href="look-for-str.html#codefunc20782">find-string-from-port?</a> &quot;--&gt;&quot; port)) (<a href="parse-error.html#codefunc37207">parser-error</a> port &quot;XML [15], no --&gt;&quot;)) (<a href="SSAX-code.html#codefunc63861">make-xml-token</a> (quote COMMENT) #f)) (define (read-cdata port) (<a href="myenv.html#codemacro19783">assert</a> (string=? &quot;CDATA[&quot; (read-string 6 port))) (<a href="SSAX-code.html#codefunc63861">make-xml-token</a> (quote CDSECT) #f)) (lambda (port) (<a href="input-parse.html#codefunc11041">assert-curr-char</a> (quote (#\&lt;)) &quot;start of the token&quot; port) (case (peek-char port) ((#\/) (read-char port) (begin0 (<a href="SSAX-code.html#codefunc63861">make-xml-token</a> (quote END) (<a href="SSAX-code.html#codefunc43248">ssax:read-QName</a> port)) (<a href="SSAX-code.html#codefunc63037">ssax:skip-S</a> port) (<a href="input-parse.html#codefunc11041">assert-curr-char</a> (quote (#\&gt;)) &quot;XML [42]&quot; port))) ((#\?) (read-char port) (<a href="SSAX-code.html#codefunc63861">make-xml-token</a> (quote PI) (<a href="SSAX-code.html#codefunc63202">ssax:read-NCName</a> port))) ((#\!) (case (<a href="input-parse.html#codefunc49057">peek-next-char</a> port) ((#\-) (read-char port) (skip-comment port)) ((#\[) (read-char port) (read-cdata port)) (else (<a href="SSAX-code.html#codefunc63861">make-xml-token</a> (quote DECL) (<a href="SSAX-code.html#codefunc63202">ssax:read-NCName</a> port))))) (else (<a href="SSAX-code.html#codefunc63861">make-xml-token</a> (quote START) (<a href="SSAX-code.html#codefunc43248">ssax:read-QName</a> port)))))))
+</pre>
+<h4><a name='codefunc24411' href='#docfunc24411'>ssax:skip-pi</a></h4>
+<i><a href='#tocfunc24411'>Index</a></i><br>
+
+<pre>(define (<a href="SSAX-code.html#codefunc24411">ssax:skip-pi</a> port) (if (not (<a href="look-for-str.html#codefunc20782">find-string-from-port?</a> &quot;?&gt;&quot; port)) (<a href="parse-error.html#codefunc37207">parser-error</a> port &quot;Failed to find ?&gt; terminating the PI&quot;)))
+</pre>
+<h4><a name='codefunc4659' href='#docfunc4659'>ssax:read-pi-body-as-string</a></h4>
+<i><a href='#tocfunc4659'>Index</a></i><br>
+
+<pre>(define (<a href="SSAX-code.html#codefunc4659">ssax:read-pi-body-as-string</a> port) (<a href="SSAX-code.html#codefunc63037">ssax:skip-S</a> port) (string-concatenate/shared (let loop () (let ((pi-fragment (<a href="input-parse.html#codefunc10217">next-token</a> (quote ()) (quote (#\?)) &quot;reading PI content&quot; port))) (if (eqv? #\&gt; (<a href="input-parse.html#codefunc49057">peek-next-char</a> port)) (begin (read-char port) (cons pi-fragment (quote ()))) (<a href="myenv.html#codefunc58107">cons*</a> pi-fragment &quot;?&quot; (loop)))))))
+</pre>
+<h4><a name='codefunc27966' href='#docfunc27966'>ssax:skip-internal-dtd</a></h4>
+<i><a href='#tocfunc27966'>Index</a></i><br>
+
+<pre>(define (<a href="SSAX-code.html#codefunc27966">ssax:skip-internal-dtd</a> port) (if (not (<a href="look-for-str.html#codefunc20782">find-string-from-port?</a> &quot;]&gt;&quot; port)) (<a href="parse-error.html#codefunc37207">parser-error</a> port &quot;Failed to find ]&gt; terminating the internal DTD subset&quot;)))
+</pre>
+<h4><a name='codefunc56261' href='#docfunc56261'>ssax:read-cdata-body</a></h4>
+<i><a href='#tocfunc56261'>Index</a></i><br>
+
+<pre>(define <a href="SSAX-code.html#codefunc56261">ssax:read-cdata-body</a> (let ((cdata-delimiters (list <a href="char-encoding.html#codefunc13371">char-return</a> #\newline #\] #\&amp;))) (lambda (port str-handler seed) (let loop ((seed seed)) (let ((fragment (<a href="input-parse.html#codefunc10217">next-token</a> (quote ()) cdata-delimiters &quot;reading CDATA&quot; port))) (case (read-char port) ((#\newline) (loop (str-handler fragment <a href="myenv.html#codefunc27758">nl</a> seed))) ((#\]) (if (not (eqv? (peek-char port) #\])) (loop (str-handler fragment &quot;]&quot; seed)) (let check-after-second-braket ((seed (if (string-null? fragment) seed (str-handler fragment &quot;&quot; seed)))) (case (<a href="input-parse.html#codefunc49057">peek-next-char</a> port) ((#\&gt;) (read-char port) seed) ((#\]) (check-after-second-braket (str-handler &quot;]&quot; &quot;&quot; seed))) (else (loop (str-handler &quot;]]&quot; &quot;&quot; seed))))))) ((#\&amp;) (let ((ent-ref (<a href="input-parse.html#codefunc38780">next-token-of</a> (lambda (c) (and (not (eof-object? c)) (char-alphabetic? c) c)) port))) (cond ((and (string=? &quot;gt&quot; ent-ref) (eqv? (peek-char port) #\;)) (read-char port) (loop (str-handler fragment &quot;&gt;&quot; seed))) (else (loop (str-handler ent-ref &quot;&quot; (str-handler fragment &quot;&amp;&quot; seed))))))) (else (if (eqv? (peek-char port) #\newline) (read-char port)) (loop (str-handler fragment <a href="myenv.html#codefunc27758">nl</a> seed)))))))))
+</pre>
+<h4><a name='codefunc41008' href='#docfunc41008'>ssax:read-char-ref</a></h4>
+<i><a href='#tocfunc41008'>Index</a></i><br>
+
+<pre>(define (<a href="SSAX-code.html#codefunc41008">ssax:read-char-ref</a> port) (let* ((base (cond ((eqv? (peek-char port) #\x) (read-char port) 16) (else 10))) (name (<a href="input-parse.html#codefunc10217">next-token</a> (quote ()) (quote (#\;)) &quot;XML [66]&quot; port)) (char-code (string-&gt;number name base))) (read-char port) (if (integer? char-code) (<a href="char-encoding.html#codefunc7638">ucscode-&gt;char</a> char-code) (<a href="parse-error.html#codefunc37207">parser-error</a> port &quot;[wf-Legalchar] broken for '&quot; name &quot;'&quot;))))
+</pre>
+<h4><a name='codefunc4169' href='#docfunc4169'>ssax:predefined-parsed-entities</a></h4>
+<i><a href='#tocfunc4169'>Index</a></i><br>
+
+<pre>(define <a href="SSAX-code.html#codefunc4169">ssax:predefined-parsed-entities</a> (quasiquote (((unquote (string-&gt;symbol &quot;amp&quot;)) . &quot;&amp;&quot;) ((unquote (string-&gt;symbol &quot;lt&quot;)) . &quot;&lt;&quot;) ((unquote (string-&gt;symbol &quot;gt&quot;)) . &quot;&gt;&quot;) ((unquote (string-&gt;symbol &quot;apos&quot;)) . &quot;'&quot;) ((unquote (string-&gt;symbol &quot;quot&quot;)) . &quot;\&quot;&quot;))))
+</pre>
+<h4><a name='codefunc58368' href='#docfunc58368'>ssax:handle-parsed-entity</a></h4>
+<i><a href='#tocfunc58368'>Index</a></i><br>
+
+<pre>(define (<a href="SSAX-code.html#codefunc58368">ssax:handle-parsed-entity</a> port name entities content-handler str-handler seed) (cond ((assq name entities) =&gt; (lambda (decl-entity) (let ((ent-body (cdr decl-entity)) (new-entities (cons (cons name #f) entities))) (cond ((string? ent-body) (<a href="myenv.html#codefunc15729">call-with-input-string</a> ent-body (lambda (port) (content-handler port new-entities seed)))) ((procedure? ent-body) (let ((port (ent-body))) (begin0 (content-handler port new-entities seed) (close-input-port port)))) (else (<a href="parse-error.html#codefunc37207">parser-error</a> port &quot;[norecursion] broken for &quot; name)))))) ((assq name <a href="SSAX-code.html#codefunc4169">ssax:predefined-parsed-entities</a>) =&gt; (lambda (decl-entity) (str-handler (cdr decl-entity) &quot;&quot; seed))) (else (<a href="parse-error.html#codefunc37207">parser-error</a> port &quot;[wf-entdeclared] broken for &quot; name))))
+</pre>
+<h4><a name='codefunc51561' href='#docfunc51561'>make-empty-attlist</a></h4>
+<i><a href='#tocfunc51561'>Index</a></i><br>
+
+<pre>(define (<a href="SSAX-code.html#codefunc51561">make-empty-attlist</a>) (quote ()))
+</pre>
+<h4><a name='codefunc59000' href='#docfunc59000'>attlist-add</a></h4>
+<i><a href='#tocfunc59000'>Index</a></i><br>
+
+<pre>(define (<a href="SSAX-code.html#codefunc59000">attlist-add</a> attlist name-value) (if (null? attlist) (cons name-value attlist) (case (<a href="SSAX-code.html#codefunc24155">name-compare</a> (car name-value) (caar attlist)) ((=) #f) ((&lt;) (cons name-value attlist)) (else (cons (car attlist) (<a href="SSAX-code.html#codefunc59000">attlist-add</a> (cdr attlist) name-value))))))
+</pre>
+<h4><a name='codefunc25549' href='#docfunc25549'>attlist-null?</a></h4>
+<i><a href='#tocfunc25549'>Index</a></i><br>
+
+<pre>(define <a href="SSAX-code.html#codefunc25549">attlist-null?</a> null?)
+</pre>
+<h4><a name='codefunc41126' href='#docfunc41126'>attlist-remove-top</a></h4>
+<i><a href='#tocfunc41126'>Index</a></i><br>
+
+<pre>(define (<a href="SSAX-code.html#codefunc41126">attlist-remove-top</a> attlist) (values (car attlist) (cdr attlist)))
+</pre>
+<h4><a name='codefunc49361' href='#docfunc49361'>attlist->alist</a></h4>
+<i><a href='#tocfunc49361'>Index</a></i><br>
+
+<pre>(define (<a href="SSAX-code.html#codefunc49361">attlist-&gt;alist</a> attlist) attlist)
+</pre>
+<h4><a name='codefunc21894' href='#docfunc21894'>attlist-fold</a></h4>
+<i><a href='#tocfunc21894'>Index</a></i><br>
+
+<pre>(define <a href="SSAX-code.html#codefunc21894">attlist-fold</a> <a href="SSAX-code.html#codefunc54226">fold</a>)
+</pre>
+<h4><a name='codefunc7667' href='#docfunc7667'>ssax:read-attributes</a></h4>
+<i><a href='#tocfunc7667'>Index</a></i><br>
+
+<pre>(define <a href="SSAX-code.html#codefunc7667">ssax:read-attributes</a> (let ((value-delimeters (append <a href="SSAX-code.html#codefunc30487">ssax:S-chars</a> (quote (#\&lt; #\&amp;))))) (define (read-attrib-value delimiter port entities prev-fragments) (let* ((new-fragments (cons (<a href="input-parse.html#codefunc10217">next-token</a> (quote ()) (cons delimiter value-delimeters) &quot;XML [10]&quot; port) prev-fragments)) (cterm (read-char port))) (cond ((or (eof-object? cterm) (eqv? cterm delimiter)) new-fragments) ((eqv? cterm <a href="char-encoding.html#codefunc13371">char-return</a>) (if (eqv? (peek-char port) #\newline) (read-char port)) (read-attrib-value delimiter port entities (cons &quot; &quot; new-fragments))) ((memv cterm <a href="SSAX-code.html#codefunc30487">ssax:S-chars</a>) (read-attrib-value delimiter port entities (cons &quot; &quot; new-fragments))) ((eqv? cterm #\&amp;) (cond ((eqv? (peek-char port) #\#) (read-char port) (read-attrib-value delimiter port entities (cons (string (<a href="SSAX-code.html#codefunc41008">ssax:read-char-ref</a> port)) new-fragments))) (else (read-attrib-value delimiter port entities (read-named-entity port entities new-fragments))))) (else (<a href="parse-error.html#codefunc37207">parser-error</a> port &quot;[CleanAttrVals] broken&quot;))))) (define (read-named-entity port entities fragments) (let ((name (<a href="SSAX-code.html#codefunc63202">ssax:read-NCName</a> port))) (<a href="input-parse.html#codefunc11041">assert-curr-char</a> (quote (#\;)) &quot;XML [68]&quot; port) (<a href="SSAX-code.html#codefunc58368">ssax:handle-parsed-entity</a> port name entities (lambda (port entities fragments) (read-attrib-value (quote *eof*) port entities fragments)) (lambda (str1 str2 fragments) (if (equal? &quot;&quot; str2) (cons str1 fragments) (<a href="myenv.html#codefunc58107">cons*</a> str2 str1 fragments))) fragments))) (lambda (port entities) (let loop ((attr-list (<a href="SSAX-code.html#codefunc51561">make-empty-attlist</a>))) (if (not (<a href="SSAX-code.html#codefunc7929">ssax:ncname-starting-char?</a> (<a href="SSAX-code.html#codefunc63037">ssax:skip-S</a> port))) attr-list (let ((name (<a href="SSAX-code.html#codefunc43248">ssax:read-QName</a> port))) (<a href="SSAX-code.html#codefunc63037">ssax:skip-S</a> port) (<a href="input-parse.html#codefunc11041">assert-curr-char</a> (quote (#\=)) &quot;XML [25]&quot; port) (<a href="SSAX-code.html#codefunc63037">ssax:skip-S</a> port) (let ((delimiter (<a href="input-parse.html#codefunc11041">assert-curr-char</a> (quote (#\' #\&quot;)) &quot;XML [10]&quot; port))) (loop (or (<a href="SSAX-code.html#codefunc59000">attlist-add</a> attr-list (cons name (string-concatenate-reverse/shared (read-attrib-value delimiter port entities (quote ()))))) (<a href="parse-error.html#codefunc37207">parser-error</a> port &quot;[uniqattspec] broken for &quot; name))))))))))
+</pre>
+<h4><a name='codefunc32590' href='#docfunc32590'>ssax:resolve-name</a></h4>
+<i><a href='#tocfunc32590'>Index</a></i><br>
+
+<pre>(define (<a href="SSAX-code.html#codefunc32590">ssax:resolve-name</a> port unres-name namespaces apply-default-ns?) (cond ((pair? unres-name) (cons (cond ((assq (car unres-name) namespaces) =&gt; cadr) ((eq? (car unres-name) <a href="SSAX-code.html#codefunc34308">ssax:Prefix-XML</a>) <a href="SSAX-code.html#codefunc34308">ssax:Prefix-XML</a>) (else (<a href="parse-error.html#codefunc37207">parser-error</a> port &quot;[nsc-NSDeclared] broken; prefix &quot; (car unres-name)))) (cdr unres-name))) (apply-default-ns? (let ((default-ns (assq (quote *DEFAULT*) namespaces))) (if (and default-ns (cadr default-ns)) (cons (cadr default-ns) unres-name) unres-name))) (else unres-name)))
+</pre>
+<h4><a name='codefunc40058' href='#docfunc40058'>ssax:uri-string->symbol</a></h4>
+<i><a href='#tocfunc40058'>Index</a></i><br>
+
+<pre>(define (<a href="SSAX-code.html#codefunc40058">ssax:uri-string-&gt;symbol</a> uri-str) (string-&gt;symbol uri-str))
+</pre>
+<h4><a name='codefunc16606' href='#docfunc16606'>ssax:complete-start-tag</a></h4>
+<i><a href='#tocfunc16606'>Index</a></i><br>
+
+<pre>(define <a href="SSAX-code.html#codefunc16606">ssax:complete-start-tag</a> (let ((xmlns (string-&gt;symbol &quot;xmlns&quot;)) (largest-dummy-decl-attr (list <a href="SSAX-code.html#codefunc56128">ssax:largest-unres-name</a> #f #f #f))) (define (validate-attrs port attlist decl-attrs) (define (add-default-decl decl-attr result) (let*-values (((attr-name content-type use-type default-value) (apply values decl-attr))) (and (eq? use-type (quote REQUIRED)) (<a href="parse-error.html#codefunc37207">parser-error</a> port &quot;[RequiredAttr] broken for&quot; attr-name)) (if default-value (cons (cons attr-name default-value) result) result))) (let loop ((attlist attlist) (decl-attrs decl-attrs) (result (quote ()))) (if (<a href="SSAX-code.html#codefunc25549">attlist-null?</a> attlist) (<a href="SSAX-code.html#codefunc21894">attlist-fold</a> add-default-decl result decl-attrs) (let*-values (((attr attr-others) (<a href="SSAX-code.html#codefunc41126">attlist-remove-top</a> attlist)) ((decl-attr other-decls) (if (<a href="SSAX-code.html#codefunc25549">attlist-null?</a> decl-attrs) (values largest-dummy-decl-attr decl-attrs) (<a href="SSAX-code.html#codefunc41126">attlist-remove-top</a> decl-attrs)))) (case (<a href="SSAX-code.html#codefunc24155">name-compare</a> (car attr) (car decl-attr)) ((&lt;) (if (or (eq? xmlns (car attr)) (and (pair? (car attr)) (eq? xmlns (caar attr)))) (loop attr-others decl-attrs (cons attr result)) (<a href="parse-error.html#codefunc37207">parser-error</a> port &quot;[ValueType] broken for &quot; attr))) ((&gt;) (loop attlist other-decls (add-default-decl decl-attr result))) (else (let*-values (((attr-name content-type use-type default-value) (apply values decl-attr))) (cond ((eq? use-type (quote FIXED)) (or (equal? (cdr attr) default-value) (<a href="parse-error.html#codefunc37207">parser-error</a> port &quot;[FixedAttr] broken for &quot; attr-name))) ((eq? content-type (quote CDATA)) #t) ((pair? content-type) (or (member (cdr attr) content-type) (<a href="parse-error.html#codefunc37207">parser-error</a> port &quot;[enum] broken for &quot; attr-name &quot;=&quot; (cdr attr)))) (else (<a href="parse-error.html#codefunc54750">ssax:warn</a> port &quot;declared content type &quot; content-type &quot; not verified yet&quot;))) (loop attr-others other-decls (cons attr result))))))))) (define (add-ns port prefix uri-str namespaces) (and (equal? &quot;&quot; uri-str) (<a href="parse-error.html#codefunc37207">parser-error</a> port &quot;[dt-NSName] broken for &quot; prefix)) (let ((uri-symbol (<a href="SSAX-code.html#codefunc40058">ssax:uri-string-&gt;symbol</a> uri-str))) (let loop ((nss namespaces)) (cond ((null? nss) (cons (<a href="myenv.html#codefunc58107">cons*</a> prefix uri-symbol uri-symbol) namespaces)) ((eq? uri-symbol (cddar nss)) (cons (<a href="myenv.html#codefunc58107">cons*</a> prefix (cadar nss) uri-symbol) namespaces)) (else (loop (cdr nss))))))) (define (adjust-namespace-decl port attrs namespaces) (let loop ((attrs attrs) (proper-attrs (quote ())) (namespaces namespaces)) (cond ((null? attrs) (values proper-attrs namespaces)) ((eq? xmlns (caar attrs)) (loop (cdr attrs) proper-attrs (if (equal? &quot;&quot; (cdar attrs)) (cons (<a href="myenv.html#codefunc58107">cons*</a> (quote *DEFAULT*) #f #f) namespaces) (add-ns port (quote *DEFAULT*) (cdar attrs) namespaces)))) ((and (pair? (caar attrs)) (eq? xmlns (caaar attrs))) (loop (cdr attrs) proper-attrs (add-ns port (cdaar attrs) (cdar attrs) namespaces))) (else (loop (cdr attrs) (cons (car attrs) proper-attrs) namespaces))))) (lambda (tag-head port elems entities namespaces) (let*-values (((attlist) (<a href="SSAX-code.html#codefunc7667">ssax:read-attributes</a> port entities)) ((empty-el-tag?) (begin (<a href="SSAX-code.html#codefunc63037">ssax:skip-S</a> port) (and (eqv? #\/ (<a href="input-parse.html#codefunc11041">assert-curr-char</a> (quote (#\&gt; #\/)) &quot;XML [40], XML [44], no '&gt;'&quot; port)) (<a href="input-parse.html#codefunc11041">assert-curr-char</a> (quote (#\&gt;)) &quot;XML [44], no '&gt;'&quot; port)))) ((elem-content decl-attrs) (if elems (cond ((assoc tag-head elems) =&gt; (lambda (decl-elem) (values (if empty-el-tag? (quote EMPTY-TAG) (cadr decl-elem)) (caddr decl-elem)))) (else (<a href="parse-error.html#codefunc37207">parser-error</a> port &quot;[elementvalid] broken, no decl for &quot; tag-head))) (values (if empty-el-tag? (quote EMPTY-TAG) (quote ANY)) #f))) ((merged-attrs) (if decl-attrs (validate-attrs port attlist decl-attrs) (<a href="SSAX-code.html#codefunc49361">attlist-&gt;alist</a> attlist))) ((proper-attrs namespaces) (adjust-namespace-decl port merged-attrs namespaces))) (values (<a href="SSAX-code.html#codefunc32590">ssax:resolve-name</a> port tag-head namespaces #t) (<a href="SSAX-code.html#codefunc8658">fold-right</a> (lambda (name-value attlist) (or (<a href="SSAX-code.html#codefunc59000">attlist-add</a> attlist (cons (<a href="SSAX-code.html#codefunc32590">ssax:resolve-name</a> port (car name-value) namespaces #f) (cdr name-value))) (<a href="parse-error.html#codefunc37207">parser-error</a> port &quot;[uniqattspec] after NS expansion broken for &quot; name-value))) (<a href="SSAX-code.html#codefunc51561">make-empty-attlist</a>) proper-attrs) namespaces elem-content)))))
+</pre>
+<h4><a name='codefunc3864' href='#docfunc3864'>ssax:read-external-id</a></h4>
+<i><a href='#tocfunc3864'>Index</a></i><br>
+
+<pre>(define (<a href="SSAX-code.html#codefunc3864">ssax:read-external-id</a> port) (let ((discriminator (<a href="SSAX-code.html#codefunc63202">ssax:read-NCName</a> port))) (<a href="input-parse.html#codefunc11041">assert-curr-char</a> <a href="SSAX-code.html#codefunc30487">ssax:S-chars</a> &quot;space after SYSTEM or PUBLIC&quot; port) (<a href="SSAX-code.html#codefunc63037">ssax:skip-S</a> port) (let ((delimiter (<a href="input-parse.html#codefunc11041">assert-curr-char</a> (quote (#\' #\&quot;)) &quot;XML [11], XML [12]&quot; port))) (cond ((eq? discriminator (string-&gt;symbol &quot;SYSTEM&quot;)) (begin0 (<a href="input-parse.html#codefunc10217">next-token</a> (quote ()) (list delimiter) &quot;XML [11]&quot; port) (read-char port))) ((eq? discriminator (string-&gt;symbol &quot;PUBLIC&quot;)) (<a href="input-parse.html#codefunc12770">skip-until</a> (list delimiter) port) (<a href="input-parse.html#codefunc11041">assert-curr-char</a> <a href="SSAX-code.html#codefunc30487">ssax:S-chars</a> &quot;space after PubidLiteral&quot; port) (<a href="SSAX-code.html#codefunc63037">ssax:skip-S</a> port) (let* ((delimiter (<a href="input-parse.html#codefunc11041">assert-curr-char</a> (quote (#\' #\&quot;)) &quot;XML [11]&quot; port)) (systemid (<a href="input-parse.html#codefunc10217">next-token</a> (quote ()) (list delimiter) &quot;XML [11]&quot; port))) (read-char port) systemid)) (else (<a href="parse-error.html#codefunc37207">parser-error</a> port &quot;XML [75], &quot; discriminator &quot; rather than SYSTEM or PUBLIC&quot;))))))
+</pre>
+<h4><a name='codefunc47777' href='#docfunc47777'>ssax:scan-Misc</a></h4>
+<i><a href='#tocfunc47777'>Index</a></i><br>
+
+<pre>(define (<a href="SSAX-code.html#codefunc47777">ssax:scan-Misc</a> port) (let loop ((c (<a href="SSAX-code.html#codefunc63037">ssax:skip-S</a> port))) (cond ((eof-object? c) c) ((not (char=? c #\&lt;)) (<a href="parse-error.html#codefunc37207">parser-error</a> port &quot;XML [22], char '&quot; c &quot;' unexpected&quot;)) (else (let ((token (<a href="SSAX-code.html#codefunc30768">ssax:read-markup-token</a> port))) (case (xml-token-kind token) ((COMMENT) (loop (<a href="SSAX-code.html#codefunc63037">ssax:skip-S</a> port))) ((PI DECL START) token) (else (<a href="parse-error.html#codefunc37207">parser-error</a> port &quot;XML [22], unexpected token of kind &quot; (xml-token-kind token)))))))))
+</pre>
+<h4><a name='codefunc41101' href='#docfunc41101'>ssax:read-char-data</a></h4>
+<i><a href='#tocfunc41101'>Index</a></i><br>
+
+<pre>(define <a href="SSAX-code.html#codefunc41101">ssax:read-char-data</a> (let ((terminators-usual (list #\&lt; #\&amp; <a href="char-encoding.html#codefunc13371">char-return</a>)) (terminators-usual-eof (list #\&lt; (quote *eof*) #\&amp; <a href="char-encoding.html#codefunc13371">char-return</a>)) (handle-fragment (lambda (fragment str-handler seed) (if (string-null? fragment) seed (str-handler fragment &quot;&quot; seed))))) (lambda (port expect-eof? str-handler seed) (if (eqv? #\&lt; (peek-char port)) (let ((token (<a href="SSAX-code.html#codefunc30768">ssax:read-markup-token</a> port))) (case (xml-token-kind token) ((START END) (values seed token)) ((CDSECT) (let ((seed (<a href="SSAX-code.html#codefunc56261">ssax:read-cdata-body</a> port str-handler seed))) (<a href="SSAX-code.html#codefunc41101">ssax:read-char-data</a> port expect-eof? str-handler seed))) ((COMMENT) (<a href="SSAX-code.html#codefunc41101">ssax:read-char-data</a> port expect-eof? str-handler seed)) (else (values seed token)))) (let ((char-data-terminators (if expect-eof? terminators-usual-eof terminators-usual))) (let loop ((seed seed)) (let* ((fragment (<a href="input-parse.html#codefunc10217">next-token</a> (quote ()) char-data-terminators &quot;reading char data&quot; port)) (term-char (peek-char port))) (if (eof-object? term-char) (values (handle-fragment fragment str-handler seed) term-char) (case term-char ((#\&lt;) (let ((token (<a href="SSAX-code.html#codefunc30768">ssax:read-markup-token</a> port))) (case (xml-token-kind token) ((CDSECT) (loop (<a href="SSAX-code.html#codefunc56261">ssax:read-cdata-body</a> port str-handler (handle-fragment fragment str-handler seed)))) ((COMMENT) (loop (handle-fragment fragment str-handler seed))) (else (values (handle-fragment fragment str-handler seed) token))))) ((#\&amp;) (case (<a href="input-parse.html#codefunc49057">peek-next-char</a> port) ((#\#) (read-char port) (loop (str-handler fragment (string (<a href="SSAX-code.html#codefunc41008">ssax:read-char-ref</a> port)) seed))) (else (let ((name (<a href="SSAX-code.html#codefunc63202">ssax:read-NCName</a> port))) (<a href="input-parse.html#codefunc11041">assert-curr-char</a> (quote (#\;)) &quot;XML [68]&quot; port) (values (handle-fragment fragment str-handler seed) (<a href="SSAX-code.html#codefunc63861">make-xml-token</a> (quote ENTITY-REF) name)))))) (else (if (eqv? (<a href="input-parse.html#codefunc49057">peek-next-char</a> port) #\newline) (read-char port)) (loop (str-handler fragment (string #\newline) seed))))))))))))
+</pre>
+<h4><a name='codefunc13738' href='#docfunc13738'>ssax:assert-token</a></h4>
+<i><a href='#tocfunc13738'>Index</a></i><br>
+
+<pre>(define (<a href="SSAX-code.html#codefunc13738">ssax:assert-token</a> token kind gi error-cont) (or (and (<a href="SSAX-code.html#codefunc44850">xml-token?</a> token) (eq? kind (xml-token-kind token)) (equal? gi (xml-token-head token))) (error-cont token kind gi)))
+</pre>
+<h5><a name='codeapp30668' href='#docapp30668'>define-syntax</a></h5>
+<i><a href='#tocapp30668'>Index</a></i><br>
+
+<pre>(define-syntax ssax:make-pi-parser (syntax-rules () ((ssax:make-pi-parser orig-handlers) (letrec-syntax ((loop (syntax-rules (*DEFAULT*) ((loop () #f accum port target seed) (make-case ((else (ssax:warn port &quot;Skipping PI: &quot; target nl) (ssax:skip-pi port) seed) . accum) () target)) ((loop () default accum port target seed) (make-case ((else (default port target seed)) . accum) () target)) ((loop ((*DEFAULT* . default) . handlers) old-def accum port target seed) (loop handlers default accum port target seed)) ((loop ((tag . handler) . handlers) default accum port target seed) (loop handlers default (((tag) (handler port target seed)) . accum) port target seed)))) (make-case (syntax-rules () ((make-case () clauses target) (case target . clauses)) ((make-case (clause . clauses) accum target) (make-case clauses (clause . accum) target))))) (lambda (port target seed) (loop orig-handlers #f () port target seed))))))
+</pre>
+<h5><a name='codeapp30668' href='#docapp30668'>define-syntax</a></h5>
+<i><a href='#tocapp30668'>Index</a></i><br>
+
+<pre>(define-syntax ssax:make-elem-parser (syntax-rules () ((ssax:make-elem-parser my-new-level-seed my-finish-element my-char-data-handler my-pi-handlers) (lambda (start-tag-head port elems entities namespaces preserve-ws? seed) (define xml-space-gi (cons ssax:Prefix-XML (string-&gt;symbol &quot;space&quot;))) (let handle-start-tag ((start-tag-head start-tag-head) (port port) (entities entities) (namespaces namespaces) (preserve-ws? preserve-ws?) (parent-seed seed)) (let*-values (((elem-gi attributes namespaces expected-content) (ssax:complete-start-tag start-tag-head port elems entities namespaces)) ((seed) (my-new-level-seed elem-gi attributes namespaces expected-content parent-seed))) (case expected-content ((EMPTY-TAG) (my-finish-element elem-gi attributes namespaces parent-seed seed)) ((EMPTY) (ssax:assert-token (and (eqv? #\&lt; (ssax:skip-S port)) (ssax:read-markup-token port)) (quote END) start-tag-head (lambda (token exp-kind exp-head) (parser-error port &quot;[elementvalid] broken for &quot; token &quot; while expecting &quot; exp-kind exp-head))) (my-finish-element elem-gi attributes namespaces parent-seed seed)) (else (let ((preserve-ws? (cond ((assoc xml-space-gi attributes) =&gt; (lambda (name-value) (equal? &quot;preserve&quot; (cdr name-value)))) (else preserve-ws?)))) (let loop ((port port) (entities entities) (expect-eof? #f) (seed seed)) (let*-values (((seed term-token) (ssax:read-char-data port expect-eof? my-char-data-handler seed))) (if (eof-object? term-token) seed (case (xml-token-kind term-token) ((END) (ssax:assert-token term-token (quote END) start-tag-head (lambda (token exp-kind exp-head) (parser-error port &quot;[GIMatch] broken for &quot; term-token &quot; while expecting &quot; exp-kind exp-head))) (my-finish-element elem-gi attributes namespaces parent-seed seed)) ((PI) (let ((seed ((ssax:make-pi-parser my-pi-handlers) port (xml-token-head term-token) seed))) (loop port entities expect-eof? seed))) ((ENTITY-REF) (let ((seed (ssax:handle-parsed-entity port (xml-token-head term-token) entities (lambda (port entities seed) (loop port entities #t seed)) my-char-data-handler seed))) (loop port entities expect-eof? seed))) ((START) (if (eq? expected-content (quote PCDATA)) (parser-error port &quot;[elementvalid] broken for &quot; elem-gi &quot; with char content only; unexpected token &quot; term-token)) (let ((seed (handle-start-tag (xml-token-head term-token) port entities namespaces preserve-ws? seed))) (loop port entities expect-eof? seed))) (else (parser-error port &quot;XML [43] broken for &quot; term-token)))))))))))))))
+</pre>
+<h5><a name='codeapp30668' href='#docapp30668'>define-syntax</a></h5>
+<i><a href='#tocapp30668'>Index</a></i><br>
+
+<pre>(define-syntax ssax:make-parser/positional-args (syntax-rules () ((ssax:make-parser/positional-args *handler-DOCTYPE *handler-UNDECL-ROOT *handler-DECL-ROOT *handler-NEW-LEVEL-SEED *handler-FINISH-ELEMENT *handler-CHAR-DATA-HANDLER *handler-PI) (lambda (port seed) (define (handle-decl port token-head seed) (or (eq? (string-&gt;symbol &quot;DOCTYPE&quot;) token-head) (parser-error port &quot;XML [22], expected DOCTYPE declaration, found &quot; token-head)) (assert-curr-char ssax:S-chars &quot;XML [28], space after DOCTYPE&quot; port) (ssax:skip-S port) (let*-values (((docname) (ssax:read-QName port)) ((systemid) (and (ssax:ncname-starting-char? (ssax:skip-S port)) (ssax:read-external-id port))) ((internal-subset?) (begin (ssax:skip-S port) (eqv? #\[ (assert-curr-char (quote (#\&gt; #\[)) &quot;XML [28], end-of-DOCTYPE&quot; port)))) ((elems entities namespaces seed) (*handler-DOCTYPE port docname systemid internal-subset? seed))) (scan-for-significant-prolog-token-2 port elems entities namespaces seed))) (define (scan-for-significant-prolog-token-1 port seed) (let ((token (ssax:scan-Misc port))) (if (eof-object? token) (parser-error port &quot;XML [22], unexpected EOF&quot;) (case (xml-token-kind token) ((PI) (let ((seed ((ssax:make-pi-parser *handler-PI) port (xml-token-head token) seed))) (scan-for-significant-prolog-token-1 port seed))) ((DECL) (handle-decl port (xml-token-head token) seed)) ((START) (let*-values (((elems entities namespaces seed) (*handler-UNDECL-ROOT (xml-token-head token) seed))) (element-parser (xml-token-head token) port elems entities namespaces #f seed))) (else (parser-error port &quot;XML [22], unexpected markup &quot; token)))))) (define (scan-for-significant-prolog-token-2 port elems entities namespaces seed) (let ((token (ssax:scan-Misc port))) (if (eof-object? token) (parser-error port &quot;XML [22], unexpected EOF&quot;) (case (xml-token-kind token) ((PI) (let ((seed ((ssax:make-pi-parser *handler-PI) port (xml-token-head token) seed))) (scan-for-significant-prolog-token-2 port elems entities namespaces seed))) ((START) (element-parser (xml-token-head token) port elems entities namespaces #f (*handler-DECL-ROOT (xml-token-head token) seed))) (else (parser-error port &quot;XML [22], unexpected markup &quot; token)))))) (define element-parser (ssax:make-elem-parser *handler-NEW-LEVEL-SEED *handler-FINISH-ELEMENT *handler-CHAR-DATA-HANDLER *handler-PI)) (scan-for-significant-prolog-token-1 port seed)))))
+</pre>
+<h5><a name='codeapp30668' href='#docapp30668'>define-syntax</a></h5>
+<i><a href='#tocapp30668'>Index</a></i><br>
+
+<pre>(define-syntax ssax:define-labeled-arg-macro (syntax-rules () ((ssax:define-labeled-arg-macro labeled-arg-macro-name (positional-macro-name (arg-name . arg-def) ...)) (define-syntax labeled-arg-macro-name (syntax-rules () ((labeled-arg-macro-name . kw-val-pairs) (letrec-syntax ((find (syntax-rules (arg-name ...) ((find k-args (arg-name . default) arg-name val . others) (next val . k-args)) ... ((find k-args key arg-no-match-name val . others) (find k-args key . others)) ((find k-args (arg-name default)) (next default . k-args)) ...)) (next (syntax-rules () ((next val vals key . keys) (find ((val . vals) . keys) key . kw-val-pairs)) ((next val vals) (rev-apply (val) vals)))) (rev-apply (syntax-rules () ((rev-apply form (x . xs)) (rev-apply (x . form) xs)) ((rev-apply form ()) form)))) (next positional-macro-name () (arg-name . arg-def) ...))))))))
+</pre>
+<h5><a name='codeapp8171' href='#docapp8171'>ssax:define-labeled-arg-macro</a></h5>
+<i><a href='#tocapp8171'>Index</a></i><br>
+
+<pre>(ssax:define-labeled-arg-macro ssax:make-parser (ssax:make-parser/positional-args (DOCTYPE (lambda (port docname systemid internal-subset? seed) (when internal-subset? (ssax:warn port &quot;Internal DTD subset is not currently handled &quot;) (ssax:skip-internal-dtd port)) (ssax:warn port &quot;DOCTYPE DECL &quot; docname &quot; &quot; systemid &quot; found and skipped&quot;) (values #f (quote ()) (quote ()) seed))) (UNDECL-ROOT (lambda (elem-gi seed) (values #f (quote ()) (quote ()) seed))) (DECL-ROOT (lambda (elem-gi seed) seed)) (NEW-LEVEL-SEED) (FINISH-ELEMENT) (CHAR-DATA-HANDLER) (PI ())))
+</pre>
+<h4><a name='codefunc15196' href='#docfunc15196'>ssax:reverse-collect-str</a></h4>
+<i><a href='#tocfunc15196'>Index</a></i><br>
+
+<pre>(define (<a href="SSAX-code.html#codefunc15196">ssax:reverse-collect-str</a> fragments) (cond ((null? fragments) (quote ())) ((null? (cdr fragments)) fragments) (else (let loop ((fragments fragments) (result (quote ())) (strs (quote ()))) (cond ((null? fragments) (if (null? strs) result (cons (string-concatenate/shared strs) result))) ((string? (car fragments)) (loop (cdr fragments) result (cons (car fragments) strs))) (else (loop (cdr fragments) (cons (car fragments) (if (null? strs) result (cons (string-concatenate/shared strs) result))) (quote ()))))))))
+</pre>
+<h4><a name='codefunc45027' href='#docfunc45027'>ssax:reverse-collect-str-drop-ws</a></h4>
+<i><a href='#tocfunc45027'>Index</a></i><br>
+
+<pre>(define (<a href="SSAX-code.html#codefunc45027">ssax:reverse-collect-str-drop-ws</a> fragments) (cond ((null? fragments) (quote ())) ((null? (cdr fragments)) (if (and (string? (car fragments)) (<a href="SSAX-code.html#codefunc40600">string-whitespace?</a> (car fragments))) (quote ()) fragments)) (else (let loop ((fragments fragments) (result (quote ())) (strs (quote ())) (all-whitespace? #t)) (cond ((null? fragments) (if all-whitespace? result (cons (string-concatenate/shared strs) result))) ((string? (car fragments)) (loop (cdr fragments) result (cons (car fragments) strs) (and all-whitespace? (<a href="SSAX-code.html#codefunc40600">string-whitespace?</a> (car fragments))))) (else (loop (cdr fragments) (cons (car fragments) (if all-whitespace? result (cons (string-concatenate/shared strs) result))) (quote ()) #t)))))))
+</pre>
+<h4><a name='codefunc62346' href='#docfunc62346'>ssax:xml->sxml</a></h4>
+<i><a href='#tocfunc62346'>Index</a></i><br>
+
+<pre>(define (<a href="SSAX-code.html#codefunc62346">ssax:xml-&gt;sxml</a> port namespace-prefix-assig) (letrec ((namespaces (map (lambda (el) (<a href="myenv.html#codefunc58107">cons*</a> #f (car el) (<a href="SSAX-code.html#codefunc40058">ssax:uri-string-&gt;symbol</a> (cdr el)))) namespace-prefix-assig)) (<a href="ssax-prim.html#codefunc56334">RES-NAME-&gt;SXML</a> (lambda (res-name) (string-&gt;symbol (string-append (symbol-&gt;string (car res-name)) &quot;:&quot; (symbol-&gt;string (cdr res-name))))))) (let ((result (reverse ((ssax:make-parser NEW-LEVEL-SEED (lambda (elem-gi attributes namespaces expected-content seed) (quote ())) FINISH-ELEMENT (lambda (elem-gi attributes namespaces parent-seed seed) (let ((seed (<a href="SSAX-code.html#codefunc45027">ssax:reverse-collect-str-drop-ws</a> seed)) (attrs (<a href="SSAX-code.html#codefunc21894">attlist-fold</a> (lambda (attr accum) (cons (list (if (symbol? (car attr)) (car attr) (<a href="ssax-prim.html#codefunc56334">RES-NAME-&gt;SXML</a> (car attr))) (cdr attr)) accum)) (quote ()) attributes))) (cons (cons (if (symbol? elem-gi) elem-gi (<a href="ssax-prim.html#codefunc56334">RES-NAME-&gt;SXML</a> elem-gi)) (if (null? attrs) seed (cons (cons (quote @) attrs) seed))) parent-seed))) CHAR-DATA-HANDLER (lambda (string1 string2 seed) (if (string-null? string2) (cons string1 seed) (<a href="myenv.html#codefunc58107">cons*</a> string2 string1 seed))) DOCTYPE (lambda (port docname systemid internal-subset? seed) (when internal-subset? (<a href="parse-error.html#codefunc54750">ssax:warn</a> port &quot;Internal DTD subset is not currently handled &quot;) (<a href="SSAX-code.html#codefunc27966">ssax:skip-internal-dtd</a> port)) (<a href="parse-error.html#codefunc54750">ssax:warn</a> port &quot;DOCTYPE DECL &quot; docname &quot; &quot; systemid &quot; found and skipped&quot;) (values #f (quote ()) namespaces seed)) UNDECL-ROOT (lambda (elem-gi seed) (values #f (quote ()) namespaces seed)) PI ((*DEFAULT* lambda (port pi-tag seed) (cons (list (quote *PI*) pi-tag (<a href="SSAX-code.html#codefunc4659">ssax:read-pi-body-as-string</a> port)) seed)))) port (quote ()))))) (cons (quote *TOP*) (if (null? namespace-prefix-assig) result (cons (list (quote @) (cons (quote *NAMESPACES*) (map (lambda (ns) (list (car ns) (cdr ns))) namespace-prefix-assig))) result))))))
+</pre></body></html>

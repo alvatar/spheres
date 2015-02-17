@@ -1,0 +1,614 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN""http://www.w3.org/TR/html401/loose.dtd"><html><head><meta name="GENERATOR" content="Mole: The Scheme Source Code Digger"><title>Module: libmisc</title><meta name='keywords' content=''></head><body bgcolor='#ffffff' text='#384412'  link='#11af05' vlink='#728b09'>
+<center><h1>Module: libmisc</h1></center>
+
+<pre> Portable Library of Miscellaneous Functions
+ $Id: libmisc.scm,v 1.7 2002/10/08 15:47:21 kl Exp kl $ 
+</pre><p><br>
+<!-- Table of content -->
+<p><dl>
+<p><dt><a name='tocchapt30179' href='#chapt30179'><b>Miscellaneous</b></a><dd>
+
+f:  <a name='tocfunc52191' href='#docfunc52191' style='text-decoration:none'>self</a><br>
+<p><dt><a name='tocchapt65074' href='#chapt65074'><b>Lists </b></a><dd>
+
+f:  <a name='tocfunc32508' href='#docfunc32508' style='text-decoration:none'>not-null?</a><br>
+
+<dl><dt><a name='tocsect12542' href='#sect12542'><b>Converters</b></a><dd>
+
+f:  <a name='tocfunc25693' href='#docfunc25693' style='text-decoration:none'>list->symbol</a><br>
+
+f:  <a name='tocfunc50384' href='#docfunc50384' style='text-decoration:none'>list-to-string</a><br>
+
+f:  <a name='tocfunc50384' href='#docfunc50384' style='text-decoration:none'>string-to-list</a><br>
+</dl>
+<p><dt><a name='tocchapt17831' href='#chapt17831'><b>Strings</b></a><dd>
+
+f:  <a name='tocfunc61069' href='#docfunc61069' style='text-decoration:none'>comment-out</a><br>
+
+f:  <a name='tocfunc61649' href='#docfunc61649' style='text-decoration:none'>read-whole-line</a><br>
+
+f:  <a name='tocfunc7003' href='#docfunc7003' style='text-decoration:none'>skip-prefix</a><br>
+<p><dt><a name='tocchapt23340' href='#chapt23340'><b>System</b></a><dd>
+
+f:  <a name='tocfunc31895' href='#docfunc31895' style='text-decoration:none'>*OPERATING-SYSTEM*</a><br>
+<p><dt><a name='tocchapt1686' href='#chapt1686'><b>IO related</b></a><dd>
+
+f:  <a name='tocfunc49376' href='#docfunc49376' style='text-decoration:none'>nl-string</a><br>
+
+f:  <a name='tocfunc40937' href='#docfunc40937' style='text-decoration:none'>make-cout</a><br>
+
+f:  <a name='tocfunc28903' href='#docfunc28903' style='text-decoration:none'>ppw</a><br>
+
+<dl><dt><a name='tocsect45140' href='#sect45140'><b>"Controlled verbosity" messages </b></a><dd>
+
+f:  <a name='tocfunc26073' href='#docfunc26073' style='text-decoration:none'>tee</a><br>
+
+f:  <a name='tocfunc37642' href='#docfunc37642' style='text-decoration:none'>tee-1</a><br>
+
+f:  <a name='tocfunc37643' href='#docfunc37643' style='text-decoration:none'>tee-2</a><br>
+
+f:  <a name='tocfunc37644' href='#docfunc37644' style='text-decoration:none'>tee-3</a><br>
+
+f:  <a name='tocfunc37645' href='#docfunc37645' style='text-decoration:none'>tee-4</a><br>
+
+f:  <a name='tocfunc63765' href='#docfunc63765' style='text-decoration:none'>verb-1</a><br>
+
+f:  <a name='tocfunc64021' href='#docfunc64021' style='text-decoration:none'>verb-2</a><br>
+
+f:  <a name='tocfunc64277' href='#docfunc64277' style='text-decoration:none'>verb-3</a><br>
+
+f:  <a name='tocfunc64533' href='#docfunc64533' style='text-decoration:none'>verb-4</a><br>
+
+f:  <a name='tocfunc3031' href='#docfunc3031' style='text-decoration:none'>argv->sxml</a><br>
+</dl>
+<p><dt><a name='tocchapt49891' href='#chapt49891'><b>A minimalistic and pure functional record type.</b></a><dd>
+
+f:  <a name='tocfunc28493' href='#docfunc28493' style='text-decoration:none'>lambda-tuple</a><br>
+</dl>
+<hr height='5'><center><h3><a name='chapt30179' href='#tocchapt30179'>Miscellaneous</a></h3></center>
+
+<pre></pre>
+<h4><a name='docfunc52191' href='#tocfunc52191'>self</a></h4>
+(define (self x)<i><br> ... <a href='#codefunc52191'>Full Code</a> ... )</i>
+<pre> Identity function
+</pre><p><br>
+<hr height='5'><center><h3><a name='chapt65074' href='#tocchapt65074'>Lists </a></h3></center>
+
+<pre></pre>
+<h4><a name='docfunc32508' href='#tocfunc32508'>not-null?</a></h4>
+(define (not-null? l)<i><br> ... <a href='#codefunc32508'>Full Code</a> ... )</i>
+<pre> Returns #f if given list is empty and the list itself otherwise
+ It is intended for emulation of MIT-style empty list treatment
+ (not-null? &lt;list&gt;) may be considered as a counterpart to MIT-style &lt;list&gt;
+</pre><p><br>
+
+<hr width='40%' align='center'><center><h3><a name='sect12542' href='#tocsect12542'>Converters</a></h3></center>
+
+<pre></pre>
+<h4><a name='docfunc25693' href='#tocfunc25693'>list->symbol</a></h4>
+(define (list-&gt;symbol lst)<i><br> ... <a href='#codefunc25693'>Full Code</a> ... )</i>
+<pre> Transform a list of characters to a symbol
+</pre><p><br>
+
+<h4><a name='docfunc50384' href='#tocfunc50384'>list-to-string</a></h4>
+(define (list-to-string l . sep-str)<i><br> ... <a href='#codefunc50384'>Full Code</a> ... )</i>
+<pre> Elements if given list &lt;l&gt;, which are supposed to be strings,
+ are returned as a string separated by sep-str 
+ or space separated if &lt;sep-str&gt; is omitted
+</pre><p><br>
+
+<h4><a name='docfunc50384' href='#tocfunc50384'>string-to-list</a></h4>
+(define (string-to-list str . rest)<i><br> ... <a href='#codefunc50384'>Full Code</a> ... )</i>
+<pre> Convert a string separated by (car rest) to a list of lines
+ If the rest is omitted, then #\space is used
+</pre><p><br>
+<hr height='5'><center><h3><a name='chapt17831' href='#tocchapt17831'>Strings</a></h3></center>
+
+<pre></pre>
+<h4><a name='docfunc61069' href='#tocfunc61069'>comment-out</a></h4>
+(define (comment-out text comment-string)<i><br> ... <a href='#codefunc61069'>Full Code</a> ... )</i>
+<pre> Return a string where every line of given &lt;text&gt; is commented out
+ using &lt;comment-string&gt;
+</pre><p><br>
+
+<h4><a name='docfunc61649' href='#tocfunc61649'>read-whole-line</a></h4>
+(define (read-whole-line . port)<i><br> ... <a href='#codefunc61649'>Full Code</a> ... )</i>
+<pre> Reads all the characters up to the end of the line and put
+ them in a string.
+ Returns a string containing all the characters read, including
+ the end-of-line character
+ If the line read is eof-object terminated, then it is returned 
+ with eof-object replaced by #\newline
+ If the eof-object is the only one character read,
+ then it is returned as is
+</pre><p><br>
+
+<h4><a name='docfunc7003' href='#tocfunc7003'>skip-prefix</a></h4>
+(define (skip-prefix skip-chars str)<i><br> ... <a href='#codefunc7003'>Full Code</a> ... )</i>
+<pre> Skip all the leading characters of a given string &lt;str&gt; which are members
+ of &lt;skip-chars&gt; list and return the substring remaining
+</pre><p><br>
+<hr height='5'><center><h3><a name='chapt23340' href='#tocchapt23340'>System</a></h3></center>
+
+<pre></pre>
+<h4><a name='docfunc31895' href='#tocfunc31895'>*OPERATING-SYSTEM*</a></h4>
+(define *OPERATING-SYSTEM* <i><br> ... <a href='#codefunc31895'>Full Code</a> ... )</i>
+<pre> Default operating system 
+</pre><p><br>
+<hr height='5'><center><h3><a name='chapt1686' href='#tocchapt1686'>IO related</a></h3></center>
+
+<pre></pre>
+<h4><a name='docfunc49376' href='#tocfunc49376'>nl-string</a></h4>
+(define (nl-string . op-system)<i><br> ... <a href='#codefunc49376'>Full Code</a> ... )</i>
+<pre> Newline string
+</pre><p><br>
+
+<h4><a name='docfunc40937' href='#tocfunc40937'>make-cout</a></h4>
+(define (make-cout fname)<i><br> ... <a href='#codefunc40937'>Full Code</a> ... )</i>
+<pre> cout redirection to a file with the given &quot;fname&quot;
+</pre><p><br>
+
+<h4><a name='docfunc28903' href='#tocfunc28903'>ppw</a></h4>
+(define (ppw obj . port)<i><br> ... <a href='#codefunc28903'>Full Code</a> ... )</i>
+<pre> Like pp, but symbols are quoted
+</pre><p><br>
+
+<hr width='40%' align='center'><center><h3><a name='sect45140' href='#tocsect45140'>"Controlled verbosity" messages </a></h3></center>
+
+<pre></pre>
+<h4><a name='docfunc26073' href='#tocfunc26073'>tee</a></h4>
+(define (tee tag x)<i><br> ... <a href='#codefunc26073'>Full Code</a> ... )</i><p><br>
+
+<h4><a name='docfunc37642' href='#tocfunc37642'>tee-1</a></h4>
+(define (tee-1 tag x)<i><br> ... <a href='#codefunc37642'>Full Code</a> ... )</i><p><br>
+
+<h4><a name='docfunc37643' href='#tocfunc37643'>tee-2</a></h4>
+(define (tee-2 tag x)<i><br> ... <a href='#codefunc37643'>Full Code</a> ... )</i><p><br>
+
+<h4><a name='docfunc37644' href='#tocfunc37644'>tee-3</a></h4>
+(define (tee-3 tag x)<i><br> ... <a href='#codefunc37644'>Full Code</a> ... )</i><p><br>
+
+<h4><a name='docfunc37645' href='#tocfunc37645'>tee-4</a></h4>
+(define (tee-4 tag x)<i><br> ... <a href='#codefunc37645'>Full Code</a> ... )</i><p><br>
+
+<h4><a name='docfunc63765' href='#tocfunc63765'>verb-1</a></h4>
+(define (verb-1 . x)<i><br> ... <a href='#codefunc63765'>Full Code</a> ... )</i><p><br>
+
+<h4><a name='docfunc64021' href='#tocfunc64021'>verb-2</a></h4>
+(define (verb-2 . x)<i><br> ... <a href='#codefunc64021'>Full Code</a> ... )</i><p><br>
+
+<h4><a name='docfunc64277' href='#tocfunc64277'>verb-3</a></h4>
+(define (verb-3 . x)<i><br> ... <a href='#codefunc64277'>Full Code</a> ... )</i><p><br>
+
+<h4><a name='docfunc64533' href='#tocfunc64533'>verb-4</a></h4>
+(define (verb-4 . x)<i><br> ... <a href='#codefunc64533'>Full Code</a> ... )</i><p><br>
+
+<h4><a name='docfunc3031' href='#tocfunc3031'>argv->sxml</a></h4>
+(define (argv-&gt;sxml argv . options)<i><br> ... <a href='#codefunc3031'>Full Code</a> ... )</i>
+<pre> SXML element: 
+   (command-line 
+       (arg 'arg-value')*             ; one per argument
+       ('opt-name'                    ; one per option
+          (@ (type { &quot;--&quot; | &quot;-&quot; }))? 
+          'opt-value'?)*
+    )
+
+  The function obtains options and their arguments from a list of 
+ parameters that follows the standard POSIX.2 option syntax.
+ It recognizes a subset of POSIX.2 options syntax wich may be unambiguously 
+ parsed without explicit description.
+ Supported types of options are: 
+  Short without arguments:  -o 
+  Short combined:           -abc 
+      which is equal to:    -a -b -c 
+  Long without arguments:   --opt 
+  Long with argument:       --opt=val
+ 
+ The function may accept an optional second argument - a list of 
+ possible options. Each option in this list has to be represented as a string.
+ Short options are represented without leading dash, while long option
+ are represented with both leading dashes presented. 
+ Example '(&quot;v&quot; &quot;--update&quot;).
+ If the list of acceptable options was given, and command line contains
+ an option not included in this list, then the function will print an
+ &quot;Invalid option&quot; error message and (exit -1).
+
+ The function doesn't use any global variables.
+</pre><p><br>
+<hr height='5'><center><h3><a name='chapt49891' href='#tocchapt49891'>A minimalistic and pure functional record type.</a></h3></center>
+
+<pre></pre>
+<h4><a name='docfunc28493' href='#tocfunc28493'>lambda-tuple</a></h4>
+(define (lambda-tuple . elts)<i><br> ... <a href='#codefunc28493'>Full Code</a> ... )</i>
+<pre> A record  constructor, which returns record as a function.
+ This returned function may be used as:
+   a field accessor 
+        -- returns value of a specified field
+           if applyed to an only parameter of type symbol (field name)
+        -- returns a list of record fields as a list of (&lt;name&gt; &lt;value&gt;) lists
+           if called without parameters
+   a modifier for some elements of the record
+        -- if its parameters are lists whose CARs are names of record fields
+           (alteration descriptors). This function doesn't modify the original
+           record but returns the record modified.
+ Two forms of alteration descriptors are supported:
+   1. (&lt;field-name&gt; &lt;new-value&gt;)
+     Specifies new value for the field &lt;field-name&gt;.
+   2. (&lt;field-name&gt; =&gt; &lt;expression&gt;)
+     The &lt;expression&gt; must be a procedure that accepts one argument; 
+     this procedure is then called on the value of the &lt;field-name&gt; field
+     and the value returned by this procedure is the new value of this field.
+     Both &lt;field-name&gt; and =&gt; has to be symbols.
+ Note: a type of record constructed with &quot;lambda-tuple&quot; is not distinct
+ from &quot;procedure&quot; type.
+</pre><p><br>
+<center><h1>Code</h1></center>
+
+<h4><a name='codefunc52191' href='#docfunc52191'>self</a></h4>
+<i><a href='#tocfunc52191'>Index</a></i><br>
+
+<pre> Identity function
+</pre>
+<pre>(define (<a href="libmisc.html#codefunc52191">self</a> x) x)
+</pre>
+<h4><a name='codefunc32508' href='#docfunc32508'>not-null?</a></h4>
+<i><a href='#tocfunc32508'>Index</a></i><br>
+
+<pre> Returns #f if given list is empty and the list itself otherwise
+ It is intended for emulation of MIT-style empty list treatment
+ (not-null? &lt;list&gt;) may be considered as a counterpart to MIT-style &lt;list&gt;
+</pre>
+<pre>(define (<a href="libmisc.html#codefunc32508">not-null?</a> l)
+  (if (null? l)
+    #f
+    l))
+</pre>
+<h4><a name='codefunc61069' href='#docfunc61069'>comment-out</a></h4>
+<i><a href='#tocfunc61069'>Index</a></i><br>
+
+<pre> Return a string where every line of given &lt;text&gt; is commented out
+ using &lt;comment-string&gt;
+</pre>
+<pre>(define (<a href="libmisc.html#codefunc61069">comment-out</a> text comment-string)
+   (let rpt ((txt (reverse (<a href="libmisc.html#codefunc50384">string-to-list</a> text #\newline))) (rzt &quot;&quot;))
+      (if (null? txt) 
+	rzt
+	(rpt (cdr txt) (string-append comment-string (car txt) &quot;\n&quot; rzt)))))
+</pre>
+<h4><a name='codefunc61649' href='#docfunc61649'>read-whole-line</a></h4>
+<i><a href='#tocfunc61649'>Index</a></i><br>
+
+<pre> Reads all the characters up to the end of the line and put
+ them in a string.
+ Returns a string containing all the characters read, including
+ the end-of-line character
+ If the line read is eof-object terminated, then it is returned 
+ with eof-object replaced by #\newline
+ If the eof-object is the only one character read,
+ then it is returned as is
+</pre>
+<pre>(define (<a href="libmisc.html#codefunc61649">read-whole-line</a> . port)
+  (let ((p (if (null? port)
+	     (current-input-port)
+	     (car port))))
+  (let rpt ((l '())
+	    (c (read-char p)))
+    (cond
+      ((and (eof-object? c) (null? l)) c)
+      ((or (eof-object? c) (char=? c #\newline)) 
+      (list-&gt;string (reverse (cons #\newline l))))
+      (else
+      (rpt (cons c l) (read-char p)))))))
+</pre>
+<h4><a name='codefunc7003' href='#docfunc7003'>skip-prefix</a></h4>
+<i><a href='#tocfunc7003'>Index</a></i><br>
+
+<pre> Skip all the leading characters of a given string &lt;str&gt; which are members
+ of &lt;skip-chars&gt; list and return the substring remaining
+</pre>
+<pre>(define (<a href="libmisc.html#codefunc7003">skip-prefix</a> skip-chars str)
+  (let ((strl (string-length str)))
+  (do ((i 0 (+ i 1))) 
+       ((or (&gt;= i strl) 
+	    (not (memq (string-ref str i)
+		       skip-chars)))
+	(substring str i strl))
+       )))
+</pre>
+<h4><a name='codefunc31895' href='#docfunc31895'>*OPERATING-SYSTEM*</a></h4>
+<i><a href='#tocfunc31895'>Index</a></i><br>
+
+<pre> Default operating system 
+</pre>
+<pre>(define <a href="libmisc.html#codefunc31895">*OPERATING-SYSTEM*</a> 'unix)
+</pre>
+<h4><a name='codefunc49376' href='#docfunc49376'>nl-string</a></h4>
+<i><a href='#tocfunc49376'>Index</a></i><br>
+
+<pre> Newline string
+</pre>
+<pre>(define (<a href="libmisc.html#codefunc49376">nl-string</a> . op-system)
+  (case (if (null? op-system)
+	  <a href="libmisc.html#codefunc31895">*OPERATING-SYSTEM*</a>
+	  (car op-system))
+    ((UNIX) (string (integer-&gt;char 10)))
+    ((WIN)  (string (integer-&gt;char 13) (integer-&gt;char 10)))
+    ((MAC)  (string (integer-&gt;char 13)))
+    (else (<a href="myenv.html#codefunc55253">cerr</a> <a href="myenv.html#codefunc27758">nl</a> &quot;Unsupported operating system: &quot; op-system <a href="myenv.html#codefunc27758">nl</a>)
+	  (exit))))
+</pre>
+<h4><a name='codefunc40937' href='#docfunc40937'>make-cout</a></h4>
+<i><a href='#tocfunc40937'>Index</a></i><br>
+
+<pre> cout redirection to a file with the given &quot;fname&quot;
+</pre>
+<pre>(define (<a href="libmisc.html#codefunc40937">make-cout</a> fname)
+ (let ((o-port
+	 (open-output-file fname)))
+   (lambda args
+  (for-each (lambda (x)
+              (if (procedure? x) 
+		(display (x) o-port) 
+		(display x o-port)))
+            args))))
+</pre>
+<h4><a name='codefunc28903' href='#docfunc28903'>ppw</a></h4>
+<i><a href='#tocfunc28903'>Index</a></i><br>
+
+<pre> Like pp, but symbols are quoted
+</pre>
+<pre>(define (<a href="libmisc.html#codefunc28903">ppw</a> obj . port)
+  (let ((port (if (null? port) (current-output-port) (car port))))
+    (begin
+      (and (symbol? obj)
+	   (display &quot;'&quot; port))
+      (pp obj port))))
+</pre>
+<h4><a name='codefunc28493' href='#docfunc28493'>lambda-tuple</a></h4>
+<i><a href='#tocfunc28493'>Index</a></i><br>
+
+<pre> A record  constructor, which returns record as a function.
+ This returned function may be used as:
+   a field accessor 
+        -- returns value of a specified field
+           if applyed to an only parameter of type symbol (field name)
+        -- returns a list of record fields as a list of (&lt;name&gt; &lt;value&gt;) lists
+           if called without parameters
+   a modifier for some elements of the record
+        -- if its parameters are lists whose CARs are names of record fields
+           (alteration descriptors). This function doesn't modify the original
+           record but returns the record modified.
+ Two forms of alteration descriptors are supported:
+   1. (&lt;field-name&gt; &lt;new-value&gt;)
+     Specifies new value for the field &lt;field-name&gt;.
+   2. (&lt;field-name&gt; =&gt; &lt;expression&gt;)
+     The &lt;expression&gt; must be a procedure that accepts one argument; 
+     this procedure is then called on the value of the &lt;field-name&gt; field
+     and the value returned by this procedure is the new value of this field.
+     Both &lt;field-name&gt; and =&gt; has to be symbols.
+ Note: a type of record constructed with &quot;lambda-tuple&quot; is not distinct
+ from &quot;procedure&quot; type.
+</pre>
+<pre>(define (<a href="libmisc.html#codefunc28493">lambda-tuple</a> . elts)
+  (lambda param
+    (cond 
+      ((null? param) elts)
+      ((symbol? (car param))
+       (cond
+	 ((assq (car param) elts)
+	  =&gt; cadr)
+	 ((eq? '*LT-ADD* (car param))
+	  (apply <a href="libmisc.html#codefunc28493">lambda-tuple</a> (append elts (cdr param))))
+	 (else (<a href="libmisc.html#codefunc64533">verb-4</a> <a href="myenv.html#codefunc27758">nl</a> &quot;Lambda-tuple field name not found: &quot; (car param)
+	        <a href="myenv.html#codefunc27758">nl</a> &quot;Valid names are: &quot; (map car elts) <a href="myenv.html#codefunc27758">nl</a>)
+	       '*LT-NOT-FOUND*
+	       )))
+      (else (apply <a href="libmisc.html#codefunc28493">lambda-tuple</a>
+		   (map
+		     (lambda(e)
+		       (cond 
+			 ((assq (car e) param)
+			  =&gt; (lambda(mut) 
+			       (list (car e)
+				     (if (eq? '=&gt; (cadr mut))
+				       ((caddr mut) (cadr e))
+				       (cadr mut)))))
+			 (else e)))
+		     elts))))))
+</pre>
+<h4><a name='codefunc25693' href='#docfunc25693'>list->symbol</a></h4>
+<i><a href='#tocfunc25693'>Index</a></i><br>
+
+<pre> Transform a list of characters to a symbol
+</pre>
+<pre>(define (<a href="libmisc.html#codefunc25693">list-&gt;symbol</a> lst) 
+  (string-&gt;symbol (apply string lst)))
+</pre>
+<h4><a name='codefunc50384' href='#docfunc50384'>list-to-string</a></h4>
+<i><a href='#tocfunc50384'>Index</a></i><br>
+
+<pre> Elements if given list &lt;l&gt;, which are supposed to be strings,
+ are returned as a string separated by sep-str 
+ or space separated if &lt;sep-str&gt; is omitted
+</pre>
+<pre>(define (<a href="libmisc.html#codefunc50384">list-to-string</a> l . sep-str)
+  (let ((sp-st (if (null? sep-str) &quot; &quot; (car sep-str))))
+    (if (not (null? l))
+  (let rpt ((x l) (rez &quot;&quot;))
+  (if (null? (cdr x))
+    (string-append rez (car x))
+    (rpt (cdr x) (string-append rez (car x) sp-st))))
+  &quot;&quot;
+  )))
+</pre>
+<h4><a name='codefunc50384' href='#docfunc50384'>string-to-list</a></h4>
+<i><a href='#tocfunc50384'>Index</a></i><br>
+
+<pre> Convert a string separated by (car rest) to a list of lines
+ If the rest is omitted, then #\space is used
+</pre>
+<pre>(define (<a href="libmisc.html#codefunc50384">string-to-list</a> str . rest)
+  (let ((lngth (string-length str))
+	(sep-char (if (null? rest)
+		    #\space
+		    (car rest)))) 
+  (let rpt ((indx 0) (rzt '()))
+    (let seek ((i 0))
+    (cond 
+      ((= lngth (+ i indx))
+	  (reverse (cons (substring str indx lngth) rzt))
+       )
+      ((char=? (string-ref str (+ i indx)) sep-char) 
+      (rpt (+ indx i 1) 
+	   (cons (substring str indx (+ indx i)) rzt)))
+      (else (seek (+ i 1))))))))
+</pre>
+<h4><a name='codefunc26073' href='#docfunc26073'>tee</a></h4>
+<i><a href='#tocfunc26073'>Index</a></i><br>
+
+<pre>(define (<a href="libmisc.html#codefunc26073">tee</a> tag x)
+  (<a href="myenv.html#codefunc55253">cerr</a> tag x <a href="myenv.html#codefunc27758">nl</a>)
+  x)
+</pre>
+<h4><a name='codefunc37642' href='#docfunc37642'>tee-1</a></h4>
+<i><a href='#tocfunc37642'>Index</a></i><br>
+
+<pre>(define (<a href="libmisc.html#codefunc37642">tee-1</a> tag x)
+  x)
+</pre>
+<h4><a name='codefunc37643' href='#docfunc37643'>tee-2</a></h4>
+<i><a href='#tocfunc37643'>Index</a></i><br>
+
+<pre>(define (<a href="libmisc.html#codefunc37643">tee-2</a> tag x)
+  x)
+</pre>
+<h4><a name='codefunc37644' href='#docfunc37644'>tee-3</a></h4>
+<i><a href='#tocfunc37644'>Index</a></i><br>
+
+<pre>(define (<a href="libmisc.html#codefunc37644">tee-3</a> tag x)
+  x)
+</pre>
+<h4><a name='codefunc37645' href='#docfunc37645'>tee-4</a></h4>
+<i><a href='#tocfunc37645'>Index</a></i><br>
+
+<pre>(define (<a href="libmisc.html#codefunc37645">tee-4</a> tag x)
+  x)
+</pre>
+<h4><a name='codefunc63765' href='#docfunc63765'>verb-1</a></h4>
+<i><a href='#tocfunc63765'>Index</a></i><br>
+
+<pre>(define (<a href="libmisc.html#codefunc63765">verb-1</a> . x)
+  #f)
+</pre>
+<h4><a name='codefunc64021' href='#docfunc64021'>verb-2</a></h4>
+<i><a href='#tocfunc64021'>Index</a></i><br>
+
+<pre>(define (<a href="libmisc.html#codefunc64021">verb-2</a> . x)
+  #f)
+</pre>
+<h4><a name='codefunc64277' href='#docfunc64277'>verb-3</a></h4>
+<i><a href='#tocfunc64277'>Index</a></i><br>
+
+<pre>(define (<a href="libmisc.html#codefunc64277">verb-3</a> . x)
+  #f)
+</pre>
+<h4><a name='codefunc64533' href='#docfunc64533'>verb-4</a></h4>
+<i><a href='#tocfunc64533'>Index</a></i><br>
+
+<pre>(define (<a href="libmisc.html#codefunc64533">verb-4</a> . x)
+   #f)
+</pre>
+<h4><a name='codefunc3031' href='#docfunc3031'>argv->sxml</a></h4>
+<i><a href='#tocfunc3031'>Index</a></i><br>
+
+<pre> SXML element: 
+   (command-line 
+       (arg 'arg-value')*             ; one per argument
+       ('opt-name'                    ; one per option
+          (@ (type { &quot;--&quot; | &quot;-&quot; }))? 
+          'opt-value'?)*
+    )
+
+  The function obtains options and their arguments from a list of 
+ parameters that follows the standard POSIX.2 option syntax.
+ It recognizes a subset of POSIX.2 options syntax wich may be unambiguously 
+ parsed without explicit description.
+ Supported types of options are: 
+  Short without arguments:  -o 
+  Short combined:           -abc 
+      which is equal to:    -a -b -c 
+  Long without arguments:   --opt 
+  Long with argument:       --opt=val
+ 
+ The function may accept an optional second argument - a list of 
+ possible options. Each option in this list has to be represented as a string.
+ Short options are represented without leading dash, while long option
+ are represented with both leading dashes presented. 
+ Example '(&quot;v&quot; &quot;--update&quot;).
+ If the list of acceptable options was given, and command line contains
+ an option not included in this list, then the function will print an
+ &quot;Invalid option&quot; error message and (exit -1).
+
+ The function doesn't use any global variables.
+</pre>
+<pre>(define (<a href="libmisc.html#codefunc3031">argv-&gt;sxml</a> argv . options)
+  (let* ((vopt (if (null? options) #f (car options)))
+	 (test-valid (lambda(opt . fopt)
+		       (and vopt
+			    (not (member opt vopt))
+			    (begin (<a href="myenv.html#codefunc55253">cerr</a> <a href="myenv.html#codefunc27758">nl</a> &quot;Invalid option: &quot; opt &quot; &quot; 
+					 (if (pair? fopt) fopt &quot;&quot;) <a href="myenv.html#codefunc27758">nl</a>) 
+				   (exit -1))))))
+    (cons 
+      '<a href="common.html#codefunc18289">command-line</a> 
+      (let rpt ((cl argv)
+		(rez '()))
+	(cond
+	  ((null? cl)
+	   (reverse rez))
+	  ((string=? (car cl) &quot;--&quot;)
+	   (append (reverse rez) (map 
+				   (lambda(x)
+				     `(arg ,x))
+				   (cdr cl))))
+	  (else (rpt 
+		  (cdr cl)
+		  (append
+		    (cond
+		      ; Long option
+		      ((string-prefix? &quot;--&quot; (car cl))
+		       (cond 
+			 ; with argument
+			 ((<a href="util.html#codefunc2331">substring?</a> &quot;=&quot; (car cl))
+			  =&gt;(lambda(pos)
+				(test-valid 
+			       (substring (car cl) 0 pos)
+					    (car cl))
+				`((,(string-&gt;symbol 
+				      (substring (car cl) 2 pos) )  ; option
+				    (@ (type &quot;--&quot;))
+				    ,(substring (car cl) (<a href="myenv.html#codemacro11051">++</a> pos)   ; argument
+					       (string-length (car cl))))
+				  )))
+			 ; without argument
+			 (else  
+			   (test-valid (car cl))
+			   `((,(string-&gt;symbol 
+				 (substring (car cl) 2 
+					    (string-length (car cl)))) 
+			       (@ (type &quot;--&quot;)))
+			     ))))
+		      ; short option
+		      ((string-prefix? &quot;-&quot; (car cl))
+		       (map
+			 (lambda (x) 
+			   (let ((opt (string x)))
+			     (test-valid opt (car cl))
+			     `(,(string-&gt;symbol opt) 
+				(@ (type &quot;-&quot;)))))
+			 (cdr (string-&gt;list (car cl)))))
+		      ; non-option
+		      (else `((argument ,(car cl)))))
+		    rez))))
+	))))
+</pre></body></html>

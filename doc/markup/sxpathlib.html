@@ -1,0 +1,993 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN""http://www.w3.org/TR/html401/loose.dtd"><html><head><meta name="GENERATOR" content="Mole: The Scheme Source Code Digger"><title>Module: sxpathlib</title><meta name='keywords' content=''></head><body bgcolor='#ffffff' text='#384412'  link='#11af05' vlink='#728b09'>
+<center><h1>Module: sxpathlib</h1></center>
+
+<pre>			XML processing in Scheme
+		     SXPath -- SXML Query Language
+
+ $Id: sxpathlib.scm,v 3.918 2004/02/05 22:52:33 kl Exp kl $
+
+ This code is in Public Domain
+ It's based on SXPath by Oleg Kiselyov, and multiple improvements 
+ implemented by Dmitry Lizorkin.
+
+ The list of differences from original SXPath.scm my be found in changelog.txt
+ 
+  Kirill Lisovsky    lisovsky@acm.org
+
+                                 *  *  *
+
+ SXPath is a query language for SXML, an instance of XML Information
+ set (Infoset) in the form of s-expressions. See SSAX.scm for the
+ definition of SXML and more details. SXPath is also a translation into
+ Scheme of an XML Path Language, XPath:
+	http://www.w3.org/TR/xpath
+ XPath and SXPath describe means of selecting a set of Infoset's items
+ or their properties.
+
+ To facilitate queries, XPath maps the XML Infoset into an explicit
+ tree, and introduces important notions of a location path and a
+ current, context node. A location path denotes a selection of a set of
+ nodes relative to a context node. Any XPath tree has a distinguished,
+ root node -- which serves as the context node for absolute location
+ paths. Location path is recursively defined as a location step joined
+ with a location path. A location step is a simple query of the
+ database relative to a context node. A step may include expressions
+ that further filter the selected set. Each node in the resulting set
+ is used as a context node for the adjoining location path. The result
+ of the step is a union of the sets returned by the latter location
+ paths.
+
+ The SXML representation of the XML Infoset (see SSAX.scm) is rather
+ suitable for querying as it is. Bowing to the XPath specification,
+ we will refer to SXML information items as 'Nodes':
+ 	&lt;Node&gt; ::= &lt;Element&gt; | &lt;attributes-coll&gt; | &lt;attrib&gt;
+ 		   | &quot;text string&quot; | &lt;PI&gt;
+ This production can also be described as
+	&lt;Node&gt; ::= (name . &lt;Nodelist&gt;) | &quot;text string&quot;
+ An (ordered) set of nodes is just a list of the constituent nodes:
+ 	&lt;Nodelist&gt; ::= (&lt;Node&gt; ...)
+ Nodelists, and Nodes other than text strings are both lists. A
+ &lt;Nodelist&gt; however is either an empty list, or a list whose head is not
+ a symbol.  A symbol at the head of a node is either an XML name (in
+ which case it's a tag of an XML element), or an administrative name
+ such as '@'.  This uniform list representation makes processing rather
+ simple and elegant, while avoiding confusion. The multi-branch tree
+ structure formed by the mutually-recursive datatypes &lt;Node&gt; and
+ &lt;Nodelist&gt; lends itself well to processing by functional languages.
+
+ A location path is in fact a composite query over an XPath tree or
+ its branch. A singe step is a combination of a projection, selection
+ or a transitive closure. Multiple steps are combined via join and
+ union operations. This insight allows us to _elegantly_ implement
+ XPath as a sequence of projection and filtering primitives --
+ converters -- joined by _combinators_. Each converter takes a node
+ and returns a nodelist which is the result of the corresponding query
+ relative to that node. A converter can also be called on a set of
+ nodes. In that case it returns a union of the corresponding queries over
+ each node in the set. The union is easily implemented as a list
+ append operation as all nodes in a SXML tree are considered
+ distinct, by XPath conventions. We also preserve the order of the
+ members in the union. Query combinators are high-order functions:
+ they take converter(s) (which is a Node|Nodelist -&gt; Nodelist function)
+ and compose or otherwise combine them. We will be concerned with
+ only relative location paths [XPath]: an absolute location path is a
+ relative path applied to the root node.
+
+ Similarly to XPath, SXPath defines full and abbreviated notations
+ for location paths. In both cases, the abbreviated notation can be
+ mechanically expanded into the full form by simple rewriting
+ rules. In case of SXPath the corresponding rules are given as
+ comments to a sxpath function, below. The regression test suite at
+ the end of this file shows a representative sample of SXPaths in
+ both notations, juxtaposed with the corresponding XPath
+ expressions. Most of the samples are borrowed literally from the
+ XPath specification, while the others are adjusted for our running
+ example, tree1.
+
+</pre><p><br>
+<!-- Table of content -->
+<p><dl>
+<p><dt><a name='tocchapt24845' href='#chapt24845'><b>Basic converters and applicators</b></a><dd>
+
+f:  <a name='tocfunc31162' href='#docfunc31162' style='text-decoration:none'>nodeset?</a><br>
+
+f:  <a name='tocfunc11721' href='#docfunc11721' style='text-decoration:none'>as-nodeset</a><br>
+
+<dl><dt><a name='tocsect48300' href='#sect48300'><b>Node test</b></a><dd>
+
+f:  <a name='tocfunc35234' href='#docfunc35234' style='text-decoration:none'>sxml:element?</a><br>
+
+f:  <a name='tocfunc6363' href='#docfunc6363' style='text-decoration:none'>ntype-names??</a><br>
+
+f:  <a name='tocfunc9356' href='#docfunc9356' style='text-decoration:none'>ntype??</a><br>
+
+f:  <a name='tocfunc32267' href='#docfunc32267' style='text-decoration:none'>ntype-namespace-id??</a><br>
+</dl>
+
+f:  <a name='tocfunc65081' href='#docfunc65081' style='text-decoration:none'>sxml:complement</a><br>
+
+f:  <a name='tocfunc31089' href='#docfunc31089' style='text-decoration:none'>node-eq?</a><br>
+
+f:  <a name='tocfunc7186' href='#docfunc7186' style='text-decoration:none'>node-equal?</a><br>
+
+f:  <a name='tocfunc47215' href='#docfunc47215' style='text-decoration:none'>node-pos</a><br>
+
+f:  <a name='tocfunc7531' href='#docfunc7531' style='text-decoration:none'>sxml:filter</a><br>
+
+f:  <a name='tocfunc7397' href='#docfunc7397' style='text-decoration:none'>take-until</a><br>
+
+f:  <a name='tocfunc3801' href='#docfunc3801' style='text-decoration:none'>take-after</a><br>
+
+f:  <a name='tocfunc27946' href='#docfunc27946' style='text-decoration:none'>map-union</a><br>
+
+f:  <a name='tocfunc38206' href='#docfunc38206' style='text-decoration:none'>node-reverse</a><br>
+
+f:  <a name='tocfunc4054' href='#docfunc4054' style='text-decoration:none'>node-trace</a><br>
+
+<dl><dt><a name='tocsect1404' href='#sect1404'><b>Converter combinators</b></a><dd>
+
+f:  <a name='tocfunc3917' href='#docfunc3917' style='text-decoration:none'>select-kids</a><br>
+
+f:  <a name='tocfunc46283' href='#docfunc46283' style='text-decoration:none'>node-self</a><br>
+
+f:  <a name='tocfunc43229' href='#docfunc43229' style='text-decoration:none'>node-join</a><br>
+
+f:  <a name='tocfunc3904' href='#docfunc3904' style='text-decoration:none'>node-reduce</a><br>
+
+f:  <a name='tocfunc17522' href='#docfunc17522' style='text-decoration:none'>node-or</a><br>
+
+f:  <a name='tocfunc33362' href='#docfunc33362' style='text-decoration:none'>node-closure</a><br>
+</dl>
+<p><dt><a name='tocchapt5476' href='#chapt5476'><b>Unified with sxpath-ext and sxml-tools</b></a><dd>
+
+f:  <a name='tocfunc63215' href='#docfunc63215' style='text-decoration:none'>sxml:node?</a><br>
+
+f:  <a name='tocfunc50657' href='#docfunc50657' style='text-decoration:none'>sxml:attr-list</a><br>
+
+f:  <a name='tocfunc65240' href='#docfunc65240' style='text-decoration:none'>sxml:attribute</a><br>
+
+f:  <a name='tocfunc5616' href='#docfunc5616' style='text-decoration:none'>sxml:child</a><br>
+
+f:  <a name='tocfunc13910' href='#docfunc13910' style='text-decoration:none'>sxml:parent</a><br>
+<p><dt><a name='tocchapt19182' href='#chapt19182'><b>Popular short cuts </b></a><dd>
+
+f:  <a name='tocfunc9787' href='#docfunc9787' style='text-decoration:none'>node-parent</a><br>
+
+f:  <a name='tocfunc23538' href='#docfunc23538' style='text-decoration:none'>sxml:child-nodes</a><br>
+
+f:  <a name='tocfunc47832' href='#docfunc47832' style='text-decoration:none'>sxml:child-elements</a><br>
+</dl>
+<hr height='5'><center><h3><a name='chapt24845' href='#tocchapt24845'>Basic converters and applicators</a></h3></center>
+
+<pre> A converter is a function
+	type Converter = Node|Nodelist -&gt; Nodelist
+ A converter can also play a role of a predicate: in that case, if a
+ converter, applied to a node or a nodelist, yields a non-empty
+ nodelist, the converter-predicate is deemed satisfied. Throughout
+ this file a nil nodelist is equivalent to #f in denoting a failure.
+</pre>
+<h4><a name='docfunc31162' href='#tocfunc31162'>nodeset?</a></h4>
+(define (nodeset? x)<i><br> ... <a href='#codefunc31162'>Full Code</a> ... )</i>
+<pre> Returns #t if given object is a nodelist
+</pre><p><br>
+
+<h4><a name='docfunc11721' href='#tocfunc11721'>as-nodeset</a></h4>
+(define (as-nodeset x)<i><br> ... <a href='#codefunc11721'>Full Code</a> ... )</i>
+<pre> If x is a nodelist - returns it as is, otherwise wrap it in a list.
+</pre><p><br>
+
+<hr width='40%' align='center'><center><h3><a name='sect48300' href='#tocsect48300'>Node test</a></h3></center>
+
+<pre> The following functions implement 'Node test's as defined in
+ Sec. 2.3 of XPath document. A node test is one of the components of a
+ location step. It is also a converter-predicate in SXPath.
+</pre>
+<h4><a name='docfunc35234' href='#tocfunc35234'>sxml:element?</a></h4>
+(define (sxml:element? obj)<i><br> ... <a href='#codefunc35234'>Full Code</a> ... )</i>
+<pre> Predicate which returns #t if &lt;obj&gt; is SXML element, otherwise returns #f. 
+</pre><p><br>
+
+<h4><a name='docfunc6363' href='#tocfunc6363'>ntype-names??</a></h4>
+(define (ntype-names?? crit)<i><br> ... <a href='#codefunc6363'>Full Code</a> ... )</i>
+<pre> The function ntype-names?? takes a list of acceptable node names as a
+ criterion and returns a function, which, when applied to a node, 
+ will return #t if the node name is present in criterion list and #f
+ othervise.
+	ntype-names?? :: ListOfNames -&gt; Node -&gt; Boolean
+</pre><p><br>
+
+<h4><a name='docfunc9356' href='#tocfunc9356'>ntype??</a></h4>
+(define (ntype?? crit)<i><br> ... <a href='#codefunc9356'>Full Code</a> ... )</i>
+<pre> The function ntype?? takes a type criterion and returns
+ a function, which, when applied to a node, will tell if the node satisfies
+ the test.
+	ntype?? :: Crit -&gt; Node -&gt; Boolean
+
+ The criterion 'crit' is 
+  one of the following symbols:
+	id		- tests if the Node has the right name (id)
+	@		- tests if the Node is an &lt;attributes-list&gt;
+	*		- tests if the Node is an &lt;Element&gt;
+	*text*		- tests if the Node is a text node
+	*data*		- tests if the Node is a data node 
+                         (text, number, boolean, etc., but not pair)
+	*PI*		- tests if the Node is a PI node
+	*COMMENT*	- tests if the Node is a COMMENT node
+	*ENTITY*        - tests if the Node is a ENTITY node
+	*any*		- #t for any type of Node
+</pre><p><br>
+
+<h4><a name='docfunc32267' href='#tocfunc32267'>ntype-namespace-id??</a></h4>
+(define (ntype-namespace-id?? ns-id)<i><br> ... <a href='#codefunc32267'>Full Code</a> ... )</i>
+<pre> This function takes a namespace-id, and returns a predicate
+ Node -&gt; Boolean, which is #t for nodes with this very namespace-id.
+ ns-id is a string
+ (ntype-namespace-id?? #f) will be #t for nodes with non-qualified names.
+</pre><p><br>
+
+<h4><a name='docfunc65081' href='#tocfunc65081'>sxml:complement</a></h4>
+(define (sxml:complement pred)<i><br> ... <a href='#codefunc65081'>Full Code</a> ... )</i>
+<pre> This function takes a predicate and returns it complemented 
+ That is if the given predicate yelds #f or '() the complemented one  
+ yields the given node (#t) and vice versa.
+</pre><p><br>
+
+<h4><a name='docfunc31089' href='#tocfunc31089'>node-eq?</a></h4>
+(define (node-eq? other)<i><br> ... <a href='#codefunc31089'>Full Code</a> ... )</i>
+<pre> Curried equivalence converter-predicates
+</pre><p><br>
+
+<h4><a name='docfunc7186' href='#tocfunc7186'>node-equal?</a></h4>
+(define (node-equal? other)<i><br> ... <a href='#codefunc7186'>Full Code</a> ... )</i><p><br>
+
+<h4><a name='docfunc47215' href='#tocfunc47215'>node-pos</a></h4>
+(define (node-pos n)<i><br> ... <a href='#codefunc47215'>Full Code</a> ... )</i>
+<pre> node-pos:: N -&gt; Nodelist -&gt; Nodelist, or
+ node-pos:: N -&gt; Converter
+ Select the N'th element of a Nodelist and return as a singular Nodelist;
+ Return an empty nodelist if the Nth element does not exist.
+ ((node-pos 1) Nodelist) selects the node at the head of the Nodelist,
+ if exists; ((node-pos 2) Nodelist) selects the Node after that, if
+ exists.
+ N can also be a negative number: in that case the node is picked from
+ the tail of the list.
+ ((node-pos -1) Nodelist) selects the last node of a non-empty nodelist;
+ ((node-pos -2) Nodelist) selects the last but one node, if exists.
+</pre><p><br>
+
+<h4><a name='docfunc7531' href='#tocfunc7531'>sxml:filter</a></h4>
+(define (sxml:filter pred?)<i><br> ... <a href='#codefunc7531'>Full Code</a> ... )</i>
+<pre> filter:: Converter -&gt; Converter
+ A filter applicator, which introduces a filtering context. The argument
+ converter is considered a predicate, with either #f or nil result meaning
+ failure.
+</pre><p><br>
+
+<h4><a name='docfunc7397' href='#tocfunc7397'>take-until</a></h4>
+(define (take-until pred?)<i><br> ... <a href='#codefunc7397'>Full Code</a> ... )</i>
+<pre> take-until:: Converter -&gt; Converter, or
+ take-until:: Pred -&gt; Node|Nodelist -&gt; Nodelist
+ Given a converter-predicate and a nodelist, apply the predicate to
+ each element of the nodelist, until the predicate yields anything but #f or
+ nil. Return the elements of the input nodelist that have been processed
+ till that moment (that is, which fail the predicate).
+ take-until is a variation of the filter above: take-until passes
+ elements of an ordered input set till (but not including) the first
+ element that satisfies the predicate.
+ The nodelist returned by ((take-until (not pred)) nset) is a subset -- 
+ to be more precise, a prefix -- of the nodelist returned by
+ ((filter pred) nset)
+</pre><p><br>
+
+<h4><a name='docfunc3801' href='#tocfunc3801'>take-after</a></h4>
+(define (take-after pred?)<i><br> ... <a href='#codefunc3801'>Full Code</a> ... )</i>
+<pre> take-after:: Converter -&gt; Converter, or
+ take-after:: Pred -&gt; Node|Nodelist -&gt; Nodelist
+ Given a converter-predicate and a nodelist, apply the predicate to
+ each element of the nodelist, until the predicate yields anything but #f or
+ nil. Return the elements of the input nodelist that have not been processed:
+ that is, return the elements of the input nodelist that follow the first
+ element that satisfied the predicate.
+ take-after along with take-until partition an input nodelist into three
+ parts: the first element that satisfies a predicate, all preceding
+ elements and all following elements.
+</pre><p><br>
+
+<h4><a name='docfunc27946' href='#tocfunc27946'>map-union</a></h4>
+(define (map-union proc lst)<i><br> ... <a href='#codefunc27946'>Full Code</a> ... )</i>
+<pre> Apply proc to each element of lst and return the list of results.
+ if proc returns a nodelist, splice it into the result
+
+ From another point of view, map-union is a function Converter-&gt;Converter,
+ which places an argument-converter in a joining context.
+</pre><p><br>
+
+<h4><a name='docfunc38206' href='#tocfunc38206'>node-reverse</a></h4>
+(define node-reverse (lambda (node-or-nodelist)<i><br> ... <a href='#codefunc38206'>Full Code</a> ... )</i>
+<pre> node-reverse :: Converter, or
+ node-reverse:: Node|Nodelist -&gt; Nodelist
+ Reverses the order of nodes in the nodelist
+ This basic converter is needed to implement a reverse document order
+ (see the XPath Recommendation).
+</pre><p><br>
+
+<h4><a name='docfunc4054' href='#tocfunc4054'>node-trace</a></h4>
+(define (node-trace title)<i><br> ... <a href='#codefunc4054'>Full Code</a> ... )</i>
+<pre> node-trace:: String -&gt; Converter
+ (node-trace title) is an identity converter. In addition it prints out
+ a node or nodelist it is applied to, prefixed with the 'title'.
+ This converter is very useful for debugging.
+</pre><p><br>
+
+<hr width='40%' align='center'><center><h3><a name='sect1404' href='#tocsect1404'>Converter combinators</a></h3></center>
+
+<pre>
+ Combinators are higher-order functions that transmogrify a converter
+ or glue a sequence of converters into a single, non-trivial
+ converter. The goal is to arrive at converters that correspond to
+ XPath location paths.
+
+ From a different point of view, a combinator is a fixed, named
+ _pattern_ of applying converters. Given below is a complete set of
+ such patterns that together implement XPath location path
+ specification. As it turns out, all these combinators can be built
+ from a small number of basic blocks: regular functional composition,
+ map-union and filter applicators, and the nodelist union.
+</pre>
+<h4><a name='docfunc3917' href='#tocfunc3917'>select-kids</a></h4>
+(define (select-kids test-pred?)<i><br> ... <a href='#codefunc3917'>Full Code</a> ... )</i>
+<pre> select-kids:: Pred -&gt; Node -&gt; Nodelist
+ Given a Node, return an (ordered) subset its children that satisfy
+ the Pred (a converter, actually)
+ select-kids:: Pred -&gt; Nodelist -&gt; Nodelist
+ The same as above, but select among children of all the nodes in
+ the Nodelist
+
+ More succinctly, the signature of this function is
+ select-kids:: Converter -&gt; Converter
+</pre><p><br>
+
+<h4><a name='docfunc46283' href='#tocfunc46283'>node-self</a></h4>
+(define node-self <i><br> ... <a href='#codefunc46283'>Full Code</a> ... )</i>
+<pre> node-self:: Pred -&gt; Node -&gt; Nodelist, or
+ node-self:: Converter -&gt; Converter
+ Similar to select-kids but apply to the Node itself rather
+ than to its children. The resulting Nodelist will contain either one
+ component, or will be empty (if the Node failed the Pred).
+</pre><p><br>
+
+<h4><a name='docfunc43229' href='#tocfunc43229'>node-join</a></h4>
+(define (node-join . selectors)<i><br> ... <a href='#codefunc43229'>Full Code</a> ... )</i>
+<pre> node-join:: [LocPath] -&gt; Node|Nodelist -&gt; Nodelist, or
+ node-join:: [Converter] -&gt; Converter
+ join the sequence of location steps or paths as described
+ in the title comments above.
+</pre><p><br>
+
+<h4><a name='docfunc3904' href='#tocfunc3904'>node-reduce</a></h4>
+(define (node-reduce . converters)<i><br> ... <a href='#codefunc3904'>Full Code</a> ... )</i>
+<pre> node-reduce:: [LocPath] -&gt; Node|Nodelist -&gt; Nodelist, or
+ node-reduce:: [Converter] -&gt; Converter
+ A regular functional composition of converters.
+ From a different point of view,
+    ((apply node-reduce converters) nodelist)
+ is equivalent to
+    (foldl apply nodelist converters)
+ i.e., folding, or reducing, a list of converters with the nodelist
+ as a seed.
+</pre><p><br>
+
+<h4><a name='docfunc17522' href='#tocfunc17522'>node-or</a></h4>
+(define (node-or . converters)<i><br> ... <a href='#codefunc17522'>Full Code</a> ... )</i>
+<pre> node-or:: [Converter] -&gt; Converter
+ This combinator applies all converters to a given node and
+ produces the union of their results.
+ This combinator corresponds to a union, '|' operation for XPath
+ location paths.
+</pre><p><br>
+
+<h4><a name='docfunc33362' href='#tocfunc33362'>node-closure</a></h4>
+(define (node-closure test-pred?)<i><br> ... <a href='#codefunc33362'>Full Code</a> ... )</i>
+<pre> node-closure:: Converter -&gt; Converter
+ Select all _descendants_ of a node that satisfy a converter-predicate.
+ This combinator is similar to select-kids but applies to
+ grand... children as well.
+ This combinator implements the &quot;descendant::&quot; XPath axis
+ Conceptually, this combinator can be expressed as
+ (define (node-closure f)
+      (node-or
+        (select-kids f)
+	 (node-reduce (select-kids (ntype?? '*)) (node-closure f))))
+ This definition, as written, looks somewhat like a fixpoint, and it
+ will run forever. It is obvious however that sooner or later
+ (select-kids (ntype?? '*)) will return an empty nodelist. At
+ this point further iterations will no longer affect the result and
+ can be stopped.
+</pre><p><br>
+<hr height='5'><center><h3><a name='chapt5476' href='#tocchapt5476'>Unified with sxpath-ext and sxml-tools</a></h3></center>
+
+<pre></pre>
+<h4><a name='docfunc63215' href='#tocfunc63215'>sxml:node?</a></h4>
+(define (sxml:node? node)<i><br> ... <a href='#codefunc63215'>Full Code</a> ... )</i>
+<pre> According to XPath specification 2.3, this test is true for any
+ XPath node.
+ For SXML auxiliary lists and lists of attributes has to be excluded.
+</pre><p><br>
+
+<h4><a name='docfunc50657' href='#tocfunc50657'>sxml:attr-list</a></h4>
+(define (sxml:attr-list obj)<i><br> ... <a href='#codefunc50657'>Full Code</a> ... )</i>
+<pre> Returns the list of attributes for a given SXML node
+ Empty list is returned if the given node os not an element,
+ or if it has no list of attributes
+</pre><p><br>
+
+<h4><a name='docfunc65240' href='#tocfunc65240'>sxml:attribute</a></h4>
+(define (sxml:attribute test-pred?)<i><br> ... <a href='#codefunc65240'>Full Code</a> ... )</i>
+<pre> Attribute axis
+</pre><p><br>
+
+<h4><a name='docfunc5616' href='#tocfunc5616'>sxml:child</a></h4>
+(define (sxml:child test-pred?)<i><br> ... <a href='#codefunc5616'>Full Code</a> ... )</i>
+<pre> Child axis
+  This function is similar to 'select-kids', but it returns an empty
+  child-list for PI, Comment and Entity nodes
+</pre><p><br>
+
+<h4><a name='docfunc13910' href='#tocfunc13910'>sxml:parent</a></h4>
+(define (sxml:parent test-pred?)<i><br> ... <a href='#codefunc13910'>Full Code</a> ... )</i>
+<pre> Parent axis
+ Given a predicate, it returns a function 
+  RootNode -&gt; Converter
+ which which yields a 
+  node -&gt; parent 
+ converter then applied to a rootnode.
+ Thus, such a converter may be constructed using
+  ((sxml:parent test-pred) rootnode)
+ and returns a parent of a node it is applied to.
+ If applied to a nodelist, it returns the 
+ list of parents of nodes in the nodelist. The rootnode does not have
+ to be the root node of the whole SXML tree -- it may be a root node
+ of a branch of interest.
+ The parent:: axis can be used with any SXML node.
+</pre><p><br>
+<hr height='5'><center><h3><a name='chapt19182' href='#tocchapt19182'>Popular short cuts </a></h3></center>
+
+<pre></pre>
+<h4><a name='docfunc9787' href='#tocfunc9787'>node-parent</a></h4>
+(define node-parent <i><br> ... <a href='#codefunc9787'>Full Code</a> ... )</i>
+<pre> node-parent:: RootNode -&gt; Converter
+ (node-parent rootnode) yields a converter that returns a parent of a
+ node it is applied to. If applied to a nodelist, it returns the list
+ of parents of nodes in the nodelist.
+ Given the notation of Philip Wadler's paper on semantics of XSLT,
+  parent(x) = { y | y=subnode*(root), x=subnode(y) }
+ Therefore, node-parent is not the fundamental converter: it can be
+ expressed through the existing ones.  Yet node-parent is a rather
+ convenient converter. It corresponds to a parent:: axis of SXPath.
+
+ Please note: this function is provided for backward compatibility 
+ with SXPath/SXPathlib ver. 3.5.x.x and earlier.
+ Now it's a particular case of 'sxml:parent' application: 
+</pre><p><br>
+
+<h4><a name='docfunc23538' href='#tocfunc23538'>sxml:child-nodes</a></h4>
+(define sxml:child-nodes <i><br> ... <a href='#codefunc23538'>Full Code</a> ... )</i><p><br>
+
+<h4><a name='docfunc47832' href='#tocfunc47832'>sxml:child-elements</a></h4>
+(define sxml:child-elements <i><br> ... <a href='#codefunc47832'>Full Code</a> ... )</i><p><br>
+<center><h1>Code</h1></center>
+
+<h4><a name='codefunc31162' href='#docfunc31162'>nodeset?</a></h4>
+<i><a href='#tocfunc31162'>Index</a></i><br>
+
+<pre> Returns #t if given object is a nodelist
+</pre>
+<pre>(define (<a href="sxpathlib.html#codefunc31162">nodeset?</a> x)
+  (or (and (pair? x) (not (symbol? (car x)))) (null? x)))
+</pre>
+<h4><a name='codefunc11721' href='#docfunc11721'>as-nodeset</a></h4>
+<i><a href='#tocfunc11721'>Index</a></i><br>
+
+<pre> If x is a nodelist - returns it as is, otherwise wrap it in a list.
+</pre>
+<pre>(define (<a href="sxpathlib.html#codefunc11721">as-nodeset</a> x)
+  (if (<a href="sxpathlib.html#codefunc31162">nodeset?</a> x) x (list x)))
+</pre>
+<h4><a name='codefunc65081' href='#docfunc65081'>sxml:complement</a></h4>
+<i><a href='#tocfunc65081'>Index</a></i><br>
+
+<pre> This function takes a predicate and returns it complemented 
+ That is if the given predicate yelds #f or '() the complemented one  
+ yields the given node (#t) and vice versa.
+</pre>
+<pre>(define (<a href="sxpathlib.html#codefunc65081">sxml:complement</a> pred)
+  (lambda(node)
+    (case (pred node)
+      ((#f '()) node)
+      (else #f))))
+</pre>
+<h4><a name='codefunc31089' href='#docfunc31089'>node-eq?</a></h4>
+<i><a href='#tocfunc31089'>Index</a></i><br>
+
+<pre> Curried equivalence converter-predicates
+</pre>
+<pre>(define (<a href="sxpathlib.html#codefunc31089">node-eq?</a> other)
+  (lambda (node)
+    (eq? other node)))
+</pre>
+<h4><a name='codefunc7186' href='#docfunc7186'>node-equal?</a></h4>
+<i><a href='#tocfunc7186'>Index</a></i><br>
+
+<pre>(define (<a href="sxpathlib.html#codefunc7186">node-equal?</a> other)
+  (lambda (node)
+    (equal? other node)))
+</pre>
+<h4><a name='codefunc47215' href='#docfunc47215'>node-pos</a></h4>
+<i><a href='#tocfunc47215'>Index</a></i><br>
+
+<pre> node-pos:: N -&gt; Nodelist -&gt; Nodelist, or
+ node-pos:: N -&gt; Converter
+ Select the N'th element of a Nodelist and return as a singular Nodelist;
+ Return an empty nodelist if the Nth element does not exist.
+ ((node-pos 1) Nodelist) selects the node at the head of the Nodelist,
+ if exists; ((node-pos 2) Nodelist) selects the Node after that, if
+ exists.
+ N can also be a negative number: in that case the node is picked from
+ the tail of the list.
+ ((node-pos -1) Nodelist) selects the last node of a non-empty nodelist;
+ ((node-pos -2) Nodelist) selects the last but one node, if exists.
+</pre>
+<pre>(define (<a href="sxpathlib.html#codefunc47215">node-pos</a> n)
+  (lambda (nodelist)
+    (cond
+     ((not (<a href="sxpathlib.html#codefunc31162">nodeset?</a> nodelist)) '())
+     ((null? nodelist) nodelist)
+     ((eqv? n 1) (list (car nodelist)))
+     ((negative? n) ((<a href="sxpathlib.html#codefunc47215">node-pos</a> (+ n 1 (length nodelist))) nodelist))
+     (else
+      (<a href="myenv.html#codemacro19783">assert</a> (positive? n))
+      ((<a href="sxpathlib.html#codefunc47215">node-pos</a> (<a href="myenv.html#codemacro11565">--</a> n)) (cdr nodelist))))))
+</pre>
+<h4><a name='codefunc7531' href='#docfunc7531'>sxml:filter</a></h4>
+<i><a href='#tocfunc7531'>Index</a></i><br>
+
+<pre> filter:: Converter -&gt; Converter
+ A filter applicator, which introduces a filtering context. The argument
+ converter is considered a predicate, with either #f or nil result meaning
+ failure.
+</pre>
+<pre>(define (<a href="sxpathlib.html#codefunc7531">sxml:filter</a> pred?)
+  (lambda (lst)	; a nodelist or a node (will be converted to a singleton nset)
+    (let loop ((lst (<a href="sxpathlib.html#codefunc11721">as-nodeset</a> lst)) 
+	       (res '()))
+      (if (null? lst)
+	  (reverse res)
+	  (let ((pred-result (pred? (car lst))))
+	    (loop (cdr lst)
+		  (if (and pred-result (not (null? pred-result)))
+		      (cons (car lst) res)
+		      res)))))))
+</pre>
+<h4><a name='codefunc7397' href='#docfunc7397'>take-until</a></h4>
+<i><a href='#tocfunc7397'>Index</a></i><br>
+
+<pre> take-until:: Converter -&gt; Converter, or
+ take-until:: Pred -&gt; Node|Nodelist -&gt; Nodelist
+ Given a converter-predicate and a nodelist, apply the predicate to
+ each element of the nodelist, until the predicate yields anything but #f or
+ nil. Return the elements of the input nodelist that have been processed
+ till that moment (that is, which fail the predicate).
+ take-until is a variation of the filter above: take-until passes
+ elements of an ordered input set till (but not including) the first
+ element that satisfies the predicate.
+ The nodelist returned by ((take-until (not pred)) nset) is a subset -- 
+ to be more precise, a prefix -- of the nodelist returned by
+ ((filter pred) nset)
+</pre>
+<pre>(define (<a href="sxpathlib.html#codefunc7397">take-until</a> pred?)
+  (lambda (lst)	; a nodelist or a node (will be converted to a singleton nset)
+    (let loop ((lst (<a href="sxpathlib.html#codefunc11721">as-nodeset</a> lst)))
+      (if (null? lst) lst
+	  (let ((pred-result (pred? (car lst))))
+	    (if (and pred-result (not (null? pred-result)))
+		'()
+		(cons (car lst) (loop (cdr lst)))))
+	  ))))
+</pre>
+<h4><a name='codefunc3801' href='#docfunc3801'>take-after</a></h4>
+<i><a href='#tocfunc3801'>Index</a></i><br>
+
+<pre> take-after:: Converter -&gt; Converter, or
+ take-after:: Pred -&gt; Node|Nodelist -&gt; Nodelist
+ Given a converter-predicate and a nodelist, apply the predicate to
+ each element of the nodelist, until the predicate yields anything but #f or
+ nil. Return the elements of the input nodelist that have not been processed:
+ that is, return the elements of the input nodelist that follow the first
+ element that satisfied the predicate.
+ take-after along with take-until partition an input nodelist into three
+ parts: the first element that satisfies a predicate, all preceding
+ elements and all following elements.
+</pre>
+<pre>(define (<a href="sxpathlib.html#codefunc3801">take-after</a> pred?)
+  (lambda (lst)	; a nodelist or a node (will be converted to a singleton nset)
+    (let loop ((lst (<a href="sxpathlib.html#codefunc11721">as-nodeset</a> lst)))
+      (if (null? lst) lst
+	  (let ((pred-result (pred? (car lst))))
+	    (if (and pred-result (not (null? pred-result)))
+		(cdr lst)
+		(loop (cdr lst))))
+	  ))))
+</pre>
+<h4><a name='codefunc27946' href='#docfunc27946'>map-union</a></h4>
+<i><a href='#tocfunc27946'>Index</a></i><br>
+
+<pre> Apply proc to each element of lst and return the list of results.
+ if proc returns a nodelist, splice it into the result
+
+ From another point of view, map-union is a function Converter-&gt;Converter,
+ which places an argument-converter in a joining context.
+</pre>
+<pre>(define (<a href="sxpathlib.html#codefunc27946">map-union</a> proc lst)
+  (if (null? lst) lst
+      (let ((proc-res (proc (car lst))))
+	((if (<a href="sxpathlib.html#codefunc31162">nodeset?</a> proc-res) append cons)
+	 proc-res (<a href="sxpathlib.html#codefunc27946">map-union</a> proc (cdr lst))))))
+</pre>
+<h4><a name='codefunc38206' href='#docfunc38206'>node-reverse</a></h4>
+<i><a href='#tocfunc38206'>Index</a></i><br>
+
+<pre> node-reverse :: Converter, or
+ node-reverse:: Node|Nodelist -&gt; Nodelist
+ Reverses the order of nodes in the nodelist
+ This basic converter is needed to implement a reverse document order
+ (see the XPath Recommendation).
+</pre>
+<pre>(define <a href="sxpathlib.html#codefunc38206">node-reverse</a> 
+  (lambda (node-or-nodelist)
+    (if (not (<a href="sxpathlib.html#codefunc31162">nodeset?</a> node-or-nodelist)) (list node-or-nodelist)
+	(reverse node-or-nodelist))))
+</pre>
+<h4><a name='codefunc4054' href='#docfunc4054'>node-trace</a></h4>
+<i><a href='#tocfunc4054'>Index</a></i><br>
+
+<pre> node-trace:: String -&gt; Converter
+ (node-trace title) is an identity converter. In addition it prints out
+ a node or nodelist it is applied to, prefixed with the 'title'.
+ This converter is very useful for debugging.
+</pre>
+<pre>(define (<a href="sxpathlib.html#codefunc4054">node-trace</a> title)
+  (lambda (node-or-nodelist)
+    (<a href="myenv.html#codefunc58328">cout</a> <a href="myenv.html#codefunc27758">nl</a> &quot;--&gt;&quot; title &quot; :&quot;)
+    (pp node-or-nodelist)
+    node-or-nodelist))
+</pre>
+<h4><a name='codefunc63215' href='#docfunc63215'>sxml:node?</a></h4>
+<i><a href='#tocfunc63215'>Index</a></i><br>
+
+<pre> According to XPath specification 2.3, this test is true for any
+ XPath node.
+ For SXML auxiliary lists and lists of attributes has to be excluded.
+</pre>
+<pre>(define (<a href="sxpathlib.html#codefunc63215">sxml:node?</a> node)
+  (not (and 
+	 (pair? node)
+	 (memq (car node) '(@ @@)))))
+</pre>
+<h4><a name='codefunc50657' href='#docfunc50657'>sxml:attr-list</a></h4>
+<i><a href='#tocfunc50657'>Index</a></i><br>
+
+<pre> Returns the list of attributes for a given SXML node
+ Empty list is returned if the given node os not an element,
+ or if it has no list of attributes
+</pre>
+<pre>(define (<a href="sxpathlib.html#codefunc50657">sxml:attr-list</a> obj)
+  (if (and  (<a href="sxpathlib.html#codefunc35234">sxml:element?</a> obj) 
+	    (not (null? (cdr obj)))
+	    (pair? (cadr obj)) 
+	    (eq? '@ (caadr obj)))
+	 (cdadr obj)
+	 '()))
+</pre>
+<h4><a name='codefunc65240' href='#docfunc65240'>sxml:attribute</a></h4>
+<i><a href='#tocfunc65240'>Index</a></i><br>
+
+<pre> Attribute axis
+</pre>
+<pre>(define (<a href="sxpathlib.html#codefunc65240">sxml:attribute</a> test-pred?)
+  (let ((fltr (<a href="sxpathlib.html#codefunc7531">sxml:filter</a> test-pred?)))
+    (lambda (node)
+      (fltr
+	(apply append
+	       (map
+             <a href="sxpathlib.html#codefunc50657">sxml:attr-list</a>
+		(<a href="sxpathlib.html#codefunc11721">as-nodeset</a> node)))))))
+</pre>
+<h4><a name='codefunc5616' href='#docfunc5616'>sxml:child</a></h4>
+<i><a href='#tocfunc5616'>Index</a></i><br>
+
+<pre> Child axis
+  This function is similar to 'select-kids', but it returns an empty
+  child-list for PI, Comment and Entity nodes
+</pre>
+<pre>(define (<a href="sxpathlib.html#codefunc5616">sxml:child</a> test-pred?)
+  (lambda (node)		; node or node-set
+    (cond 
+      ((null? node) node)
+      ((not (pair? node)) '())   ; No children
+      ((memq (car node) '(*PI* *COMMENT* *ENTITY*))   ; PI, Comment or Entity
+       '())   ; No children
+      ((symbol? (car node))    ; it's a single node       
+       ((<a href="sxpathlib.html#codefunc7531">sxml:filter</a> test-pred?) (cdr node)))
+      (else (<a href="sxpathlib.html#codefunc27946">map-union</a> (<a href="sxpathlib.html#codefunc5616">sxml:child</a> test-pred?) node)))))
+</pre>
+<h4><a name='codefunc13910' href='#docfunc13910'>sxml:parent</a></h4>
+<i><a href='#tocfunc13910'>Index</a></i><br>
+
+<pre> Parent axis
+ Given a predicate, it returns a function 
+  RootNode -&gt; Converter
+ which which yields a 
+  node -&gt; parent 
+ converter then applied to a rootnode.
+ Thus, such a converter may be constructed using
+  ((sxml:parent test-pred) rootnode)
+ and returns a parent of a node it is applied to.
+ If applied to a nodelist, it returns the 
+ list of parents of nodes in the nodelist. The rootnode does not have
+ to be the root node of the whole SXML tree -- it may be a root node
+ of a branch of interest.
+ The parent:: axis can be used with any SXML node.
+</pre>
+<pre>(define (<a href="sxpathlib.html#codefunc13910">sxml:parent</a> test-pred?)
+  (lambda (root-node)   ; node or nodelist
+    (lambda (node)   ; node or nodelist
+      (if (<a href="sxpathlib.html#codefunc31162">nodeset?</a> node)
+	(<a href="sxpathlib.html#codefunc27946">map-union</a> ((<a href="sxpathlib.html#codefunc13910">sxml:parent</a> test-pred?) root-node) node)
+	(let rpt ((pairs
+		    (apply append
+		     (map 
+			      (lambda (root-n)
+				(map
+				  (lambda (arg) (cons arg root-n))
+				  (append 
+				    (<a href="sxpathlib.html#codefunc50657">sxml:attr-list</a> root-n)
+				    (<a href="sxpathlib.html#codefunc23538">sxml:child-nodes</a> root-n))))
+                              (<a href="sxpathlib.html#codefunc11721">as-nodeset</a> root-node)))
+		     ))
+	  (if (null? pairs)
+	    '()
+	    (let ((pair (car pairs)))
+	      (if (eq? (car pair) node)
+		((<a href="sxpathlib.html#codefunc7531">sxml:filter</a> test-pred?) (list (cdr pair)))
+		(rpt (append
+			(map
+			  (lambda (arg) (cons arg (car pair)))
+			  (append 
+			    (<a href="sxpathlib.html#codefunc50657">sxml:attr-list</a> (car pair))
+			    (<a href="sxpathlib.html#codefunc23538">sxml:child-nodes</a> (car pair))))
+			(cdr pairs)
+			))))))))))
+</pre>
+<h4><a name='codefunc9787' href='#docfunc9787'>node-parent</a></h4>
+<i><a href='#tocfunc9787'>Index</a></i><br>
+
+<pre> node-parent:: RootNode -&gt; Converter
+ (node-parent rootnode) yields a converter that returns a parent of a
+ node it is applied to. If applied to a nodelist, it returns the list
+ of parents of nodes in the nodelist.
+ Given the notation of Philip Wadler's paper on semantics of XSLT,
+  parent(x) = { y | y=subnode*(root), x=subnode(y) }
+ Therefore, node-parent is not the fundamental converter: it can be
+ expressed through the existing ones.  Yet node-parent is a rather
+ convenient converter. It corresponds to a parent:: axis of SXPath.
+
+ Please note: this function is provided for backward compatibility 
+ with SXPath/SXPathlib ver. 3.5.x.x and earlier.
+ Now it's a particular case of 'sxml:parent' application: 
+</pre>
+<pre>(define <a href="sxpathlib.html#codefunc9787">node-parent</a> (<a href="sxpathlib.html#codefunc13910">sxml:parent</a> (<a href="sxpathlib.html#codefunc9356">ntype??</a> '*any*)))
+</pre>
+<h4><a name='codefunc23538' href='#docfunc23538'>sxml:child-nodes</a></h4>
+<i><a href='#tocfunc23538'>Index</a></i><br>
+
+<pre>(define <a href="sxpathlib.html#codefunc23538">sxml:child-nodes</a> (<a href="sxpathlib.html#codefunc5616">sxml:child</a> <a href="sxpathlib.html#codefunc63215">sxml:node?</a>))
+</pre>
+<h4><a name='codefunc47832' href='#docfunc47832'>sxml:child-elements</a></h4>
+<i><a href='#tocfunc47832'>Index</a></i><br>
+
+<pre>(define <a href="sxpathlib.html#codefunc47832">sxml:child-elements</a> (<a href="sxpathlib.html#codefunc3917">select-kids</a> <a href="sxpathlib.html#codefunc35234">sxml:element?</a>))
+</pre>
+<h4><a name='codefunc35234' href='#docfunc35234'>sxml:element?</a></h4>
+<i><a href='#tocfunc35234'>Index</a></i><br>
+
+<pre> Predicate which returns #t if &lt;obj&gt; is SXML element, otherwise returns #f. 
+</pre>
+<pre>(define (<a href="sxpathlib.html#codefunc35234">sxml:element?</a> obj)	
+   (and (pair? obj)
+	(symbol? (car obj))
+	(not (memq (car obj) 
+			   ; '(@ @@ *PI* *COMMENT* *ENTITY* *NAMESPACES*)
+			   ; the line above is a workaround for old SXML
+	'(@ @@ *PI* *COMMENT* *ENTITY*)))))
+</pre>
+<h4><a name='codefunc6363' href='#docfunc6363'>ntype-names??</a></h4>
+<i><a href='#tocfunc6363'>Index</a></i><br>
+
+<pre> The function ntype-names?? takes a list of acceptable node names as a
+ criterion and returns a function, which, when applied to a node, 
+ will return #t if the node name is present in criterion list and #f
+ othervise.
+	ntype-names?? :: ListOfNames -&gt; Node -&gt; Boolean
+</pre>
+<pre>(define (<a href="sxpathlib.html#codefunc6363">ntype-names??</a> crit)
+  (lambda(node)
+    (and (pair? node)
+	 (memq (car node) crit))))
+</pre>
+<h4><a name='codefunc9356' href='#docfunc9356'>ntype??</a></h4>
+<i><a href='#tocfunc9356'>Index</a></i><br>
+
+<pre> The function ntype?? takes a type criterion and returns
+ a function, which, when applied to a node, will tell if the node satisfies
+ the test.
+	ntype?? :: Crit -&gt; Node -&gt; Boolean
+
+ The criterion 'crit' is 
+  one of the following symbols:
+	id		- tests if the Node has the right name (id)
+	@		- tests if the Node is an &lt;attributes-list&gt;
+	*		- tests if the Node is an &lt;Element&gt;
+	*text*		- tests if the Node is a text node
+	*data*		- tests if the Node is a data node 
+                         (text, number, boolean, etc., but not pair)
+	*PI*		- tests if the Node is a PI node
+	*COMMENT*	- tests if the Node is a COMMENT node
+	*ENTITY*        - tests if the Node is a ENTITY node
+	*any*		- #t for any type of Node
+</pre>
+<pre>(define (<a href="sxpathlib.html#codefunc9356">ntype??</a> crit)
+  (case crit
+    ((*) <a href="sxpathlib.html#codefunc35234">sxml:element?</a>)
+    ((*any*) (lambda (node) #t))
+    ((*text*) (lambda (node) (string? node)))
+    ((*data*) (lambda (node) (not (pair? node))))
+    (else (lambda (node) (and (pair? node) (eq? crit (car node)))))
+    ))
+</pre>
+<h4><a name='codefunc32267' href='#docfunc32267'>ntype-namespace-id??</a></h4>
+<i><a href='#tocfunc32267'>Index</a></i><br>
+
+<pre> This function takes a namespace-id, and returns a predicate
+ Node -&gt; Boolean, which is #t for nodes with this very namespace-id.
+ ns-id is a string
+ (ntype-namespace-id?? #f) will be #t for nodes with non-qualified names.
+</pre>
+<pre>(define (<a href="sxpathlib.html#codefunc32267">ntype-namespace-id??</a> ns-id)
+  (lambda (node)
+    (and (pair? node)
+	 (not (memq (car node) 
+			 '(@ @@ *PI* *COMMENT* *ENTITY*)))
+	 (let ((nm (symbol-&gt;string (car node))))
+	   (cond 
+	     ((<a href="util.html#codefunc35783">string-rindex</a> nm #\:)	   
+	      =&gt; (lambda (pos) 
+	      (and 
+		(= pos (string-length ns-id))
+		(string-prefix? ns-id nm))))
+	     (else (not ns-id)))))))
+</pre>
+<h4><a name='codefunc3917' href='#docfunc3917'>select-kids</a></h4>
+<i><a href='#tocfunc3917'>Index</a></i><br>
+
+<pre> select-kids:: Pred -&gt; Node -&gt; Nodelist
+ Given a Node, return an (ordered) subset its children that satisfy
+ the Pred (a converter, actually)
+ select-kids:: Pred -&gt; Nodelist -&gt; Nodelist
+ The same as above, but select among children of all the nodes in
+ the Nodelist
+
+ More succinctly, the signature of this function is
+ select-kids:: Converter -&gt; Converter
+</pre>
+<pre>(define (<a href="sxpathlib.html#codefunc3917">select-kids</a> test-pred?)
+  (lambda (node)		; node or node-set
+    (cond 
+     ((null? node) node)
+     ((not (pair? node)) '())   ; No children
+     ((symbol? (car node))
+      ((<a href="sxpathlib.html#codefunc7531">sxml:filter</a> test-pred?) (cdr node)))	; it's a single node
+     (else (<a href="sxpathlib.html#codefunc27946">map-union</a> (<a href="sxpathlib.html#codefunc3917">select-kids</a> test-pred?) node)))))
+</pre>
+<h4><a name='codefunc46283' href='#docfunc46283'>node-self</a></h4>
+<i><a href='#tocfunc46283'>Index</a></i><br>
+
+<pre> node-self:: Pred -&gt; Node -&gt; Nodelist, or
+ node-self:: Converter -&gt; Converter
+ Similar to select-kids but apply to the Node itself rather
+ than to its children. The resulting Nodelist will contain either one
+ component, or will be empty (if the Node failed the Pred).
+</pre>
+<pre>(define <a href="sxpathlib.html#codefunc46283">node-self</a> <a href="sxpathlib.html#codefunc7531">sxml:filter</a>)
+</pre>
+<h4><a name='codefunc43229' href='#docfunc43229'>node-join</a></h4>
+<i><a href='#tocfunc43229'>Index</a></i><br>
+
+<pre> node-join:: [LocPath] -&gt; Node|Nodelist -&gt; Nodelist, or
+ node-join:: [Converter] -&gt; Converter
+ join the sequence of location steps or paths as described
+ in the title comments above.
+</pre>
+<pre>(define (<a href="sxpathlib.html#codefunc43229">node-join</a> . selectors)
+  (lambda (nodelist)		; Nodelist or node
+    (let loop ((nodelist nodelist) (selectors selectors))
+      (if (null? selectors) nodelist
+	  (loop 
+	   (if (<a href="sxpathlib.html#codefunc31162">nodeset?</a> nodelist)
+	       (<a href="sxpathlib.html#codefunc27946">map-union</a> (car selectors) nodelist)
+	       ((car selectors) nodelist))
+	   (cdr selectors))))))
+</pre>
+<h4><a name='codefunc3904' href='#docfunc3904'>node-reduce</a></h4>
+<i><a href='#tocfunc3904'>Index</a></i><br>
+
+<pre> node-reduce:: [LocPath] -&gt; Node|Nodelist -&gt; Nodelist, or
+ node-reduce:: [Converter] -&gt; Converter
+ A regular functional composition of converters.
+ From a different point of view,
+    ((apply node-reduce converters) nodelist)
+ is equivalent to
+    (foldl apply nodelist converters)
+ i.e., folding, or reducing, a list of converters with the nodelist
+ as a seed.
+</pre>
+<pre>(define (<a href="sxpathlib.html#codefunc3904">node-reduce</a> . converters)
+  (lambda (nodelist)		; Nodelist or node
+    (let loop ((nodelist nodelist) (converters converters))
+      (if (null? converters) nodelist
+	  (loop ((car converters) nodelist) (cdr converters))))))
+</pre>
+<h4><a name='codefunc17522' href='#docfunc17522'>node-or</a></h4>
+<i><a href='#tocfunc17522'>Index</a></i><br>
+
+<pre> node-or:: [Converter] -&gt; Converter
+ This combinator applies all converters to a given node and
+ produces the union of their results.
+ This combinator corresponds to a union, '|' operation for XPath
+ location paths.
+</pre>
+<pre>(define (<a href="sxpathlib.html#codefunc17522">node-or</a> . converters)
+  (lambda (node-or-nodelist)
+    (let loop ((result '()) (converters converters))
+      (if (null? converters) result
+	  (loop (append result (or ((car converters) node-or-nodelist) '()))
+		(cdr converters))))))
+</pre>
+<h4><a name='codefunc33362' href='#docfunc33362'>node-closure</a></h4>
+<i><a href='#tocfunc33362'>Index</a></i><br>
+
+<pre> node-closure:: Converter -&gt; Converter
+ Select all _descendants_ of a node that satisfy a converter-predicate.
+ This combinator is similar to select-kids but applies to
+ grand... children as well.
+ This combinator implements the &quot;descendant::&quot; XPath axis
+ Conceptually, this combinator can be expressed as
+ (define (node-closure f)
+      (node-or
+        (select-kids f)
+	 (node-reduce (select-kids (ntype?? '*)) (node-closure f))))
+ This definition, as written, looks somewhat like a fixpoint, and it
+ will run forever. It is obvious however that sooner or later
+ (select-kids (ntype?? '*)) will return an empty nodelist. At
+ this point further iterations will no longer affect the result and
+ can be stopped.
+</pre>
+<pre>(define (<a href="sxpathlib.html#codefunc33362">node-closure</a> test-pred?)	    
+(let ((kid-selector (<a href="sxpathlib.html#codefunc3917">select-kids</a> test-pred?)))
+  (lambda (node) ; Nodelist or node
+    (let loop ((parent node) (result '()))
+      (if (null? parent) result
+	(loop (<a href="sxpathlib.html#codefunc47832">sxml:child-elements</a> parent)
+	  (append result
+	    (kid-selector parent)))
+	)))))
+</pre></body></html>

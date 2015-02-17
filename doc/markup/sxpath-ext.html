@@ -1,0 +1,959 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN""http://www.w3.org/TR/html401/loose.dtd"><html><head><meta name="GENERATOR" content="Mole: The Scheme Source Code Digger"><title>Module: sxpath-ext</title><meta name='keywords' content=''></head><body bgcolor='#ffffff' text='#384412'  link='#11af05' vlink='#728b09'>
+<center><h1>Module: sxpath-ext</h1></center>
+
+<pre> W3C compliant extensions to SXPathlib
+ $Id: sxpath-ext.scm,v 1.911 2002/12/06 22:10:53 kl Exp kl $:
+
+ This software is in Public Domain.
+ IT IS PROVIDED &quot;AS IS&quot;, WITHOUT WARRANTY OF ANY KIND.
+
+ Please send bug reports and comments to:
+   lisovsky@acm.org      Kirill Lisovsky
+   lizorkin@hotbox.ru    Dmitry Lizorkin
+</pre><p><br>
+<!-- Table of content -->
+<p><dl>
+<p><dt><a name='tocchapt31633' href='#chapt31633'><b>SXML counterparts to W3C XPath Core Functions Library</b></a><dd>
+
+f:  <a name='tocfunc14688' href='#docfunc14688' style='text-decoration:none'>sxml:string</a><br>
+
+f:  <a name='tocfunc35416' href='#docfunc35416' style='text-decoration:none'>sxml:boolean</a><br>
+
+f:  <a name='tocfunc9829' href='#docfunc9829' style='text-decoration:none'>sxml:number</a><br>
+
+f:  <a name='tocfunc15784' href='#docfunc15784' style='text-decoration:none'>sxml:string-value</a><br>
+
+f:  <a name='tocfunc20095' href='#docfunc20095' style='text-decoration:none'>sxml:id</a><br>
+<p><dt><a name='tocchapt11009' href='#chapt11009'><b>Comparators for XPath objects </b></a><dd>
+
+f:  <a name='tocfunc3392' href='#docfunc3392' style='text-decoration:none'>sxml:nested-loop-join</a><br>
+
+<dl><dt><a name='tocsect55260' href='#sect55260'><b>Merge-sort for speeding up equality comparison of two nodesets</b></a><dd>
+
+f:  <a name='tocfunc48066' href='#docfunc48066' style='text-decoration:none'>sxml:list-head</a><br>
+
+f:  <a name='tocfunc4089' href='#docfunc4089' style='text-decoration:none'>sxml:merge-sort</a><br>
+
+f:  <a name='tocfunc6861' href='#docfunc6861' style='text-decoration:none'>sxml:merge-sort-join</a><br>
+</dl>
+
+<dl><dt><a name='tocsect37976' href='#sect37976'><b>Radix-sort join for equality comparison of 2 nodesets</b></a><dd>
+
+f:  <a name='tocfunc4542' href='#docfunc4542' style='text-decoration:none'>sxml:charlst->branch</a><br>
+
+f:  <a name='tocfunc16502' href='#docfunc16502' style='text-decoration:none'>sxml:string->tree</a><br>
+
+f:  <a name='tocfunc30059' href='#docfunc30059' style='text-decoration:none'>sxml:add-string-to-tree</a><br>
+
+f:  <a name='tocfunc60878' href='#docfunc60878' style='text-decoration:none'>sxml:string-in-tree?</a><br>
+
+f:  <a name='tocfunc9419' href='#docfunc9419' style='text-decoration:none'>sxml:radix-sort-join</a><br>
+</dl>
+
+<dl><dt><a name='tocsect49391' href='#sect49391'><b>Equality comparison</b></a><dd>
+
+f:  <a name='tocfunc15268' href='#docfunc15268' style='text-decoration:none'>sxml:equality-cmp</a><br>
+
+f:  <a name='tocfunc11309' href='#docfunc11309' style='text-decoration:none'>sxml:equal?</a><br>
+
+f:  <a name='tocfunc3786' href='#docfunc3786' style='text-decoration:none'>sxml:not-equal?</a><br>
+</dl>
+
+<dl><dt><a name='tocsect5720' href='#sect5720'><b>Relational comparison</b></a><dd>
+
+f:  <a name='tocfunc41977' href='#docfunc41977' style='text-decoration:none'>sxml:relational-cmp</a><br>
+</dl>
+<p><dt><a name='tocchapt53480' href='#chapt53480'><b>XPath axes</b></a><dd>
+
+f:  <a name='tocfunc36053' href='#docfunc36053' style='text-decoration:none'>sxml:ancestor</a><br>
+
+f:  <a name='tocfunc3134' href='#docfunc3134' style='text-decoration:none'>sxml:ancestor-or-self</a><br>
+
+f:  <a name='tocfunc62759' href='#docfunc62759' style='text-decoration:none'>sxml:descendant</a><br>
+
+f:  <a name='tocfunc29840' href='#docfunc29840' style='text-decoration:none'>sxml:descendant-or-self</a><br>
+
+f:  <a name='tocfunc63452' href='#docfunc63452' style='text-decoration:none'>sxml:following</a><br>
+
+f:  <a name='tocfunc40526' href='#docfunc40526' style='text-decoration:none'>sxml:following-sibling</a><br>
+
+f:  <a name='tocfunc64181' href='#docfunc64181' style='text-decoration:none'>sxml:namespace</a><br>
+
+f:  <a name='tocfunc61635' href='#docfunc61635' style='text-decoration:none'>sxml:preceding</a><br>
+
+f:  <a name='tocfunc38709' href='#docfunc38709' style='text-decoration:none'>sxml:preceding-sibling</a><br>
+</dl>
+<hr height='5'><center><h3><a name='chapt31633' href='#tocchapt31633'>SXML counterparts to W3C XPath Core Functions Library</a></h3></center>
+
+<pre></pre>
+<h4><a name='docfunc14688' href='#tocfunc14688'>sxml:string</a></h4>
+(define (sxml:string object)<i><br> ... <a href='#codefunc14688'>Full Code</a> ... )</i>
+<pre> The counterpart to XPath 'string' function (section 4.2 XPath Rec.)
+ Converts a given object to a string
+ NOTE:
+  1. When converting a nodeset - a document order is not preserved
+  2. number-&gt;string function returns the result in a form which is slightly
+ different from XPath Rec. specification
+</pre><p><br>
+
+<h4><a name='docfunc35416' href='#tocfunc35416'>sxml:boolean</a></h4>
+(define (sxml:boolean object)<i><br> ... <a href='#codefunc35416'>Full Code</a> ... )</i>
+<pre> The counterpart to XPath 'boolean' function (section 4.3 XPath Rec.)
+ Converts its argument to a boolean
+</pre><p><br>
+
+<h4><a name='docfunc9829' href='#tocfunc9829'>sxml:number</a></h4>
+(define (sxml:number obj)<i><br> ... <a href='#codefunc9829'>Full Code</a> ... )</i>
+<pre> The counterpart to XPath 'number' function (section 4.4 XPath Rec.)
+ Converts its argument to a number
+ NOTE: 
+  1. The argument is not optional (yet?)
+  2. string-&gt;number conversion is not IEEE 754 round-to-nearest
+  3. NaN is represented as 0
+</pre><p><br>
+
+<h4><a name='docfunc15784' href='#tocfunc15784'>sxml:string-value</a></h4>
+(define (sxml:string-value node)<i><br> ... <a href='#codefunc15784'>Full Code</a> ... )</i>
+<pre> Returns a string value for a given node in accordance to
+ XPath Rec. 5.1 - 5.7 
+</pre><p><br>
+
+<h4><a name='docfunc20095' href='#tocfunc20095'>sxml:id</a></h4>
+(define (sxml:id id-index)<i><br> ... <a href='#codefunc20095'>Full Code</a> ... )</i>
+<pre> Select SXML element by its unique IDs
+ XPath Rec. 4.1
+  object - a nodeset or a datatype which can be converted to a string by means
+ of a 'string' function
+  id-index = ( (id-value . element) (id-value . element) ... ) 
+ This index is used for selection of an element by its unique ID. 
+ The result is a nodeset
+</pre><p><br>
+<hr height='5'><center><h3><a name='chapt11009' href='#tocchapt11009'>Comparators for XPath objects </a></h3></center>
+
+<pre></pre>
+<h4><a name='docfunc3392' href='#tocfunc3392'>sxml:nested-loop-join</a></h4>
+(define (sxml:nested-loop-join string-set1 string-set2 string-op)<i><br> ... <a href='#codefunc3392'>Full Code</a> ... )</i>
+<pre> Implements XPath equality comparison in a straightforward nested loop manner
+</pre><p><br>
+
+<hr width='40%' align='center'><center><h3><a name='sect55260' href='#tocsect55260'>Merge-sort for speeding up equality comparison of two nodesets</a></h3></center>
+
+<pre></pre>
+<h4><a name='docfunc48066' href='#tocfunc48066'>sxml:list-head</a></h4>
+(define (sxml:list-head lst k)<i><br> ... <a href='#codefunc48066'>Full Code</a> ... )</i>
+<pre> Similar to R5RS 'list-tail' but returns the new list consisting of the first
+ 'k' members of 'lst'
+</pre><p><br>
+
+<h4><a name='docfunc4089' href='#tocfunc4089'>sxml:merge-sort</a></h4>
+(define (sxml:merge-sort less-than?-pred lst)<i><br> ... <a href='#codefunc4089'>Full Code</a> ... )</i>
+<pre> Implements merge-sort of the given lst
+ Returns the sorted list, the smallest member first
+ less-than?-pred ::= (lambda (obj1 obj2) ...)
+ less-than?-pred returns #t if obj1&lt;obj2 with respect to the given ordering
+</pre><p><br>
+
+<h4><a name='docfunc6861' href='#tocfunc6861'>sxml:merge-sort-join</a></h4>
+(define (sxml:merge-sort-join string-set1 string-set2 string-op)<i><br> ... <a href='#codefunc6861'>Full Code</a> ... )</i>
+<pre> Implementation of XPath equality comparison for 2 string-sets with
+ merge-sort join algorithm
+</pre><p><br>
+
+<hr width='40%' align='center'><center><h3><a name='sect37976' href='#tocsect37976'>Radix-sort join for equality comparison of 2 nodesets</a></h3></center>
+
+<pre> The running time of the algorithm is proportional to the nodeset size and
+ to node string-value length
+ 
+ Since each nodeset contains O(n) nodes and string-value for each node is
+ O(n) in length, radix-sort join algorithm evaluates in O(n^2) time. By
+ comparison, nested loop join requires O(n^3) time, merge-sort join
+ implemented above requires O(n^2*log(n)).
+
+ On the other hand, radix-sort join is time-ineffective for relatively small
+ nodesets being joined. For small nodesets, the above implemented sort-merge
+ join runs more effectively. Radix-sort join is promising for large nodesets.
+</pre>
+<h4><a name='docfunc4542' href='#tocfunc4542'>sxml:charlst->branch</a></h4>
+(define (sxml:charlst-&gt;branch lst)<i><br> ... <a href='#codefunc4542'>Full Code</a> ... )</i>
+<pre> Represents a list of chars as a branch in the string-tree
+ The list of chars must be non-empty
+</pre><p><br>
+
+<h4><a name='docfunc16502' href='#tocfunc16502'>sxml:string->tree</a></h4>
+(define (sxml:string-&gt;tree str)<i><br> ... <a href='#codefunc16502'>Full Code</a> ... )</i>
+<pre> Converts a string to a string-tree
+</pre><p><br>
+
+<h4><a name='docfunc30059' href='#tocfunc30059'>sxml:add-string-to-tree</a></h4>
+(define (sxml:add-string-to-tree str tree)<i><br> ... <a href='#codefunc30059'>Full Code</a> ... )</i>
+<pre> Adds a new string to string-tree
+ In a special case, tree257 may be #f. The function than creates a new tree,
+ which contains just the representation for str
+</pre><p><br>
+
+<h4><a name='docfunc60878' href='#tocfunc60878'>sxml:string-in-tree?</a></h4>
+(define (sxml:string-in-tree? str tree)<i><br> ... <a href='#codefunc60878'>Full Code</a> ... )</i>
+<pre> Whether a given string is presented in the string-tree
+</pre><p><br>
+
+<h4><a name='docfunc9419' href='#tocfunc9419'>sxml:radix-sort-join</a></h4>
+(define (sxml:radix-sort-join string-set1 string-set2 bool-op)<i><br> ... <a href='#codefunc9419'>Full Code</a> ... )</i>
+<pre> XPath equality comparison for 2 string-sets
+  bool-op - comparison function for 2 boolean values
+</pre><p><br>
+
+<hr width='40%' align='center'><center><h3><a name='sect49391' href='#tocsect49391'>Equality comparison</a></h3></center>
+
+<pre></pre>
+<h4><a name='docfunc15268' href='#tocfunc15268'>sxml:equality-cmp</a></h4>
+(define (sxml:equality-cmp bool-op number-op string-op)<i><br> ... <a href='#codefunc15268'>Full Code</a> ... )</i>
+<pre> A helper for XPath equality operations: = , !=
+  'bool-op', 'number-op' and 'string-op' are comparison operations for 
+ a pair of booleans,  numbers and strings respectively
+</pre><p><br>
+
+<h4><a name='docfunc11309' href='#tocfunc11309'>sxml:equal?</a></h4>
+(define sxml:equal? <i><br> ... <a href='#codefunc11309'>Full Code</a> ... )</i><p><br>
+
+<h4><a name='docfunc3786' href='#tocfunc3786'>sxml:not-equal?</a></h4>
+(define sxml:not-equal? <i><br> ... <a href='#codefunc3786'>Full Code</a> ... )</i><p><br>
+
+<hr width='40%' align='center'><center><h3><a name='sect5720' href='#tocsect5720'>Relational comparison</a></h3></center>
+
+<pre></pre>
+<h4><a name='docfunc41977' href='#tocfunc41977'>sxml:relational-cmp</a></h4>
+(define (sxml:relational-cmp op)<i><br> ... <a href='#codefunc41977'>Full Code</a> ... )</i>
+<pre> Relational operation ( &lt; , &gt; , &lt;= , &gt;= ) for two XPath objects
+  op is comparison procedure: &lt; , &gt; , &lt;= or &gt;=
+</pre><p><br>
+<hr height='5'><center><h3><a name='chapt53480' href='#tocchapt53480'>XPath axes</a></h3></center>
+
+<pre> An order in resulting nodeset is preserved
+</pre>
+<h4><a name='docfunc36053' href='#tocfunc36053'>sxml:ancestor</a></h4>
+(define (sxml:ancestor test-pred?)<i><br> ... <a href='#codefunc36053'>Full Code</a> ... )</i>
+<pre> Ancestor axis
+</pre><p><br>
+
+<h4><a name='docfunc3134' href='#tocfunc3134'>sxml:ancestor-or-self</a></h4>
+(define (sxml:ancestor-or-self test-pred?)<i><br> ... <a href='#codefunc3134'>Full Code</a> ... )</i>
+<pre> Ancestor-or-self axis
+</pre><p><br>
+
+<h4><a name='docfunc62759' href='#tocfunc62759'>sxml:descendant</a></h4>
+(define (sxml:descendant test-pred?)<i><br> ... <a href='#codefunc62759'>Full Code</a> ... )</i>
+<pre> Descendant axis
+ It's similar to original 'node-closure' a resulting nodeset is 
+ in depth-first order rather than breadth-first
+ Fix: din't descend in non-element nodes!
+</pre><p><br>
+
+<h4><a name='docfunc29840' href='#tocfunc29840'>sxml:descendant-or-self</a></h4>
+(define (sxml:descendant-or-self test-pred?)<i><br> ... <a href='#codefunc29840'>Full Code</a> ... )</i>
+<pre> Descendant-or-self axis
+</pre><p><br>
+
+<h4><a name='docfunc63452' href='#tocfunc63452'>sxml:following</a></h4>
+(define (sxml:following test-pred?)<i><br> ... <a href='#codefunc63452'>Full Code</a> ... )</i>
+<pre> Following axis
+</pre><p><br>
+
+<h4><a name='docfunc40526' href='#tocfunc40526'>sxml:following-sibling</a></h4>
+(define (sxml:following-sibling test-pred?)<i><br> ... <a href='#codefunc40526'>Full Code</a> ... )</i>
+<pre> Following-sibling axis
+</pre><p><br>
+
+<h4><a name='docfunc64181' href='#tocfunc64181'>sxml:namespace</a></h4>
+(define (sxml:namespace test-pred?)<i><br> ... <a href='#codefunc64181'>Full Code</a> ... )</i>
+<pre> Namespace axis
+</pre><p><br>
+
+<h4><a name='docfunc61635' href='#tocfunc61635'>sxml:preceding</a></h4>
+(define (sxml:preceding test-pred?)<i><br> ... <a href='#codefunc61635'>Full Code</a> ... )</i>
+<pre> Preceding axis
+</pre><p><br>
+
+<h4><a name='docfunc38709' href='#tocfunc38709'>sxml:preceding-sibling</a></h4>
+(define (sxml:preceding-sibling test-pred?)<i><br> ... <a href='#codefunc38709'>Full Code</a> ... )</i>
+<pre> Preceding-sibling axis
+</pre><p><br>
+<center><h1>Code</h1></center>
+
+<h4><a name='codefunc14688' href='#docfunc14688'>sxml:string</a></h4>
+<i><a href='#tocfunc14688'>Index</a></i><br>
+
+<pre> The counterpart to XPath 'string' function (section 4.2 XPath Rec.)
+ Converts a given object to a string
+ NOTE:
+  1. When converting a nodeset - a document order is not preserved
+  2. number-&gt;string function returns the result in a form which is slightly
+ different from XPath Rec. specification
+</pre>
+<pre>(define (<a href="sxpath-ext.html#codefunc14688">sxml:string</a> object)
+  (cond
+    ((string? object) object)
+    ((<a href="sxpathlib.html#codefunc31162">nodeset?</a> object) (if (null? object)
+			 &quot;&quot;
+			 (<a href="sxpath-ext.html#codefunc15784">sxml:string-value</a> (car object))))
+    ((number? object)
+     (if (and (rational? object) (not (integer? object)))  ; like 1/2
+         (number-&gt;string (exact-&gt;inexact object))
+         (number-&gt;string object)))
+    ((boolean? object) (if object &quot;true&quot; &quot;false&quot;))
+    (else &quot;&quot;)))  ; Unknown type -&gt; empty string. 
+</pre>
+<h4><a name='codefunc35416' href='#docfunc35416'>sxml:boolean</a></h4>
+<i><a href='#tocfunc35416'>Index</a></i><br>
+
+<pre> The counterpart to XPath 'boolean' function (section 4.3 XPath Rec.)
+ Converts its argument to a boolean
+</pre>
+<pre>(define (<a href="sxpath-ext.html#codefunc35416">sxml:boolean</a> object)
+  (cond
+    ((boolean? object) object)
+    ((number? object) (not (= object 0)))
+    ((string? object) (&gt; (string-length object) 0))
+    ((<a href="sxpathlib.html#codefunc31162">nodeset?</a> object) (not (null? object)))
+    (else #f)))  ; Not specified in XPath Rec.
+</pre>
+<h4><a name='codefunc9829' href='#docfunc9829'>sxml:number</a></h4>
+<i><a href='#tocfunc9829'>Index</a></i><br>
+
+<pre> The counterpart to XPath 'number' function (section 4.4 XPath Rec.)
+ Converts its argument to a number
+ NOTE: 
+  1. The argument is not optional (yet?)
+  2. string-&gt;number conversion is not IEEE 754 round-to-nearest
+  3. NaN is represented as 0
+</pre>
+<pre>(define (<a href="sxpath-ext.html#codefunc9829">sxml:number</a> obj)
+  (cond
+    ((number? obj) obj)
+    ((string? obj)
+     (let ((nmb (<a href="myenv.html#codefunc15729">call-with-input-string</a> obj read)))
+       (if (number? nmb)
+	 nmb
+	 0))) ; NaN
+    ((boolean? obj) (if obj 1 0))
+    ((<a href="sxpathlib.html#codefunc31162">nodeset?</a> obj) (<a href="sxpath-ext.html#codefunc9829">sxml:number</a> (<a href="sxpath-ext.html#codefunc14688">sxml:string</a> obj)))
+    (else 0))) ; unknown datatype
+</pre>
+<h4><a name='codefunc15784' href='#docfunc15784'>sxml:string-value</a></h4>
+<i><a href='#tocfunc15784'>Index</a></i><br>
+
+<pre> Returns a string value for a given node in accordance to
+ XPath Rec. 5.1 - 5.7 
+</pre>
+<pre>(define (<a href="sxpath-ext.html#codefunc15784">sxml:string-value</a> node)
+  (cond
+    ((not (pair? node))  ; a text node or data node
+     (<a href="sxpath-ext.html#codefunc14688">sxml:string</a> node))
+    ((null? (cdr node))
+     &quot;&quot;)
+    (else
+     (apply string-append  ; a list of arguments is always non-null
+            (map
+             (lambda (node)
+               (if (<a href="sxpathlib.html#codefunc63215">sxml:node?</a> node)  ; not annot-attr node or aux list node
+                   (<a href="sxpath-ext.html#codefunc15784">sxml:string-value</a> node) &quot;&quot;))
+             (cdr node))))))
+</pre>
+<h4><a name='codefunc20095' href='#docfunc20095'>sxml:id</a></h4>
+<i><a href='#tocfunc20095'>Index</a></i><br>
+
+<pre> Select SXML element by its unique IDs
+ XPath Rec. 4.1
+  object - a nodeset or a datatype which can be converted to a string by means
+ of a 'string' function
+  id-index = ( (id-value . element) (id-value . element) ... ) 
+ This index is used for selection of an element by its unique ID. 
+ The result is a nodeset
+</pre>
+<pre>(define (<a href="sxpath-ext.html#codefunc20095">sxml:id</a> id-index)
+  (lambda(object)
+    (if (<a href="sxpathlib.html#codefunc31162">nodeset?</a> object)
+      (let loop ((str-lst (map <a href="sxpath-ext.html#codefunc15784">sxml:string-value</a> object))
+		 (res '()))
+	(if (null? str-lst)
+	  (reverse res)
+	  (let ((node (<a href="sxml-tools.html#codefunc13926">sxml:lookup</a> (car str-lst) id-index)))
+	    (if (not node)  ; no such element
+	      (loop (cdr str-lst) res)
+	      (loop (cdr str-lst) (cons node res))))))
+      (let rpt ((lst (string-&gt;list (<a href="sxpath-ext.html#codefunc14688">sxml:string</a> object)))
+		(tmp '())
+		(res '()))
+	(cond
+	  ((null? lst)
+	   (if (null? tmp) 
+	     (reverse res)
+	     (let ((node (<a href="sxml-tools.html#codefunc13926">sxml:lookup</a> (list-&gt;string (reverse tmp)) id-index)))
+	       (if (not node)
+		 (reverse res)
+		 (reverse (cons node res))))))
+	  ((member (car lst) '(#\space #\return #\newline #\tab))
+	   (if (null? tmp)
+	     (rpt (cdr lst) tmp res)
+	     (let ((node (<a href="sxml-tools.html#codefunc13926">sxml:lookup</a> (list-&gt;string (reverse tmp)) id-index)))
+	       (if (not node)
+		 (rpt (cdr lst) '() res)
+		 (rpt (cdr lst) '() (cons node res))))))
+	  (else (rpt (cdr lst) (cons (car lst) tmp) res)))))))
+</pre>
+<h4><a name='codefunc3392' href='#docfunc3392'>sxml:nested-loop-join</a></h4>
+<i><a href='#tocfunc3392'>Index</a></i><br>
+
+<pre> Implements XPath equality comparison in a straightforward nested loop manner
+</pre>
+<pre>(define (<a href="sxpath-ext.html#codefunc3392">sxml:nested-loop-join</a> string-set1 string-set2 string-op)
+  (let first ((str-set1 string-set1)
+              (str-set2 string-set2))
+    (cond
+      ((null? str-set1) #f)
+      ((let second ((elem (car str-set1))
+                    (set2 str-set2))
+         (cond
+           ((null? set2) #f)
+           ((string-op elem (car set2)) #t)
+           (else (second elem (cdr set2))))) #t)
+      (else
+       (first (cdr str-set1) str-set2)))))
+</pre>
+<h4><a name='codefunc36053' href='#docfunc36053'>sxml:ancestor</a></h4>
+<i><a href='#tocfunc36053'>Index</a></i><br>
+
+<pre> Ancestor axis
+</pre>
+<pre>(define (<a href="sxpath-ext.html#codefunc36053">sxml:ancestor</a> test-pred?)
+  (lambda (root-node)   ; node or nodeset
+    (lambda (node)      ; node or nodeset
+      (if (<a href="sxpathlib.html#codefunc31162">nodeset?</a> node)
+	(<a href="sxpathlib.html#codefunc27946">map-union</a> ((<a href="sxpath-ext.html#codefunc36053">sxml:ancestor</a> test-pred?) root-node) node)
+	(let rpt ((paths (if (<a href="sxpathlib.html#codefunc31162">nodeset?</a> root-node)
+			   (map list root-node)
+			   (list (list root-node)))))
+	  (if (null? paths)
+	    '()
+	    (let ((path (car paths)))
+	      (if (eq? (car path) node)
+		((<a href="sxpathlib.html#codefunc7531">sxml:filter</a> test-pred?) (cdr path))
+		(rpt (append
+		       (map
+			 (lambda (arg) (cons arg path))
+			 (append 
+			   ((<a href="sxpathlib.html#codefunc65240">sxml:attribute</a> (<a href="sxpathlib.html#codefunc9356">ntype??</a> '*)) (car path))
+			   ((<a href="sxpathlib.html#codefunc5616">sxml:child</a> <a href="sxpathlib.html#codefunc63215">sxml:node?</a>) (car path))))
+		       (cdr paths)))))))))))
+</pre>
+<h4><a name='codefunc3134' href='#docfunc3134'>sxml:ancestor-or-self</a></h4>
+<i><a href='#tocfunc3134'>Index</a></i><br>
+
+<pre> Ancestor-or-self axis
+</pre>
+<pre>(define (<a href="sxpath-ext.html#codefunc3134">sxml:ancestor-or-self</a> test-pred?)
+  (lambda (root-node)   ; node or nodeset
+    (lambda (node)   ; node or nodeset
+      (if (<a href="sxpathlib.html#codefunc31162">nodeset?</a> node)
+	(<a href="sxpathlib.html#codefunc27946">map-union</a> ((<a href="sxpath-ext.html#codefunc3134">sxml:ancestor-or-self</a> test-pred?) root-node) node)
+	(let rpt ((paths (if (<a href="sxpathlib.html#codefunc31162">nodeset?</a> root-node)
+			   (map list root-node)
+			   (list (list root-node)))))
+	  (if (null? paths)
+	    ((<a href="sxpathlib.html#codefunc7531">sxml:filter</a> test-pred?) (list node))
+	    (let ((path (car paths)))
+	      (if (eq? (car path) node)
+		((<a href="sxpathlib.html#codefunc7531">sxml:filter</a> test-pred?) path)
+		(rpt (append
+		       (map
+			 (lambda (arg) (cons arg path))
+			 (append 
+			   ((<a href="sxpathlib.html#codefunc65240">sxml:attribute</a> (<a href="sxpathlib.html#codefunc9356">ntype??</a> '*)) (car path))
+			   ((<a href="sxpathlib.html#codefunc5616">sxml:child</a> <a href="sxpathlib.html#codefunc63215">sxml:node?</a>) (car path))))
+		       (cdr paths)))))))))))
+</pre>
+<h4><a name='codefunc62759' href='#docfunc62759'>sxml:descendant</a></h4>
+<i><a href='#tocfunc62759'>Index</a></i><br>
+
+<pre> Descendant axis
+ It's similar to original 'node-closure' a resulting nodeset is 
+ in depth-first order rather than breadth-first
+ Fix: din't descend in non-element nodes!
+</pre>
+<pre>(define (<a href="sxpath-ext.html#codefunc62759">sxml:descendant</a> test-pred?)
+  (lambda (node)   ; node or nodeset
+    (if (<a href="sxpathlib.html#codefunc31162">nodeset?</a> node)
+      (<a href="sxpathlib.html#codefunc27946">map-union</a> (<a href="sxpath-ext.html#codefunc62759">sxml:descendant</a> test-pred?) node)
+      (let rpt ((res '())
+		(more ((<a href="sxpathlib.html#codefunc5616">sxml:child</a> <a href="sxpathlib.html#codefunc63215">sxml:node?</a>) node)))
+	(if (null? more)
+	  (reverse res)
+	  (rpt (if (test-pred? (car more))
+		 (cons (car more) res)
+		 res)
+	       (append ((<a href="sxpathlib.html#codefunc5616">sxml:child</a> <a href="sxpathlib.html#codefunc63215">sxml:node?</a>) (car more))
+		       (cdr more))))))))
+</pre>
+<h4><a name='codefunc29840' href='#docfunc29840'>sxml:descendant-or-self</a></h4>
+<i><a href='#tocfunc29840'>Index</a></i><br>
+
+<pre> Descendant-or-self axis
+</pre>
+<pre>(define (<a href="sxpath-ext.html#codefunc29840">sxml:descendant-or-self</a> test-pred?)
+  (lambda (node)   ; node or nodeset
+    (if (<a href="sxpathlib.html#codefunc31162">nodeset?</a> node)
+      (<a href="sxpathlib.html#codefunc27946">map-union</a> (<a href="sxpath-ext.html#codefunc29840">sxml:descendant-or-self</a> test-pred?) node)
+      (let rpt ((res '())
+		(more (list node)))
+	(if (null? more)
+	  (reverse res)
+	  (rpt (if (test-pred? (car more))
+		 (cons (car more) res)
+		 res)
+	       (append ((<a href="sxpathlib.html#codefunc5616">sxml:child</a> <a href="sxpathlib.html#codefunc63215">sxml:node?</a>) (car more))
+		       ; <a href="sxpathlib.html#codefunc63215">sxml:node?</a>
+		       (cdr more))))))))
+</pre>
+<h4><a name='codefunc63452' href='#docfunc63452'>sxml:following</a></h4>
+<i><a href='#tocfunc63452'>Index</a></i><br>
+
+<pre> Following axis
+</pre>
+<pre>(define (<a href="sxpath-ext.html#codefunc63452">sxml:following</a> test-pred?)
+  (lambda (root-node)   ; node or nodeset
+    (lambda (node)      ; node or nodeset
+      (if (<a href="sxpathlib.html#codefunc31162">nodeset?</a> node)
+	(<a href="sxpathlib.html#codefunc27946">map-union</a> ((<a href="sxpath-ext.html#codefunc63452">sxml:following</a> test-pred?) root-node) node)
+	(let loop ((seq (if (<a href="sxpathlib.html#codefunc31162">nodeset?</a> root-node)
+			  (list root-node)
+			  (list (list root-node)))))
+	  (cond
+	    ((null? seq) '())
+	    ((null? (car seq)) (loop (cdr seq)))
+	    ((eq? (caar seq) node)
+	     (let rpt ((seq (cdr (apply append seq)))
+		       (res '()))
+	       (if (null? seq)
+		 res
+		 (rpt (cdr seq)
+		      (append 
+			res
+			((<a href="sxpath-ext.html#codefunc29840">sxml:descendant-or-self</a> test-pred?) (car seq)))))))
+	    ((and (<a href="sxpathlib.html#codefunc35234">sxml:element?</a> (caar seq))
+		  (memq node (<a href="sxpathlib.html#codefunc50657">sxml:attr-list</a> (caar seq))))
+	     (let rpt ((sq (cdr (apply append seq)))
+		       (res ((<a href="sxpath-ext.html#codefunc62759">sxml:descendant</a> test-pred?) (caar seq))))
+	       (if (null? sq)
+		 res
+		 (rpt (cdr sq)
+		      (append res
+			      ((<a href="sxpath-ext.html#codefunc29840">sxml:descendant-or-self</a> test-pred?) (car sq)))))))
+	    (else
+	      (loop (cons 
+		      ((<a href="sxpathlib.html#codefunc5616">sxml:child</a> <a href="sxpathlib.html#codefunc63215">sxml:node?</a>) (caar seq))
+		      (cons (cdar seq) (cdr seq)))))))))))
+</pre>
+<h4><a name='codefunc40526' href='#docfunc40526'>sxml:following-sibling</a></h4>
+<i><a href='#tocfunc40526'>Index</a></i><br>
+
+<pre> Following-sibling axis
+</pre>
+<pre>(define (<a href="sxpath-ext.html#codefunc40526">sxml:following-sibling</a> test-pred?)
+  (lambda (root-node)   ; node or nodeset
+    (lambda (node)   ; node or nodeset
+      (if (<a href="sxpathlib.html#codefunc31162">nodeset?</a> node)
+	(<a href="sxpathlib.html#codefunc27946">map-union</a> ((<a href="sxpath-ext.html#codefunc40526">sxml:following-sibling</a> test-pred?) root-node) node)
+	(let loop ((seqs (if (<a href="sxpathlib.html#codefunc31162">nodeset?</a> root-node)
+			   (list root-node)
+			   (list (list root-node)))))
+	  (if (null? seqs)
+	    '()
+	    (let rpt ((seq (car seqs)))
+	      (cond
+		((null? seq)
+		 (loop (append
+			 (map (<a href="sxpathlib.html#codefunc5616">sxml:child</a> <a href="sxpathlib.html#codefunc63215">sxml:node?</a>)
+			      (car seqs))
+			 (cdr seqs))))
+		((eq? (car seq) node) ((<a href="sxpathlib.html#codefunc7531">sxml:filter</a> test-pred?) (cdr seq)))
+		(else (rpt (cdr seq)))))))))))
+</pre>
+<h4><a name='codefunc64181' href='#docfunc64181'>sxml:namespace</a></h4>
+<i><a href='#tocfunc64181'>Index</a></i><br>
+
+<pre> Namespace axis
+</pre>
+<pre>(define (<a href="sxpath-ext.html#codefunc64181">sxml:namespace</a> test-pred?)
+  (lambda (node)   ; node or nodeset
+    ((<a href="sxpathlib.html#codefunc7531">sxml:filter</a> test-pred?) 
+     (<a href="sxml-tools.html#codefunc24174">sxml:ns-list</a> node))))
+</pre>
+<h4><a name='codefunc61635' href='#docfunc61635'>sxml:preceding</a></h4>
+<i><a href='#tocfunc61635'>Index</a></i><br>
+
+<pre> Preceding axis
+</pre>
+<pre>(define (<a href="sxpath-ext.html#codefunc61635">sxml:preceding</a> test-pred?)
+  (lambda (root-node)   ; node or nodeset
+    (lambda (node)   ; node or nodeset
+      (if (<a href="sxpathlib.html#codefunc31162">nodeset?</a> node)
+	(<a href="sxpathlib.html#codefunc27946">map-union</a> ((<a href="sxpath-ext.html#codefunc61635">sxml:preceding</a> test-pred?) root-node) node)
+	(let loop ((seq (if (<a href="sxpathlib.html#codefunc31162">nodeset?</a> root-node)
+			  (list (reverse root-node))
+			  (list (list root-node)))))
+	  (cond
+	    ((null? seq) '())
+	    ((null? (car seq)) (loop (cdr seq)))
+	    ((or (eq? (caar seq) node)
+		 (not (null? ((<a href="sxpathlib.html#codefunc65240">sxml:attribute</a> 
+				(lambda (n)
+				  (eq? n node))) 
+			      (caar seq)))))
+	     (let rpt ((seq (cdr (apply append seq)))
+		       (res '()))
+	       (if (null? seq)
+		 res
+		 (rpt (cdr seq)
+		      (append res
+			      (reverse ((<a href="sxpath-ext.html#codefunc29840">sxml:descendant-or-self</a> test-pred?) 
+					(car seq))))))))
+	    (else (loop (cons (reverse ((<a href="sxpathlib.html#codefunc5616">sxml:child</a> <a href="sxpathlib.html#codefunc63215">sxml:node?</a>) (caar seq)))
+			      (cons (cdar seq) (cdr seq)))))))))))
+</pre>
+<h4><a name='codefunc38709' href='#docfunc38709'>sxml:preceding-sibling</a></h4>
+<i><a href='#tocfunc38709'>Index</a></i><br>
+
+<pre> Preceding-sibling axis
+</pre>
+<pre>(define (<a href="sxpath-ext.html#codefunc38709">sxml:preceding-sibling</a> test-pred?)
+  (lambda (root-node)   ; node or nodeset
+    (lambda (node)   ; node or nodeset
+      (if(<a href="sxpathlib.html#codefunc31162">nodeset?</a> node)
+	(<a href="sxpathlib.html#codefunc27946">map-union</a> ((<a href="sxpath-ext.html#codefunc38709">sxml:preceding-sibling</a> test-pred?) root-node) node)
+	(let loop ((seqs (if (<a href="sxpathlib.html#codefunc31162">nodeset?</a> root-node)
+			   (list root-node)
+			   (list (list root-node)))))
+	  (if (null? seqs)
+	    '()
+	    (let rpt ((seq (car seqs)))
+	      (cond
+		((null? seq)
+		 (loop (append
+			 (map
+			   (lambda (n)
+			     (reverse ((<a href="sxpathlib.html#codefunc5616">sxml:child</a> <a href="sxpathlib.html#codefunc63215">sxml:node?</a>) n)))
+			   (car seqs))
+			 (cdr seqs))))
+		((eq? (car seq) node) ((<a href="sxpathlib.html#codefunc7531">sxml:filter</a> test-pred?) (cdr seq)))
+		(else (rpt (cdr seq)))))))))))
+</pre>
+<h4><a name='codefunc48066' href='#docfunc48066'>sxml:list-head</a></h4>
+<i><a href='#tocfunc48066'>Index</a></i><br>
+
+<pre> Similar to R5RS 'list-tail' but returns the new list consisting of the first
+ 'k' members of 'lst'
+</pre>
+<pre>(define (<a href="sxpath-ext.html#codefunc48066">sxml:list-head</a> lst k)
+  (if (or (null? lst) (zero? k))
+      '()
+      (cons (car lst) (<a href="sxpath-ext.html#codefunc48066">sxml:list-head</a> (cdr lst) (- k 1)))))
+</pre>
+<h4><a name='codefunc4089' href='#docfunc4089'>sxml:merge-sort</a></h4>
+<i><a href='#tocfunc4089'>Index</a></i><br>
+
+<pre> Implements merge-sort of the given lst
+ Returns the sorted list, the smallest member first
+ less-than?-pred ::= (lambda (obj1 obj2) ...)
+ less-than?-pred returns #t if obj1&lt;obj2 with respect to the given ordering
+</pre>
+<pre>(define (<a href="sxpath-ext.html#codefunc4089">sxml:merge-sort</a> less-than?-pred lst)
+  (letrec
+      ((merge-sorted-lists
+        ; Merges 2 sorted lists into one sorted list
+        (lambda (lst1 lst2)
+          (cond
+            ((null? lst1) lst2)
+            ((null? lst2) lst1)
+            ; both lists are non-null here
+            ((less-than?-pred (car lst1) (car lst2))
+             (cons (car lst1)
+                   (merge-sorted-lists (cdr lst1) lst2)))
+            (else
+             (cons (car lst2)
+                   (merge-sorted-lists lst1 (cdr lst2))))))))
+    (if
+     (or (null? lst) (null? (cdr lst)))  ; already sorted
+     lst
+     (let ((middle (inexact-&gt;exact (round (/ (length lst) 2)))))
+       (merge-sorted-lists
+        (<a href="sxpath-ext.html#codefunc4089">sxml:merge-sort</a> less-than?-pred (<a href="sxpath-ext.html#codefunc48066">sxml:list-head</a> lst middle))
+        (<a href="sxpath-ext.html#codefunc4089">sxml:merge-sort</a> less-than?-pred (list-tail lst middle)))))))
+</pre>
+<h4><a name='codefunc6861' href='#docfunc6861'>sxml:merge-sort-join</a></h4>
+<i><a href='#tocfunc6861'>Index</a></i><br>
+
+<pre> Implementation of XPath equality comparison for 2 string-sets with
+ merge-sort join algorithm
+</pre>
+<pre>(define (<a href="sxpath-ext.html#codefunc6861">sxml:merge-sort-join</a> string-set1 string-set2 string-op)
+  (let loop ((str-set1 (<a href="sxpath-ext.html#codefunc4089">sxml:merge-sort</a> string&lt;? string-set1))
+             (str-set2 (<a href="sxpath-ext.html#codefunc4089">sxml:merge-sort</a> string&lt;? string-set2)))
+    (cond
+      ((or (null? str-set1) (null? str-set2))
+       #f)
+      ((string-op (car str-set1) (car str-set2))
+       ; comparison condition fulfilled for a pair of nodes
+       #t)
+      ((string&lt;? (car str-set1) (car str-set2))
+       ; we can remove (car str-set1) from our further consideration
+       (loop (cdr str-set1) str-set2))
+      (else  ; vice versa
+       (loop str-set1 (cdr str-set2))))))
+</pre>
+<h4><a name='codefunc4542' href='#docfunc4542'>sxml:charlst->branch</a></h4>
+<i><a href='#tocfunc4542'>Index</a></i><br>
+
+<pre> Represents a list of chars as a branch in the string-tree
+ The list of chars must be non-empty
+</pre>
+<pre>(define (<a href="sxpath-ext.html#codefunc4542">sxml:charlst-&gt;branch</a> lst)
+  (if (null? (cdr lst))  ; this is the last character in the lst
+      `(,(car lst) #t)
+      `(,(car lst) #f ,(<a href="sxpath-ext.html#codefunc4542">sxml:charlst-&gt;branch</a> (cdr lst)))))
+</pre>
+<h4><a name='codefunc16502' href='#docfunc16502'>sxml:string->tree</a></h4>
+<i><a href='#tocfunc16502'>Index</a></i><br>
+
+<pre> Converts a string to a string-tree
+</pre>
+<pre>(define (<a href="sxpath-ext.html#codefunc16502">sxml:string-&gt;tree</a> str)
+  (let ((lst (string-&gt;list str)))
+    (if (null? lst)   ; an empty string is given
+        '(*top* #t)
+        `(*top* #f ,(<a href="sxpath-ext.html#codefunc4542">sxml:charlst-&gt;branch</a> lst)))))
+</pre>
+<h4><a name='codefunc30059' href='#docfunc30059'>sxml:add-string-to-tree</a></h4>
+<i><a href='#tocfunc30059'>Index</a></i><br>
+
+<pre> Adds a new string to string-tree
+ In a special case, tree257 may be #f. The function than creates a new tree,
+ which contains just the representation for str
+</pre>
+<pre>(define (<a href="sxpath-ext.html#codefunc30059">sxml:add-string-to-tree</a> str tree)
+  (letrec
+      ((add-lst-to-tree   ; adds the list of chars to tree
+        (lambda (lst tree)
+          (if
+           (null? lst)  ; the lst is over
+           (if
+            (cadr tree)  ; whether it is already in the tree
+            tree
+            (cons (car tree)
+                  (cons #t (cddr tree))))
+           (let ((curr-char (car lst)))
+             (let iter-alist ((alist (cddr tree))
+                              (res (list (cadr tree) (car tree))))
+               (cond
+                 ((null? alist)  ; branch not in a tree
+                  (reverse
+                   (cons
+                    (<a href="sxpath-ext.html#codefunc4542">sxml:charlst-&gt;branch</a> lst)
+                    res)))
+                 ((char=? (caar alist) curr-char)  ; entry found
+                  (if
+                   (null? (cdr alist))  ; nothing more in the alist
+                   (reverse
+                    (cons
+                     (add-lst-to-tree (cdr lst) (car alist))
+                     res))
+                   (append
+                    (reverse
+                     (cons
+                      (add-lst-to-tree (cdr lst) (car alist))
+                      res))
+                    (cdr alist))))
+                 ((char&gt;? (caar alist) curr-char)
+                  (if
+                   (null? (cdr alist))  ; nothing more in the alist
+                   (reverse
+                    (cons (car alist)
+                          (cons (<a href="sxpath-ext.html#codefunc4542">sxml:charlst-&gt;branch</a> lst) res)))
+                   (append
+                    (reverse
+                     (cons
+                      (<a href="sxpath-ext.html#codefunc4542">sxml:charlst-&gt;branch</a> lst)
+                      res))
+                    alist)))
+                 (else
+                  (iter-alist (cdr alist)
+                              (cons (car alist) res))))))))))
+    (add-lst-to-tree (string-&gt;list str) tree)))
+</pre>
+<h4><a name='codefunc60878' href='#docfunc60878'>sxml:string-in-tree?</a></h4>
+<i><a href='#tocfunc60878'>Index</a></i><br>
+
+<pre> Whether a given string is presented in the string-tree
+</pre>
+<pre>(define (<a href="sxpath-ext.html#codefunc60878">sxml:string-in-tree?</a> str tree)  
+  (let loop ((lst (string-&gt;list str))
+             (tree tree))
+    (cond
+      ((null? lst)  ; the string is over
+       (cadr tree))
+      ((assv (car lst) (cddr tree))             
+       =&gt; (lambda (new-tree)
+            (loop (cdr lst) new-tree)))
+      (else #f))))
+</pre>
+<h4><a name='codefunc9419' href='#docfunc9419'>sxml:radix-sort-join</a></h4>
+<i><a href='#tocfunc9419'>Index</a></i><br>
+
+<pre> XPath equality comparison for 2 string-sets
+  bool-op - comparison function for 2 boolean values
+</pre>
+<pre>(define (<a href="sxpath-ext.html#codefunc9419">sxml:radix-sort-join</a> string-set1 string-set2 bool-op)
+  (if
+   (null? string-set1)  ; always #f
+   #f
+   (let ((tree
+          (let iter-1 ((set1 (cdr string-set1))
+                       (tree (<a href="sxpath-ext.html#codefunc16502">sxml:string-&gt;tree</a> (car string-set1))))
+            (if (null? set1)
+                tree
+                (iter-1 (cdr set1)
+                        (<a href="sxpath-ext.html#codefunc30059">sxml:add-string-to-tree</a> (car set1) tree))))))
+     (let iter-2 ((set2 string-set2))
+       (cond
+         ((null? set2)  ; equality not found
+          #f)
+         ((bool-op (<a href="sxpath-ext.html#codefunc60878">sxml:string-in-tree?</a> (car set2) tree) #t)
+          #t)
+         (else
+          (iter-2 (cdr set2))))))))
+</pre>
+<h4><a name='codefunc15268' href='#docfunc15268'>sxml:equality-cmp</a></h4>
+<i><a href='#tocfunc15268'>Index</a></i><br>
+
+<pre> A helper for XPath equality operations: = , !=
+  'bool-op', 'number-op' and 'string-op' are comparison operations for 
+ a pair of booleans,  numbers and strings respectively
+</pre>
+<pre>(define (<a href="sxpath-ext.html#codefunc15268">sxml:equality-cmp</a> bool-op number-op string-op)
+  (lambda (obj1 obj2)
+    (cond
+      ((and (not (<a href="sxpathlib.html#codefunc31162">nodeset?</a> obj1)) (not (<a href="sxpathlib.html#codefunc31162">nodeset?</a> obj2)))  
+       ; neither object is a nodeset
+       (cond
+         ((boolean? obj1) (bool-op obj1 (<a href="sxpath-ext.html#codefunc35416">sxml:boolean</a> obj2)))
+         ((boolean? obj2) (bool-op (<a href="sxpath-ext.html#codefunc35416">sxml:boolean</a> obj1) obj2))
+         ((number? obj1) (number-op obj1 (<a href="sxpath-ext.html#codefunc9829">sxml:number</a> obj2)))
+         ((number? obj2) (number-op (<a href="sxpath-ext.html#codefunc9829">sxml:number</a> obj1) obj2))
+         (else  ; both objects are strings
+          (string-op obj1 obj2))))
+      ((and (<a href="sxpathlib.html#codefunc31162">nodeset?</a> obj1) (<a href="sxpathlib.html#codefunc31162">nodeset?</a> obj2))  ; both objects are nodesets
+       (let ((lng1 (length obj1))
+             (lng2 (length obj2)))
+         (cond
+           ((and (&lt; lng1 100000) (&lt; lng2 100000))
+            ((if  ; either nodeset is a short one              
+              (or (&lt;= lng1 2) (&lt;= lng2 2))
+              <a href="sxpath-ext.html#codefunc3392">sxml:nested-loop-join</a>
+              <a href="sxpath-ext.html#codefunc6861">sxml:merge-sort-join</a>)
+             (map <a href="sxpath-ext.html#codefunc15784">sxml:string-value</a> obj1)
+             (map <a href="sxpath-ext.html#codefunc15784">sxml:string-value</a> obj2)
+             string-op))
+           ((&lt; lng1 lng2)            
+            (<a href="sxpath-ext.html#codefunc9419">sxml:radix-sort-join</a> (map <a href="sxpath-ext.html#codefunc15784">sxml:string-value</a> obj1)
+                                  (map <a href="sxpath-ext.html#codefunc15784">sxml:string-value</a> obj2)
+                                  bool-op))
+           (else  ; lng2 &lt; lng1
+            (<a href="sxpath-ext.html#codefunc9419">sxml:radix-sort-join</a> (map <a href="sxpath-ext.html#codefunc15784">sxml:string-value</a> obj2)
+                                  (map <a href="sxpath-ext.html#codefunc15784">sxml:string-value</a> obj1)
+                                  bool-op)))))
+      (else  ; one of the objects is a nodeset, another is not
+       (call-with-values
+        (lambda ()  ; Equality operations are commutative
+          (if (<a href="sxpathlib.html#codefunc31162">nodeset?</a> obj1) (values obj1 obj2) (values obj2 obj1)))
+        (lambda (nset elem)
+          (cond
+            ((boolean? elem) (bool-op elem (<a href="sxpath-ext.html#codefunc35416">sxml:boolean</a> nset)))
+            ((number? elem)
+             (let loop ((nset 
+                         (map
+                          (lambda (node) (<a href="sxpath-ext.html#codefunc9829">sxml:number</a> (<a href="sxpath-ext.html#codefunc15784">sxml:string-value</a> node)))
+                          nset)))
+               (cond
+                 ((null? nset) #f)
+                 ((number-op elem (car nset)) #t)
+                 (else (loop (cdr nset))))))
+            ((string? elem)
+             (let loop ((nset (map <a href="sxpath-ext.html#codefunc15784">sxml:string-value</a> nset)))
+               (cond
+                 ((null? nset) #f)
+                 ((string-op elem (car nset)) #t)
+                 (else (loop (cdr nset))))))
+            (else  ; unknown datatype
+             (<a href="myenv.html#codefunc55253">cerr</a> &quot;Unknown datatype: &quot; elem <a href="myenv.html#codefunc27758">nl</a>)
+             #f))))))))
+</pre>
+<h4><a name='codefunc11309' href='#docfunc11309'>sxml:equal?</a></h4>
+<i><a href='#tocfunc11309'>Index</a></i><br>
+
+<pre>(define <a href="sxpath-ext.html#codefunc11309">sxml:equal?</a> (<a href="sxpath-ext.html#codefunc15268">sxml:equality-cmp</a> eq? = string=?))
+</pre>
+<h4><a name='codefunc3786' href='#docfunc3786'>sxml:not-equal?</a></h4>
+<i><a href='#tocfunc3786'>Index</a></i><br>
+
+<pre>(define <a href="sxpath-ext.html#codefunc3786">sxml:not-equal?</a>
+  (<a href="sxpath-ext.html#codefunc15268">sxml:equality-cmp</a>
+   (lambda (bool1 bool2) (not (eq? bool1 bool2)))
+   (lambda (num1 num2) (not (= num1 num2)))
+   (lambda (str1 str2) (not (string=? str1 str2)))))
+</pre>
+<h4><a name='codefunc41977' href='#docfunc41977'>sxml:relational-cmp</a></h4>
+<i><a href='#tocfunc41977'>Index</a></i><br>
+
+<pre> Relational operation ( &lt; , &gt; , &lt;= , &gt;= ) for two XPath objects
+  op is comparison procedure: &lt; , &gt; , &lt;= or &gt;=
+</pre>
+<pre>(define (<a href="sxpath-ext.html#codefunc41977">sxml:relational-cmp</a> op)
+  (lambda (obj1 obj2)
+    (cond
+      ((not (or (<a href="sxpathlib.html#codefunc31162">nodeset?</a> obj1) (<a href="sxpathlib.html#codefunc31162">nodeset?</a> obj2)))  ; neither obj is a nodeset
+       (op (<a href="sxpath-ext.html#codefunc9829">sxml:number</a> obj1) (<a href="sxpath-ext.html#codefunc9829">sxml:number</a> obj2)))
+      ((boolean? obj1)  ; 'obj1' is a boolean, 'obj2' is a nodeset
+       (op (<a href="sxpath-ext.html#codefunc9829">sxml:number</a> obj1) (<a href="sxpath-ext.html#codefunc9829">sxml:number</a> (<a href="sxpath-ext.html#codefunc35416">sxml:boolean</a> obj2))))
+      ((boolean? obj2)  ; 'obj1' is a nodeset, 'obj2' is a boolean
+       (op (<a href="sxpath-ext.html#codefunc9829">sxml:number</a> (<a href="sxpath-ext.html#codefunc35416">sxml:boolean</a> obj1)) (<a href="sxpath-ext.html#codefunc9829">sxml:number</a> obj2)))
+      ((or (null? obj1) (null? obj2)) ; one of the objects is an empty nodeset
+       #f)
+      (else  ; at least one object is a nodeset
+       (op
+        (cond
+          ((<a href="sxpathlib.html#codefunc31162">nodeset?</a> obj1)  ; 'obj1' is a (non-empty) nodeset
+           (let ((nset1 (map
+                         (lambda (node) (<a href="sxpath-ext.html#codefunc9829">sxml:number</a> (<a href="sxpath-ext.html#codefunc15784">sxml:string-value</a> node)))
+                         obj1)))
+             (let first ((num1 (car nset1))
+                         (nset1 (cdr nset1)))
+               (cond
+                 ((null? nset1) num1)
+                 ((op num1 (car nset1)) (first num1 (cdr nset1)))
+                 (else (first (car nset1) (cdr nset1)))))))
+          ((string? obj1) (<a href="sxpath-ext.html#codefunc9829">sxml:number</a> obj1))
+          (else  ; 'obj1' is a number
+           obj1))
+        (cond
+          ((<a href="sxpathlib.html#codefunc31162">nodeset?</a> obj2)  ; 'obj2' is a (non-empty) nodeset
+           (let ((nset2 (map
+                         (lambda (node) (<a href="sxpath-ext.html#codefunc9829">sxml:number</a> (<a href="sxpath-ext.html#codefunc15784">sxml:string-value</a> node)))
+                         obj2)))
+             (let second ((num2 (car nset2))
+                          (nset2 (cdr nset2)))
+               (cond
+                 ((null? nset2) num2)
+                 ((op num2 (car nset2)) (second (car nset2) (cdr nset2)))
+                 (else (second num2 (cdr nset2)))))))
+          ((string? obj2) (<a href="sxpath-ext.html#codefunc9829">sxml:number</a> obj2))
+          (else  ; 'obj2' is a number
+           obj2)))))))
+</pre></body></html>

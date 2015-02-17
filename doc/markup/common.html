@@ -1,0 +1,77 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN""http://www.w3.org/TR/html401/loose.dtd"><html><head><meta name="GENERATOR" content="Mole: The Scheme Source Code Digger"><title>Module: common</title><meta name='keywords' content=''></head><body bgcolor='#ffffff' text='#384412'  link='#11af05' vlink='#728b09'>
+<center><h1>Module: common</h1></center>
+
+<pre> For PLT Schemes v.200
+</pre><p><br>
+<!-- Table of content -->
+<p><dl>
+
+f:  <a name='tocfunc18289' href='#docfunc18289' style='text-decoration:none'>command-line</a><br>
+
+f:  <a name='tocfunc48131' href='#docfunc48131' style='text-decoration:none'>close-output-string</a><br>
+
+f:  <a name='tocfunc20536' href='#docfunc20536' style='text-decoration:none'>filter</a><br>
+</dl>
+
+<h4><a name='docfunc18289' href='#tocfunc18289'>command-line</a></h4>
+(define (command-line)<i><br> ... <a href='#codefunc18289'>Full Code</a> ... )</i><p><br>
+
+<h4><a name='docfunc48131' href='#tocfunc48131'>close-output-string</a></h4>
+(define close-output-string <i><br> ... <a href='#codefunc48131'>Full Code</a> ... )</i><p><br>
+
+<h4><a name='docfunc20536' href='#tocfunc20536'>filter</a></h4>
+(define (filter pred lis)<i><br> ... <a href='#codefunc20536'>Full Code</a> ... )</i>
+<pre> 
+</pre><p><br>
+<center><h1>Code</h1></center>
+
+<h5><a name='codeapp19890' href='#docapp19890'>require</a></h5>
+<i><a href='#tocapp19890'>Index</a></i><br>
+
+<pre>(require 
+  (lib &quot;defmacro.ss&quot;)
+  (lib &quot;string.ss&quot;)
+  (rename (lib &quot;pretty.ss&quot;) pp pretty-print))
+</pre>
+<h4><a name='codefunc18289' href='#docfunc18289'>command-line</a></h4>
+<i><a href='#tocfunc18289'>Index</a></i><br>
+
+<pre>(define (<a href="common.html#codefunc18289">command-line</a>)
+  (cons &quot;plt&quot; (vector-&gt;list (current-command-line-arguments)
+	;	argv
+		)))
+</pre>
+<h4><a name='codefunc48131' href='#docfunc48131'>close-output-string</a></h4>
+<i><a href='#tocfunc48131'>Index</a></i><br>
+
+<pre>(define <a href="common.html#codefunc48131">close-output-string</a> get-output-string)
+</pre>
+<h4><a name='codefunc20536' href='#docfunc20536'>filter</a></h4>
+<i><a href='#tocfunc20536'>Index</a></i><br>
+
+<pre> 
+</pre>
+<pre>(define (<a href="common.html#codefunc20536">filter</a> pred lis)			
+  (let rpt ((l lis))		
+    (if (null? l) 
+      '()
+       (if (pred (car l))
+	 (cons (car l) (rpt (cdr l)))
+	 (rpt (cdr l))))))
+</pre>
+<h5><a name='codeapp30668' href='#docapp30668'>define-syntax</a></h5>
+<i><a href='#tocapp30668'>Index</a></i><br>
+
+<pre>(define-syntax and-let*                                                            
+  (syntax-rules ()                   
+		((and-let* () body ...)
+		 (begin body ...))
+		((and-let* ((var expr) clauses ...) body ...) 
+		 (let ((var expr))
+		   (if var (and-let* (clauses ...) body ...) #f)))
+		((and-let* ((expr) clauses ...) body ...)
+		 (if expr (and-let* (clauses ...) body ...) #f))
+		((and-let* (var clauses ...) body ...)
+		 (if var (and-let* (clauses ...) body ...) #f))
+		))                  
+</pre></body></html>

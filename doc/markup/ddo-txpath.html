@@ -1,0 +1,3039 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN""http://www.w3.org/TR/html401/loose.dtd"><html><head><meta name="GENERATOR" content="Mole: The Scheme Source Code Digger"><title>Module: ddo-txpath</title><meta name='keywords' content=''></head><body bgcolor='#ffffff' text='#384412'  link='#11af05' vlink='#728b09'>
+<center><h1>Module: ddo-txpath</h1></center>
+
+<pre> XPath implementation with distinct document order support
+
+ This software is in Public Domain.
+ IT IS PROVIDED &quot;AS IS&quot;, WITHOUT WARRANTY OF ANY KIND.
+
+ Please send bug reports and comments to:
+   lizorkin@hotbox.ru    Dmitry Lizorkin
+</pre><p><br>
+<!-- Table of content -->
+<p><dl>
+<p><dt><a name='tocchapt30179' href='#chapt30179'><b>Miscellaneous</b></a><dd>
+
+f:  <a name='tocfunc4419' href='#docfunc4419' style='text-decoration:none'>ddo:or</a><br>
+
+f:  <a name='tocfunc29464' href='#docfunc29464' style='text-decoration:none'>ddo:foldr</a><br>
+
+f:  <a name='tocfunc14368' href='#docfunc14368' style='text-decoration:none'>ddo:type-nodeset</a><br>
+
+f:  <a name='tocfunc48943' href='#docfunc48943' style='text-decoration:none'>ddo:type-number</a><br>
+
+f:  <a name='tocfunc53802' href='#docfunc53802' style='text-decoration:none'>ddo:type-string</a><br>
+
+f:  <a name='tocfunc8995' href='#docfunc8995' style='text-decoration:none'>ddo:type-boolean</a><br>
+
+f:  <a name='tocfunc22612' href='#docfunc22612' style='text-decoration:none'>ddo:type-any</a><br>
+
+<dl><dt><a name='tocsect51016' href='#sect51016'><b>Comparison for nodesets</b></a><dd>
+
+f:  <a name='tocfunc36038' href='#docfunc36038' style='text-decoration:none'>ddo:nset-contained?</a><br>
+
+f:  <a name='tocfunc52710' href='#docfunc52710' style='text-decoration:none'>ddo:nset-equal?</a><br>
+</dl>
+<p><dt><a name='tocchapt57820' href='#chapt57820'><b>Different cases of nodeset filtering</b></a><dd>
+
+<dl><dt><a name='tocsect8246' href='#sect8246'><b>Filtering pos-result with (position-based) predicates and combining</b></a><dd>
+
+f:  <a name='tocfunc10703' href='#docfunc10703' style='text-decoration:none'>ddo:pos-result-forward?</a><br>
+
+f:  <a name='tocfunc1009' href='#docfunc1009' style='text-decoration:none'>ddo:pos-result->nodeset</a><br>
+
+f:  <a name='tocfunc48508' href='#docfunc48508' style='text-decoration:none'>ddo:location-step-pos</a><br>
+</dl>
+
+<dl><dt><a name='tocsect50696' href='#sect50696'><b>Implementation for location step for the other cases</b></a><dd>
+
+f:  <a name='tocfunc38303' href='#docfunc38303' style='text-decoration:none'>ddo:location-step-non-intersect</a><br>
+
+f:  <a name='tocfunc23129' href='#docfunc23129' style='text-decoration:none'>ddo:location-step-non-pos</a><br>
+</dl>
+
+<dl><dt><a name='tocsect55798' href='#sect55798'><b>Implementations for FilterExpr</b></a><dd>
+
+f:  <a name='tocfunc7896' href='#docfunc7896' style='text-decoration:none'>ddo:filter-expr-general</a><br>
+
+f:  <a name='tocfunc65251' href='#docfunc65251' style='text-decoration:none'>ddo:filter-expr-non-pos</a><br>
+
+f:  <a name='tocfunc984' href='#docfunc984' style='text-decoration:none'>ddo:filter-expr-special-predicate</a><br>
+</dl>
+<p><dt><a name='tocchapt59115' href='#chapt59115'><b>Uniting context-sets, preserving distinct document order</b></a><dd>
+
+f:  <a name='tocfunc3760' href='#docfunc3760' style='text-decoration:none'>ddo:all-contexts-in-doc</a><br>
+
+f:  <a name='tocfunc8398' href='#docfunc8398' style='text-decoration:none'>ddo:unite-2-contextsets</a><br>
+
+f:  <a name='tocfunc599' href='#docfunc599' style='text-decoration:none'>ddo:unite-multiple-context-sets</a><br>
+<p><dt><a name='tocchapt9387' href='#chapt9387'><b>Optimizing special predicates like [position()=1] and the like</b></a><dd>
+
+f:  <a name='tocfunc23214' href='#docfunc23214' style='text-decoration:none'>ddo:list-tail</a><br>
+
+f:  <a name='tocfunc18090' href='#docfunc18090' style='text-decoration:none'>ddo:list-head</a><br>
+
+f:  <a name='tocfunc21830' href='#docfunc21830' style='text-decoration:none'>ddo:list-ref</a><br>
+
+<dl><dt><a name='tocsect6390' href='#sect6390'><b>Checks for a special structure of the predicate in its AST representation</b></a><dd>
+
+f:  <a name='tocfunc59875' href='#docfunc59875' style='text-decoration:none'>ddo:check-ast-position?</a><br>
+
+f:  <a name='tocfunc35358' href='#docfunc35358' style='text-decoration:none'>ddo:check4ast-number</a><br>
+
+f:  <a name='tocfunc43451' href='#docfunc43451' style='text-decoration:none'>ddo:check-special-predicate</a><br>
+</dl>
+<p><dt><a name='tocchapt37313' href='#chapt37313'><b>Some simple rewrites for XPath AST</b></a><dd>
+
+f:  <a name='tocfunc45141' href='#docfunc45141' style='text-decoration:none'>ddo:check-ast-desc-os?</a><br>
+
+f:  <a name='tocfunc64910' href='#docfunc64910' style='text-decoration:none'>ddo:rewrite-step*</a><br>
+<p><dt><a name='tocchapt61463' href='#chapt61463'><b>Optimization for deeply nested predicates</b></a><dd>
+
+f:  <a name='tocfunc38909' href='#docfunc38909' style='text-decoration:none'>ddo:generate-pred-id</a><br>
+
+<dl><dt><a name='tocsect26337' href='#sect26337'><b>Search for predicate values</b></a><dd>
+
+f:  <a name='tocfunc20617' href='#docfunc20617' style='text-decoration:none'>ddo:get-pred-value</a><br>
+
+f:  <a name='tocfunc13350' href='#docfunc13350' style='text-decoration:none'>ddo:get-pred-value-pos</a><br>
+
+f:  <a name='tocfunc43777' href='#docfunc43777' style='text-decoration:none'>ddo:get-abs-lpath-value</a><br>
+</dl>
+
+<dl><dt><a name='tocsect62045' href='#sect62045'><b>Construct predicate values</b></a><dd>
+
+f:  <a name='tocfunc42064' href='#docfunc42064' style='text-decoration:none'>ddo:construct-pred-values</a><br>
+
+f:  <a name='tocfunc16692' href='#docfunc16692' style='text-decoration:none'>ddo:construct-pred-values-pos</a><br>
+
+f:  <a name='tocfunc21018' href='#docfunc21018' style='text-decoration:none'>ddo:vector-copy-set</a><br>
+
+f:  <a name='tocfunc59912' href='#docfunc59912' style='text-decoration:none'>ddo:add-vector-to-var-binding</a><br>
+</dl>
+
+<dl><dt><a name='tocsect13290' href='#sect13290'><b>Methods similar to radix sort for linear access time for all variables</b></a><dd>
+
+f:  <a name='tocfunc16896' href='#docfunc16896' style='text-decoration:none'>ddo:charlst->branch</a><br>
+
+f:  <a name='tocfunc2299' href='#docfunc2299' style='text-decoration:none'>ddo:add-var-to-tree</a><br>
+
+f:  <a name='tocfunc29043' href='#docfunc29043' style='text-decoration:none'>ddo:var-binding->tree</a><br>
+
+f:  <a name='tocfunc32442' href='#docfunc32442' style='text-decoration:none'>ddo:get-var-value-from-tree</a><br>
+</dl>
+<p><dt><a name='tocchapt29406' href='#chapt29406'><b>XPath AST processing</b></a><dd>
+
+f:  <a name='tocfunc18753' href='#docfunc18753' style='text-decoration:none'>ddo:ast-axis-specifier</a><br>
+
+f:  <a name='tocfunc52563' href='#docfunc52563' style='text-decoration:none'>ddo:ast-location-path</a><br>
+
+f:  <a name='tocfunc38681' href='#docfunc38681' style='text-decoration:none'>ddo:ast-absolute-location-path</a><br>
+
+f:  <a name='tocfunc32813' href='#docfunc32813' style='text-decoration:none'>ddo:ast-relative-location-path</a><br>
+
+f:  <a name='tocfunc9346' href='#docfunc9346' style='text-decoration:none'>ddo:ast-step</a><br>
+
+f:  <a name='tocfunc1165' href='#docfunc1165' style='text-decoration:none'>ddo:ast-step-list</a><br>
+
+f:  <a name='tocfunc61102' href='#docfunc61102' style='text-decoration:none'>ddo:ast-predicate</a><br>
+
+f:  <a name='tocfunc63886' href='#docfunc63886' style='text-decoration:none'>ddo:ast-predicate-list</a><br>
+
+f:  <a name='tocfunc10879' href='#docfunc10879' style='text-decoration:none'>ddo:ast-expr</a><br>
+
+f:  <a name='tocfunc63251' href='#docfunc63251' style='text-decoration:none'>ddo:apply-ast-procedure</a><br>
+
+f:  <a name='tocfunc34864' href='#docfunc34864' style='text-decoration:none'>ddo:ast-or-expr</a><br>
+
+f:  <a name='tocfunc50756' href='#docfunc50756' style='text-decoration:none'>ddo:ast-and-expr</a><br>
+
+f:  <a name='tocfunc52092' href='#docfunc52092' style='text-decoration:none'>ddo:ast-equality-expr</a><br>
+
+f:  <a name='tocfunc8421' href='#docfunc8421' style='text-decoration:none'>ddo:ast-relational-expr</a><br>
+
+f:  <a name='tocfunc45681' href='#docfunc45681' style='text-decoration:none'>ddo:ast-additive-expr</a><br>
+
+f:  <a name='tocfunc2495' href='#docfunc2495' style='text-decoration:none'>ddo:ast-multiplicative-expr</a><br>
+
+f:  <a name='tocfunc13772' href='#docfunc13772' style='text-decoration:none'>ddo:ast-union-expr</a><br>
+
+f:  <a name='tocfunc57253' href='#docfunc57253' style='text-decoration:none'>ddo:ast-path-expr</a><br>
+
+f:  <a name='tocfunc26105' href='#docfunc26105' style='text-decoration:none'>ddo:ast-filter-expr</a><br>
+
+f:  <a name='tocfunc61728' href='#docfunc61728' style='text-decoration:none'>ddo:ast-variable-reference</a><br>
+
+f:  <a name='tocfunc28776' href='#docfunc28776' style='text-decoration:none'>ddo:ast-literal</a><br>
+
+f:  <a name='tocfunc35306' href='#docfunc35306' style='text-decoration:none'>ddo:ast-number</a><br>
+
+f:  <a name='tocfunc49244' href='#docfunc49244' style='text-decoration:none'>ddo:ast-function-call</a><br>
+
+f:  <a name='tocfunc2129' href='#docfunc2129' style='text-decoration:none'>ddo:ast-function-arguments</a><br>
+<p><dt><a name='tocchapt29326' href='#chapt29326'><b>Highest level API functions</b></a><dd>
+
+f:  <a name='tocfunc34008' href='#docfunc34008' style='text-decoration:none'>ddo:api-helper</a><br>
+
+f:  <a name='tocfunc57644' href='#docfunc57644' style='text-decoration:none'>ddo:txpath</a><br>
+
+f:  <a name='tocfunc39915' href='#docfunc39915' style='text-decoration:none'>ddo:xpath-expr</a><br>
+
+f:  <a name='tocfunc57643' href='#docfunc57643' style='text-decoration:none'>ddo:sxpath</a><br>
+</dl>
+<hr height='5'><center><h3><a name='chapt30179' href='#tocchapt30179'>Miscellaneous</a></h3></center>
+
+<pre></pre>
+<h4><a name='docfunc4419' href='#tocfunc4419'>ddo:or</a></h4>
+(define (ddo:or . args)<i><br> ... <a href='#codefunc4419'>Full Code</a> ... )</i>
+<pre> Implement 'or' as a function, so that we could 'apply' it
+</pre><p><br>
+
+<h4><a name='docfunc29464' href='#tocfunc29464'>ddo:foldr</a></h4>
+(define (ddo:foldr op init lst)<i><br> ... <a href='#codefunc29464'>Full Code</a> ... )</i>
+<pre>  (if (null? lst)
+      init
+      (ddo:foldl op (op (car lst) init) (cdr lst))))
+</pre><p><br>
+
+<h4><a name='docfunc14368' href='#tocfunc14368'>ddo:type-nodeset</a></h4>
+(define ddo:type-nodeset <i><br> ... <a href='#codefunc14368'>Full Code</a> ... )</i>
+<pre> Definition of types
+</pre><p><br>
+
+<h4><a name='docfunc48943' href='#tocfunc48943'>ddo:type-number</a></h4>
+(define ddo:type-number <i><br> ... <a href='#codefunc48943'>Full Code</a> ... )</i><p><br>
+
+<h4><a name='docfunc53802' href='#tocfunc53802'>ddo:type-string</a></h4>
+(define ddo:type-string <i><br> ... <a href='#codefunc53802'>Full Code</a> ... )</i><p><br>
+
+<h4><a name='docfunc8995' href='#tocfunc8995'>ddo:type-boolean</a></h4>
+(define ddo:type-boolean <i><br> ... <a href='#codefunc8995'>Full Code</a> ... )</i><p><br>
+
+<h4><a name='docfunc22612' href='#tocfunc22612'>ddo:type-any</a></h4>
+(define ddo:type-any <i><br> ... <a href='#codefunc22612'>Full Code</a> ... )</i><p><br>
+
+<hr width='40%' align='center'><center><h3><a name='sect51016' href='#tocsect51016'>Comparison for nodesets</a></h3></center>
+
+<pre> In order to compare nodesets produced by conventional SXPath and SXPath with
+ distinct document order support, we must take into account that members in
+ each of the nodesets being compared can be ordered differently.
+</pre>
+<h4><a name='docfunc36038' href='#tocfunc36038'>ddo:nset-contained?</a></h4>
+(define (ddo:nset-contained? nodeset1 nodeset2)<i><br> ... <a href='#codefunc36038'>Full Code</a> ... )</i>
+<pre> Whether all members from the first nodeset are contained in the second
+ nodeset
+</pre><p><br>
+
+<h4><a name='docfunc52710' href='#tocfunc52710'>ddo:nset-equal?</a></h4>
+(define (ddo:nset-equal? nodeset1 nodeset2)<i><br> ... <a href='#codefunc52710'>Full Code</a> ... )</i><p><br>
+<hr height='5'><center><h3><a name='chapt57820' href='#tocchapt57820'>Different cases of nodeset filtering</a></h3></center>
+
+<pre></pre>
+<hr width='40%' align='center'><center><h3><a name='sect8246' href='#tocsect8246'>Filtering pos-result with (position-based) predicates and combining</a></h3></center>
+
+<pre> a filtered pos-result into a distinct document order nodeset
+  pos-result ::= (listof pos-nodeset)
+  pos-nodeset ::= (listof (cons node order-num))
+ Each pos-nodeset is a result of applying the axis to a single node in the
+ input nodeset. Pos-result can be informally considered as
+  (map axis-pos input-nodeset)
+ Each node in the pos-nodeset comes with its order number. An order-num is
+ an integer, possibly a negative one. A node precedes another node in
+ document order if the order-num of the former node is less than the order-num
+ of the latter node. Equal order-nums (in different pos-nodesets) correspond
+ to equal nodes.
+ Each pos-nodeset is sorted in accordance with the position() of each of its
+ members. Consequently, order-nums increase within pos-nodeset for forward
+ XPath axes and decrease for reverse XPath axes.
+</pre>
+<h4><a name='docfunc10703' href='#tocfunc10703'>ddo:pos-result-forward?</a></h4>
+(define (ddo:pos-result-forward? pos-result)<i><br> ... <a href='#codefunc10703'>Full Code</a> ... )</i>
+<pre> Whether pos-result in a forward order
+ Return #t if in document order, #f if in reverse document order
+</pre><p><br>
+
+<h4><a name='docfunc1009' href='#tocfunc1009'>ddo:pos-result->nodeset</a></h4>
+(define (ddo:pos-result-&gt;nodeset pos-result)<i><br> ... <a href='#codefunc1009'>Full Code</a> ... )</i>
+<pre> Unites pos-result into a nodeset in distinct document order
+</pre><p><br>
+
+<h4><a name='docfunc48508' href='#tocfunc48508'>ddo:location-step-pos</a></h4>
+(define (ddo:location-step-pos pos-axis-impl pred-impl-lst)<i><br> ... <a href='#codefunc48508'>Full Code</a> ... )</i>
+<pre>  pos-axis-impl ::= lambda
+  pred-impl-lst ::= (listof lambda)
+ Every predicate is called with respect to each node
+ Returns:  lambda
+  lambda ::= (lambda (nodeset position+size var-binding) ...)
+</pre><p><br>
+
+<hr width='40%' align='center'><center><h3><a name='sect50696' href='#tocsect50696'>Implementation for location step for the other cases</a></h3></center>
+
+<pre></pre>
+<h4><a name='docfunc38303' href='#tocfunc38303'>ddo:location-step-non-intersect</a></h4>
+(define (ddo:location-step-non-intersect axis-impl pred-impl-lst)<i><br> ... <a href='#codefunc38303'>Full Code</a> ... )</i>
+<pre> A location step for the axis which doesn't return a result in the form of
+ a pos-nodeset, but instead resulting nodesets for each input node are in
+ document order
+  pos-axis-impl ::= lambda
+  pred-impl-lst ::= (listof lambda)
+ Every predicate is called with respect to each node
+ Returns:  lambda
+  lambda ::= (lambda (nodeset position+size var-binding) ...)
+ This function is somewhat similar to 'sxml:xpath-nodeset-filter' from
+ &quot;txpath.scm&quot;
+</pre><p><br>
+
+<h4><a name='docfunc23129' href='#tocfunc23129'>ddo:location-step-non-pos</a></h4>
+(define (ddo:location-step-non-pos axis-impl pred-impl-lst)<i><br> ... <a href='#codefunc23129'>Full Code</a> ... )</i>
+<pre> A location step doesn't contain position-based predicates
+</pre><p><br>
+
+<hr width='40%' align='center'><center><h3><a name='sect55798' href='#tocsect55798'>Implementations for FilterExpr</a></h3></center>
+
+<pre></pre>
+<h4><a name='docfunc7896' href='#tocfunc7896'>ddo:filter-expr-general</a></h4>
+(define (ddo:filter-expr-general expr-impl pred-impl-lst)<i><br> ... <a href='#codefunc7896'>Full Code</a> ... )</i>
+<pre> Implementing FilterExpr in the general case, for position-based predicates
+</pre><p><br>
+
+<h4><a name='docfunc65251' href='#tocfunc65251'>ddo:filter-expr-non-pos</a></h4>
+(define (ddo:filter-expr-non-pos expr-impl pred-impl-lst)<i><br> ... <a href='#codefunc65251'>Full Code</a> ... )</i>
+<pre> A FilterExpr doesn't contain position-based predicates
+ NOTE: This function is very similar to 'ddo:location-step-non-pos'
+  Should think of combining them.
+</pre><p><br>
+
+<h4><a name='docfunc984' href='#tocfunc984'>ddo:filter-expr-special-predicate</a></h4>
+(define (ddo:filter-expr-special-predicate expr-impl special-pred-impl)<i><br> ... <a href='#codefunc984'>Full Code</a> ... )</i>
+<pre>  Filter expression, with a single predicate of the special structure, like
+  [position()=1]
+ special-pred-impl ::= (lambda (nodeset) ...)  - filters the nodeset
+</pre><p><br>
+<hr height='5'><center><h3><a name='chapt59115' href='#tocchapt59115'>Uniting context-sets, preserving distinct document order</a></h3></center>
+
+<pre> Is required for XPath UnionExpr
+</pre>
+<h4><a name='docfunc3760' href='#tocfunc3760'>ddo:all-contexts-in-doc</a></h4>
+(define (ddo:all-contexts-in-doc doc)<i><br> ... <a href='#codefunc3760'>Full Code</a> ... )</i>
+<pre> Returns all contexts of the document, including the ones for attribute nodes
+ and for attribute value nodes. All contexts are returned in document order,
+ attribute value nodes immediately follow attribute nodes
+</pre><p><br>
+
+<h4><a name='docfunc8398' href='#tocfunc8398'>ddo:unite-2-contextsets</a></h4>
+(define (ddo:unite-2-contextsets cntset1 cntset2)<i><br> ... <a href='#codefunc8398'>Full Code</a> ... )</i>
+<pre> Every context in both context-sets must contain all the ancestors of the
+ context node (this corresponds to the num-ancestors=#f)
+ All nodes must have one and the same root node (i.e. this function cannot
+ correctly unite context-sets whose members belong to different documents)
+ Returns the context-set that is a distinct-document-order union of the
+ argument context-sets
+</pre><p><br>
+
+<h4><a name='docfunc599' href='#tocfunc599'>ddo:unite-multiple-context-sets</a></h4>
+(define (ddo:unite-multiple-context-sets . context-sets)<i><br> ... <a href='#codefunc599'>Full Code</a> ... )</i>
+<pre> Based on the function for uniting 2 context-sets, unites multiple
+ context-sets
+</pre><p><br>
+<hr height='5'><center><h3><a name='chapt9387' href='#tocchapt9387'>Optimizing special predicates like [position()=1] and the like</a></h3></center>
+
+<pre></pre>
+<h4><a name='docfunc23214' href='#tocfunc23214'>ddo:list-tail</a></h4>
+(define (ddo:list-tail lst k)<i><br> ... <a href='#codefunc23214'>Full Code</a> ... )</i>
+<pre> Similar to R5RS list-tail, but returns an empty list when k &gt; (length lst)
+</pre><p><br>
+
+<h4><a name='docfunc18090' href='#tocfunc18090'>ddo:list-head</a></h4>
+(define (ddo:list-head lst k)<i><br> ... <a href='#codefunc18090'>Full Code</a> ... )</i>
+<pre> Takes the first k members of the list
+ The whole list is taken when k &gt; (length lst)
+</pre><p><br>
+
+<h4><a name='docfunc21830' href='#tocfunc21830'>ddo:list-ref</a></h4>
+(define (ddo:list-ref lst k)<i><br> ... <a href='#codefunc21830'>Full Code</a> ... )</i>
+<pre> Similar to R5RS list-tail, but returns an empty list when
+ (or (&lt; k 0) (&gt; k (length lst))
+</pre><p><br>
+
+<hr width='40%' align='center'><center><h3><a name='sect6390' href='#tocsect6390'>Checks for a special structure of the predicate in its AST representation</a></h3></center>
+
+<pre></pre>
+<h4><a name='docfunc59875' href='#tocfunc59875'>ddo:check-ast-position?</a></h4>
+(define ddo:check-ast-position? <i><br> ... <a href='#codefunc59875'>Full Code</a> ... )</i>
+<pre> Checks whether the given op is the AST representation to a function call
+ to position()
+</pre><p><br>
+
+<h4><a name='docfunc35358' href='#tocfunc35358'>ddo:check4ast-number</a></h4>
+(define (ddo:check4ast-number op)<i><br> ... <a href='#codefunc35358'>Full Code</a> ... )</i>
+<pre> If the given op is the AST representation for a number and this number is
+ exact, returns this number. Otherwise returns #f
+</pre><p><br>
+
+<h4><a name='docfunc43451' href='#tocfunc43451'>ddo:check-special-predicate</a></h4>
+(define (ddo:check-special-predicate op)<i><br> ... <a href='#codefunc43451'>Full Code</a> ... )</i>
+<pre>  In case when the predicate has one of the following forms:
+ SpecialPredicate ::= [ Number ]
+                      | [ position() CmpOp Number ]
+                      | [ Number CmpOp position() ]
+ CmpOp ::= &gt; | &lt; | &gt;= | &lt;= | =
+ Number - an integer
+  than returns (lambda (nodeset) ...), where the lambda performs the required
+  filtering as specified by the predicate.
+  For a different sort of a predicate, returns #f
+  The function doesn't signal of any semantic errors.
+</pre><p><br>
+<hr height='5'><center><h3><a name='chapt37313' href='#tocchapt37313'>Some simple rewrites for XPath AST</a></h3></center>
+
+<pre></pre>
+<h4><a name='docfunc45141' href='#tocfunc45141'>ddo:check-ast-desc-os?</a></h4>
+(define ddo:check-ast-desc-os? <i><br> ... <a href='#codefunc45141'>Full Code</a> ... )</i>
+<pre> Whether a given AST node is the representation of the location step
+ &quot;descendant-or-self::node()&quot;, which is the full syntax for its abbreviated
+ equivalent &quot;//&quot;
+</pre><p><br>
+
+<h4><a name='docfunc64910' href='#tocfunc64910'>ddo:rewrite-step*</a></h4>
+(define (ddo:rewrite-step* op-lst)<i><br> ... <a href='#codefunc64910'>Full Code</a> ... )</i>
+<pre> Rewrites the sequence of location steps, by combining the two consecutive
+ steps &quot;//para&quot; into a single one &quot;descendant::para&quot;
+ Returns the reconstructed list of steps
+</pre><p><br>
+<hr height='5'><center><h3><a name='chapt61463' href='#tocchapt61463'>Optimization for deeply nested predicates</a></h3></center>
+
+<pre> For predicates whose level of nesting exceeds 3, these predicates are likely
+ to be called for more than n^3 times, where n is the number of nodes in an
+ SXML document being processed. For such predicates, it is desirable to
+ evaluate them in advance, for every combination of context node, context
+ position and context size (the latter two components are not even required
+ if the predicate doesn't use position).
+ Such an optimization allows achieving a polinomial-time complexity for any
+ XPath expression
+</pre>
+<h4><a name='docfunc38909' href='#tocfunc38909'>ddo:generate-pred-id</a></h4>
+(define (ddo:generate-pred-id)<i><br> ... <a href='#codefunc38909'>Full Code</a> ... )</i><p><br>
+
+<hr width='40%' align='center'><center><h3><a name='sect26337' href='#tocsect26337'>Search for predicate values</a></h3></center>
+
+<pre> Predicate values are added to var-binding
+</pre>
+<h4><a name='docfunc20617' href='#tocfunc20617'>ddo:get-pred-value</a></h4>
+(define (ddo:get-pred-value pred-id)<i><br> ... <a href='#codefunc20617'>Full Code</a> ... )</i>
+<pre> Predicate value for a predicate that doesn't require position
+ Predicate values are stored in the form of
+ pred-values ::= (listof  (cons  node  pred-value))
+ NOTE: A node (and not a context) is used as a key in the alist
+</pre><p><br>
+
+<h4><a name='docfunc13350' href='#tocfunc13350'>ddo:get-pred-value-pos</a></h4>
+(define (ddo:get-pred-value-pos pred-id)<i><br> ... <a href='#codefunc13350'>Full Code</a> ... )</i>
+<pre> Predicate value for a predicate that requires position
+ Predicate values are stored in the form of
+ pred-values ::=
+        (listof
+         (cons node
+               (listof
+                (cons size
+                      (listof
+                       (cons position pred-value))))))
+ NOTE: A node (and not a context) is used as a key in the alist
+</pre><p><br>
+
+<h4><a name='docfunc43777' href='#tocfunc43777'>ddo:get-abs-lpath-value</a></h4>
+(define (ddo:get-abs-lpath-value pred-id)<i><br> ... <a href='#codefunc43777'>Full Code</a> ... )</i>
+<pre> Value that results from evaluating the absolute location path
+ The argument is named `pred-id' for the sake of mere unification with
+ deep predicates
+</pre><p><br>
+
+<hr width='40%' align='center'><center><h3><a name='sect62045' href='#tocsect62045'>Construct predicate values</a></h3></center>
+
+<pre></pre>
+<h4><a name='docfunc42064' href='#tocfunc42064'>ddo:construct-pred-values</a></h4>
+(define (ddo:construct-pred-values pred-impl context-set var-binding)<i><br> ... <a href='#codefunc42064'>Full Code</a> ... )</i>
+<pre> Construct alist of values for a predicate that doesn't require position
+ pred-impl - lambda that implements the predicate
+ context-set - set of contexts for all nodes in the source document
+ var-bindings - include variables supplied by user and the ones formed by
+  deeper level predicates
+</pre><p><br>
+
+<h4><a name='docfunc16692' href='#tocfunc16692'>ddo:construct-pred-values-pos</a></h4>
+(define (ddo:construct-pred-values-pos pred-impl context-set var-binding max-size)<i><br> ... <a href='#codefunc16692'>Full Code</a> ... )</i>
+<pre> Construct alist of values for a predicate that requires position
+  pred-impl - lambda that implements the predicate
+  context-set - set of contexts for all nodes in the source document
+  var-bindings - include variables supplied by user and the ones formed by
+ deeper level predicates
+  max-size - maximal context size possible in the document
+</pre><p><br>
+
+<h4><a name='docfunc21018' href='#tocfunc21018'>ddo:vector-copy-set</a></h4>
+(define (ddo:vector-copy-set vect k obj)<i><br> ... <a href='#codefunc21018'>Full Code</a> ... )</i>
+<pre> is replaced with `obj'
+</pre><p><br>
+
+<h4><a name='docfunc59912' href='#tocfunc59912'>ddo:add-vector-to-var-binding</a></h4>
+(define (ddo:add-vector-to-var-binding vars2offsets deep-predicates doc var-binding)<i><br> ... <a href='#codefunc59912'>Full Code</a> ... )</i>
+<pre> Extends `var-binding' with a vector data structure for binding variable
+ values and values for deep predicates.
+ Returns extended var-binding, which is constructed as follows:
+ (cons (cons '*var-vector* ,vector)
+       var-binding)
+</pre><p><br>
+
+<hr width='40%' align='center'><center><h3><a name='sect13290' href='#tocsect13290'>Methods similar to radix sort for linear access time for all variables</a></h3></center>
+
+<pre></pre>
+<h4><a name='docfunc16896' href='#tocfunc16896'>ddo:charlst->branch</a></h4>
+(define (ddo:charlst-&gt;branch lst value)<i><br> ... <a href='#codefunc16896'>Full Code</a> ... )</i>
+<pre> Represents a list of chars as a branch in the string-tree
+ The list of chars must be non-empty
+</pre><p><br>
+
+<h4><a name='docfunc2299' href='#tocfunc2299'>ddo:add-var-to-tree</a></h4>
+(define (ddo:add-var-to-tree var-name var-value tree)<i><br> ... <a href='#codefunc2299'>Full Code</a> ... )</i>
+<pre> Adds a new string to string-tree
+</pre><p><br>
+
+<h4><a name='docfunc29043' href='#tocfunc29043'>ddo:var-binding->tree</a></h4>
+(define (ddo:var-binding-&gt;tree var-binding)<i><br> ... <a href='#codefunc29043'>Full Code</a> ... )</i>
+<pre> Convert var-binding to their tree representation
+ var-binding is supposed to be non-null
+</pre><p><br>
+
+<h4><a name='docfunc32442' href='#tocfunc32442'>ddo:get-var-value-from-tree</a></h4>
+(define (ddo:get-var-value-from-tree var-name tree)<i><br> ... <a href='#codefunc32442'>Full Code</a> ... )</i>
+<pre> Obtain variable value from the tree
+</pre><p><br>
+<hr height='5'><center><h3><a name='chapt29406' href='#tocchapt29406'>XPath AST processing</a></h3></center>
+
+<pre> AST is considered to be properly formed
+ In the signature of functions below, the following terms are taken:
+  op - S-expression which represents the operation
+  num-anc - how many ancestors are required in the context after that
+   operation
+</pre>
+<h4><a name='docfunc18753' href='#tocfunc18753'>ddo:ast-axis-specifier</a></h4>
+(define (ddo:ast-axis-specifier op num-anc single-level? requires-position?)<i><br> ... <a href='#codefunc18753'>Full Code</a> ... )</i>
+<pre> {5} &lt;AxisSpecifier&gt; ::= (axis-specifier  &lt;AxisName&gt; )
+ {6} &lt;AxisName&gt; ::= (ancestor)
+                    | (ancestor-or-self)
+                    | (attribute)
+                    | (child)
+                    | (descendant)
+                    | (descendant-or-self)
+                    | (following)
+                    | (following-sibling)
+                    | (namespace)
+                    | (parent)
+                    | (preceding)
+                    | (preceding-sibling)
+                    | (self)
+
+ single-level? - whether all nodes in the input nodeset are located on the
+  same level of tree hierarchy
+ requires-position? - whether context position or context size are required to
+  filter the result produced by the axis
+
+ For requires-position?=#f, the function returns
+  (list  axis-lambda
+         num-anc-it-requires
+         single-level?)
+ For requires-position?=#t, the function returns
+  (list  axis-lambda
+         num-anc-it-requires
+         single-level?
+         pos-result?)
+  single-level? - whether nodes are in the single level after the axis
+  pos-result? - whether the result of the axis has the form of pos-result.
+   If #f, the axis returns its result in the form of the common nodeset
+</pre><p><br>
+
+<h4><a name='docfunc52563' href='#tocfunc52563'>ddo:ast-location-path</a></h4>
+(define (ddo:ast-location-path op num-anc single-level? pred-nesting vars2offsets)<i><br> ... <a href='#codefunc52563'>Full Code</a> ... )</i>
+<pre>                        | &lt;AbsoluteLocationPath&gt;
+</pre><p><br>
+
+<h4><a name='docfunc38681' href='#tocfunc38681'>ddo:ast-absolute-location-path</a></h4>
+(define (ddo:ast-absolute-location-path op num-anc single-level? pred-nesting vars2offsets)<i><br> ... <a href='#codefunc38681'>Full Code</a> ... )</i>
+<pre> {2} &lt;AbsoluteLocationPath&gt; ::= (absolute-location-path  &lt;Step&gt;* )
+ NOTE: single-level? is dummy here, since AbsoluteLocationPath always
+ starts from a single node - the root of the document
+</pre><p><br>
+
+<h4><a name='docfunc32813' href='#tocfunc32813'>ddo:ast-relative-location-path</a></h4>
+(define (ddo:ast-relative-location-path op num-anc single-level? pred-nesting vars2offsets)<i><br> ... <a href='#codefunc32813'>Full Code</a> ... )</i>
+<pre> {3} &lt;RelativeLocationPath&gt; ::= (relative-location-path  &lt;Step&gt;+ )
+</pre><p><br>
+
+<h4><a name='docfunc9346' href='#tocfunc9346'>ddo:ast-step</a></h4>
+(define (ddo:ast-step op num-anc single-level? pred-nesting vars2offsets)<i><br> ... <a href='#codefunc9346'>Full Code</a> ... )</i>
+<pre> {4} &lt;Step&gt; ::= (step  &lt;AxisSpecifier&gt; &lt;NodeTest&gt; &lt;Predicate&gt;* )
+                | (range-to  (expr &lt;Expr&gt;)  &lt;Predicate&gt;* )
+</pre><p><br>
+
+<h4><a name='docfunc1165' href='#tocfunc1165'>ddo:ast-step-list</a></h4>
+(define (ddo:ast-step-list step-lst num-anc single-level? pred-nesting vars2offsets)<i><br> ... <a href='#codefunc1165'>Full Code</a> ... )</i>
+<pre> {4a} ( &lt;Step&gt;+ )
+ Returns (list (listof step-impl)
+               num-anc single-level? requires-position? expr-type
+               deep-predicates vars2offsets)
+ or #f
+ TECHNICAL NOTE: To calculate 'single-level?', we need to process steps in
+ straight orger. To calculate 'num-anc', we need to process steps in reverse
+ order. This thus has to be implemented in 2 passes
+</pre><p><br>
+
+<h4><a name='docfunc61102' href='#tocfunc61102'>ddo:ast-predicate</a></h4>
+(define (ddo:ast-predicate op num-anc single-level? pred-nesting vars2offsets)<i><br> ... <a href='#codefunc61102'>Full Code</a> ... )</i>
+<pre> {8} &lt;Predicate&gt; ::= (predicate  &lt;Expr&gt; )
+ NOTE: num-anc is dummy here, since it is always 0 for Predicates
+ NOTE: single-level? is dummy here, since a Predicate is always called for
+  a single node to be filtered
+ NOTE: Unlike 'draft:ast-predicate', we don't implement any filtering here,
+  because it depends on the particular axis in the step. Filtering is
+  performed on the higher level
+</pre><p><br>
+
+<h4><a name='docfunc63886' href='#tocfunc63886'>ddo:ast-predicate-list</a></h4>
+(define (ddo:ast-predicate-list op-lst num-anc single-level? pred-nesting vars2offsets)<i><br> ... <a href='#codefunc63886'>Full Code</a> ... )</i>
+<pre> {8a} ( &lt;Predicate&gt;+ )
+ Returns (list (listof pred-impl)
+               num-anc single-level? requires-position? expr-type
+               deep-predicates)
+ or #f
+ NOTE: num-anc is dummy here, since it is always 0 for Predicates
+ NOTE: single-level? is dummy here, since a Predicate is always called for
+  a single node to be filtered
+ NOTE: information about the type for each Predicate is lost
+</pre><p><br>
+
+<h4><a name='docfunc10879' href='#tocfunc10879'>ddo:ast-expr</a></h4>
+(define (ddo:ast-expr op num-anc single-level? pred-nesting vars2offsets)<i><br> ... <a href='#codefunc10879'>Full Code</a> ... )</i>
+<pre> {9} &lt;Expr&gt; ::= &lt;OrExpr&gt;
+                | &lt;AndExpr&gt;
+                | &lt;EqualityExpr&gt;
+                | &lt;RelationalExpr&gt;
+                | &lt;AdditiveExpr&gt;
+                | &lt;MultiplicativeExpr&gt;
+                | &lt;UnionExpr&gt;
+                | &lt;PathExpr&gt;
+                | &lt;FilterExpr&gt;
+                | &lt;VariableReference&gt;
+                | &lt;Literal&gt;
+                | &lt;Number&gt;
+                | &lt;FunctionCall&gt;
+                | &lt;LocationPath&gt;
+</pre><p><br>
+
+<h4><a name='docfunc63251' href='#tocfunc63251'>ddo:apply-ast-procedure</a></h4>
+(define (ddo:apply-ast-procedure ast-procedure op-lst num-anc single-level? pred-nesting vars2offsets)<i><br> ... <a href='#codefunc63251'>Full Code</a> ... )</i>
+<pre> Applies AST processing to a list of operations
+</pre><p><br>
+
+<h4><a name='docfunc34864' href='#tocfunc34864'>ddo:ast-or-expr</a></h4>
+(define (ddo:ast-or-expr op num-anc single-level? pred-nesting vars2offsets)<i><br> ... <a href='#codefunc34864'>Full Code</a> ... )</i>
+<pre> {10} &lt;OrExpr&gt; ::= (or &lt;Expr&gt; &lt;Expr&gt;+ )
+ NOTE: num-anc is dummy here, since it is always 0 for OrExpr
+</pre><p><br>
+
+<h4><a name='docfunc50756' href='#tocfunc50756'>ddo:ast-and-expr</a></h4>
+(define (ddo:ast-and-expr op num-anc single-level? pred-nesting vars2offsets)<i><br> ... <a href='#codefunc50756'>Full Code</a> ... )</i>
+<pre> {11} &lt;AndExpr&gt; ::= (and &lt;Expr&gt; &lt;Expr&gt;+ )
+ NOTE: num-anc is dummy here, since it is always 0 for AndExpr
+</pre><p><br>
+
+<h4><a name='docfunc52092' href='#tocfunc52092'>ddo:ast-equality-expr</a></h4>
+(define (ddo:ast-equality-expr op num-anc single-level? pred-nesting vars2offsets)<i><br> ... <a href='#codefunc52092'>Full Code</a> ... )</i>
+<pre> {12} &lt;EqualityExpr&gt; ::= (=  &lt;Expr&gt; &lt;Expr&gt; )
+                         | (!=  &lt;Expr&gt; &lt;Expr&gt; )
+ NOTE: num-anc is dummy here, since it is always 0 for EqualityExpr
+</pre><p><br>
+
+<h4><a name='docfunc8421' href='#tocfunc8421'>ddo:ast-relational-expr</a></h4>
+(define (ddo:ast-relational-expr op num-anc single-level? pred-nesting vars2offsets)<i><br> ... <a href='#codefunc8421'>Full Code</a> ... )</i>
+<pre> {13} &lt;RelationalExpr&gt; ::= (&lt;  &lt;Expr&gt; &lt;Expr&gt; )
+                           | (&gt;  &lt;Expr&gt; &lt;Expr&gt; )
+                           | (&lt;=  &lt;Expr&gt; &lt;Expr&gt; )
+                           | (&gt;=  &lt;Expr&gt; &lt;Expr&gt; )
+ NOTE: num-anc is dummy here, since it is always 0 for RelationalExpr
+</pre><p><br>
+
+<h4><a name='docfunc45681' href='#tocfunc45681'>ddo:ast-additive-expr</a></h4>
+(define (ddo:ast-additive-expr op num-anc single-level? pred-nesting vars2offsets)<i><br> ... <a href='#codefunc45681'>Full Code</a> ... )</i>
+<pre> {14} &lt;AdditiveExpr&gt; ::= (+  &lt;Expr&gt; &lt;Expr&gt; )
+                         | (-  &lt;Expr&gt; &lt;Expr&gt;? )
+ NOTE: num-anc is dummy here, since it is always 0 for AdditiveExpr
+</pre><p><br>
+
+<h4><a name='docfunc2495' href='#tocfunc2495'>ddo:ast-multiplicative-expr</a></h4>
+(define (ddo:ast-multiplicative-expr op num-anc single-level? pred-nesting vars2offsets)<i><br> ... <a href='#codefunc2495'>Full Code</a> ... )</i>
+<pre> {15} &lt;MultiplicativeExpr&gt; ::= (*  &lt;Expr&gt; &lt;Expr&gt; )
+                               | (div  &lt;Expr&gt; &lt;Expr&gt; )
+                               | (mod  &lt;Expr&gt; &lt;Expr&gt; )
+ NOTE: num-anc is dummy here, since it is always 0 for MultiplicativeExpr
+</pre><p><br>
+
+<h4><a name='docfunc13772' href='#tocfunc13772'>ddo:ast-union-expr</a></h4>
+(define (ddo:ast-union-expr op num-anc single-level? pred-nesting vars2offsets)<i><br> ... <a href='#codefunc13772'>Full Code</a> ... )</i>
+<pre> {16} &lt;UnionExpr&gt; ::= (union-expr  &lt;Expr&gt; &lt;Expr&gt;+ )
+ TECHNICAL NOTE: For implementing the union while supporting distinct document
+ order, we need num-ancestors=#f for the arguments of the union-expr. This
+ operation is time-consuming and should be avoided
+</pre><p><br>
+
+<h4><a name='docfunc57253' href='#tocfunc57253'>ddo:ast-path-expr</a></h4>
+(define (ddo:ast-path-expr op num-anc single-level? pred-nesting vars2offsets)<i><br> ... <a href='#codefunc57253'>Full Code</a> ... )</i>
+<pre> {17} &lt;PathExpr&gt; ::= (path-expr  &lt;FilterExpr&gt; &lt;Step&gt;+ )
+ TECHNICAL NOTE: To calculate 'single-level?', we need to process components
+ in straight orger. To calculate 'num-anc', we need to process steps in
+ reverse order. It is too expensive to make the 2 passes, that's why we
+ consider single-level?=#f for steps
+</pre><p><br>
+
+<h4><a name='docfunc26105' href='#tocfunc26105'>ddo:ast-filter-expr</a></h4>
+(define (ddo:ast-filter-expr op num-anc single-level? pred-nesting vars2offsets)<i><br> ... <a href='#codefunc26105'>Full Code</a> ... )</i>
+<pre> {18} &lt;FilterExpr&gt; ::= (filter-expr (primary-expr  &lt;Expr&gt; )
+                                    &lt;Predicate&gt;* )
+</pre><p><br>
+
+<h4><a name='docfunc61728' href='#tocfunc61728'>ddo:ast-variable-reference</a></h4>
+(define (ddo:ast-variable-reference op num-anc single-level? pred-nesting vars2offsets)<i><br> ... <a href='#codefunc61728'>Full Code</a> ... )</i>
+<pre> {19} &lt;VariableReference&gt; ::= (variable-reference  &lt;String&gt; )
+</pre><p><br>
+
+<h4><a name='docfunc28776' href='#tocfunc28776'>ddo:ast-literal</a></h4>
+(define (ddo:ast-literal op num-anc single-level? pred-nesting vars2offsets)<i><br> ... <a href='#codefunc28776'>Full Code</a> ... )</i>
+<pre> {20} &lt;Literal&gt; ::= (literal  &lt;String&gt; )
+</pre><p><br>
+
+<h4><a name='docfunc35306' href='#tocfunc35306'>ddo:ast-number</a></h4>
+(define (ddo:ast-number op num-anc single-level? pred-nesting vars2offsets)<i><br> ... <a href='#codefunc35306'>Full Code</a> ... )</i>
+<pre> {21} &lt;Number&gt; :: (number  &lt;Number&gt; )
+</pre><p><br>
+
+<h4><a name='docfunc49244' href='#tocfunc49244'>ddo:ast-function-call</a></h4>
+(define (ddo:ast-function-call op num-anc single-level? pred-nesting vars2offsets)<i><br> ... <a href='#codefunc49244'>Full Code</a> ... )</i>
+<pre> {22} &lt;FunctionCall&gt; ::= (function-call (function-name  &lt;String&gt; )
+                                        (argument  &lt;Expr&gt; )* )
+</pre><p><br>
+
+<h4><a name='docfunc2129' href='#tocfunc2129'>ddo:ast-function-arguments</a></h4>
+(define (ddo:ast-function-arguments op-lst single-level? pred-nesting vars2offsets)<i><br> ... <a href='#codefunc2129'>Full Code</a> ... )</i>
+<pre> {22a} ( (argument  &lt;Expr&gt; )* )
+ na-lst - number of ancestors required for each of the arguments
+ Returns:  #f  or
+  (listof 
+    (list expr-impl num-anc single-level? requires-position? expr-type
+          deep-predicates vars2offsets))
+ NOTE: In XPath Core Function Library, none of the function arguments
+ is required to save any ancestors in the context
+</pre><p><br>
+<hr height='5'><center><h3><a name='chapt29326' href='#tocchapt29326'>Highest level API functions</a></h3></center>
+
+<pre>
+ procedure ddo:sxpath :: query [ns-binding] [num-ancestors] -&gt;
+                          -&gt; node-or-nodeset [var-binding] -&gt; nodeset
+ procedure ddo:txpath :: location-path [ns-binding] [num-ancestors] -&gt;
+                          -&gt; node-or-nodeset [var-binding] -&gt; nodeset
+
+ Polynomial-time XPath implementation with distinct document order support.
+
+ The API is identical to the API of a context-based SXPath (here we even use
+ API helpers from &quot;xpath-context.scm&quot;). For convenience, below we repeat
+ comments for the API (borrowed from &quot;xpath-context.scm&quot;).
+
+ query - a query in SXPath native syntax
+ location-path - XPath location path represented as a string
+ ns-binding - declared namespace prefixes (an optional argument)
+  ns-binding ::= (listof (prefix . uri))
+  prefix - a symbol
+  uri - a string
+ num-ancestors - number of ancestors required for resulting nodeset. Can
+  generally be omitted and is than defaulted to 0, which denotes a
+  _conventional_  nodeset. If a negative number, this signals that all
+  ancestors should be remembered in the context.
+
+ Returns: (lambda (node-or-nodeset . var-binding) ...)
+ var-binding - XPath variable bindings (an optional argument)
+  var-binding = (listof (var-name . value))
+  var-name - (a symbol) a name of a variable
+  value - its value. The value can have the following type: boolean, number,
+  string, nodeset. NOTE: a node must be represented as a singleton nodeset.
+
+ The result of applying the latter lambda to an SXML node or nodeset is the
+ result of evaluating the query / location-path for that node / nodeset.
+</pre>
+<h4><a name='docfunc34008' href='#tocfunc34008'>ddo:api-helper</a></h4>
+(define (ddo:api-helper grammar-parser ast-parser)<i><br> ... <a href='#codefunc34008'>Full Code</a> ... )</i>
+<pre> Helper for constructing several highest-level API functions
+ ns+na - can contain 'ns-binding' and/or 'num-ancestors' and/or none of them
+</pre><p><br>
+
+<h4><a name='docfunc57644' href='#tocfunc57644'>ddo:txpath</a></h4>
+(define ddo:txpath <i><br> ... <a href='#codefunc57644'>Full Code</a> ... )</i><p><br>
+
+<h4><a name='docfunc39915' href='#tocfunc39915'>ddo:xpath-expr</a></h4>
+(define ddo:xpath-expr <i><br> ... <a href='#codefunc39915'>Full Code</a> ... )</i><p><br>
+
+<h4><a name='docfunc57643' href='#tocfunc57643'>ddo:sxpath</a></h4>
+(define ddo:sxpath <i><br> ... <a href='#codefunc57643'>Full Code</a> ... )</i><p><br>
+<center><h1>Code</h1></center>
+
+<h4><a name='codefunc4419' href='#docfunc4419'>ddo:or</a></h4>
+<i><a href='#tocfunc4419'>Index</a></i><br>
+
+<pre> Implement 'or' as a function, so that we could 'apply' it
+</pre>
+<pre>(define (<a href="ddo-txpath.html#codefunc4419">ddo:or</a> . args)
+  (if (null? args) #f (or (car args) (apply <a href="ddo-txpath.html#codefunc4419">ddo:or</a> (cdr args)))))
+</pre>
+<h4><a name='codefunc29464' href='#docfunc29464'>ddo:foldr</a></h4>
+<i><a href='#tocfunc29464'>Index</a></i><br>
+
+<pre>  (if (null? lst)
+      init
+      (ddo:foldl op (op (car lst) init) (cdr lst))))
+</pre>
+<pre>(define (<a href="ddo-txpath.html#codefunc29464">ddo:foldr</a> op init lst)
+  (if (null? lst)
+      init
+      (op (car lst)
+          (<a href="ddo-txpath.html#codefunc29464">ddo:foldr</a> op init (cdr lst)))))
+</pre>
+<h4><a name='codefunc14368' href='#docfunc14368'>ddo:type-nodeset</a></h4>
+<i><a href='#tocfunc14368'>Index</a></i><br>
+
+<pre> Definition of types
+</pre>
+<pre>(define <a href="ddo-txpath.html#codefunc14368">ddo:type-nodeset</a> '<a href="ddo-txpath.html#codefunc14368">ddo:type-nodeset</a>)
+</pre>
+<h4><a name='codefunc48943' href='#docfunc48943'>ddo:type-number</a></h4>
+<i><a href='#tocfunc48943'>Index</a></i><br>
+
+<pre>(define <a href="ddo-txpath.html#codefunc48943">ddo:type-number</a> '<a href="ddo-txpath.html#codefunc48943">ddo:type-number</a>)
+</pre>
+<h4><a name='codefunc53802' href='#docfunc53802'>ddo:type-string</a></h4>
+<i><a href='#tocfunc53802'>Index</a></i><br>
+
+<pre>(define <a href="ddo-txpath.html#codefunc53802">ddo:type-string</a> '<a href="ddo-txpath.html#codefunc53802">ddo:type-string</a>)
+</pre>
+<h4><a name='codefunc8995' href='#docfunc8995'>ddo:type-boolean</a></h4>
+<i><a href='#tocfunc8995'>Index</a></i><br>
+
+<pre>(define <a href="ddo-txpath.html#codefunc8995">ddo:type-boolean</a> '<a href="ddo-txpath.html#codefunc8995">ddo:type-boolean</a>)
+</pre>
+<h4><a name='codefunc22612' href='#docfunc22612'>ddo:type-any</a></h4>
+<i><a href='#tocfunc22612'>Index</a></i><br>
+
+<pre>(define <a href="ddo-txpath.html#codefunc22612">ddo:type-any</a> '<a href="ddo-txpath.html#codefunc22612">ddo:type-any</a>)
+</pre>
+<h4><a name='codefunc3760' href='#docfunc3760'>ddo:all-contexts-in-doc</a></h4>
+<i><a href='#tocfunc3760'>Index</a></i><br>
+
+<pre> Returns all contexts of the document, including the ones for attribute nodes
+ and for attribute value nodes. All contexts are returned in document order,
+ attribute value nodes immediately follow attribute nodes
+</pre>
+<pre>(define (<a href="ddo-txpath.html#codefunc3760">ddo:all-contexts-in-doc</a> doc)
+  (let iter-nodes ((contents (map
+                              (lambda (kid) (list kid doc))
+                              ((<a href="sxpathlib.html#codefunc5616">sxml:child</a> <a href="sxpathlib.html#codefunc63215">sxml:node?</a>) doc)))
+                   (res (list doc)))
+    (cond
+      ((null? contents)  ; every content processed
+       (reverse res))
+      ((not ((<a href="sxpathlib.html#codefunc9356">ntype??</a> '*) (caar contents)))  ; text node or PI or etc.
+       (iter-nodes (cdr contents)
+                   (cons
+                    (<a href="xpath-context.html#codefunc34204">draft:make-context</a> (caar contents) (cdar contents))
+                    res)))
+      (else  ; element node
+       (let iter-attrs ((attrs (<a href="sxpathlib.html#codefunc50657">sxml:attr-list</a> (caar contents)))
+                        (res (cons
+                              (<a href="xpath-context.html#codefunc34204">draft:make-context</a>
+                               (caar contents) (cdar contents))
+                              res)))
+         (cond
+           ((null? attrs)  ; all attributes of a given element processed
+            (iter-nodes
+             (append (map
+                      (lambda (kid) (cons kid (car contents)))
+                      ((<a href="sxpathlib.html#codefunc5616">sxml:child</a> <a href="sxpathlib.html#codefunc63215">sxml:node?</a>) (caar contents)))
+                     (cdr contents))
+             res))
+           ((not (<a href="sxpathlib.html#codefunc63215">sxml:node?</a> (car attrs)))  ; aux node of SXML 3.0
+            (iter-attrs (cdr attrs) res))
+           ((null? (cdar attrs))  ; singular attribute
+            (iter-attrs (cdr attrs)
+                        (cons
+                         (<a href="xpath-context.html#codefunc34204">draft:make-context</a> (car attrs) (car contents))
+                         res)))
+           (else  ; an attribute has a value
+            (iter-attrs
+             (cdr attrs)
+             (cons  ; attribute value
+              (<a href="xpath-context.html#codefunc34204">draft:make-context</a> (cadar attrs)
+                                  (cons (car attrs) (car contents)))
+              (cons
+               (<a href="xpath-context.html#codefunc34204">draft:make-context</a> (car attrs) (car contents))
+               res))))))))))
+</pre>
+<h4><a name='codefunc8398' href='#docfunc8398'>ddo:unite-2-contextsets</a></h4>
+<i><a href='#tocfunc8398'>Index</a></i><br>
+
+<pre> Every context in both context-sets must contain all the ancestors of the
+ context node (this corresponds to the num-ancestors=#f)
+ All nodes must have one and the same root node (i.e. this function cannot
+ correctly unite context-sets whose members belong to different documents)
+ Returns the context-set that is a distinct-document-order union of the
+ argument context-sets
+</pre>
+<pre>(define (<a href="ddo-txpath.html#codefunc8398">ddo:unite-2-contextsets</a> cntset1 cntset2)
+  (if
+   (null? cntset1)  ; nothing to do
+   cntset2
+   (let loop ((order (<a href="ddo-txpath.html#codefunc3760">ddo:all-contexts-in-doc</a>
+                      (<a href="xpath-context.html#codefunc53532">draft:list-last</a>
+                       (<a href="xpath-context.html#codefunc8528">sxml:context-&gt;content</a> (car cntset1)))))
+              (cntset1 cntset1)
+              (cntset2 cntset2)
+              (res '()))
+     (cond
+       ((null? cntset1)
+        (append (reverse res) cntset2))
+       ((null? cntset2)
+        (append (reverse res) cntset1))
+       ; order should never be null
+       ((eq? (<a href="xpath-context.html#codefunc41847">sxml:context-&gt;node</a> (car order))
+             (<a href="xpath-context.html#codefunc41847">sxml:context-&gt;node</a> (car cntset1)))
+        (loop (cdr order)
+              (cdr cntset1)
+              (if (eq? (<a href="xpath-context.html#codefunc41847">sxml:context-&gt;node</a> (car cntset1))
+                       (<a href="xpath-context.html#codefunc41847">sxml:context-&gt;node</a> (car cntset2)))
+                  (cdr cntset2)
+                  cntset2)
+              (cons (car cntset1) res)))
+       ((eq? (<a href="xpath-context.html#codefunc41847">sxml:context-&gt;node</a> (car order))
+             (<a href="xpath-context.html#codefunc41847">sxml:context-&gt;node</a> (car cntset2)))
+        (loop (cdr order)
+              cntset1
+              (cdr cntset2)              
+              (cons (car cntset2) res)))
+       (else
+        (loop (cdr order) cntset1 cntset2 res))))))
+</pre>
+<h4><a name='codefunc599' href='#docfunc599'>ddo:unite-multiple-context-sets</a></h4>
+<i><a href='#tocfunc599'>Index</a></i><br>
+
+<pre> Based on the function for uniting 2 context-sets, unites multiple
+ context-sets
+</pre>
+<pre>(define (<a href="ddo-txpath.html#codefunc599">ddo:unite-multiple-context-sets</a> . context-sets)
+  (if (null? context-sets)  ; nothing to do
+      '()
+      (let loop ((res (car context-sets))
+                 (more (cdr context-sets)))
+        (if (null? more)
+            res
+            (loop (<a href="ddo-txpath.html#codefunc8398">ddo:unite-2-contextsets</a> res (car more))
+                  (cdr more))))))
+</pre>
+<h4><a name='codefunc23214' href='#docfunc23214'>ddo:list-tail</a></h4>
+<i><a href='#tocfunc23214'>Index</a></i><br>
+
+<pre> Similar to R5RS list-tail, but returns an empty list when k &gt; (length lst)
+</pre>
+<pre>(define (<a href="ddo-txpath.html#codefunc23214">ddo:list-tail</a> lst k)
+  (if (or (null? lst) (&lt;= k 0))
+      lst
+      (<a href="ddo-txpath.html#codefunc23214">ddo:list-tail</a> (cdr lst) (- k 1))))
+</pre>
+<h4><a name='codefunc18090' href='#docfunc18090'>ddo:list-head</a></h4>
+<i><a href='#tocfunc18090'>Index</a></i><br>
+
+<pre> Takes the first k members of the list
+ The whole list is taken when k &gt; (length lst)
+</pre>
+<pre>(define (<a href="ddo-txpath.html#codefunc18090">ddo:list-head</a> lst k)
+  (if (or (null? lst) (&lt;= k 0))
+      '()
+      (cons (car lst) (<a href="ddo-txpath.html#codefunc18090">ddo:list-head</a> (cdr lst) (- k 1)))))
+</pre>
+<h4><a name='codefunc21830' href='#docfunc21830'>ddo:list-ref</a></h4>
+<i><a href='#tocfunc21830'>Index</a></i><br>
+
+<pre> Similar to R5RS list-tail, but returns an empty list when
+ (or (&lt; k 0) (&gt; k (length lst))
+</pre>
+<pre>(define (<a href="ddo-txpath.html#codefunc21830">ddo:list-ref</a> lst k)
+  (cond ((null? lst) lst)
+        ((zero? k) (car lst))
+        (else (<a href="ddo-txpath.html#codefunc21830">ddo:list-ref</a> (cdr lst) (- k 1)))))
+</pre>
+<h4><a name='codefunc45141' href='#docfunc45141'>ddo:check-ast-desc-os?</a></h4>
+<i><a href='#tocfunc45141'>Index</a></i><br>
+
+<pre> Whether a given AST node is the representation of the location step
+ &quot;descendant-or-self::node()&quot;, which is the full syntax for its abbreviated
+ equivalent &quot;//&quot;
+</pre>
+<pre>(define <a href="ddo-txpath.html#codefunc45141">ddo:check-ast-desc-os?</a>
+  (let ((ddo:ast-for-desc-os   ; evaluate just once
+         (cadr  ; selects the first location step
+          (<a href="xpath-ast.html#codefunc39640">txp:xpath-&gt;ast</a> &quot;//dummy&quot;))))
+    (lambda (op)
+      (equal? op ddo:ast-for-desc-os))))
+</pre>
+<h4><a name='codefunc64910' href='#docfunc64910'>ddo:rewrite-step*</a></h4>
+<i><a href='#tocfunc64910'>Index</a></i><br>
+
+<pre> Rewrites the sequence of location steps, by combining the two consecutive
+ steps &quot;//para&quot; into a single one &quot;descendant::para&quot;
+ Returns the reconstructed list of steps
+</pre>
+<pre>(define (<a href="ddo-txpath.html#codefunc64910">ddo:rewrite-step*</a> op-lst)
+  (cond
+    ((or (null? op-lst) (null? (cdr op-lst)))  ; nothing to rewrite
+     op-lst)
+    ; There are at least 2 steps in a sequence of steps
+    ((and (<a href="ddo-txpath.html#codefunc45141">ddo:check-ast-desc-os?</a> (car op-lst))
+          ; Next step uses a child axis specifier
+          (equal? (<a href="xpath-ast.html#codefunc25302">txp:step-axis</a> (cadr op-lst)) '(child))
+          ; Next step doesn't use any predicates
+          (null? (<a href="xpath-ast.html#codefunc57537">txp:step-preds</a> (cadr op-lst))))
+     (cons
+      (<a href="xpath-ast.html#codefunc32237">txp:construct-step</a>
+       '(descendant)  ; rewrite into descendant axis
+       (<a href="xpath-ast.html#codefunc29095">txp:step-node-test</a> (cadr op-lst))  ; Node test of the next step
+       )
+      (<a href="ddo-txpath.html#codefunc64910">ddo:rewrite-step*</a> (cddr op-lst))))
+    (else  ; Any other case
+     (cons (car op-lst)
+           (<a href="ddo-txpath.html#codefunc64910">ddo:rewrite-step*</a> (cdr op-lst))))))
+</pre>
+<h4><a name='codefunc38909' href='#docfunc38909'>ddo:generate-pred-id</a></h4>
+<i><a href='#tocfunc38909'>Index</a></i><br>
+
+<pre>(define (<a href="ddo-txpath.html#codefunc38909">ddo:generate-pred-id</a>)
+  (string-&gt;symbol
+   (string-append &quot;*predicate-&quot; (symbol-&gt;string (gensym)) &quot;*&quot;)))
+</pre>
+<h4><a name='codefunc18753' href='#docfunc18753'>ddo:ast-axis-specifier</a></h4>
+<i><a href='#tocfunc18753'>Index</a></i><br>
+
+<pre> {5} &lt;AxisSpecifier&gt; ::= (axis-specifier  &lt;AxisName&gt; )
+ {6} &lt;AxisName&gt; ::= (ancestor)
+                    | (ancestor-or-self)
+                    | (attribute)
+                    | (child)
+                    | (descendant)
+                    | (descendant-or-self)
+                    | (following)
+                    | (following-sibling)
+                    | (namespace)
+                    | (parent)
+                    | (preceding)
+                    | (preceding-sibling)
+                    | (self)
+
+ single-level? - whether all nodes in the input nodeset are located on the
+  same level of tree hierarchy
+ requires-position? - whether context position or context size are required to
+  filter the result produced by the axis
+
+ For requires-position?=#f, the function returns
+  (list  axis-lambda
+         num-anc-it-requires
+         single-level?)
+ For requires-position?=#t, the function returns
+  (list  axis-lambda
+         num-anc-it-requires
+         single-level?
+         pos-result?)
+  single-level? - whether nodes are in the single level after the axis
+  pos-result? - whether the result of the axis has the form of pos-result.
+   If #f, the axis returns its result in the form of the common nodeset
+</pre>
+<pre>(define (<a href="ddo-txpath.html#codefunc18753">ddo:ast-axis-specifier</a> op num-anc single-level? requires-position?)
+  (cond
+    ((not (eq? (car op) 'axis-specifier))  ; AST error
+     (<a href="xpath-context.html#codefunc8076">draft:signal-semantic-error</a> &quot;not an AxisSpecifier - &quot; op))
+    (requires-position?
+     (case (caadr op)  ; AxisName
+       ((ancestor)
+        (list <a href="ddo-axes.html#codefunc15640">ddo:ancestor-pos</a>
+              #f #f #t))
+       ((ancestor-or-self)
+        (list <a href="ddo-axes.html#codefunc42391">ddo:ancestor-or-self-pos</a>
+              #f #f #t))
+       ((attribute)
+        (list <a href="xpath-context.html#codefunc53587">draft:attribute</a>
+              (<a href="xpath-context.html#codefunc38839">draft:na-minus-nneg</a> num-anc 1) single-level? #f))
+       ((child)
+        (if single-level?
+            (list <a href="xpath-context.html#codefunc59498">draft:child</a>
+                  (<a href="xpath-context.html#codefunc38839">draft:na-minus-nneg</a> num-anc 1) #t #f)
+            (list <a href="ddo-axes.html#codefunc4328">ddo:child-pos</a>
+                  (<a href="xpath-context.html#codefunc38839">draft:na-minus-nneg</a> num-anc 1) #f #t)))
+       ((descendant)
+        (if single-level?
+            (list <a href="xpath-context.html#codefunc8266">draft:descendant</a>
+                  (<a href="xpath-context.html#codefunc38839">draft:na-minus-nneg</a> num-anc 1) #f #f)
+            (list <a href="ddo-axes.html#codefunc36736">ddo:descendant-pos</a>
+                  (<a href="xpath-context.html#codefunc38839">draft:na-minus-nneg</a> num-anc 1) #f #t)))
+       ((descendant-or-self)
+        (if single-level?
+            (list <a href="xpath-context.html#codefunc35017">draft:descendant-or-self</a>
+                  num-anc #f #f)
+            (list <a href="ddo-axes.html#codefunc63487">ddo:descendant-or-self-pos</a>
+                  num-anc #f #t)))
+       ((following)
+        ; DL: this is incorrect for single-level?=#f
+        (list <a href="ddo-axes.html#codefunc63177">ddo:following-single-level-pos</a>
+              #f #f #t))
+       ((following-sibling)
+        (list (if single-level?
+                  <a href="ddo-axes.html#codefunc26736">ddo:following-sibling-single-level-pos</a>
+                  <a href="ddo-axes.html#codefunc28528">ddo:following-sibling-pos</a>)
+              (<a href="xpath-context.html#codefunc23095">draft:na-max</a> num-anc 1) single-level? #t))
+       ((namespace)
+        (list <a href="xpath-context.html#codefunc44623">draft:namespace</a>
+              (<a href="xpath-context.html#codefunc38839">draft:na-minus-nneg</a> num-anc 1) single-level? #f))
+       ((parent)
+        (list (if single-level? <a href="ddo-axes.html#codefunc48570">ddo:parent-single-level-pos</a> <a href="ddo-axes.html#codefunc48577">ddo:parent-pos</a>)
+              (<a href="xpath-context.html#codefunc29907">draft:na+</a> num-anc 1) single-level? #t))
+       ((preceding)
+        ; DL: this is incorrect for single-level?=#f
+        (list <a href="ddo-axes.html#codefunc56770">ddo:preceding-single-level-pos</a>
+              #f #f #t))
+       ((preceding-sibling)
+        (list (if single-level?
+                  <a href="ddo-axes.html#codefunc20329">ddo:preceding-sibling-single-level-pos</a>
+                  <a href="ddo-axes.html#codefunc22121">ddo:preceding-sibling-pos</a>)
+              (<a href="xpath-context.html#codefunc23095">draft:na-max</a> num-anc 1) single-level? #t))
+       ((<a href="libmisc.html#codefunc52191">self</a>)
+        (list <a href="xpath-context.html#codefunc57113">draft:self</a> num-anc single-level? #f))
+       (else
+        (<a href="xpath-context.html#codefunc8076">draft:signal-semantic-error</a> &quot;unknown AxisName - &quot; op))))
+    (else  ; doesn't require to keep position
+     (case (caadr op)  ; AxisName
+       ((ancestor)
+        (list <a href="ddo-axes.html#codefunc22907">ddo:ancestor</a> #f #f))
+       ((ancestor-or-self)
+        (list <a href="ddo-axes.html#codefunc49658">ddo:ancestor-or-self</a> #f #f))
+       ((attribute)
+        (list <a href="xpath-context.html#codefunc53587">draft:attribute</a>
+              (<a href="xpath-context.html#codefunc38839">draft:na-minus-nneg</a> num-anc 1) single-level?))
+       ((child)
+        (list (if single-level? <a href="xpath-context.html#codefunc59498">draft:child</a> <a href="ddo-axes.html#codefunc29700">ddo:child</a>)
+              (<a href="xpath-context.html#codefunc38839">draft:na-minus-nneg</a> num-anc 1) single-level?))
+       ((descendant)
+        (list (if single-level? <a href="xpath-context.html#codefunc8266">draft:descendant</a> <a href="ddo-axes.html#codefunc44003">ddo:descendant</a>)
+              (<a href="xpath-context.html#codefunc38839">draft:na-minus-nneg</a> num-anc 1) #f))
+       ((descendant-or-self)
+        (list (if single-level?
+                  <a href="xpath-context.html#codefunc35017">draft:descendant-or-self</a> <a href="ddo-axes.html#codefunc5219">ddo:descendant-or-self</a>)
+              num-anc #f))
+       ((following)
+        (list (if single-level? <a href="ddo-axes.html#codefunc4909">ddo:following-single-level</a> <a href="ddo-axes.html#codefunc24806">ddo:following</a>)
+              #f #f))
+       ((following-sibling)
+        (list (if single-level?
+                  <a href="ddo-axes.html#codefunc34003">ddo:following-sibling-single-level</a> <a href="ddo-axes.html#codefunc53900">ddo:following-sibling</a>)
+              (<a href="xpath-context.html#codefunc23095">draft:na-max</a> num-anc 1) single-level?))
+       ((namespace)
+        (list <a href="xpath-context.html#codefunc44623">draft:namespace</a>
+              (<a href="xpath-context.html#codefunc38839">draft:na-minus-nneg</a> num-anc 1) single-level?))
+       ((parent)
+        (list (if single-level? <a href="ddo-axes.html#codefunc8407">ddo:parent-single-level</a> <a href="ddo-axes.html#codefunc55844">ddo:parent</a>)
+              (<a href="xpath-context.html#codefunc29907">draft:na+</a> num-anc 1) single-level?))
+       ((preceding)
+        (list (if single-level? <a href="ddo-axes.html#codefunc64037">ddo:preceding-single-level</a> <a href="ddo-axes.html#codefunc18399">ddo:preceding</a>)
+              #f #f))
+       ((preceding-sibling)
+        (list (if single-level?
+                  <a href="ddo-axes.html#codefunc27596">ddo:preceding-sibling-single-level</a> <a href="ddo-axes.html#codefunc47493">ddo:preceding-sibling</a>)
+              (<a href="xpath-context.html#codefunc23095">draft:na-max</a> num-anc 1) single-level?))
+       ((<a href="libmisc.html#codefunc52191">self</a>)
+        (list <a href="xpath-context.html#codefunc57113">draft:self</a> num-anc single-level?))
+       (else
+        (<a href="xpath-context.html#codefunc8076">draft:signal-semantic-error</a> &quot;unknown AxisName - &quot; op))))))
+</pre>
+<h4><a name='codefunc52563' href='#docfunc52563'>ddo:ast-location-path</a></h4>
+<i><a href='#tocfunc52563'>Index</a></i><br>
+
+<pre>                        | &lt;AbsoluteLocationPath&gt;
+</pre>
+<pre>(define (<a href="ddo-txpath.html#codefunc52563">ddo:ast-location-path</a>
+         op num-anc single-level? pred-nesting vars2offsets)
+  (case (car op)
+    ((absolute-location-path)
+     (<a href="ddo-txpath.html#codefunc38681">ddo:ast-absolute-location-path</a>
+      op num-anc single-level? pred-nesting vars2offsets))
+    ((relative-location-path)
+     (<a href="ddo-txpath.html#codefunc32813">ddo:ast-relative-location-path</a>
+      op num-anc single-level? pred-nesting vars2offsets))
+    (else
+     (<a href="xpath-context.html#codefunc8076">draft:signal-semantic-error</a> &quot;improper LocationPath - &quot; op))))
+</pre>
+<h4><a name='codefunc38681' href='#docfunc38681'>ddo:ast-absolute-location-path</a></h4>
+<i><a href='#tocfunc38681'>Index</a></i><br>
+
+<pre> {2} &lt;AbsoluteLocationPath&gt; ::= (absolute-location-path  &lt;Step&gt;* )
+ NOTE: single-level? is dummy here, since AbsoluteLocationPath always
+ starts from a single node - the root of the document
+</pre>
+<pre>(define (<a href="ddo-txpath.html#codefunc38681">ddo:ast-absolute-location-path</a>
+         op num-anc single-level? pred-nesting vars2offsets)
+  (cond
+    ((not (eq? (car op) 'absolute-location-path))
+     (<a href="xpath-context.html#codefunc8076">draft:signal-semantic-error</a> &quot;not an AbsoluteLocationPath - &quot; op))
+    ((null? (cdr op))  ; no Steps
+     (list
+      (lambda (nodeset position+size var-binding)
+        (<a href="xpath-context.html#codefunc60759">draft:reach-root</a> nodeset))
+      #f  ; requires all ancestors
+      #t  ; on single level
+      #f  ; doesn't require position
+      <a href="ddo-txpath.html#codefunc14368">ddo:type-nodeset</a>
+      '()  ; no deep predicates
+      vars2offsets
+      ))
+    (else
+     (and-let*
+      ((steps-res (<a href="ddo-txpath.html#codefunc1165">ddo:ast-step-list</a>
+                   (cdr op) num-anc #t pred-nesting vars2offsets)))
+      (let ((impl  ; implementation of the absolute location path
+             (if
+              (null? (cdar steps-res))  ; only a single step
+              (let ((step-impl (caar steps-res)))
+                (lambda (nodeset position+size var-binding)
+                  (step-impl
+                   (<a href="xpath-context.html#codefunc60759">draft:reach-root</a> nodeset) position+size var-binding)))
+              (let ((converters (car steps-res)))
+                (lambda (nodeset position+size var-binding)
+                  (let rpt ((nset (<a href="xpath-context.html#codefunc60759">draft:reach-root</a> nodeset))
+                            (fs converters))
+                    (if (null? fs)
+                        nset
+                        (rpt ((car fs) nset position+size var-binding)
+                             (cdr fs)))))))))
+        (if
+         (&gt; pred-nesting 0)  ; absolute location path inside a predicate
+         (let ((vars2offsets (list-ref steps-res 6)))
+           (list
+            (<a href="ddo-txpath.html#codefunc43777">ddo:get-abs-lpath-value</a> (car vars2offsets))
+            #f  ; all ancestors required
+            (caddr steps-res)  ; single-level
+            #f  ; doesn't require position
+            <a href="ddo-txpath.html#codefunc14368">ddo:type-nodeset</a>
+            (cons
+             (list (car vars2offsets)  ; identifier
+                   'absolute-location-path  ; flag to denote absolute lpath
+                   impl)
+             (list-ref steps-res 5)  ; deep-predicates
+             )
+            (cons (+ (car vars2offsets) 1)
+                  (cdr vars2offsets))))
+         (cons impl
+               (cons #f  ; all ancestors required
+                     (cddr steps-res)   ; the remaining parameters
+                     ))))))))
+</pre>
+<h4><a name='codefunc32813' href='#docfunc32813'>ddo:ast-relative-location-path</a></h4>
+<i><a href='#tocfunc32813'>Index</a></i><br>
+
+<pre> {3} &lt;RelativeLocationPath&gt; ::= (relative-location-path  &lt;Step&gt;+ )
+</pre>
+<pre>(define (<a href="ddo-txpath.html#codefunc32813">ddo:ast-relative-location-path</a>
+         op num-anc single-level? pred-nesting vars2offsets)
+  (if
+   (not (eq? (car op) 'relative-location-path))
+   (<a href="xpath-context.html#codefunc8076">draft:signal-semantic-error</a> &quot;not a RelativeLocationPath - &quot; op)
+   (and-let*
+    ((steps-res
+      (<a href="ddo-txpath.html#codefunc1165">ddo:ast-step-list</a>
+       (cdr op) num-anc single-level? pred-nesting vars2offsets)))
+    (cons
+     (if
+      (null? (cdar steps-res))  ; only a single step
+      (caar steps-res)
+      (let ((converters (car steps-res)))
+        (lambda (nodeset position+size var-binding)
+          (let rpt ((nset nodeset)
+                    (fs converters))
+            (if (null? fs)
+                nset
+                (rpt ((car fs) nset position+size var-binding)
+                     (cdr fs)))))))
+     (cdr steps-res)  ; the remaining parameters
+     ))))
+</pre>
+<h4><a name='codefunc9346' href='#docfunc9346'>ddo:ast-step</a></h4>
+<i><a href='#tocfunc9346'>Index</a></i><br>
+
+<pre> {4} &lt;Step&gt; ::= (step  &lt;AxisSpecifier&gt; &lt;NodeTest&gt; &lt;Predicate&gt;* )
+                | (range-to  (expr &lt;Expr&gt;)  &lt;Predicate&gt;* )
+</pre>
+<pre>(define (<a href="ddo-txpath.html#codefunc9346">ddo:ast-step</a> op num-anc single-level? pred-nesting vars2offsets)
+  (cond
+    ((eq? (car op) 'range-to)
+     (<a href="xpath-context.html#codefunc8076">draft:signal-semantic-error</a> &quot;range-to function not implemented&quot;))
+    ((eq? (car op) 'filter-expr)
+     (<a href="ddo-txpath.html#codefunc26105">ddo:ast-filter-expr</a> op num-anc single-level? pred-nesting vars2offsets))
+    ((eq? (car op) 'lambda-step)  ; created by <a href="sxpath.html#codefunc16984">sxpath</a>
+     (let ((proc (cadr op)))
+       (list
+        (if
+         (and num-anc (zero? num-anc))  ; no ancestors required
+         (lambda (nodeset position+size var-binding)
+           (proc (<a href="xpath-context.html#codefunc53298">draft:contextset-&gt;nodeset</a> (<a href="sxpathlib.html#codefunc11721">as-nodeset</a> nodeset))
+                 (if (and (pair? var-binding)  ; non-null
+                          (eq? (caar var-binding) '*var-vector*))
+                     (cdr var-binding) var-binding)))
+         (lambda (nodeset position+size var-binding)
+           (<a href="xpath-context.html#codefunc45116">draft:find-proper-context</a>
+            (proc (<a href="xpath-context.html#codefunc53298">draft:contextset-&gt;nodeset</a> (<a href="sxpathlib.html#codefunc11721">as-nodeset</a> nodeset))
+                  (if (and (pair? var-binding)  ; non-null
+                           (eq? (caar var-binding) '*var-vector*))
+                      (cdr var-binding) var-binding))
+            (map <a href="xpath-context.html#codefunc8528">sxml:context-&gt;content</a>   ; TODO: should add variables
+                 (<a href="sxpathlib.html#codefunc11721">as-nodeset</a> nodeset))
+            num-anc)))
+        num-anc  ; num-ancestors
+        #f  ; single-level? after this step
+        #f  ; position-required?
+        <a href="ddo-txpath.html#codefunc22612">ddo:type-any</a>
+        '()  ; no deep predicates
+        vars2offsets
+        )))
+    ((eq? (car op) 'step)
+     (if
+      (null? (cdddr op))  ; no Predicates
+      (and-let*
+       ((axis-lst (<a href="ddo-txpath.html#codefunc18753">ddo:ast-axis-specifier</a>
+                   (cadr op) num-anc single-level? #f))
+        (ntest (<a href="xpath-context.html#codefunc28905">draft:ast-node-test</a> (caddr op))))
+       (let ((axis ((car axis-lst) ntest num-anc)))
+         (list
+          (lambda (nodeset position+size var-binding)
+            (axis nodeset))
+          (cadr axis-lst)
+          (caddr axis-lst)
+          #f
+          <a href="ddo-txpath.html#codefunc14368">ddo:type-nodeset</a>
+          '()  ; no deep predicates
+          vars2offsets
+          )))
+      ; There are Predicates
+      (and-let*
+       ((preds-res (<a href="ddo-txpath.html#codefunc63886">ddo:ast-predicate-list</a>
+                    (cdddr op) 0 #t (+ pred-nesting 1) vars2offsets))
+        (preds-res
+         (if (and (list-ref preds-res 3)  ; position required for the predicate
+                  (&lt; pred-nesting 3))  ; level of nesting matters
+             (<a href="ddo-txpath.html#codefunc63886">ddo:ast-predicate-list</a>  ; the second pass
+              (cdddr op) 0 #t
+              (+ pred-nesting 2)  ; called for quadratic number of times
+              vars2offsets
+              )
+             preds-res  ; do not need to change anything
+             ))
+        (axis-lst (<a href="ddo-txpath.html#codefunc18753">ddo:ast-axis-specifier</a>
+                   (cadr op)
+                   (<a href="xpath-context.html#codefunc23095">draft:na-max</a> num-anc (cadr preds-res))
+                   single-level?
+                   (list-ref preds-res 3)  ; whether position required
+                   ))
+        (ntest (<a href="xpath-context.html#codefunc28905">draft:ast-node-test</a> (caddr op))))
+       (let ((axis ((car axis-lst)
+                    ntest (<a href="xpath-context.html#codefunc23095">draft:na-max</a> num-anc (cadr preds-res))))
+             (pred-impl-lst (car preds-res)))
+         (list
+          (cond
+            ((not (list-ref preds-res 3))  ; whether position required
+             (<a href="ddo-txpath.html#codefunc23129">ddo:location-step-non-pos</a> axis pred-impl-lst))
+            ((list-ref axis-lst 3)  ; pos-result?
+             (<a href="ddo-txpath.html#codefunc48508">ddo:location-step-pos</a> axis pred-impl-lst))
+            (else  ; non-intersect
+             (<a href="ddo-txpath.html#codefunc38303">ddo:location-step-non-intersect</a> axis pred-impl-lst)))
+          (cadr axis-lst)  ; num-ancestors
+          (caddr axis-lst)  ; single-level? after this step
+          #f  ; position-required?
+          <a href="ddo-txpath.html#codefunc14368">ddo:type-nodeset</a>
+          (list-ref preds-res 5)  ; deep predicates
+          (list-ref preds-res 6)  ; new var-binding
+          )))))
+    (else
+     (<a href="xpath-context.html#codefunc8076">draft:signal-semantic-error</a> &quot;not a Step - &quot; op))))
+</pre>
+<h4><a name='codefunc1165' href='#docfunc1165'>ddo:ast-step-list</a></h4>
+<i><a href='#tocfunc1165'>Index</a></i><br>
+
+<pre> {4a} ( &lt;Step&gt;+ )
+ Returns (list (listof step-impl)
+               num-anc single-level? requires-position? expr-type
+               deep-predicates vars2offsets)
+ or #f
+ TECHNICAL NOTE: To calculate 'single-level?', we need to process steps in
+ straight orger. To calculate 'num-anc', we need to process steps in reverse
+ order. This thus has to be implemented in 2 passes
+</pre>
+<pre>(define (<a href="ddo-txpath.html#codefunc1165">ddo:ast-step-list</a>
+         step-lst num-anc single-level? pred-nesting vars2offsets)
+  (let ((step-lst (<a href="ddo-txpath.html#codefunc64910">ddo:rewrite-step*</a> step-lst))
+        ; Calculates single-level? for each step in the step-lst
+        ; Returns: (listof single-level?)
+        ; where each member of the REVERSED result list corresponds to the step
+        ; in the corresponding position of a step-lst
+        ; We can notice that when single-level?=#f for some step, it remains
+        ; #f for all the subsequent steps
+        (calculate-single-level
+         (lambda (step-lst single-level?)
+           (let iter-steps ((steps step-lst)
+                            (sl? single-level?)
+                            (res '()))
+             (cond
+               ((null? steps) res)
+               ((or (memq (caar steps) '(range-to filter-expr lambda-step))
+                    (not sl?))
+                ; #f for the remaining steps
+                (append (map
+                         (lambda (step) #f)
+                         steps)   ; DL: was: step-lst
+                        res))
+               (else  ; evaluate single-level? for the current step
+                (and-let*
+                 ((axis-lst (<a href="ddo-txpath.html#codefunc18753">ddo:ast-axis-specifier</a>
+                             (cadar steps)  ; is to be axis specifier
+                             0 sl? #f)))
+                 (iter-steps (cdr steps)
+                             (caddr axis-lst)  ; single-level for next step
+                             (cons sl? res)))))))))
+    (and-let*
+     ((single-level-lst (calculate-single-level step-lst single-level?)))
+     (let loop ((steps-to-view (reverse step-lst))
+                (sl?-lst single-level-lst)
+                (res-lst '())
+                (num-anc num-anc)
+                (deep-predicates '())
+                (vars2offsets vars2offsets))
+       (if
+        (null? steps-to-view)  ; everyone processed
+        (list res-lst
+              num-anc (car single-level-lst) #f
+              <a href="ddo-txpath.html#codefunc14368">ddo:type-nodeset</a> deep-predicates vars2offsets)
+        (and-let*
+         ((step-res
+           (<a href="ddo-txpath.html#codefunc9346">ddo:ast-step</a>
+            (car steps-to-view) num-anc (car sl?-lst)
+            pred-nesting vars2offsets)))
+         (loop
+          (cdr steps-to-view)
+          (cdr sl?-lst)
+          (cons (car step-res) res-lst)
+          (cadr step-res)
+          (append (list-ref step-res 5) deep-predicates)
+          (list-ref step-res 6)  ; new vars2offsets
+          )))))))
+</pre>
+<h4><a name='codefunc61102' href='#docfunc61102'>ddo:ast-predicate</a></h4>
+<i><a href='#tocfunc61102'>Index</a></i><br>
+
+<pre> {8} &lt;Predicate&gt; ::= (predicate  &lt;Expr&gt; )
+ NOTE: num-anc is dummy here, since it is always 0 for Predicates
+ NOTE: single-level? is dummy here, since a Predicate is always called for
+  a single node to be filtered
+ NOTE: Unlike 'draft:ast-predicate', we don't implement any filtering here,
+  because it depends on the particular axis in the step. Filtering is
+  performed on the higher level
+</pre>
+<pre>(define (<a href="ddo-txpath.html#codefunc61102">ddo:ast-predicate</a> op num-anc single-level? pred-nesting vars2offsets)
+  (if
+   (not (eq? (car op) 'predicate))
+   (<a href="xpath-context.html#codefunc8076">draft:signal-semantic-error</a> &quot;not an Predicate - &quot; op)
+   (and-let*
+    ((expr-res (<a href="ddo-txpath.html#codefunc10879">ddo:ast-expr</a> (cadr op) 0 #t pred-nesting vars2offsets)))
+    (let ((requires-position?
+           (or (cadddr expr-res)  ; predicate expression requires position
+               (memq (list-ref expr-res 4)  ; involves position implicitly
+                     '(<a href="ddo-txpath.html#codefunc48943">ddo:type-number</a> <a href="ddo-txpath.html#codefunc22612">ddo:type-any</a>))))
+          (vars2offsets (list-ref expr-res 6)))
+      (call-with-values
+       (lambda ()
+         (if
+          (or    ; this is a deep predicate
+           (&gt; pred-nesting 3)
+           ; DL: theoretically reasonable although impractical condition:
+           ;(and (not requires-position?) (&gt; pred-nesting 1))
+          )
+          (let ((pred-id (car vars2offsets)
+                         ; was: (<a href="ddo-txpath.html#codefunc38909">ddo:generate-pred-id</a>)
+                         ))
+            (values
+             ((if requires-position?
+                  <a href="ddo-txpath.html#codefunc13350">ddo:get-pred-value-pos</a> <a href="ddo-txpath.html#codefunc20617">ddo:get-pred-value</a>)
+              pred-id)
+             (cons
+              (list pred-id
+                    requires-position?
+                    (car expr-res)  ; implementation
+                    )
+              (list-ref expr-res 5)  ; deep-predicates
+              )
+             (cons (+ (car vars2offsets) 1)
+                   (cdr vars2offsets))))
+          (values (car expr-res)  ; implementation
+                  (list-ref expr-res 5)
+                  vars2offsets)))
+       (lambda (pred-impl deep-predicates vars2offsets)
+         (list pred-impl
+               (cadr expr-res)  ; num-ancestors required
+               (caddr expr-res)  ; single-level? - we don't care
+               requires-position?
+               (list-ref expr-res 4)  ; return type
+               deep-predicates
+               vars2offsets)))))))
+</pre>
+<h4><a name='codefunc63886' href='#docfunc63886'>ddo:ast-predicate-list</a></h4>
+<i><a href='#tocfunc63886'>Index</a></i><br>
+
+<pre> {8a} ( &lt;Predicate&gt;+ )
+ Returns (list (listof pred-impl)
+               num-anc single-level? requires-position? expr-type
+               deep-predicates)
+ or #f
+ NOTE: num-anc is dummy here, since it is always 0 for Predicates
+ NOTE: single-level? is dummy here, since a Predicate is always called for
+  a single node to be filtered
+ NOTE: information about the type for each Predicate is lost
+</pre>
+<pre>(define (<a href="ddo-txpath.html#codefunc63886">ddo:ast-predicate-list</a>
+         op-lst num-anc single-level? pred-nesting vars2offsets)
+  (let ((pred-res-lst
+         (<a href="ddo-txpath.html#codefunc29464">ddo:foldr</a>          
+          (lambda (op init)
+            (cons
+             (<a href="ddo-txpath.html#codefunc61102">ddo:ast-predicate</a>
+              op 0 #t pred-nesting
+              (if (or (null? init)  ; called for the first time
+                      (not (car init)))
+                  vars2offsets
+                  (list-ref (car init) 6)  ; vars2offsets from previous pred
+                  ))
+             init))
+          '()
+          op-lst)))
+    (and
+     (not (memv #f pred-res-lst))  ; error detected
+     (list (map car pred-res-lst)
+           (apply <a href="xpath-context.html#codefunc23095">draft:na-max</a> (map cadr pred-res-lst))
+           #t
+           (apply <a href="ddo-txpath.html#codefunc4419">ddo:or</a> (map cadddr pred-res-lst))
+           <a href="ddo-txpath.html#codefunc22612">ddo:type-any</a>
+           (apply append   ; deep-predicates
+                  (map
+                   (lambda (pred-res) (list-ref pred-res 5))
+                   pred-res-lst))
+           (list-ref (car pred-res-lst) 6)  ; vars2offsets
+           ))))
+</pre>
+<h4><a name='codefunc10879' href='#docfunc10879'>ddo:ast-expr</a></h4>
+<i><a href='#tocfunc10879'>Index</a></i><br>
+
+<pre> {9} &lt;Expr&gt; ::= &lt;OrExpr&gt;
+                | &lt;AndExpr&gt;
+                | &lt;EqualityExpr&gt;
+                | &lt;RelationalExpr&gt;
+                | &lt;AdditiveExpr&gt;
+                | &lt;MultiplicativeExpr&gt;
+                | &lt;UnionExpr&gt;
+                | &lt;PathExpr&gt;
+                | &lt;FilterExpr&gt;
+                | &lt;VariableReference&gt;
+                | &lt;Literal&gt;
+                | &lt;Number&gt;
+                | &lt;FunctionCall&gt;
+                | &lt;LocationPath&gt;
+</pre>
+<pre>(define (<a href="ddo-txpath.html#codefunc10879">ddo:ast-expr</a> op num-anc single-level? pred-nesting vars2offsets)
+  (case (car op)
+    ((or)
+     (<a href="ddo-txpath.html#codefunc34864">ddo:ast-or-expr</a> op num-anc single-level? pred-nesting vars2offsets))
+    ((and)
+     (<a href="ddo-txpath.html#codefunc50756">ddo:ast-and-expr</a> op num-anc single-level? pred-nesting vars2offsets))
+    ((= !=)
+     (<a href="ddo-txpath.html#codefunc52092">ddo:ast-equality-expr</a> op num-anc single-level? pred-nesting vars2offsets))
+    ((&lt; &gt; &lt;= &gt;=)
+     (<a href="ddo-txpath.html#codefunc8421">ddo:ast-relational-expr</a>
+      op num-anc single-level? pred-nesting vars2offsets))
+    ((+ -)
+     (<a href="ddo-txpath.html#codefunc45681">ddo:ast-additive-expr</a> op num-anc single-level? pred-nesting vars2offsets))
+    ((* div mod)
+     (<a href="ddo-txpath.html#codefunc2495">ddo:ast-multiplicative-expr</a>
+      op num-anc single-level? pred-nesting vars2offsets))
+    ((union-expr)
+     (<a href="ddo-txpath.html#codefunc13772">ddo:ast-union-expr</a> op num-anc single-level? pred-nesting vars2offsets))
+    ((path-expr)
+     (<a href="ddo-txpath.html#codefunc57253">ddo:ast-path-expr</a> op num-anc single-level? pred-nesting vars2offsets))
+    ((filter-expr)
+     (<a href="ddo-txpath.html#codefunc26105">ddo:ast-filter-expr</a> op num-anc single-level? pred-nesting vars2offsets))
+    ((variable-reference)
+     (<a href="ddo-txpath.html#codefunc61728">ddo:ast-variable-reference</a>
+      op num-anc single-level? pred-nesting vars2offsets))
+    ((literal)
+     (<a href="ddo-txpath.html#codefunc28776">ddo:ast-literal</a> op num-anc single-level? pred-nesting vars2offsets))
+    ((number)
+     (<a href="ddo-txpath.html#codefunc35306">ddo:ast-number</a> op num-anc single-level? pred-nesting vars2offsets))
+    ((function-call)
+     (<a href="ddo-txpath.html#codefunc49244">ddo:ast-function-call</a> op num-anc single-level? pred-nesting vars2offsets))
+    ((absolute-location-path)
+     (<a href="ddo-txpath.html#codefunc38681">ddo:ast-absolute-location-path</a>
+      op num-anc single-level? pred-nesting vars2offsets))
+    ((relative-location-path)
+     (<a href="ddo-txpath.html#codefunc32813">ddo:ast-relative-location-path</a>
+      op num-anc single-level? pred-nesting vars2offsets))
+    (else
+     (<a href="xpath-context.html#codefunc8076">draft:signal-semantic-error</a> &quot;unknown Expr - &quot; op))))
+</pre>
+<h4><a name='codefunc63251' href='#docfunc63251'>ddo:apply-ast-procedure</a></h4>
+<i><a href='#tocfunc63251'>Index</a></i><br>
+
+<pre> Applies AST processing to a list of operations
+</pre>
+<pre>(define (<a href="ddo-txpath.html#codefunc63251">ddo:apply-ast-procedure</a>
+         ast-procedure op-lst num-anc single-level? pred-nesting vars2offsets)
+  (<a href="ddo-txpath.html#codefunc29464">ddo:foldr</a>
+   (lambda (expr init)
+     (cons
+      (ast-procedure
+       expr num-anc single-level? pred-nesting
+       (if (or (null? init)  ; called for the first time
+               (not (car init))  ; error during previously processed expr
+               )
+           vars2offsets
+           (list-ref (car init) 6)  ; vars2offsets from previous expr
+           ))
+      init))
+   '()
+   op-lst))
+</pre>
+<h4><a name='codefunc34864' href='#docfunc34864'>ddo:ast-or-expr</a></h4>
+<i><a href='#tocfunc34864'>Index</a></i><br>
+
+<pre> {10} &lt;OrExpr&gt; ::= (or &lt;Expr&gt; &lt;Expr&gt;+ )
+ NOTE: num-anc is dummy here, since it is always 0 for OrExpr
+</pre>
+<pre>(define (<a href="ddo-txpath.html#codefunc34864">ddo:ast-or-expr</a> op num-anc single-level? pred-nesting vars2offsets)
+  (let ((expr-res-lst
+         (<a href="ddo-txpath.html#codefunc63251">ddo:apply-ast-procedure</a>
+          <a href="ddo-txpath.html#codefunc10879">ddo:ast-expr</a>
+          (cdr op) 0 single-level? pred-nesting vars2offsets)))
+    (and
+     (not (memv #f expr-res-lst))  ; error detected
+     (let ((expr-impls (map car expr-res-lst)))
+     (list
+      (lambda (nodeset position+size var-binding)
+        (let rpt ((fs expr-impls))
+          (cond
+            ((null? fs) #f)
+            ((<a href="sxpath-ext.html#codefunc35416">sxml:boolean</a> ((car fs) nodeset position+size var-binding)) #t)
+            (else (rpt (cdr fs))))))
+      (apply <a href="xpath-context.html#codefunc23095">draft:na-max</a> (map cadr expr-res-lst))  ; num-ancestors
+      #t     ; single-level? after this step
+      (apply <a href="ddo-txpath.html#codefunc4419">ddo:or</a> (map cadddr expr-res-lst))  ; position-required?
+      <a href="ddo-txpath.html#codefunc8995">ddo:type-boolean</a>
+      (apply append   ; deep-predicates
+             (map
+              (lambda (expr-res) (list-ref expr-res 5))
+              expr-res-lst))
+      (list-ref (car expr-res-lst) 6)  ; vars2offsets
+      )))))
+</pre>
+<h4><a name='codefunc50756' href='#docfunc50756'>ddo:ast-and-expr</a></h4>
+<i><a href='#tocfunc50756'>Index</a></i><br>
+
+<pre> {11} &lt;AndExpr&gt; ::= (and &lt;Expr&gt; &lt;Expr&gt;+ )
+ NOTE: num-anc is dummy here, since it is always 0 for AndExpr
+</pre>
+<pre>(define (<a href="ddo-txpath.html#codefunc50756">ddo:ast-and-expr</a> op num-anc single-level? pred-nesting vars2offsets)
+  (let ((expr-res-lst
+         (<a href="ddo-txpath.html#codefunc63251">ddo:apply-ast-procedure</a>
+          <a href="ddo-txpath.html#codefunc10879">ddo:ast-expr</a>
+          (cdr op) 0 single-level? pred-nesting vars2offsets)))
+    (and
+     (not (memv #f expr-res-lst))  ; error detected
+     (let ((expr-impls (map car expr-res-lst)))
+     (list
+      (lambda (nodeset position+size var-binding)
+        (let rpt ((fs expr-impls))
+          (cond
+            ((null? fs) #t)
+            ((not
+              (<a href="sxpath-ext.html#codefunc35416">sxml:boolean</a> ((car fs) nodeset position+size var-binding)))
+             #f)
+            (else (rpt (cdr fs))))))
+      (apply <a href="xpath-context.html#codefunc23095">draft:na-max</a> (map cadr expr-res-lst))  ; num-ancestors
+      #t     ; single-level? after this step
+      (apply <a href="ddo-txpath.html#codefunc4419">ddo:or</a> (map cadddr expr-res-lst))  ; position-required?
+      <a href="ddo-txpath.html#codefunc8995">ddo:type-boolean</a>
+      (apply append   ; deep-predicates
+             (map
+              (lambda (expr-res) (list-ref expr-res 5))
+              expr-res-lst))
+      (list-ref (car expr-res-lst) 6)  ; vars2offsets
+      )))))
+</pre>
+<h4><a name='codefunc52092' href='#docfunc52092'>ddo:ast-equality-expr</a></h4>
+<i><a href='#tocfunc52092'>Index</a></i><br>
+
+<pre> {12} &lt;EqualityExpr&gt; ::= (=  &lt;Expr&gt; &lt;Expr&gt; )
+                         | (!=  &lt;Expr&gt; &lt;Expr&gt; )
+ NOTE: num-anc is dummy here, since it is always 0 for EqualityExpr
+</pre>
+<pre>(define (<a href="ddo-txpath.html#codefunc52092">ddo:ast-equality-expr</a>
+         op num-anc single-level? pred-nesting vars2offsets)
+  (and-let*
+   ((left-lst
+     (<a href="ddo-txpath.html#codefunc10879">ddo:ast-expr</a> (cadr op) 0 single-level? pred-nesting vars2offsets))
+    (right-lst
+     (<a href="ddo-txpath.html#codefunc10879">ddo:ast-expr</a> (caddr op) 0 single-level? pred-nesting
+                   (list-ref left-lst 6)  ; vars2offsets for left part
+                   )))
+   (let ((cmp-op (cadr (assq (car op) `((= ,sxml:equal?)
+                                        (!= ,sxml:not-equal?)))))
+         (left (car left-lst))
+         (right (car right-lst)))
+     (list
+      (lambda (nodeset position+size var-binding)
+        (cmp-op
+         (<a href="xpath-context.html#codefunc53298">draft:contextset-&gt;nodeset</a>
+          (left nodeset position+size var-binding))
+         (<a href="xpath-context.html#codefunc53298">draft:contextset-&gt;nodeset</a>
+          (right nodeset position+size var-binding))))
+      (<a href="xpath-context.html#codefunc23095">draft:na-max</a> (cadr left-lst) (cadr right-lst))   ; num-ancestors
+      #t     ; single-level? after this step
+      (or (cadddr left-lst) (cadddr right-lst))  ; position-required?
+      <a href="ddo-txpath.html#codefunc8995">ddo:type-boolean</a>
+      (append (list-ref left-lst 5)   ; deep-predicates
+              (list-ref right-lst 5))
+      (list-ref right-lst 6)  ; vars2offsets for right part
+      ))))
+</pre>
+<h4><a name='codefunc8421' href='#docfunc8421'>ddo:ast-relational-expr</a></h4>
+<i><a href='#tocfunc8421'>Index</a></i><br>
+
+<pre> {13} &lt;RelationalExpr&gt; ::= (&lt;  &lt;Expr&gt; &lt;Expr&gt; )
+                           | (&gt;  &lt;Expr&gt; &lt;Expr&gt; )
+                           | (&lt;=  &lt;Expr&gt; &lt;Expr&gt; )
+                           | (&gt;=  &lt;Expr&gt; &lt;Expr&gt; )
+ NOTE: num-anc is dummy here, since it is always 0 for RelationalExpr
+</pre>
+<pre>(define (<a href="ddo-txpath.html#codefunc8421">ddo:ast-relational-expr</a>
+         op num-anc single-level? pred-nesting vars2offsets)
+  (and-let*
+   ((left-lst
+     (<a href="ddo-txpath.html#codefunc10879">ddo:ast-expr</a> (cadr op) 0 single-level? pred-nesting vars2offsets))
+    (right-lst
+     (<a href="ddo-txpath.html#codefunc10879">ddo:ast-expr</a> (caddr op) 0 single-level? pred-nesting
+                   (list-ref left-lst 6)  ; vars2offsets for left part
+                   )))
+   (let ((cmp-op
+          (<a href="sxpath-ext.html#codefunc41977">sxml:relational-cmp</a>
+           (cadr (assq (car op) `((&lt; ,&lt;) (&gt; ,&gt;) (&lt;= ,&lt;=) (&gt;= ,&gt;=))))))
+         (left (car left-lst))
+         (right (car right-lst)))
+     (list
+      (lambda (nodeset position+size var-binding)
+        (cmp-op
+         (<a href="xpath-context.html#codefunc53298">draft:contextset-&gt;nodeset</a>
+          (left nodeset position+size var-binding))
+         (<a href="xpath-context.html#codefunc53298">draft:contextset-&gt;nodeset</a>
+          (right nodeset position+size var-binding))))
+      (<a href="xpath-context.html#codefunc23095">draft:na-max</a> (cadr left-lst) (cadr right-lst))   ; num-ancestors
+      #t     ; single-level? after this step
+      (or (cadddr left-lst) (cadddr right-lst))  ; position-required?
+      <a href="ddo-txpath.html#codefunc8995">ddo:type-boolean</a>
+      (append (list-ref left-lst 5)   ; deep-predicates
+              (list-ref right-lst 5))
+      (list-ref right-lst 6)  ; vars2offsets for right part
+      ))))
+</pre>
+<h4><a name='codefunc45681' href='#docfunc45681'>ddo:ast-additive-expr</a></h4>
+<i><a href='#tocfunc45681'>Index</a></i><br>
+
+<pre> {14} &lt;AdditiveExpr&gt; ::= (+  &lt;Expr&gt; &lt;Expr&gt; )
+                         | (-  &lt;Expr&gt; &lt;Expr&gt;? )
+ NOTE: num-anc is dummy here, since it is always 0 for AdditiveExpr
+</pre>
+<pre>(define (<a href="ddo-txpath.html#codefunc45681">ddo:ast-additive-expr</a>
+         op num-anc single-level? pred-nesting vars2offsets)
+  (let ((expr-res-lst
+         (<a href="ddo-txpath.html#codefunc63251">ddo:apply-ast-procedure</a>
+          <a href="ddo-txpath.html#codefunc10879">ddo:ast-expr</a>
+          (cdr op) 0 single-level? pred-nesting vars2offsets)))
+    (and
+     (not (memv #f expr-res-lst))  ; error detected
+     (let ((add-op (cadr (assq (car op) `((+ ,+) (- ,-)))))
+           (expr-impls (map car expr-res-lst)))
+     (list
+      (lambda (nodeset position+size var-binding)
+        (apply
+         add-op
+         (map
+          (lambda (expr)
+            (<a href="sxpath-ext.html#codefunc9829">sxml:number</a>
+             (<a href="xpath-context.html#codefunc53298">draft:contextset-&gt;nodeset</a>
+              (expr nodeset position+size var-binding))))
+          expr-impls)))
+      (apply <a href="xpath-context.html#codefunc23095">draft:na-max</a> (map cadr expr-res-lst))  ; num-ancestors
+      #t     ; single-level? after this step
+      (apply <a href="ddo-txpath.html#codefunc4419">ddo:or</a> (map cadddr expr-res-lst))  ; position-required?
+      <a href="ddo-txpath.html#codefunc48943">ddo:type-number</a>
+      (apply append   ; deep-predicates
+             (map
+              (lambda (expr-res) (list-ref expr-res 5))
+              expr-res-lst))
+      (list-ref (car expr-res-lst) 6)  ; vars2offsets
+      )))))
+</pre>
+<h4><a name='codefunc2495' href='#docfunc2495'>ddo:ast-multiplicative-expr</a></h4>
+<i><a href='#tocfunc2495'>Index</a></i><br>
+
+<pre> {15} &lt;MultiplicativeExpr&gt; ::= (*  &lt;Expr&gt; &lt;Expr&gt; )
+                               | (div  &lt;Expr&gt; &lt;Expr&gt; )
+                               | (mod  &lt;Expr&gt; &lt;Expr&gt; )
+ NOTE: num-anc is dummy here, since it is always 0 for MultiplicativeExpr
+</pre>
+<pre>(define (<a href="ddo-txpath.html#codefunc2495">ddo:ast-multiplicative-expr</a>
+         op num-anc single-level? pred-nesting vars2offsets)
+  (and-let*
+   ((left-lst
+     (<a href="ddo-txpath.html#codefunc10879">ddo:ast-expr</a> (cadr op) 0 single-level? pred-nesting vars2offsets))
+    (right-lst
+     (<a href="ddo-txpath.html#codefunc10879">ddo:ast-expr</a> (caddr op) 0 single-level? pred-nesting
+                   (list-ref left-lst 6)  ; vars2offsets for left part
+                   )))
+   (let ((mul-op
+          (<a href="sxpath-ext.html#codefunc41977">sxml:relational-cmp</a>
+           (cadr (assq (car op) `((* ,*) (div ,/) (mod ,remainder))))))
+         (left (car left-lst))
+         (right (car right-lst)))
+     (list
+      (lambda (nodeset position+size var-binding)
+        (mul-op
+         (<a href="sxpath-ext.html#codefunc9829">sxml:number</a>
+          (<a href="xpath-context.html#codefunc53298">draft:contextset-&gt;nodeset</a>
+           (left nodeset position+size var-binding)))
+         (<a href="sxpath-ext.html#codefunc9829">sxml:number</a>
+          (<a href="xpath-context.html#codefunc53298">draft:contextset-&gt;nodeset</a>
+           (right nodeset position+size var-binding)))))
+      (<a href="xpath-context.html#codefunc23095">draft:na-max</a> (cadr left-lst) (cadr right-lst))   ; num-ancestors
+      #t     ; single-level? after this step
+      (or (cadddr left-lst) (cadddr right-lst))  ; position-required?
+      <a href="ddo-txpath.html#codefunc48943">ddo:type-number</a>
+      (append (list-ref left-lst 5)   ; deep-predicates
+              (list-ref right-lst 5))
+      (list-ref right-lst 6)  ; vars2offsets for right part
+      ))))
+</pre>
+<h4><a name='codefunc13772' href='#docfunc13772'>ddo:ast-union-expr</a></h4>
+<i><a href='#tocfunc13772'>Index</a></i><br>
+
+<pre> {16} &lt;UnionExpr&gt; ::= (union-expr  &lt;Expr&gt; &lt;Expr&gt;+ )
+ TECHNICAL NOTE: For implementing the union while supporting distinct document
+ order, we need num-ancestors=#f for the arguments of the union-expr. This
+ operation is time-consuming and should be avoided
+</pre>
+<pre>(define (<a href="ddo-txpath.html#codefunc13772">ddo:ast-union-expr</a> op num-anc single-level? pred-nesting vars2offsets)
+  (let ((expr-res-lst
+         (<a href="ddo-txpath.html#codefunc29464">ddo:foldr</a>
+          (lambda (expr init)
+            (let ((expr-res
+                   (if 
+                    (or (null? init)  ; called for the first time
+                        (not (car init)))                   
+                    (<a href="ddo-txpath.html#codefunc10879">ddo:ast-expr</a>
+                     expr num-anc  ; not necessarily all ancestors
+                     single-level? pred-nesting vars2offsets)
+                    (<a href="ddo-txpath.html#codefunc10879">ddo:ast-expr</a>
+                     expr #f single-level? pred-nesting
+                     (list-ref (car init) 6)  ; vars2offsets from previous expr
+                     ))))
+              (cons
+               (if
+                (not (or (eq? (list-ref expr-res 4) <a href="ddo-txpath.html#codefunc14368">ddo:type-nodeset</a>)
+                         (eq? (list-ref expr-res 4) <a href="ddo-txpath.html#codefunc22612">ddo:type-any</a>)))               
+                (<a href="xpath-context.html#codefunc8076">draft:signal-semantic-error</a>
+                 &quot;expression to be unioned evaluates to a non-nodeset - &quot;
+                 expr)
+                expr-res)
+               init)))
+          '()
+          (cdr op))))
+    (and
+     (not (memv #f expr-res-lst))  ; error detected
+     (let ((expr-impls (map car expr-res-lst)))
+       (list
+        (lambda (nodeset position+size var-binding)
+          (let rpt ((res '())
+                    (fs expr-impls))
+            (if
+             (null? fs)
+             res
+             (let ((nset ((car fs) nodeset position+size var-binding)))
+               (rpt
+                (<a href="ddo-txpath.html#codefunc8398">ddo:unite-2-contextsets</a> 
+                 res
+                 (cond
+                   ((not (<a href="sxpathlib.html#codefunc31162">nodeset?</a> nset))
+                    (<a href="txpath.html#codefunc13525">sxml:xpointer-runtime-error</a>
+                     &quot;expected - nodeset instead of &quot; nset)
+                    '())
+                   (else nset)))
+                (cdr fs))))))
+        #f  ; num-ancestors
+        #f     ; single-level? after this step
+        (apply <a href="ddo-txpath.html#codefunc4419">ddo:or</a> (map cadddr expr-res-lst))  ; position-required?
+        <a href="ddo-txpath.html#codefunc14368">ddo:type-nodeset</a>
+        (apply append   ; deep-predicates
+               (map
+                (lambda (expr-res) (list-ref expr-res 5))
+                expr-res-lst))
+        (list-ref (car expr-res-lst) 6)  ; vars2offsets
+        )))))
+</pre>
+<h4><a name='codefunc57253' href='#docfunc57253'>ddo:ast-path-expr</a></h4>
+<i><a href='#tocfunc57253'>Index</a></i><br>
+
+<pre> {17} &lt;PathExpr&gt; ::= (path-expr  &lt;FilterExpr&gt; &lt;Step&gt;+ )
+ TECHNICAL NOTE: To calculate 'single-level?', we need to process components
+ in straight orger. To calculate 'num-anc', we need to process steps in
+ reverse order. It is too expensive to make the 2 passes, that's why we
+ consider single-level?=#f for steps
+</pre>
+<pre>(define (<a href="ddo-txpath.html#codefunc57253">ddo:ast-path-expr</a> op num-anc single-level? pred-nesting vars2offsets)
+  (and-let*
+    ((steps-res (<a href="ddo-txpath.html#codefunc1165">ddo:ast-step-list</a>
+                 (cddr op) num-anc
+                 #f  ; consider single-level?=#f after FilterExpr
+                 pred-nesting
+                 vars2offsets))
+     (filter-lst (<a href="ddo-txpath.html#codefunc26105">ddo:ast-filter-expr</a>
+                  (cadr op)
+                  (cadr steps-res)  ; num-ancestors
+                  single-level?
+                  pred-nesting
+                  (list-ref steps-res 6)  ; vars2offsets from steps-list
+                  )))
+    (if
+     (not (or (eq? (list-ref filter-lst 4) <a href="ddo-txpath.html#codefunc14368">ddo:type-nodeset</a>)
+              (eq? (list-ref filter-lst 4) <a href="ddo-txpath.html#codefunc22612">ddo:type-any</a>)))
+     (<a href="xpath-context.html#codefunc8076">draft:signal-semantic-error</a>
+      &quot;location steps are applied to a non-nodeset result - &quot; (cadr op))
+     (let ((init-impl (car filter-lst))
+           (converters (car steps-res)))
+       (list
+        (lambda (nodeset position+size var-binding)
+          (let ((nset
+                 (init-impl nodeset position+size var-binding)))
+            (let rpt ((nset
+                       (cond
+                         ((<a href="sxpathlib.html#codefunc31162">nodeset?</a> nset) nset)
+                         (else
+                          (<a href="txpath.html#codefunc13525">sxml:xpointer-runtime-error</a> 
+                           &quot;expected - nodeset instead of &quot; nset)
+                          '())))
+                      (fs converters))
+              (if (null? fs)
+                  nset
+                  (rpt ((car fs) nset position+size var-binding)
+                       (cdr fs))))))
+        (cadr filter-lst)  ; num-ancestors
+        (cadddr steps-res)     ; single-level?, =#f in our assumption
+        (cadddr filter-lst)  ; position-required?
+        <a href="ddo-txpath.html#codefunc14368">ddo:type-nodeset</a>
+        (append (list-ref filter-lst 5)   ; deep-predicates
+                (list-ref steps-res 5))
+        (list-ref filter-lst 6)  ; vars2offsets from filter-lst
+        )))))
+</pre>
+<h4><a name='codefunc26105' href='#docfunc26105'>ddo:ast-filter-expr</a></h4>
+<i><a href='#tocfunc26105'>Index</a></i><br>
+
+<pre> {18} &lt;FilterExpr&gt; ::= (filter-expr (primary-expr  &lt;Expr&gt; )
+                                    &lt;Predicate&gt;* )
+</pre>
+<pre>(define (<a href="ddo-txpath.html#codefunc26105">ddo:ast-filter-expr</a> op num-anc single-level? pred-nesting vars2offsets)
+  (cond
+    ((not (eq? (car op) 'filter-expr))
+     (<a href="xpath-context.html#codefunc8076">draft:signal-semantic-error</a> &quot;not an FilterExpr - &quot; op))
+    ((not (eq? (caadr op) 'primary-expr))
+     (<a href="xpath-context.html#codefunc8076">draft:signal-semantic-error</a> &quot;not an PrimaryExpr - &quot; (cadr op)))
+    ((null? (cddr op))  ; no Predicates
+     (<a href="ddo-txpath.html#codefunc10879">ddo:ast-expr</a> (cadadr op) num-anc single-level? pred-nesting vars2offsets))
+    ((and (null? (cdddr op))   ; a single predicate
+          (<a href="ddo-txpath.html#codefunc43451">ddo:check-special-predicate</a> (caddr op)))
+     =&gt; (lambda (special-pred-impl)          
+          (and-let*
+           ((expr-lst (<a href="ddo-txpath.html#codefunc10879">ddo:ast-expr</a>
+                       (cadadr op)
+                       num-anc   ; special predicate doesn't require ancestors
+                       single-level? pred-nesting vars2offsets)))
+           (list
+            (<a href="ddo-txpath.html#codefunc984">ddo:filter-expr-special-predicate</a>
+             (car expr-lst) special-pred-impl)
+            (cadr expr-lst)  ; num-ancestors
+            (caddr expr-lst)  ; single-level? after this step
+            (cadddr expr-lst)  ; position-required?
+            <a href="ddo-txpath.html#codefunc14368">ddo:type-nodeset</a>
+            (list-ref expr-lst 5)  ; deep-predicates
+            (list-ref expr-lst 6)  ; vars2offsets
+            ))))
+    (else   ; the general case
+     (and-let*
+       ((preds-res (<a href="ddo-txpath.html#codefunc63886">ddo:ast-predicate-list</a>
+                    (cddr op) 0 #t (+ pred-nesting 1) vars2offsets))
+        (expr-lst (<a href="ddo-txpath.html#codefunc10879">ddo:ast-expr</a>
+                   (cadadr op)
+                   (<a href="xpath-context.html#codefunc23095">draft:na-max</a> num-anc (cadr preds-res))  ; num-anc
+                   single-level? pred-nesting
+                   (list-ref preds-res 6)  ; vars2offsets from predicates
+                   )))
+       (if
+        (not (or (eq? (list-ref expr-lst 4) <a href="ddo-txpath.html#codefunc14368">ddo:type-nodeset</a>)
+                 (eq? (list-ref expr-lst 4) <a href="ddo-txpath.html#codefunc22612">ddo:type-any</a>)))
+        (<a href="xpath-context.html#codefunc8076">draft:signal-semantic-error</a>
+         &quot;expression to be filtered evaluates to a non-nodeset - &quot; (cadr op)) 
+        (let ((expr-impl (car expr-lst))
+              (pred-impl-lst (car preds-res)))
+          (list
+           (if
+            (list-ref preds-res 3)  ; position required
+            (<a href="ddo-txpath.html#codefunc7896">ddo:filter-expr-general</a> expr-impl pred-impl-lst)
+            (<a href="ddo-txpath.html#codefunc65251">ddo:filter-expr-non-pos</a> expr-impl pred-impl-lst))
+           (cadr expr-lst)  ; num-ancestors
+           (caddr expr-lst)  ; single-level? after this step
+           (cadddr expr-lst)  ; position-required?
+           <a href="ddo-txpath.html#codefunc14368">ddo:type-nodeset</a>
+           (append (list-ref expr-lst 5)   ; deep-predicates
+                   (list-ref preds-res 5))
+           (list-ref expr-lst 6)  ; vars2offsets from expr-lst
+           )))))))
+</pre>
+<h4><a name='codefunc61728' href='#docfunc61728'>ddo:ast-variable-reference</a></h4>
+<i><a href='#tocfunc61728'>Index</a></i><br>
+
+<pre> {19} &lt;VariableReference&gt; ::= (variable-reference  &lt;String&gt; )
+</pre>
+<pre>(define (<a href="ddo-txpath.html#codefunc61728">ddo:ast-variable-reference</a>
+         op num-anc single-level? pred-nesting vars2offsets)
+  (let ((name (string-&gt;symbol (cadr op))))
+    (call-with-values
+     (lambda ()
+       (cond
+         ((assq name (cdr vars2offsets))  ; this variable already in alist
+          =&gt; (lambda (pair)
+               (values (cdr pair) vars2offsets)))
+         (else  ; this is a new variable
+          (values (car vars2offsets)
+                  (cons
+                   (+ (car vars2offsets) 1)
+                   (cons (cons name (car vars2offsets))      
+                         (cdr vars2offsets)))))))
+     (lambda (var-offset new-vars2offsets)
+       (list
+        (lambda (nodeset position+size var-binding)
+          (cond
+            ((and (not (null? var-binding))
+                  (eq? (caar var-binding) '*var-vector*))
+             (vector-ref (cdar var-binding) var-offset))
+            ; For backward compatibility
+            ((assq name var-binding)
+             =&gt; cdr)
+            (else
+             (<a href="txpath.html#codefunc13525">sxml:xpointer-runtime-error</a> &quot;unbound variable - &quot; name)
+             '())))
+        0
+        #t  ; ATTENTION: in is not generally on the single-level
+        #f
+        <a href="ddo-txpath.html#codefunc22612">ddo:type-any</a>  ; type cannot be statically determined
+        '()  ; deep-predicates     
+        new-vars2offsets)))))
+</pre>
+<h4><a name='codefunc28776' href='#docfunc28776'>ddo:ast-literal</a></h4>
+<i><a href='#tocfunc28776'>Index</a></i><br>
+
+<pre> {20} &lt;Literal&gt; ::= (literal  &lt;String&gt; )
+</pre>
+<pre>(define (<a href="ddo-txpath.html#codefunc28776">ddo:ast-literal</a> op num-anc single-level? pred-nesting vars2offsets)
+  (let ((literal (cadr op)))
+    (list
+     (lambda (nodeset position+size var-binding) literal)
+     0 #t #f <a href="ddo-txpath.html#codefunc53802">ddo:type-string</a> '() vars2offsets)))
+</pre>
+<h4><a name='codefunc35306' href='#docfunc35306'>ddo:ast-number</a></h4>
+<i><a href='#tocfunc35306'>Index</a></i><br>
+
+<pre> {21} &lt;Number&gt; :: (number  &lt;Number&gt; )
+</pre>
+<pre>(define (<a href="ddo-txpath.html#codefunc35306">ddo:ast-number</a> op num-anc single-level? pred-nesting vars2offsets)
+  (let ((number (cadr op)))
+    (list
+     (lambda (nodeset position+size var-binding) number)
+     0 #t #f <a href="ddo-txpath.html#codefunc48943">ddo:type-number</a> '() vars2offsets)))
+</pre>
+<h4><a name='codefunc49244' href='#docfunc49244'>ddo:ast-function-call</a></h4>
+<i><a href='#tocfunc49244'>Index</a></i><br>
+
+<pre> {22} &lt;FunctionCall&gt; ::= (function-call (function-name  &lt;String&gt; )
+                                        (argument  &lt;Expr&gt; )* )
+</pre>
+<pre>(define (<a href="ddo-txpath.html#codefunc49244">ddo:ast-function-call</a>
+         op num-anc single-level? pred-nesting vars2offsets)
+  (let ((core-alist
+         ; (list fun-name min-num-args max-num-args na4res impl
+         ;       single-level? requires-position? expr-type)         
+         `((last 0 0 0 ,draft:core-last
+                 #t #t ,ddo:type-number)
+           (position 0 0 0 ,draft:core-position
+                     #t #t ,ddo:type-number)
+           (count 1 1 0 ,draft:core-count
+                  #t #f ,ddo:type-number)
+           (id 1 1 #f ,draft:core-id
+               #f #f ,ddo:type-nodeset)
+           (local-name 0 1 0 ,draft:core-local-name
+                       #t #f ,ddo:type-string)
+           (namespace-uri 0 1 0 ,draft:core-namespace-uri
+                          #t #f ,ddo:type-string)
+           (name 0 1 0 ,draft:core-name
+                 #t #f ,ddo:type-string)
+           (string 0 1 0 ,draft:core-string
+                   #t #f ,ddo:type-string)
+           (concat 2 -1 0 ,draft:core-concat
+                   #t #f ,ddo:type-string)
+           (starts-with 2 2 0 ,draft:core-starts-with
+                        #t #f ,ddo:type-boolean)
+           (contains 2 2 0 ,draft:core-contains
+                     #t #f ,ddo:type-boolean)
+           (substring-before 2 2 0 ,draft:core-substring-before
+                             #t #f ,ddo:type-boolean)
+           (substring-after 2 2 0 ,draft:core-substring-after
+                            #t #f ,ddo:type-boolean)
+           (substring 2 3 0 ,draft:core-substring
+                      #t #f ,ddo:type-boolean)
+           (string-length 0 1 0 ,draft:core-string-length
+                          #t #f ,ddo:type-number)
+           (normalize-space 0 1 0 ,draft:core-normalize-space
+                            #t #f ,ddo:type-string)
+           (translate 3 3 0 ,draft:core-translate
+                      #t #f ,ddo:type-string)
+           (boolean 1 1 0 ,draft:core-boolean
+                    #t #f ,ddo:type-boolean)
+           (not 1 1 0 ,draft:core-not
+                #t #f ,ddo:type-boolean)
+           (true 0 0 0 ,draft:core-true
+                 #t #f ,ddo:type-boolean)
+           (false 0 0 0 ,draft:core-false
+                  #t #f ,ddo:type-boolean)
+           (lang 1 1 #f ,draft:core-lang
+                 #t #f ,ddo:type-boolean)
+           (number 0 1 0 ,draft:core-number
+                   #t #f ,ddo:type-number)
+           (sum 1 1 0 ,draft:core-sum
+                #t #f ,ddo:type-number)
+           (floor 1 1 0 ,draft:core-floor
+                  #t #f ,ddo:type-number)
+           (ceiling 1 1 0 ,draft:core-ceiling
+                    #t #f ,ddo:type-number)
+           (round 1 1 0 ,draft:core-round
+                  #t #f ,ddo:type-number))))
+    (cond
+      ((not (eq? (caadr op) 'function-name))
+       (<a href="xpath-context.html#codefunc8076">draft:signal-semantic-error</a> &quot;not an FunctionName - &quot; (cadr op)))
+      ((assq (string-&gt;symbol (cadadr op)) core-alist)       
+       =&gt; (lambda (description)  ; Core function found
+            (cond
+              ((&lt; (length (cddr op)) (cadr description))
+               (<a href="xpath-context.html#codefunc8076">draft:signal-semantic-error</a>
+                &quot;too few arguments for the Core Function call - &quot;
+                (cadadr op)))
+              ((and (&gt;= (caddr description) 0)
+                    (&gt; (length (cddr op)) (caddr description)))
+               (<a href="xpath-context.html#codefunc8076">draft:signal-semantic-error</a>
+                &quot;too many arguments for the Core Function call - &quot;
+                (cadadr op)))
+              (else  ; correct number of arguments
+               (and-let*
+                ((args-impl-lst (<a href="ddo-txpath.html#codefunc2129">ddo:ast-function-arguments</a>
+                                 (cddr op)  ; list of arguments
+                                 single-level? pred-nesting vars2offsets)))
+                (list
+                 ; Producing a function implementation
+                 (apply (list-ref description 4)
+                        num-anc
+                        (map car args-impl-lst))
+                 (apply  ; num-ancestors required for function
+                  <a href="xpath-context.html#codefunc23095">draft:na-max</a>
+                  (cons
+                   (list-ref description 3)  ; from function description
+                   (map cadr args-impl-lst)  ; from arguments
+                   ))                    
+                 (list-ref description 5)  ; single-level?
+                 (or (list-ref description 6)  ; position-required?
+                     (not (null?
+                           (<a href="common.html#codefunc20536">filter</a> cadddr args-impl-lst))))
+                 (list-ref description 7)  ; return type
+                 (apply append   ; deep-predicates
+                        (map
+                         (lambda (arg-res) (list-ref arg-res 5))
+                         args-impl-lst))
+                 (if (null? args-impl-lst)  ; no arguments
+                     vars2offsets
+                     (list-ref (car args-impl-lst) 6))
+                 ))))))
+           (else  ; function definition not found
+            (<a href="xpath-context.html#codefunc8076">draft:signal-semantic-error</a>
+             &quot;function call to an unknown function - &quot; (cadadr op))))))
+</pre>
+<h4><a name='codefunc2129' href='#docfunc2129'>ddo:ast-function-arguments</a></h4>
+<i><a href='#tocfunc2129'>Index</a></i><br>
+
+<pre> {22a} ( (argument  &lt;Expr&gt; )* )
+ na-lst - number of ancestors required for each of the arguments
+ Returns:  #f  or
+  (listof 
+    (list expr-impl num-anc single-level? requires-position? expr-type
+          deep-predicates vars2offsets))
+ NOTE: In XPath Core Function Library, none of the function arguments
+ is required to save any ancestors in the context
+</pre>
+<pre>(define (<a href="ddo-txpath.html#codefunc2129">ddo:ast-function-arguments</a>
+         op-lst single-level? pred-nesting vars2offsets)
+  (let ((arg-res-lst
+         (<a href="ddo-txpath.html#codefunc29464">ddo:foldr</a>
+          (lambda (op init)            
+            (cons
+             (if
+              (not (eq? (car op) 'argument))
+              (<a href="xpath-context.html#codefunc8076">draft:signal-semantic-error</a> &quot;not an Argument - &quot; op)
+              (<a href="ddo-txpath.html#codefunc10879">ddo:ast-expr</a>
+               (cadr op) 0 single-level? pred-nesting
+               (if (or (null? init)  ; called for the first time
+                       (not (car init)))
+                   vars2offsets
+                   (list-ref (car init) 6)  ; vars2offsets from previous pred
+                   )))
+             init))
+          '()
+          op-lst)))
+    (and
+     (not (memv #f arg-res-lst))  ; semantic error detected
+     arg-res-lst)))
+</pre>
+<h4><a name='codefunc34008' href='#docfunc34008'>ddo:api-helper</a></h4>
+<i><a href='#tocfunc34008'>Index</a></i><br>
+
+<pre> Helper for constructing several highest-level API functions
+ ns+na - can contain 'ns-binding' and/or 'num-ancestors' and/or none of them
+</pre>
+<pre>(define (<a href="ddo-txpath.html#codefunc34008">ddo:api-helper</a> grammar-parser ast-parser)
+  (lambda (xpath-string . ns+na)
+    (call-with-values
+     (lambda () (<a href="xpath-context.html#codefunc36352">draft:arglist-&gt;ns+na</a> ns+na))
+     (lambda (ns-binding num-anc)
+       (and-let*
+        ((ast (grammar-parser xpath-string ns-binding))
+         (impl-lst (ast-parser ast num-anc
+                               #t  ; we suppose single-level?=#t for src
+                               0  ; predicate nesting is zero
+                               '(0)  ; initial vars2offsets
+                               )))
+        (let ((impl-lambda
+               (if
+                (and num-anc (zero? num-anc))
+                (let ((impl-car (car impl-lst)))
+                  (lambda (node position+size var-binding)
+                    (<a href="xpath-context.html#codefunc53298">draft:contextset-&gt;nodeset</a>
+                     (impl-car node position+size var-binding))))                
+                (car impl-lst))))
+          (lambda (node . var-binding)   ; common implementation
+            (impl-lambda
+             (<a href="sxpathlib.html#codefunc11721">as-nodeset</a> node)
+             (cons 1 1)
+             (<a href="ddo-txpath.html#codefunc59912">ddo:add-vector-to-var-binding</a>
+              (list-ref impl-lst 6)  ; vars2offsets
+              (reverse  ; deep-predicates: need to reverse
+               (list-ref impl-lst 5))
+              node
+              (if (null? var-binding) var-binding (car var-binding)))))))))))
+</pre>
+<h4><a name='codefunc57644' href='#docfunc57644'>ddo:txpath</a></h4>
+<i><a href='#tocfunc57644'>Index</a></i><br>
+
+<pre>(define <a href="ddo-txpath.html#codefunc57644">ddo:txpath</a> (<a href="ddo-txpath.html#codefunc34008">ddo:api-helper</a> <a href="xpath-ast.html#codefunc39640">txp:xpath-&gt;ast</a> <a href="ddo-txpath.html#codefunc52563">ddo:ast-location-path</a>))
+</pre>
+<h4><a name='codefunc39915' href='#docfunc39915'>ddo:xpath-expr</a></h4>
+<i><a href='#tocfunc39915'>Index</a></i><br>
+
+<pre>(define <a href="ddo-txpath.html#codefunc39915">ddo:xpath-expr</a> (<a href="ddo-txpath.html#codefunc34008">ddo:api-helper</a> <a href="xpath-ast.html#codefunc20413">txp:expr-&gt;ast</a> <a href="ddo-txpath.html#codefunc10879">ddo:ast-expr</a>))
+</pre>
+<h4><a name='codefunc57643' href='#docfunc57643'>ddo:sxpath</a></h4>
+<i><a href='#tocfunc57643'>Index</a></i><br>
+
+<pre>(define <a href="ddo-txpath.html#codefunc57643">ddo:sxpath</a> (<a href="ddo-txpath.html#codefunc34008">ddo:api-helper</a> <a href="xpath-ast.html#codefunc42815">txp:sxpath-&gt;ast</a> <a href="ddo-txpath.html#codefunc10879">ddo:ast-expr</a>))
+</pre>
+<h4><a name='codefunc36038' href='#docfunc36038'>ddo:nset-contained?</a></h4>
+<i><a href='#tocfunc36038'>Index</a></i><br>
+
+<pre> Whether all members from the first nodeset are contained in the second
+ nodeset
+</pre>
+<pre>(define (<a href="ddo-txpath.html#codefunc36038">ddo:nset-contained?</a> nodeset1 nodeset2)
+  (cond
+    ((null? nodeset1) #t)
+    ((memq (car nodeset1) nodeset2)
+     (<a href="ddo-txpath.html#codefunc36038">ddo:nset-contained?</a> (cdr nodeset1) nodeset2))
+    (else #f)))
+</pre>
+<h4><a name='codefunc52710' href='#docfunc52710'>ddo:nset-equal?</a></h4>
+<i><a href='#tocfunc52710'>Index</a></i><br>
+
+<pre>(define (<a href="ddo-txpath.html#codefunc52710">ddo:nset-equal?</a> nodeset1 nodeset2)
+  (and (<a href="ddo-txpath.html#codefunc36038">ddo:nset-contained?</a> nodeset1 nodeset2)
+       (<a href="ddo-txpath.html#codefunc36038">ddo:nset-contained?</a> nodeset2 nodeset1)))
+</pre>
+<h4><a name='codefunc10703' href='#docfunc10703'>ddo:pos-result-forward?</a></h4>
+<i><a href='#tocfunc10703'>Index</a></i><br>
+
+<pre> Whether pos-result in a forward order
+ Return #t if in document order, #f if in reverse document order
+</pre>
+<pre>(define (<a href="ddo-txpath.html#codefunc10703">ddo:pos-result-forward?</a> pos-result)
+  (let loop ((pos-res pos-result))
+    (cond
+      ((null? pos-res)  ; every pos-nodeset has the length of &lt;2
+       #t)
+      ((or (null? (car pos-res)) (null? (cdar pos-res)))
+       ; this pos-nodeset has the length of less or equal to 1
+       (loop (cdr pos-res)))
+      (else
+       (&lt; (cdaar pos-res) (cdadar pos-res))))))
+</pre>
+<h4><a name='codefunc1009' href='#docfunc1009'>ddo:pos-result->nodeset</a></h4>
+<i><a href='#tocfunc1009'>Index</a></i><br>
+
+<pre> Unites pos-result into a nodeset in distinct document order
+</pre>
+<pre>(define (<a href="ddo-txpath.html#codefunc1009">ddo:pos-result-&gt;nodeset</a> pos-result)
+  (letrec (; Combines 2 pos-nodesets into a single one
+           (combine-2-pos-nodesets
+            (lambda (chain1 chain2)
+              (cond
+                ((null? chain1) chain2)                
+                ((null? chain2) chain1)
+                ; None of the chains are null
+                ((eq? (caar chain1) (caar chain2))  ; equal nodes
+                 ; the same with (= (cdar chain1) (cdar chain2))
+                 (cons (car chain1)
+                       (combine-2-pos-nodesets (cdr chain1) (cdr chain2))))
+                ((&lt; (cdar chain1) (cdar chain2))
+                 (cons (car chain1)
+                       (combine-2-pos-nodesets (cdr chain1) chain2)))
+                (else
+                 (cons (car chain2)
+                       (combine-2-pos-nodesets chain1 (cdr chain2))))))))
+    (if
+     (null? pos-result)  ; nothing to do
+     pos-result
+     (let ((pos-result (if (<a href="ddo-txpath.html#codefunc10703">ddo:pos-result-forward?</a> pos-result)
+                           pos-result
+                           (map reverse pos-result))))
+      (let loop ((res (car pos-result))
+                 (to-scan (cdr pos-result)))
+        (if (null? to-scan)
+            res
+            (loop (combine-2-pos-nodesets res (car to-scan))
+                  (cdr to-scan))))))))
+</pre>
+<h4><a name='codefunc48508' href='#docfunc48508'>ddo:location-step-pos</a></h4>
+<i><a href='#tocfunc48508'>Index</a></i><br>
+
+<pre>  pos-axis-impl ::= lambda
+  pred-impl-lst ::= (listof lambda)
+ Every predicate is called with respect to each node
+ Returns:  lambda
+  lambda ::= (lambda (nodeset position+size var-binding) ...)
+</pre>
+<pre>(define (<a href="ddo-txpath.html#codefunc48508">ddo:location-step-pos</a> pos-axis-impl pred-impl-lst) 
+  (lambda (nodeset position+size var-binding)
+    (map
+     car
+     (<a href="ddo-txpath.html#codefunc1009">ddo:pos-result-&gt;nodeset</a>
+      (map
+       (lambda (pos-nodeset)
+         (let iter-preds ((nset pos-nodeset)
+                          (preds pred-impl-lst))
+           (if
+            (null? preds)
+            nset
+            (let ((size (length nset)))  ; context size
+              (let iter-pairs ((nset nset)
+                               (res '())
+                               (pos 1))                          
+                (if
+                 (null? nset)  ; continue with the next predicate
+                 (iter-preds (reverse res) (cdr preds))
+                 (let ((val ((car preds)  ; predicate value
+                             (list (caar nset)) (cons pos size) var-binding)))
+                   (iter-pairs (cdr nset)
+                               (if (if (number? val)
+                                       (= val pos)
+                                       (<a href="sxpath-ext.html#codefunc35416">sxml:boolean</a> val))
+                                   (cons (car nset) res)
+                                   res)
+                               (+ pos 1)))))))))
+       (pos-axis-impl nodeset))))))
+</pre>
+<h4><a name='codefunc38303' href='#docfunc38303'>ddo:location-step-non-intersect</a></h4>
+<i><a href='#tocfunc38303'>Index</a></i><br>
+
+<pre> A location step for the axis which doesn't return a result in the form of
+ a pos-nodeset, but instead resulting nodesets for each input node are in
+ document order
+  pos-axis-impl ::= lambda
+  pred-impl-lst ::= (listof lambda)
+ Every predicate is called with respect to each node
+ Returns:  lambda
+  lambda ::= (lambda (nodeset position+size var-binding) ...)
+ This function is somewhat similar to 'sxml:xpath-nodeset-filter' from
+ &quot;txpath.scm&quot;
+</pre>
+<pre>(define (<a href="ddo-txpath.html#codefunc38303">ddo:location-step-non-intersect</a> axis-impl pred-impl-lst)
+  (lambda (nodeset position+size var-binding)
+    (<a href="sxpathlib.html#codefunc27946">map-union</a>
+     (lambda (node)
+       (let iter-preds ((nset (axis-impl node))
+                        (preds pred-impl-lst))
+         (if
+          (null? preds)
+          nset
+          (let ((size (length nset)))  ; context size
+            (let iter-nodes ((nset nset)
+                             (res '())
+                             (pos 1))                        
+              (if
+               (null? nset)  ; continue with the next predicate
+               (iter-preds (reverse res) (cdr preds))
+               (let ((val ((car preds)  ; predicate value
+                           (list (car nset)) (cons pos size) var-binding)))
+                 (iter-nodes (cdr nset)
+                             (if (if (number? val)
+                                     (= val pos)
+                                     (<a href="sxpath-ext.html#codefunc35416">sxml:boolean</a> val))
+                                 (cons (car nset) res)
+                                 res)
+                             (+ pos 1)))))))))
+     nodeset)))
+</pre>
+<h4><a name='codefunc23129' href='#docfunc23129'>ddo:location-step-non-pos</a></h4>
+<i><a href='#tocfunc23129'>Index</a></i><br>
+
+<pre> A location step doesn't contain position-based predicates
+</pre>
+<pre>(define (<a href="ddo-txpath.html#codefunc23129">ddo:location-step-non-pos</a> axis-impl pred-impl-lst)
+  (lambda (nodeset position+size var-binding)
+    (let iter-preds ((nset (axis-impl nodeset))
+                     (preds pred-impl-lst))
+      (if
+       (null? preds)
+       nset
+       (let ((curr-pred (car preds)))
+         (iter-preds
+          (<a href="common.html#codefunc20536">filter</a>
+           (lambda (node)
+             (<a href="sxpath-ext.html#codefunc35416">sxml:boolean</a>
+              (curr-pred (list node)
+                         (cons 1 1)  ; dummy
+                         var-binding)))
+           nset)
+          (cdr preds)))))))
+</pre>
+<h4><a name='codefunc7896' href='#docfunc7896'>ddo:filter-expr-general</a></h4>
+<i><a href='#tocfunc7896'>Index</a></i><br>
+
+<pre> Implementing FilterExpr in the general case, for position-based predicates
+</pre>
+<pre>(define (<a href="ddo-txpath.html#codefunc7896">ddo:filter-expr-general</a> expr-impl pred-impl-lst)
+  (lambda (nodeset position+size var-binding)
+    (let ((prim-res (expr-impl nodeset position+size var-binding)))
+      (cond
+        ((not (<a href="sxpathlib.html#codefunc31162">nodeset?</a> prim-res))
+         (<a href="txpath.html#codefunc13525">sxml:xpointer-runtime-error</a> 
+          &quot;expected - nodeset instead of &quot; prim-res)
+         '())
+        (else
+         (let iter-preds ((nset prim-res)
+                          (preds pred-impl-lst))
+           (if
+            (null? preds)
+            nset
+            (let ((size (length nset)))  ; context size
+              (let iter-nodes ((nset nset)
+                               (res '())
+                               (pos 1))
+                (if
+                 (null? nset)  ; continue with the next predicate
+                 (iter-preds (reverse res) (cdr preds))
+                 (let ((val ((car preds)  ; predicate value
+                             (list (car nset)) (cons pos size) var-binding)))
+                   (iter-nodes (cdr nset)
+                               (if (if (number? val)
+                                       (= val pos)
+                                       (<a href="sxpath-ext.html#codefunc35416">sxml:boolean</a> val))
+                                   (cons (car nset) res)
+                                   res)
+                               (+ pos 1)))))))))))))
+</pre>
+<h4><a name='codefunc65251' href='#docfunc65251'>ddo:filter-expr-non-pos</a></h4>
+<i><a href='#tocfunc65251'>Index</a></i><br>
+
+<pre> A FilterExpr doesn't contain position-based predicates
+ NOTE: This function is very similar to 'ddo:location-step-non-pos'
+  Should think of combining them.
+</pre>
+<pre>(define (<a href="ddo-txpath.html#codefunc65251">ddo:filter-expr-non-pos</a> expr-impl pred-impl-lst)
+  (lambda (nodeset position+size var-binding)
+    (let ((prim-res (expr-impl nodeset position+size var-binding)))
+      (cond
+        ((not (<a href="sxpathlib.html#codefunc31162">nodeset?</a> prim-res))
+         (<a href="txpath.html#codefunc13525">sxml:xpointer-runtime-error</a> 
+          &quot;expected - nodeset instead of &quot; prim-res)
+         '())
+        (else
+         (let iter-preds ((nset prim-res)
+                          (preds pred-impl-lst))
+           (if
+            (null? preds)
+            nset
+            (let ((curr-pred (car preds)))
+              (iter-preds
+               (<a href="common.html#codefunc20536">filter</a>
+                (lambda (node)
+                  (<a href="sxpath-ext.html#codefunc35416">sxml:boolean</a>
+                   (curr-pred (list node)
+                              (cons 1 1)  ; dummy
+                              var-binding)))
+                nset)
+               (cdr preds))))))))))
+</pre>
+<h4><a name='codefunc984' href='#docfunc984'>ddo:filter-expr-special-predicate</a></h4>
+<i><a href='#tocfunc984'>Index</a></i><br>
+
+<pre>  Filter expression, with a single predicate of the special structure, like
+  [position()=1]
+ special-pred-impl ::= (lambda (nodeset) ...)  - filters the nodeset
+</pre>
+<pre>(define (<a href="ddo-txpath.html#codefunc984">ddo:filter-expr-special-predicate</a> expr-impl special-pred-impl)
+  (lambda (nodeset position+size var-binding)
+    (let ((prim-res (expr-impl nodeset position+size var-binding)))
+      (if
+       (not (<a href="sxpathlib.html#codefunc31162">nodeset?</a> prim-res))
+       (begin
+         (<a href="txpath.html#codefunc13525">sxml:xpointer-runtime-error</a>
+          &quot;expected - nodeset instead of &quot; prim-res)
+         '())
+       (special-pred-impl prim-res)))))
+</pre>
+<h4><a name='codefunc59875' href='#docfunc59875'>ddo:check-ast-position?</a></h4>
+<i><a href='#tocfunc59875'>Index</a></i><br>
+
+<pre> Checks whether the given op is the AST representation to a function call
+ to position()
+</pre>
+<pre>(define <a href="ddo-txpath.html#codefunc59875">ddo:check-ast-position?</a>
+  (let ((ddo:ast-for-position-fun-call   ; evaluate just once
+         (<a href="xpath-ast.html#codefunc20413">txp:expr-&gt;ast</a> &quot;position()&quot;)))
+    (lambda (op)
+      (equal? op ddo:ast-for-position-fun-call))))
+</pre>
+<h4><a name='codefunc35358' href='#docfunc35358'>ddo:check4ast-number</a></h4>
+<i><a href='#tocfunc35358'>Index</a></i><br>
+
+<pre> If the given op is the AST representation for a number and this number is
+ exact, returns this number. Otherwise returns #f
+</pre>
+<pre>(define (<a href="ddo-txpath.html#codefunc35358">ddo:check4ast-number</a> op)
+  (if
+   (eq? (car op) 'number)    
+   (let ((number (cadr op)))
+     (if (and (number? number) (exact? number))
+         number #f))
+   #f))
+</pre>
+<h4><a name='codefunc43451' href='#docfunc43451'>ddo:check-special-predicate</a></h4>
+<i><a href='#tocfunc43451'>Index</a></i><br>
+
+<pre>  In case when the predicate has one of the following forms:
+ SpecialPredicate ::= [ Number ]
+                      | [ position() CmpOp Number ]
+                      | [ Number CmpOp position() ]
+ CmpOp ::= &gt; | &lt; | &gt;= | &lt;= | =
+ Number - an integer
+  than returns (lambda (nodeset) ...), where the lambda performs the required
+  filtering as specified by the predicate.
+  For a different sort of a predicate, returns #f
+  The function doesn't signal of any semantic errors.
+</pre>
+<pre>(define (<a href="ddo-txpath.html#codefunc43451">ddo:check-special-predicate</a> op)
+  (if
+   (not (eq? (car op) 'predicate))
+   #f  ; an improper AST
+   (let ((expr (cadr op)))
+     (cond
+       ((<a href="ddo-txpath.html#codefunc35358">ddo:check4ast-number</a> expr)
+        =&gt; (lambda (num)
+             (lambda (nodeset) (<a href="ddo-txpath.html#codefunc21830">ddo:list-ref</a> nodeset (- num 1)))))
+       ((and (memq (car expr) '(= &gt; &lt; &gt;= &lt;=))
+             (= (length expr) 3))
+        (call-with-values
+         (lambda ()
+           (cond
+             ((and (<a href="ddo-txpath.html#codefunc59875">ddo:check-ast-position?</a> (cadr expr))
+                   (<a href="ddo-txpath.html#codefunc35358">ddo:check4ast-number</a> (caddr expr)))
+              =&gt; (lambda (num) (values (car expr) num)))
+             ((and (<a href="ddo-txpath.html#codefunc59875">ddo:check-ast-position?</a> (caddr expr))
+                   (<a href="ddo-txpath.html#codefunc35358">ddo:check4ast-number</a> (cadr expr)))
+              =&gt; (lambda (num)
+                   (values
+                    (cond   ; invert the cmp-op
+                      ((assq (car expr)
+                             '((&lt; . &gt;) (&gt; . &lt;) (&gt;= . &lt;=) (&lt;= . &gt;=)))
+                       =&gt; cdr)
+                      (else (car expr)))
+                    num)))
+             (else
+              (values #f #f))))
+         (lambda (cmp-op num)
+           (if
+            (not num)
+            #f
+            (case cmp-op
+              ((=)
+               (lambda (nodeset) (<a href="ddo-txpath.html#codefunc21830">ddo:list-ref</a> nodeset (- num 1))))
+              ((&gt;)
+               (lambda (nodeset) (<a href="ddo-txpath.html#codefunc23214">ddo:list-tail</a> nodeset num)))
+              ((&gt;=)
+               (lambda (nodeset) (<a href="ddo-txpath.html#codefunc23214">ddo:list-tail</a> nodeset (- num 1))))
+              ((&lt;)
+               (lambda (nodeset) (<a href="ddo-txpath.html#codefunc18090">ddo:list-head</a> nodeset (- num 1))))
+              ((&lt;=)
+               (lambda (nodeset) (<a href="ddo-txpath.html#codefunc18090">ddo:list-head</a> nodeset num)))
+              (else   ; internal error
+               #f))))))
+       (else  ; not an equality or relational expr with 2 arguments
+        #f)))))
+</pre>
+<h4><a name='codefunc20617' href='#docfunc20617'>ddo:get-pred-value</a></h4>
+<i><a href='#tocfunc20617'>Index</a></i><br>
+
+<pre> Predicate value for a predicate that doesn't require position
+ Predicate values are stored in the form of
+ pred-values ::= (listof  (cons  node  pred-value))
+ NOTE: A node (and not a context) is used as a key in the alist
+</pre>
+<pre>(define (<a href="ddo-txpath.html#codefunc20617">ddo:get-pred-value</a> pred-id)
+  (lambda (nodeset position+size var-binding)
+    (cond
+      ((not (and (<a href="sxpathlib.html#codefunc31162">nodeset?</a> nodeset)
+                 (null? (cdr nodeset))))
+       (<a href="txpath.html#codefunc13525">sxml:xpointer-runtime-error</a>
+        &quot;internal DDO SXPath error - &quot;
+        &quot;a predicate is supplied with a non-singleton nodeset: &quot; pred-id)
+       #f)
+      ((or (null? var-binding)
+           (not (eq? (caar var-binding) '*var-vector*)))
+       (<a href="txpath.html#codefunc13525">sxml:xpointer-runtime-error</a>
+        &quot;internal DDO SXPath error - predicate value not found: &quot; pred-id)
+       #f)
+      ; predicate value as expected
+      ((assq (<a href="xpath-context.html#codefunc41847">sxml:context-&gt;node</a> (car nodeset))
+             (vector-ref (cdar var-binding) pred-id))
+       =&gt; (lambda (pair) (force (cdr pair)))
+       ; =&gt; cdr   ; DL: was
+       )
+      (else  ; predicate value for the given node not found
+       (<a href="txpath.html#codefunc13525">sxml:xpointer-runtime-error</a>
+        &quot;internal DDO SXPath error - no predicate value for node: &quot;
+        pred-id (<a href="xpath-context.html#codefunc41847">sxml:context-&gt;node</a> (car nodeset)))
+       #f))))
+</pre>
+<h4><a name='codefunc13350' href='#docfunc13350'>ddo:get-pred-value-pos</a></h4>
+<i><a href='#tocfunc13350'>Index</a></i><br>
+
+<pre> Predicate value for a predicate that requires position
+ Predicate values are stored in the form of
+ pred-values ::=
+        (listof
+         (cons node
+               (listof
+                (cons size
+                      (listof
+                       (cons position pred-value))))))
+ NOTE: A node (and not a context) is used as a key in the alist
+</pre>
+<pre>(define (<a href="ddo-txpath.html#codefunc13350">ddo:get-pred-value-pos</a> pred-id)
+  (lambda (nodeset position+size var-binding)
+    (cond
+      ((not (and (<a href="sxpathlib.html#codefunc31162">nodeset?</a> nodeset)
+                 (null? (cdr nodeset))))
+       (<a href="txpath.html#codefunc13525">sxml:xpointer-runtime-error</a>
+        &quot;internal DDO SXPath error - &quot;
+        &quot;a predicate is supplied with a non-singleton nodeset: &quot; pred-id)
+       #f)
+      ((or (null? var-binding)
+           (not (eq? (caar var-binding) '*var-vector*)))
+       (<a href="txpath.html#codefunc13525">sxml:xpointer-runtime-error</a>
+        &quot;internal DDO SXPath error - predicate value not found: &quot; pred-id)
+       #f)
+      ; predicate value as expected
+      ((assq (<a href="xpath-context.html#codefunc41847">sxml:context-&gt;node</a> (car nodeset))
+             (vector-ref (cdar var-binding) pred-id))
+       =&gt; (lambda (size-pair)
+            (if
+             (&gt; (cdr position+size)  ; context size
+                (vector-length (cdr size-pair)))
+             (begin
+               (<a href="txpath.html#codefunc13525">sxml:xpointer-runtime-error</a>
+                &quot;internal DDO SXPath error - &quot;
+                &quot;vector member for context size not found: &quot; pred-id)
+               #f)
+             (let ((pos-vect (vector-ref (cdr size-pair)
+                                         (- (cdr position+size) 1))))
+               (if
+                (&gt; (car position+size)  ; context position
+                   (vector-length pos-vect))
+                (begin
+                  (<a href="txpath.html#codefunc13525">sxml:xpointer-runtime-error</a>
+                   &quot;internal DDO SXPath error - &quot;
+                   &quot;vector member for context position not found: &quot;
+                   pred-id)
+                  #f)
+                (force (vector-ref pos-vect
+                                   (- (car position+size) 1))))))))
+      (else  ; predicate value for the given node not found
+       (<a href="txpath.html#codefunc13525">sxml:xpointer-runtime-error</a>
+        &quot;internal DDO SXPath error - no predicate value for node: &quot;
+        pred-id (<a href="xpath-context.html#codefunc41847">sxml:context-&gt;node</a> (car nodeset)))
+       #f))))
+</pre>
+<h4><a name='codefunc43777' href='#docfunc43777'>ddo:get-abs-lpath-value</a></h4>
+<i><a href='#tocfunc43777'>Index</a></i><br>
+
+<pre> Value that results from evaluating the absolute location path
+ The argument is named `pred-id' for the sake of mere unification with
+ deep predicates
+</pre>
+<pre>(define (<a href="ddo-txpath.html#codefunc43777">ddo:get-abs-lpath-value</a> pred-id)
+  (lambda (nodeset position+size var-binding)
+    (if
+     (or (null? var-binding)
+         (not (eq? (caar var-binding) '*var-vector*)))
+     (begin
+       (<a href="txpath.html#codefunc13525">sxml:xpointer-runtime-error</a>
+        &quot;internal DDO SXPath error - &quot;
+        &quot;value for absolute location path not found: &quot; pred-id)
+       '()  ; the value defaults to an empty nodeset
+       )     
+     (vector-ref (cdar var-binding) pred-id))))
+</pre>
+<h4><a name='codefunc42064' href='#docfunc42064'>ddo:construct-pred-values</a></h4>
+<i><a href='#tocfunc42064'>Index</a></i><br>
+
+<pre> Construct alist of values for a predicate that doesn't require position
+ pred-impl - lambda that implements the predicate
+ context-set - set of contexts for all nodes in the source document
+ var-bindings - include variables supplied by user and the ones formed by
+  deeper level predicates
+</pre>
+<pre>(define (<a href="ddo-txpath.html#codefunc42064">ddo:construct-pred-values</a> pred-impl context-set var-binding)  
+  (map
+   (lambda (context)
+     (cons (<a href="xpath-context.html#codefunc41847">sxml:context-&gt;node</a> context)
+           (delay
+             (<a href="sxpath-ext.html#codefunc35416">sxml:boolean</a>  ; since return type cannot be number
+              (pred-impl (list context)
+                         (cons 1 1)  ; dummy context position and size
+                         var-binding)))))
+   context-set))
+</pre>
+<h4><a name='codefunc16692' href='#docfunc16692'>ddo:construct-pred-values-pos</a></h4>
+<i><a href='#tocfunc16692'>Index</a></i><br>
+
+<pre> Construct alist of values for a predicate that requires position
+  pred-impl - lambda that implements the predicate
+  context-set - set of contexts for all nodes in the source document
+  var-bindings - include variables supplied by user and the ones formed by
+ deeper level predicates
+  max-size - maximal context size possible in the document
+</pre>
+<pre>(define (<a href="ddo-txpath.html#codefunc16692">ddo:construct-pred-values-pos</a>
+         pred-impl context-set var-binding max-size)
+  (map
+   (lambda (context)      
+     (cons
+      (<a href="xpath-context.html#codefunc41847">sxml:context-&gt;node</a> context)
+      (let ((context (list context)))
+        (let iter-size ((size 1)
+                        (size-lst '()))
+          (if
+           (&gt; size max-size)  ; iteration is over
+           (list-&gt;vector (reverse size-lst))
+           (let iter-pos ((position 1)
+                          (pos-lst '()))
+             (if
+              (&gt; position size)  ; iteration is over               
+              (iter-size
+               (+ size 1)
+               (cons (list-&gt;vector (reverse pos-lst))
+                     size-lst))
+              (iter-pos
+               (+ position 1)
+               (cons
+                (delay
+                  (let ((pred-value
+                         (pred-impl
+                          context (cons position size) var-binding)))
+                    (if (number? pred-value)
+                        (= pred-value position)
+                        (<a href="sxpath-ext.html#codefunc35416">sxml:boolean</a> pred-value))))
+                pos-lst)))))))))
+   context-set))
+</pre>
+<h4><a name='codefunc21018' href='#docfunc21018'>ddo:vector-copy-set</a></h4>
+<i><a href='#tocfunc21018'>Index</a></i><br>
+
+<pre> is replaced with `obj'
+</pre>
+<pre>(define (<a href="ddo-txpath.html#codefunc21018">ddo:vector-copy-set</a> vect k obj)
+  (let loop ((src (vector-&gt;list vect))
+             (pos 0)
+             (res '()))
+    (if
+     (null? src)  ; iteration is over
+     (list-&gt;vector (reverse res))
+     (loop (cdr src)
+           (+ pos 1)
+           (cons
+            (if (= pos k) obj (car src))
+            res)))))
+</pre>
+<h4><a name='codefunc59912' href='#docfunc59912'>ddo:add-vector-to-var-binding</a></h4>
+<i><a href='#tocfunc59912'>Index</a></i><br>
+
+<pre> Extends `var-binding' with a vector data structure for binding variable
+ values and values for deep predicates.
+ Returns extended var-binding, which is constructed as follows:
+ (cons (cons '*var-vector* ,vector)
+       var-binding)
+</pre>
+<pre>(define (<a href="ddo-txpath.html#codefunc59912">ddo:add-vector-to-var-binding</a>
+         vars2offsets deep-predicates doc var-binding)
+  (let ((cons-var-vector  ; cons var-vector to var-binding
+         (lambda (var-vector var-binding)
+           (cons (cons '*var-vector* var-vector)
+                 var-binding))))
+    (if
+     (and (null? deep-predicates) (null? var-binding))
+     var-binding  ; nothing to add
+     (let* ((var-tree
+             (if
+              (&lt; (length var-binding) 100)  ; not too many variables
+              #f  ; do not need any tree
+              (<a href="ddo-txpath.html#codefunc29043">ddo:var-binding-&gt;tree</a> var-binding)))
+            (var-vector
+             (let iter-offsets ((pos (- (car vars2offsets) 1))
+                                (vars-alist (cdr vars2offsets))
+                                (lst '()))
+               (cond
+                 ((&lt; pos 0)  ; iteration is over
+                  (list-&gt;vector lst))
+                 ((or (null? vars-alist)  ; no more vars in the alist
+                      (not (= pos (cdar vars-alist))))
+                  (iter-offsets (- pos 1)
+                                vars-alist
+                                (cons #f lst)  ; cons a dummy value
+                                ))
+                 (else  ; this position is in the 1st member of vars-alist
+                  (iter-offsets
+                   (- pos 1)
+                   (cdr vars-alist)
+                   (cons
+                    (cond  ; more sophisticated way of searching for value
+                      (var-tree  ; access variables through var-tree
+                       (<a href="ddo-txpath.html#codefunc32442">ddo:get-var-value-from-tree</a>  ; checks for declared var
+                        (caar vars-alist) var-tree))
+                      ((assq (caar vars-alist) var-binding)
+                       =&gt; cdr)
+                      (else
+                       (<a href="txpath.html#codefunc13525">sxml:xpointer-runtime-error</a> &quot;unbound variable - &quot;
+                                                    (cdar vars-alist))
+                       '()))
+                    lst)))))))
+       (if
+        (null? deep-predicates)
+        (cons-var-vector var-vector var-binding)
+        (let* ((context-set
+                (if (null?  ; just absolute location paths
+                     (<a href="common.html#codefunc20536">filter</a>
+                      (lambda (triple)
+                        (not (eq? (cadr triple) 'absolute-location-path)))
+                      deep-predicates))
+                    '()  ; dummy
+                    (<a href="ddo-txpath.html#codefunc3760">ddo:all-contexts-in-doc</a> doc)))
+               (max-size
+                (if  ; position-required? for at least one deep predicate
+                 (not (null? (<a href="common.html#codefunc20536">filter</a> cadr deep-predicates)))
+                 (length context-set)
+                 1  ; dummy
+                 )))
+          (let iter-preds ((deep-predicates deep-predicates)
+                           (var-vector var-vector))
+            (if
+             (null? deep-predicates)  ; iteration is over
+             (cons-var-vector var-vector var-binding)
+             (iter-preds
+              (cdr deep-predicates)
+              (<a href="ddo-txpath.html#codefunc21018">ddo:vector-copy-set</a>
+               var-vector
+               (caar deep-predicates)  ; pred-id
+               (cond
+                 ((eq? (cadar deep-predicates) 'absolute-location-path)
+                  ((caddar deep-predicates)  ; absolute lpath impl
+                   (<a href="sxpathlib.html#codefunc11721">as-nodeset</a> doc)
+                   (cons 1 1)  ; dummy context position and size
+                   (cons-var-vector var-vector var-binding)))
+                 ((cadar deep-predicates)  ; requires-position?
+                  (<a href="ddo-txpath.html#codefunc16692">ddo:construct-pred-values-pos</a> 
+                   (caddar deep-predicates)  ; pred-impl
+                   context-set
+                   (cons-var-vector var-vector var-binding)
+                   max-size))
+                 (else
+                  (<a href="ddo-txpath.html#codefunc42064">ddo:construct-pred-values</a>
+                   (caddar deep-predicates)  ; pred-impl
+                   context-set
+                   (cons-var-vector var-vector var-binding))))))))))))))
+</pre>
+<h4><a name='codefunc16896' href='#docfunc16896'>ddo:charlst->branch</a></h4>
+<i><a href='#tocfunc16896'>Index</a></i><br>
+
+<pre> Represents a list of chars as a branch in the string-tree
+ The list of chars must be non-empty
+</pre>
+<pre>(define (<a href="ddo-txpath.html#codefunc16896">ddo:charlst-&gt;branch</a> lst value)
+  (if (null? (cdr lst))  ; this is the last character in the lst
+      (list (car lst) (cons 'value value))
+      `(,(car lst) #f ,(<a href="ddo-txpath.html#codefunc16896">ddo:charlst-&gt;branch</a> (cdr lst) value))))
+</pre>
+<h4><a name='codefunc2299' href='#docfunc2299'>ddo:add-var-to-tree</a></h4>
+<i><a href='#tocfunc2299'>Index</a></i><br>
+
+<pre> Adds a new string to string-tree
+</pre>
+<pre>(define (<a href="ddo-txpath.html#codefunc2299">ddo:add-var-to-tree</a> var-name var-value tree)
+  (letrec
+      ((add-lst-to-tree   ; adds the list of chars to tree
+        (lambda (lst tree)
+          (if
+           (null? lst)  ; the lst is over
+           (cons (car tree)
+                 (cons (cons 'value var-value)  ; replace variable value
+                       (cddr tree)))
+           (let ((curr-char (car lst)))
+             (let iter-alist ((alist (cddr tree))
+                              (res (list (cadr tree) (car tree))))
+               (cond
+                 ((null? alist)  ; branch not in a tree
+                  (reverse
+                   (cons
+                    (<a href="ddo-txpath.html#codefunc16896">ddo:charlst-&gt;branch</a> lst var-value)
+                    res)))
+                 ((char=? (caar alist) curr-char)  ; entry found
+                  (if
+                   (null? (cdr alist))  ; nothing more in the alist
+                   (reverse
+                    (cons
+                     (add-lst-to-tree (cdr lst) (car alist))
+                     res))
+                   (append
+                    (reverse
+                     (cons
+                      (add-lst-to-tree (cdr lst) (car alist))
+                      res))
+                    (cdr alist))))
+                 ((char&gt;? (caar alist) curr-char)
+                  (if
+                   (null? (cdr alist))  ; nothing more in the alist
+                   (reverse
+                    (cons
+                     (car alist)
+                     (cons (<a href="ddo-txpath.html#codefunc16896">ddo:charlst-&gt;branch</a> lst var-value)
+                           res)))
+                   (append
+                    (reverse
+                     (cons
+                      (<a href="ddo-txpath.html#codefunc16896">ddo:charlst-&gt;branch</a> lst var-value)
+                      res))
+                    alist)))
+                 (else
+                  (iter-alist (cdr alist)
+                              (cons (car alist) res))))))))))
+    (add-lst-to-tree (string-&gt;list (symbol-&gt;string var-name))
+                     tree)))
+</pre>
+<h4><a name='codefunc29043' href='#docfunc29043'>ddo:var-binding->tree</a></h4>
+<i><a href='#tocfunc29043'>Index</a></i><br>
+
+<pre> Convert var-binding to their tree representation
+ var-binding is supposed to be non-null
+</pre>
+<pre>(define (<a href="ddo-txpath.html#codefunc29043">ddo:var-binding-&gt;tree</a> var-binding)
+  (let loop ((var-binding (cdr var-binding))
+             (tree
+              (list '*top*
+                    #f
+                    (<a href="ddo-txpath.html#codefunc16896">ddo:charlst-&gt;branch</a>
+                     (string-&gt;list
+                      (symbol-&gt;string (caar var-binding)))  ; var name
+                     (cdar var-binding)))))
+    (if (null? var-binding)
+        tree
+        (loop (cdr var-binding)
+              (<a href="ddo-txpath.html#codefunc2299">ddo:add-var-to-tree</a>
+               (caar var-binding) (cdar var-binding) tree)))))
+</pre>
+<h4><a name='codefunc32442' href='#docfunc32442'>ddo:get-var-value-from-tree</a></h4>
+<i><a href='#tocfunc32442'>Index</a></i><br>
+
+<pre> Obtain variable value from the tree
+</pre>
+<pre>(define (<a href="ddo-txpath.html#codefunc32442">ddo:get-var-value-from-tree</a> var-name tree)
+  (let loop ((lst (string-&gt;list (symbol-&gt;string var-name)))
+             (tree tree))
+    (cond
+      ((and (not (null? lst))
+            (assv (car lst) (cddr tree)))
+       =&gt; (lambda (new-tree)
+            (loop (cdr lst) new-tree)))
+      ((and (null? lst)  ; lst is over
+            (cadr tree)  ; value for variable in the tree supplied
+            )
+       (cdadr tree))
+      (else
+       (<a href="txpath.html#codefunc13525">sxml:xpointer-runtime-error</a> &quot;unbound variable - &quot; var-name)
+       '()  ; dummy value
+       ))))
+</pre></body></html>

@@ -1,0 +1,305 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN""http://www.w3.org/TR/html401/loose.dtd"><html><head><meta name="GENERATOR" content="Mole: The Scheme Source Code Digger"><title>Module: sxpath</title><meta name='keywords' content=''></head><body bgcolor='#ffffff' text='#384412'  link='#11af05' vlink='#728b09'>
+<center><h1>Module: sxpath</h1></center>
+
+<pre> $Id: sxpath.scm,v 1.5 2005/09/07 09:27:34 lizorkin Exp $
+ Highghest level SXPath 
+ Refactored from sxml-tools.scm and sxpathlib.scm
+</pre><p><br>
+<!-- Table of content -->
+<p><dl>
+<p><dt><a name='tocchapt21603' href='#chapt21603'><b>Abbreviated SXPath</b></a><dd>
+
+f:  <a name='tocfunc16984' href='#docfunc16984' style='text-decoration:none'>sxpath</a><br>
+<p><dt><a name='tocchapt48059' href='#chapt48059'><b>Wrappers </b></a><dd>
+
+f:  <a name='tocfunc48856' href='#docfunc48856' style='text-decoration:none'>if-sxpath</a><br>
+
+f:  <a name='tocfunc37991' href='#docfunc37991' style='text-decoration:none'>if-car-sxpath</a><br>
+
+f:  <a name='tocfunc53549' href='#docfunc53549' style='text-decoration:none'>car-sxpath</a><br>
+<p><dt><a name='tocchapt44586' href='#chapt44586'><b>lookup by a value of ID type attribute</b></a><dd>
+
+f:  <a name='tocfunc23486' href='#docfunc23486' style='text-decoration:none'>sxml:id-alist</a><br>
+</dl>
+<hr height='5'><center><h3><a name='chapt21603' href='#tocchapt21603'>Abbreviated SXPath</a></h3></center>
+
+<pre></pre>
+<h4><a name='docfunc16984' href='#tocfunc16984'>sxpath</a></h4>
+(define (sxpath path . ns-binding)<i><br> ... <a href='#codefunc16984'>Full Code</a> ... )</i>
+<pre> Evaluate an abbreviated SXPath
+	sxpath:: AbbrPath -&gt; Converter, or
+	sxpath:: AbbrPath -&gt; Node|Nodeset -&gt; Nodeset
+ AbbrPath is a list. It is translated to the full SXPath according
+ to the following rewriting rules
+ (sxpath '()) -&gt; (node-join)
+ (sxpath '(path-component ...)) -&gt;
+		(node-join (sxpath1 path-component) (sxpath '(...)))
+ (sxpath1 '//) -&gt; (sxml:descendant-or-self sxml:node?)
+ (sxpath1 '(equal? x)) -&gt; (select-kids (node-equal? x))
+ (sxpath1 '(eq? x))    -&gt; (select-kids (node-eq? x))
+ (sxpath1 '(*or* ...))  -&gt; (select-kids (ntype-names??
+                                          (cdr '(*or* ...))))
+ (sxpath1 '(*not* ...)) -&gt; (select-kids (sxml:complement 
+                                         (ntype-names??
+                                          (cdr '(*not* ...)))))
+ (sxpath1 '(ns-id:* x)) -&gt; (select-kids 
+                                      (ntype-namespace-id?? x))
+ (sxpath1 ?symbol)     -&gt; (select-kids (ntype?? ?symbol))
+ (sxpath1 ?string)     -&gt; (txpath ?string)
+ (sxpath1 procedure)   -&gt; procedure
+ (sxpath1 '(?symbol ...)) -&gt; (sxpath1 '((?symbol) ...))
+ (sxpath1 '(path reducer ...)) -&gt;
+		(node-reduce (sxpath path) (sxpathr reducer) ...)
+ (sxpathr number)      -&gt; (node-pos number)
+ (sxpathr path-filter) -&gt; (filter (sxpath path-filter))
+</pre><p><br>
+<hr height='5'><center><h3><a name='chapt48059' href='#tocchapt48059'>Wrappers </a></h3></center>
+
+<pre></pre>
+<h4><a name='docfunc48856' href='#tocfunc48856'>if-sxpath</a></h4>
+(define (if-sxpath path)<i><br> ... <a href='#codefunc48856'>Full Code</a> ... )</i>
+<pre> sxpath always returns a list, which is #t in Scheme 
+ if-sxpath returns #f instead of empty list
+</pre><p><br>
+
+<h4><a name='docfunc37991' href='#tocfunc37991'>if-car-sxpath</a></h4>
+(define (if-car-sxpath path)<i><br> ... <a href='#codefunc37991'>Full Code</a> ... )</i>
+<pre> Returns first node found, if any.
+ Otherwise returns #f.
+</pre><p><br>
+
+<h4><a name='docfunc53549' href='#tocfunc53549'>car-sxpath</a></h4>
+(define (car-sxpath path)<i><br> ... <a href='#codefunc53549'>Full Code</a> ... )</i>
+<pre> Returns first node found, if any.
+ Otherwise returns empty list.
+</pre><p><br>
+<hr height='5'><center><h3><a name='chapt44586' href='#tocchapt44586'>lookup by a value of ID type attribute</a></h3></center>
+
+<pre> See also sxml:lookup in sxml-tools
+</pre>
+<h4><a name='docfunc23486' href='#tocfunc23486'>sxml:id-alist</a></h4>
+(define (sxml:id-alist node . lpaths)<i><br> ... <a href='#codefunc23486'>Full Code</a> ... )</i>
+<pre> Built an index as a list of (ID_value . element) pairs for given
+ node. lpaths are location paths for attributes of type ID.
+</pre><p><br>
+<center><h1>Code</h1></center>
+
+<h4><a name='codefunc16984' href='#docfunc16984'>sxpath</a></h4>
+<i><a href='#tocfunc16984'>Index</a></i><br>
+
+<pre> Evaluate an abbreviated SXPath
+	sxpath:: AbbrPath -&gt; Converter, or
+	sxpath:: AbbrPath -&gt; Node|Nodeset -&gt; Nodeset
+ AbbrPath is a list. It is translated to the full SXPath according
+ to the following rewriting rules
+ (sxpath '()) -&gt; (node-join)
+ (sxpath '(path-component ...)) -&gt;
+		(node-join (sxpath1 path-component) (sxpath '(...)))
+ (sxpath1 '//) -&gt; (sxml:descendant-or-self sxml:node?)
+ (sxpath1 '(equal? x)) -&gt; (select-kids (node-equal? x))
+ (sxpath1 '(eq? x))    -&gt; (select-kids (node-eq? x))
+ (sxpath1 '(*or* ...))  -&gt; (select-kids (ntype-names??
+                                          (cdr '(*or* ...))))
+ (sxpath1 '(*not* ...)) -&gt; (select-kids (sxml:complement 
+                                         (ntype-names??
+                                          (cdr '(*not* ...)))))
+ (sxpath1 '(ns-id:* x)) -&gt; (select-kids 
+                                      (ntype-namespace-id?? x))
+ (sxpath1 ?symbol)     -&gt; (select-kids (ntype?? ?symbol))
+ (sxpath1 ?string)     -&gt; (txpath ?string)
+ (sxpath1 procedure)   -&gt; procedure
+ (sxpath1 '(?symbol ...)) -&gt; (sxpath1 '((?symbol) ...))
+ (sxpath1 '(path reducer ...)) -&gt;
+		(node-reduce (sxpath path) (sxpathr reducer) ...)
+ (sxpathr number)      -&gt; (node-pos number)
+ (sxpathr path-filter) -&gt; (filter (sxpath path-filter))
+</pre>
+<pre>(define (<a href="sxpath.html#codefunc16984">sxpath</a> path . ns-binding)
+  (let ((ns-binding (if (null? ns-binding) ns-binding (car ns-binding))))
+  (let loop ((converters '())
+             (root-vars '())  ; a list of booleans, one per location step:
+	                      ;  #t - location step function is binary
+                              ;  #f - location step function is unary
+             (path (if (string? path) (list path) path)))
+    (cond
+      ((null? path)  ; parsing is finished
+       (lambda (node . var-binding)
+         (let ((var-binding
+                (if (null? var-binding) var-binding (car var-binding))))
+           (let rpt ((nodeset (<a href="sxpathlib.html#codefunc11721">as-nodeset</a> node))
+                     (conv (reverse converters))
+                     (r-v (reverse root-vars)))
+             (if
+              (null? conv)  ; the path is over
+              nodeset
+              (rpt
+               (if (car r-v)  ; the current converter consumes 2 arguments
+                   ((car conv) nodeset var-binding)
+                   ((car conv) nodeset))
+               (cdr conv)
+               (cdr r-v)))))))
+      ; *or* handler
+      ((and (pair? (car path)) 
+            (not (null? (car path)))
+            (eq? '*or* (caar path)))
+       (loop (cons (<a href="sxpathlib.html#codefunc3917">select-kids</a> (<a href="sxpathlib.html#codefunc6363">ntype-names??</a> (cdar path))) converters)
+             (cons #f root-vars)
+             (cdr path)))
+      ; *not* handler 
+      ((and (pair? (car path)) 
+            (not (null? (car path)))
+            (eq? '*not* (caar path)))
+       (loop (cons
+              (<a href="sxpathlib.html#codefunc3917">select-kids</a> (<a href="sxpathlib.html#codefunc65081">sxml:complement</a> (<a href="sxpathlib.html#codefunc6363">ntype-names??</a> (cdar path))))
+              converters)
+             (cons #f root-vars)
+             (cdr path)))
+      ((procedure? (car path))
+       (loop (cons (car path) converters)
+             (cons #t root-vars)
+             (cdr path)))
+      ((eq? '// (car path))
+       (if (or (null? (cdr path))
+               (not (symbol? (cadr path)))
+               (eq? (cadr path) '@))
+           (loop (cons (<a href="sxpath-ext.html#codefunc29840">sxml:descendant-or-self</a> <a href="sxpathlib.html#codefunc63215">sxml:node?</a>)
+                       converters)
+                 (cons #f root-vars)
+                 (cdr path))
+           (loop (cons (<a href="sxpath-ext.html#codefunc62759">sxml:descendant</a> (<a href="sxpathlib.html#codefunc9356">ntype??</a> (cadr path)))
+                       converters)
+                 (cons #f root-vars)
+                 (cddr path))))
+      ((symbol? (car path))
+       (loop (cons (<a href="sxpathlib.html#codefunc3917">select-kids</a> (<a href="sxpathlib.html#codefunc9356">ntype??</a> (car path))) converters)
+             (cons #f root-vars)
+             (cdr path)))
+      ((string? (car path))
+       (and-let*
+        ((f (<a href="txpath.html#codefunc64791">sxml:xpath-expr</a> (car path) ns-binding)))  ; DL: was: <a href="txpath.html#codefunc16985">txpath</a>
+        (loop (cons f converters)
+              (cons #t root-vars)
+              (cdr path))))
+      ((and (pair? (car path)) (eq? 'equal? (caar path)))
+       (loop (cons (<a href="sxpathlib.html#codefunc3917">select-kids</a> (apply <a href="sxpathlib.html#codefunc7186">node-equal?</a> (cdar path))) converters)
+             (cons #f root-vars)
+             (cdr path)))
+      ; ns-id:* handler 
+      ((and (pair? (car path)) (eq? 'ns-id:* (caar path)))
+       (loop
+        (cons (<a href="sxpathlib.html#codefunc3917">select-kids</a> (<a href="sxpathlib.html#codefunc32267">ntype-namespace-id??</a> (cadar path))) converters)
+        (cons #f root-vars)
+        (cdr path)))
+      ((and (pair? (car path)) (eq? 'eq? (caar path)))
+       (loop (cons (<a href="sxpathlib.html#codefunc3917">select-kids</a> (apply <a href="sxpathlib.html#codefunc31089">node-eq?</a> (cdar path))) converters)
+             (cons #f root-vars)
+             (cdr path)))      
+      ((pair? (car path))
+       (and-let*
+        ((select
+          (if
+           (symbol? (caar path))
+           (lambda (node . var-binding)
+             ((<a href="sxpathlib.html#codefunc3917">select-kids</a> (<a href="sxpathlib.html#codefunc9356">ntype??</a> (caar path))) node))
+           (<a href="sxpath.html#codefunc16984">sxpath</a> (caar path) ns-binding))))
+        (let reducer ((reducing-path (cdar path))
+                      (filters '()))
+          (cond
+            ((null? reducing-path)
+             (loop
+              (cons
+               (lambda (node var-binding)
+                 (<a href="sxpathlib.html#codefunc27946">map-union</a>
+                  (lambda (node)
+                    (let label ((nodeset (select node var-binding))
+                                (fs (reverse filters)))
+                      (if
+                       (null? fs)
+                       nodeset
+                       (label
+                        ((car fs) nodeset var-binding)
+                        (cdr fs)))))
+                  (if (<a href="sxpathlib.html#codefunc31162">nodeset?</a> node) node (list node))))
+               converters)
+              (cons #t root-vars)
+              (cdr path)))
+            ((number? (car reducing-path))
+             (reducer
+              (cdr reducing-path)
+              (cons
+               (lambda (node var-binding)
+                 ((<a href="sxpathlib.html#codefunc47215">node-pos</a> (car reducing-path)) node))
+               filters)))
+            (else
+             (and-let*
+              ((func (<a href="sxpath.html#codefunc16984">sxpath</a> (car reducing-path) ns-binding)))
+              (reducer
+               (cdr reducing-path)
+               (cons
+                (lambda (node var-binding)
+                  ((<a href="sxpathlib.html#codefunc7531">sxml:filter</a>
+                    (lambda (n) (func n var-binding)))
+                    node))
+                filters))))))))
+      (else
+       (<a href="myenv.html#codefunc55253">cerr</a> &quot;Invalid path step: &quot; (car path))
+       #f)))))
+</pre>
+<h4><a name='codefunc48856' href='#docfunc48856'>if-sxpath</a></h4>
+<i><a href='#tocfunc48856'>Index</a></i><br>
+
+<pre> sxpath always returns a list, which is #t in Scheme 
+ if-sxpath returns #f instead of empty list
+</pre>
+<pre>(define (<a href="sxpath.html#codefunc48856">if-sxpath</a> path)
+  (lambda (obj)
+   (let ((x ((<a href="sxpath.html#codefunc16984">sxpath</a> path) obj)))
+     (if (null? x) #f x))))
+</pre>
+<h4><a name='codefunc37991' href='#docfunc37991'>if-car-sxpath</a></h4>
+<i><a href='#tocfunc37991'>Index</a></i><br>
+
+<pre> Returns first node found, if any.
+ Otherwise returns #f.
+</pre>
+<pre>(define (<a href="sxpath.html#codefunc37991">if-car-sxpath</a> path)
+  (lambda (obj)
+   (let ((x ((<a href="sxpath.html#codefunc16984">sxpath</a> path) obj)))
+     (if (null? x) #f (car x)))))
+</pre>
+<h4><a name='codefunc53549' href='#docfunc53549'>car-sxpath</a></h4>
+<i><a href='#tocfunc53549'>Index</a></i><br>
+
+<pre> Returns first node found, if any.
+ Otherwise returns empty list.
+</pre>
+<pre>(define (<a href="sxpath.html#codefunc53549">car-sxpath</a> path)
+  (lambda (obj)
+   (let ((x ((<a href="sxpath.html#codefunc16984">sxpath</a> path) obj)))
+     (if (null? x) '() (car x)))))
+</pre>
+<h4><a name='codefunc23486' href='#docfunc23486'>sxml:id-alist</a></h4>
+<i><a href='#tocfunc23486'>Index</a></i><br>
+
+<pre> Built an index as a list of (ID_value . element) pairs for given
+ node. lpaths are location paths for attributes of type ID.
+</pre>
+<pre>(define (<a href="sxpath.html#codefunc23486">sxml:id-alist</a> node . lpaths)
+  (apply
+    append
+    (map 
+      (lambda(lp)
+	(let ((lpr (reverse lp)))
+	  (map 
+	    (lambda (nd)
+	      (cons (<a href="sxml-tools.html#codefunc47873">sxml:attr</a> nd (car lpr))
+		    nd))
+	    ; Selects elements with ID attributes
+	    ;  using (lpath ,(<a href="sxpathlib.html#codefunc46283">node-self</a> (<a href="sxpath.html#codefunc16984">sxpath</a> '(@ attrname))))
+	    ((<a href="sxpath.html#codefunc16984">sxpath</a> (reverse (cons 
+			  (lambda(n r+v)
+			   ((<a href="sxpathlib.html#codefunc46283">node-self</a> (<a href="sxpath.html#codefunc16984">sxpath</a> `(@ ,(car lpr)))) n))
+				(cddr lpr)))) node))   
+	  ))
+      lpaths)))
+</pre></body></html>

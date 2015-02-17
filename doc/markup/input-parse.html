@@ -1,0 +1,555 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN""http://www.w3.org/TR/html401/loose.dtd"><html><head><meta name="GENERATOR" content="Mole: The Scheme Source Code Digger"><title>Module: input-parse</title><meta name='keywords' content=''></head><body bgcolor='#ffffff' text='#384412'  link='#11af05' vlink='#728b09'>
+<center><h1>Module: input-parse</h1></center>
+<p><br>
+<!-- Table of content -->
+<p><dl>
+
+<dl><dt><a name='tocsect0' href='#sect0'><b></b></a><dd>
+
+f:  <a name='tocfunc49057' href='#docfunc49057' style='text-decoration:none'>peek-next-char</a><br>
+</dl>
+
+<dl><dt><a name='tocsect0' href='#sect0'><b></b></a><dd>
+
+f:  <a name='tocfunc11041' href='#docfunc11041' style='text-decoration:none'>assert-curr-char</a><br>
+
+f:  <a name='tocfunc12770' href='#docfunc12770' style='text-decoration:none'>skip-until</a><br>
+
+f:  <a name='tocfunc8671' href='#docfunc8671' style='text-decoration:none'>skip-while</a><br>
+
+f:  <a name='tocfunc12772' href='#docfunc12772' style='text-decoration:none'>input-parse:init-buffer</a><br>
+
+f:  <a name='tocfunc10217' href='#docfunc10217' style='text-decoration:none'>next-token</a><br>
+
+f:  <a name='tocfunc64557' href='#docfunc64557' style='text-decoration:none'>next-token-list-based</a><br>
+
+f:  <a name='tocfunc38780' href='#docfunc38780' style='text-decoration:none'>next-token-of</a><br>
+</dl>
+</dl>
+
+<hr width='40%' align='center'><center><h3><a name='sect0' href='#tocsect0'></a></h3></center>
+
+<pre> -- procedure+: peek-next-char [PORT]
+ 	advances to the next character in the PORT and peeks at it.
+ 	This function is useful when parsing LR(1)-type languages
+ 	(one-char-read-ahead).
+	The optional argument PORT defaults to the current input port.
+</pre>
+<h4><a name='docfunc49057' href='#tocfunc49057'>peek-next-char</a></h4>
+(define (peek-next-char (optional (port (current-input-port))))<i><br> ... <a href='#codefunc49057'>Full Code</a> ... )</i><p><br>
+
+<hr width='40%' align='center'><center><h3><a name='sect0' href='#tocsect0'></a></h3></center>
+
+<pre> -- procedure+: assert-curr-char CHAR-LIST STRING [PORT]
+	Reads a character from the PORT and looks it up
+	in the CHAR-LIST of expected characters
+	If the read character was found among expected, it is returned
+	Otherwise, the procedure writes a nasty message using STRING
+	as a comment, and quits.
+	The optional argument PORT defaults to the current input port.
+
+</pre>
+<h4><a name='docfunc11041' href='#tocfunc11041'>assert-curr-char</a></h4>
+(define (assert-curr-char expected-chars comment (optional (port (current-input-port))))<i><br> ... <a href='#codefunc11041'>Full Code</a> ... )</i><p><br>
+
+<h4><a name='docfunc12770' href='#tocfunc12770'>skip-until</a></h4>
+(define (skip-until arg (optional (port (current-input-port))))<i><br> ... <a href='#codefunc12770'>Full Code</a> ... )</i>
+<pre> -- procedure+: skip-until CHAR-LIST [PORT]
+	Reads and skips characters from the PORT until one of the break
+	characters is encountered. This break character is returned.
+	The break characters are specified as the CHAR-LIST. This list
+	may include EOF, which is to be coded as a symbol *eof*
+
+ -- procedure+: skip-until NUMBER [PORT]
+	Skips the specified NUMBER of characters from the PORT and returns #f
+
+	The optional argument PORT defaults to the current input port.
+</pre><p><br>
+
+<h4><a name='docfunc8671' href='#tocfunc8671'>skip-while</a></h4>
+(define (skip-while skip-chars (optional (port (current-input-port))))<i><br> ... <a href='#codefunc8671'>Full Code</a> ... )</i>
+<pre> -- procedure+: skip-while CHAR-LIST [PORT]
+	Reads characters from the PORT and disregards them,
+	as long as they are mentioned in the CHAR-LIST.
+	The first character (which may be EOF) peeked from the stream
+	that is NOT a member of the CHAR-LIST is returned. This character
+	is left on the stream.
+	The optional argument PORT defaults to the current input port.
+</pre><p><br>
+
+<h4><a name='docfunc12772' href='#tocfunc12772'>input-parse:init-buffer</a></h4>
+(define input-parse:init-buffer <i><br> ... <a href='#codefunc12772'>Full Code</a> ... )</i>
+<pre> returns an initial buffer for next-token* procedures.
+ The input-parse:init-buffer may allocate a new buffer per each invocation:
+	(define (input-parse:init-buffer) (make-string 32))
+ Size 32 turns out to be fairly good, on average.
+ That policy is good only when a Scheme system is multi-threaded with
+ preemptive scheduling, or when a Scheme system supports shared substrings.
+ In all the other cases, it's better for input-parse:init-buffer to
+ return the same static buffer. next-token* functions return a copy
+ (a substring) of accumulated data, so the same buffer can be reused.
+ We shouldn't worry about new token being too large: next-token will use
+ a larger buffer automatically. Still, the best size for the static buffer
+ is to allow most of the tokens to fit in.
+ Using a static buffer _dramatically_ reduces the amount of produced garbage
+ (e.g., during XML parsing).
+</pre><p><br>
+
+<h4><a name='docfunc10217' href='#tocfunc10217'>next-token</a></h4>
+(define (next-token prefix-skipped-chars break-chars (optional (comment ) (port (current-input-port))))<i><br> ... <a href='#codefunc10217'>Full Code</a> ... )</i><p><br>
+
+<h4><a name='docfunc64557' href='#tocfunc64557'>next-token-list-based</a></h4>
+(define (next-token-list-based prefix-skipped-chars break-chars (optional (comment ) (port (current-input-port))))<i><br> ... <a href='#codefunc64557'>Full Code</a> ... )</i>
+<pre> Another version of next-token, accumulating characters in a list rather
+ than in a string buffer. I heard that it tends to work faster.
+ In reality, it works just as fast as the string buffer version above,
+ but it allocates 50% more memory and thus has to run garbage collection
+ 50% as many times. See next-token-comp.scm
+</pre><p><br>
+
+<h4><a name='docfunc38780' href='#tocfunc38780'>next-token-of</a></h4>
+(define (next-token-of incl-list/pred (optional (port (current-input-port))))<i><br> ... <a href='#codefunc38780'>Full Code</a> ... )</i>
+<pre> -- procedure+: next-token-of INC-CHARSET [PORT]
+	Reads characters from the PORT that belong to the list of characters
+	INC-CHARSET. The reading stops at the first character which is not
+	a member of the set. This character is left on the stream.
+	All the read characters are returned in a string.
+
+ -- procedure+: next-token-of PRED [PORT]
+	Reads characters from the PORT for which PRED (a procedure of one
+	argument) returns non-#f. The reading stops at the first character
+	for which PRED returns #f. That character is left on the stream.
+	All the results of evaluating of PRED up to #f are returned in a
+	string.
+
+	PRED is a procedure that takes one argument (a character
+	or the EOF object) and returns a character or #f. The returned
+	character does not have to be the same as the input argument
+	to the PRED. For example,
+	(next-token-of (lambda (c)
+			  (cond ((eof-object? c) #f)
+				((char-alphabetic? c) (char-downcase c))
+				(else #f))))
+	will try to read an alphabetic token from the current
+	input port, and return it in lower case.
+ 
+	The optional argument PORT defaults to the current input port.
+
+ Note: since we can't tell offhand how large the token being read is
+ going to be, we make a guess, pre-allocate a string, and grow it by
+ quanta if necessary. The quantum is always the length of the string
+ before it was extended the last time. Thus the algorithm does
+ a Fibonacci-type extension, which has been proven optimal.
+
+ This procedure is similar to next-token but only it implements
+ an inclusion rather than delimiting semantics.
+</pre><p><br>
+<center><h1>Code</h1></center>
+
+<h5><a name='codeapp6205' href='#docapp6205'>cond-expand</a></h5>
+<i><a href='#tocapp6205'>Index</a></i><br>
+
+<pre> optional arguments, e.g.,
+
+ (define-opt (foo arg1 arg2 (optional (arg3 init3) (arg4 init4))) body)
+
+ define-opt is identical to a regular define, with one exception: the
+ last argument may have a form
+	(optional (binding init) ... )
+</pre>
+<pre>(cond-expand
+ ((or bigloo gambit)
+
+    ; For Gambit and Bigloo, which support DSSSL extended lambdas,
+    ; define-opt like the one in the example above is re-written into
+    ; (define-opt (foo arg1 arg2 #!optional (arg3 init3) (arg4 init4)) body)
+  (define-macro (define-opt bindings body . body-rest)
+    (let* ((rev-bindings (reverse bindings))
+	   (opt-bindings
+	    (and (pair? rev-bindings) (pair? (car rev-bindings))
+		 (eq? 'optional (caar rev-bindings))
+		 (cdar rev-bindings))))
+      (if opt-bindings
+	`(define ,(append (reverse
+			   (cons (with-input-from-string &quot;#!optional&quot; read)
+				 (cdr rev-bindings)))
+			  opt-bindings)
+	   ,body ,@body-rest)
+	`(define ,bindings ,body ,@body-rest))))
+  )
+ (plt  ; DL: borrowed from &quot;define-opt.scm&quot;
+
+  (define-syntax define-opt
+   (syntax-rules (optional)
+    ((define-opt (name . bindings) . bodies)
+      (define-opt &quot;seek-optional&quot; bindings () ((name . bindings) . bodies)))
+
+    ((define-opt &quot;seek-optional&quot; ((optional . _opt-bindings))
+       (reqd ...) ((name . _bindings) . _bodies))
+      (define (name reqd ... . _rest)
+	(letrec-syntax
+	  ((handle-opts
+	     (syntax-rules ()
+	       ((_ rest bodies (var init))
+		 (let ((var (if (null? rest) init
+			      (if (null? (cdr rest)) (car rest)
+				(error &quot;extra rest&quot; rest)))))
+		   . bodies))
+	       ((_ rest bodies var) (handle-opts rest bodies (var #f)))
+	       ((_ rest bodies (var init) . other-vars)
+		 (let ((var (if (null? rest) init (car rest)))
+		       (new-rest (if (null? rest) '() (cdr rest))))
+		   (handle-opts new-rest bodies . other-vars)))
+	       ((_ rest bodies var . other-vars)
+		 (handle-opts rest bodies (var #f) . other-vars))
+	       ((_ rest bodies)		; no optional args, unlikely
+		 (let ((_ (or (null? rest) (error &quot;extra rest&quot; rest))))
+		   . bodies)))))
+	  (handle-opts _rest _bodies . _opt-bindings))))
+
+    ((define-opt &quot;seek-optional&quot; (x . rest) (reqd ...) form)
+      (define-opt &quot;seek-optional&quot; rest (reqd ... x) form))
+
+    ((define-opt &quot;seek-optional&quot; not-a-pair reqd form)
+      (define . form))			; No optional found, regular define
+
+    ((define-opt name body)		; Just the definition for 'name',
+      (define name body))		; for compatibilibility with define
+  ))
+ )
+ (else
+
+    ; For Scheme systems without DSSSL extensions, we rewrite the definition
+    ; of foo of the example above into the following:
+    ;	(define (foo arg1 arg2 . rest)
+    ;      (let* ((arg3 (if (null? rest) init3 (car rest)))
+    ;	          (arg4 (if (or (null? rest) (null? (cdr rest))) init4
+    ;		            (cadr rest)))
+    ;        body))
+    ; We won't handle more than two optional arguments
+
+  (define-macro define-opt (lambda (bindings body . body-rest)
+    (let* ((rev-bindings (reverse bindings))
+	   (opt-bindings
+	    (and (pair? rev-bindings) (pair? (car rev-bindings))
+		 (eq? 'optional (caar rev-bindings))
+		 (cdar rev-bindings))))
+      (cond
+       ((not opt-bindings)		; No optional arguments
+	`(define ,bindings ,body ,@body-rest))
+       ((null? opt-bindings)
+	`(define ,bindings ,body ,@body-rest))
+       ((or (null? (cdr opt-bindings)) (null? (cddr opt-bindings)))
+	(let* ((rest (gensym))		; One or two optional args
+	       (first-opt (car opt-bindings))
+	       (second-opt (and (pair? (cdr opt-bindings))
+				(cadr opt-bindings))))
+	  `(define ,(let loop ((bindings bindings))
+		      (if (null? (cdr bindings)) rest
+			  (cons (car bindings) (loop (cdr bindings)))))
+	     (let* ((,(car first-opt) (if (null? ,rest)
+					  ,(cadr first-opt)
+					  (car ,rest)))
+		    ,@(if second-opt
+			  `((,(car second-opt) 
+			     (if (or (null? ,rest) (null? (cdr ,rest)))
+				 ,(cadr second-opt)
+				 (cadr ,rest))))
+			  '()))
+	       ,body ,@body-rest))))
+       (else
+	'(error &quot;At most two options are supported&quot;))))))
+  ))
+</pre>
+<h5><a name='codeapp6205' href='#docapp6205'>cond-expand</a></h5>
+<i><a href='#tocapp6205'>Index</a></i><br>
+
+<pre>(cond-expand
+ (gambit
+      ; The following macro makes a macro that turns (read-char port)
+      ; into (##read-char port). We can't enter such a macro-converter
+      ; directly as readers of SCM and Bigloo, for ones, don't like
+      ; identifiers with two leading # characters
+   (define-macro (gambitize clause)
+     `(define-macro ,clause
+	,(list 'quasiquote
+	    (cons
+	     (string-&gt;symbol (string-append &quot;##&quot;
+					    (symbol-&gt;string (car clause))))
+	     (map (lambda (id) (list 'unquote id)) (cdr clause))))))
+   (gambitize (read-char port))
+   (gambitize (peek-char port))
+   (gambitize (eof-object? port))
+   ;(gambitize (string-append a b))
+   )
+ (else #t))
+</pre>
+<h4><a name='codefunc49057' href='#docfunc49057'>peek-next-char</a></h4>
+<i><a href='#tocfunc49057'>Index</a></i><br>
+
+<pre>(define-opt (<a href="input-parse.html#codefunc49057">peek-next-char</a> (optional (port (current-input-port))))
+  (read-char port) 
+  (peek-char port)) 
+</pre>
+<h4><a name='codefunc11041' href='#docfunc11041'>assert-curr-char</a></h4>
+<i><a href='#tocfunc11041'>Index</a></i><br>
+
+<pre>(define-opt (<a href="input-parse.html#codefunc11041">assert-curr-char</a> expected-chars comment
+			      (optional (port (current-input-port))))
+  (let ((c (read-char port)))
+    (if (memq c expected-chars) c
+    (<a href="parse-error.html#codefunc37207">parser-error</a> port &quot;Wrong character &quot; c
+    	   &quot; (0x&quot; (if (eof-object? c) &quot;*eof*&quot;
+    	   	    (number-&gt;string (char-&gt;integer c) 16)) &quot;) &quot;
+    	   comment &quot;. &quot; expected-chars &quot; expected&quot;))))
+</pre>
+<h4><a name='codefunc12770' href='#docfunc12770'>skip-until</a></h4>
+<i><a href='#tocfunc12770'>Index</a></i><br>
+
+<pre> -- procedure+: skip-until CHAR-LIST [PORT]
+	Reads and skips characters from the PORT until one of the break
+	characters is encountered. This break character is returned.
+	The break characters are specified as the CHAR-LIST. This list
+	may include EOF, which is to be coded as a symbol *eof*
+
+ -- procedure+: skip-until NUMBER [PORT]
+	Skips the specified NUMBER of characters from the PORT and returns #f
+
+	The optional argument PORT defaults to the current input port.
+</pre>
+<pre>(define-opt (<a href="input-parse.html#codefunc12770">skip-until</a> arg (optional (port (current-input-port))) )
+  (cond
+   ((number? arg)		; skip 'arg' characters
+      (do ((i arg (<a href="myenv.html#codemacro11565">--</a> i)))
+      	  ((&lt;= i 0) #f)
+      	  (if (eof-object? (read-char port))
+      	    (<a href="parse-error.html#codefunc37207">parser-error</a> port &quot;Unexpected EOF while skipping &quot;
+			 arg &quot; characters&quot;))))
+   (else			; skip until break-chars (=arg)
+     (let loop ((c (read-char port)))
+       (cond
+         ((memv c arg) c)
+         ((eof-object? c)
+           (if (memv '*eof* arg) c
+             (<a href="parse-error.html#codefunc37207">parser-error</a> port &quot;Unexpected EOF while skipping until &quot; arg)))
+         (else (loop (read-char port))))))))
+</pre>
+<h4><a name='codefunc8671' href='#docfunc8671'>skip-while</a></h4>
+<i><a href='#tocfunc8671'>Index</a></i><br>
+
+<pre> -- procedure+: skip-while CHAR-LIST [PORT]
+	Reads characters from the PORT and disregards them,
+	as long as they are mentioned in the CHAR-LIST.
+	The first character (which may be EOF) peeked from the stream
+	that is NOT a member of the CHAR-LIST is returned. This character
+	is left on the stream.
+	The optional argument PORT defaults to the current input port.
+</pre>
+<pre>(define-opt (<a href="input-parse.html#codefunc8671">skip-while</a> skip-chars (optional (port (current-input-port))) )
+  (do ((c (peek-char port) (peek-char port)))
+      ((not (memv c skip-chars)) c)
+      (read-char port)))
+</pre>
+<h4><a name='codefunc12772' href='#docfunc12772'>input-parse:init-buffer</a></h4>
+<i><a href='#tocfunc12772'>Index</a></i><br>
+
+<pre> returns an initial buffer for next-token* procedures.
+ The input-parse:init-buffer may allocate a new buffer per each invocation:
+	(define (input-parse:init-buffer) (make-string 32))
+ Size 32 turns out to be fairly good, on average.
+ That policy is good only when a Scheme system is multi-threaded with
+ preemptive scheduling, or when a Scheme system supports shared substrings.
+ In all the other cases, it's better for input-parse:init-buffer to
+ return the same static buffer. next-token* functions return a copy
+ (a substring) of accumulated data, so the same buffer can be reused.
+ We shouldn't worry about new token being too large: next-token will use
+ a larger buffer automatically. Still, the best size for the static buffer
+ is to allow most of the tokens to fit in.
+ Using a static buffer _dramatically_ reduces the amount of produced garbage
+ (e.g., during XML parsing).
+</pre>
+<pre>(define <a href="input-parse.html#codefunc12772">input-parse:init-buffer</a>
+  (let ((buffer (make-string 512)))
+    (lambda () buffer)))
+</pre>
+<h4><a name='codefunc10217' href='#docfunc10217'>next-token</a></h4>
+<i><a href='#tocfunc10217'>Index</a></i><br>
+
+<pre>(define-opt (<a href="input-parse.html#codefunc10217">next-token</a> prefix-skipped-chars break-chars
+			(optional (comment &quot;&quot;) (port (current-input-port))) )
+  (let* ((buffer (<a href="input-parse.html#codefunc12772">input-parse:init-buffer</a>))
+	 (curr-buf-len (string-length buffer)) (quantum 16))
+    (let loop ((i 0) (c (<a href="input-parse.html#codefunc8671">skip-while</a> prefix-skipped-chars port)))
+      (cond
+        ((memq c break-chars) (substring buffer 0 i))
+    	((eof-object? c)
+    	  (if (memq '*eof* break-chars)
+    	    (substring buffer 0 i)		; was EOF expected?
+    	    (<a href="parse-error.html#codefunc37207">parser-error</a> port &quot;EOF while reading a token &quot; comment)))
+    	(else
+    	  (if (&gt;= i curr-buf-len)	; make space for i-th char in buffer
+    	    (begin			; -&gt; grow the buffer by the quantum
+    	      (set! buffer (string-append buffer (make-string quantum)))
+    	      (set! quantum curr-buf-len)
+    	      (set! curr-buf-len (string-length buffer))))
+    	  (string-set! buffer i c)
+    	  (read-char port)			; move to the next char
+    	  (loop (<a href="myenv.html#codemacro11051">++</a> i) (peek-char port))
+    	  )))))
+</pre>
+<h4><a name='codefunc64557' href='#docfunc64557'>next-token-list-based</a></h4>
+<i><a href='#tocfunc64557'>Index</a></i><br>
+
+<pre> Another version of next-token, accumulating characters in a list rather
+ than in a string buffer. I heard that it tends to work faster.
+ In reality, it works just as fast as the string buffer version above,
+ but it allocates 50% more memory and thus has to run garbage collection
+ 50% as many times. See next-token-comp.scm
+</pre>
+<pre>(define-opt (<a href="input-parse.html#codefunc64557">next-token-list-based</a> prefix-skipped-chars break-chars
+		  (optional (comment &quot;&quot;) (port (current-input-port))) )
+  (let* ((first-char (<a href="input-parse.html#codefunc8671">skip-while</a> prefix-skipped-chars port))
+         (accum-chars (cons first-char '())))
+    (cond 
+      ((eof-object? first-char)
+        (if (memq '*eof* break-chars) &quot;&quot;
+          (<a href="parse-error.html#codefunc37207">parser-error</a> port &quot;EOF while skipping before reading token &quot;
+		       comment)))
+      ((memq first-char break-chars) &quot;&quot;)
+      (else
+        (read-char port)		; consume the first-char
+        (let loop ((tail accum-chars) (c (peek-char port)))
+          (cond
+            ((memq c break-chars) (list-&gt;string accum-chars))
+            ((eof-object? c)
+              (if (memq '*eof* break-chars)
+                (list-&gt;string accum-chars)		; was EOF expected?
+                (<a href="parse-error.html#codefunc37207">parser-error</a> port &quot;EOF while reading a token &quot; comment)))
+            (else
+              (read-char port)		; move to the next char
+              (set-cdr! tail (cons c '()))
+              (loop (cdr tail) (peek-char port))
+        )))))))
+</pre>
+<h4><a name='codefunc38780' href='#docfunc38780'>next-token-of</a></h4>
+<i><a href='#tocfunc38780'>Index</a></i><br>
+
+<pre> -- procedure+: next-token-of INC-CHARSET [PORT]
+	Reads characters from the PORT that belong to the list of characters
+	INC-CHARSET. The reading stops at the first character which is not
+	a member of the set. This character is left on the stream.
+	All the read characters are returned in a string.
+
+ -- procedure+: next-token-of PRED [PORT]
+	Reads characters from the PORT for which PRED (a procedure of one
+	argument) returns non-#f. The reading stops at the first character
+	for which PRED returns #f. That character is left on the stream.
+	All the results of evaluating of PRED up to #f are returned in a
+	string.
+
+	PRED is a procedure that takes one argument (a character
+	or the EOF object) and returns a character or #f. The returned
+	character does not have to be the same as the input argument
+	to the PRED. For example,
+	(next-token-of (lambda (c)
+			  (cond ((eof-object? c) #f)
+				((char-alphabetic? c) (char-downcase c))
+				(else #f))))
+	will try to read an alphabetic token from the current
+	input port, and return it in lower case.
+ 
+	The optional argument PORT defaults to the current input port.
+
+ Note: since we can't tell offhand how large the token being read is
+ going to be, we make a guess, pre-allocate a string, and grow it by
+ quanta if necessary. The quantum is always the length of the string
+ before it was extended the last time. Thus the algorithm does
+ a Fibonacci-type extension, which has been proven optimal.
+
+ This procedure is similar to next-token but only it implements
+ an inclusion rather than delimiting semantics.
+</pre>
+<pre>(define-opt (<a href="input-parse.html#codefunc38780">next-token-of</a> incl-list/pred
+			   (optional (port (current-input-port))) )
+  (let* ((buffer (<a href="input-parse.html#codefunc12772">input-parse:init-buffer</a>))
+	 (curr-buf-len (string-length buffer)) (quantum 16))
+  (if (procedure? incl-list/pred)
+    (let loop ((i 0) (c (peek-char port)))
+      (cond
+        ((incl-list/pred c) =&gt;
+          (lambda (c)
+            (if (&gt;= i curr-buf-len)	; make space for i-th char in buffer
+              (begin			; -&gt; grow the buffer by the quantum
+                (set! buffer (string-append buffer (make-string quantum)))
+                (set! quantum curr-buf-len)
+                (set! curr-buf-len (string-length buffer))))
+            (string-set! buffer i c)
+            (read-char port)			; move to the next char
+            (loop (<a href="myenv.html#codemacro11051">++</a> i) (peek-char port))))
+        (else (substring buffer 0 i))))
+			; incl-list/pred is a list of allowed characters
+    (let loop ((i 0) (c (peek-char port)))
+      (cond
+        ((not (memq c incl-list/pred)) (substring buffer 0 i))
+    	(else
+    	  (if (&gt;= i curr-buf-len)	; make space for i-th char in buffer
+    	    (begin			; -&gt; grow the buffer by the quantum
+    	      (set! buffer (string-append buffer (make-string quantum)))
+    	      (set! quantum curr-buf-len)
+    	      (set! curr-buf-len (string-length buffer))))
+    	  (string-set! buffer i c)
+    	  (read-char port)			; move to the next char
+    	  (loop (<a href="myenv.html#codemacro11051">++</a> i) (peek-char port))
+    	  ))))))
+</pre>
+<h5><a name='codeapp6205' href='#docapp6205'>cond-expand</a></h5>
+<i><a href='#tocapp6205'>Index</a></i><br>
+
+<pre>(cond-expand
+ (plt
+  #t  ; DL: already available in PLT
+ )
+ (else
+
+; -- procedure+: read-line [PORT]
+;	Reads one line of text from the PORT, and returns it as a string.
+;	A line is a (possibly empty) sequence of characters terminated
+;	by CR, CRLF or LF (or even the end of file).
+;	The terminating character (or CRLF combination) is removed from
+;	the input stream. The terminating character(s) is not a part
+;	of the return string either.
+;	If EOF is encountered before any character is read, the return
+;	value is EOF.
+; 
+;	The optional argument PORT defaults to the current input port.
+
+(define-opt (read-line (optional (port (current-input-port))) )
+  (if (eof-object? (peek-char port)) (peek-char port)
+    (let* ((line
+             (next-token '() '(#\newline #\return *eof*)
+			 &quot;reading a line&quot; port))
+           (c (read-char port)))	; must be either \n or \r or EOF
+       (and (eq? c #\return) (eq? (peek-char port) #\newline)
+         (read-char port))			; skip \n that follows \r
+       line)))
+
+
+; -- procedure+: read-string N [PORT]
+;	Reads N characters from the PORT, and  returns them in a string.
+;	If EOF is encountered before N characters are read, a shorter string
+;	will be returned.
+;	If N is not positive, an empty string will be returned.
+;	The optional argument PORT defaults to the current input port.
+
+(define-opt (read-string n (optional (port (current-input-port))) )
+  (if (not (positive? n)) &quot;&quot;
+    (let ((buffer (make-string n)))
+      (let loop ((i 0) (c (read-char port)))
+        (if (eof-object? c) (substring buffer 0 i)
+          (let ((i1 (++ i)))
+            (string-set! buffer i c)
+            (if (= i1 n) buffer
+              (loop i1 (read-char port)))))))))
+
+))
+</pre></body></html>

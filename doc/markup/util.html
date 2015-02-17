@@ -1,0 +1,439 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN""http://www.w3.org/TR/html401/loose.dtd"><html><head><meta name="GENERATOR" content="Mole: The Scheme Source Code Digger"><title>Module: util</title><meta name='keywords' content=''></head><body bgcolor='#ffffff' text='#384412'  link='#11af05' vlink='#728b09'>
+<center><h1>Module: util</h1></center>
+<p><br>
+<!-- Table of content -->
+<p><dl>
+
+<dl><dt><a name='tocsect33589' href='#sect33589'><b>		Some list manipulation functions</b></a><dd>
+
+f:  <a name='tocfunc30253' href='#docfunc30253' style='text-decoration:none'>list-intersperse</a><br>
+
+f:  <a name='tocfunc30286' href='#docfunc30286' style='text-decoration:none'>list-intersperse!</a><br>
+
+f:  <a name='tocfunc47269' href='#docfunc47269' style='text-decoration:none'>list-tail-diff</a><br>
+</dl>
+
+<dl><dt><a name='tocsect6268' href='#sect6268'><b>			String utilities</b></a><dd>
+
+f:  <a name='tocfunc35783' href='#docfunc35783' style='text-decoration:none'>string-rindex</a><br>
+
+f:  <a name='tocfunc2331' href='#docfunc2331' style='text-decoration:none'>substring?</a><br>
+
+f:  <a name='tocfunc39259' href='#docfunc39259' style='text-decoration:none'>string-split</a><br>
+
+f:  <a name='tocfunc35218' href='#docfunc35218' style='text-decoration:none'>make-char-quotator</a><br>
+</dl>
+</dl>
+
+<hr width='40%' align='center'><center><h3><a name='sect33589' href='#tocsect33589'>		Some list manipulation functions</a></h3></center>
+
+<pre></pre>
+<h4><a name='docfunc30253' href='#tocfunc30253'>list-intersperse</a></h4>
+(define (list-intersperse src-l elem)<i><br> ... <a href='#codefunc30253'>Full Code</a> ... )</i>
+<pre> -- procedure+: list-intersperse SRC-L ELEM
+ inserts ELEM between elements of the SRC-L, returning a freshly allocated
+ list (cells, that is)
+</pre><p><br>
+
+<h4><a name='docfunc30286' href='#tocfunc30286'>list-intersperse!</a></h4>
+(define (list-intersperse! src-l elem)<i><br> ... <a href='#codefunc30286'>Full Code</a> ... )</i>
+<pre> -- procedure+: list-intersperse! SRC-L ELEM
+ inserts ELEM between elements of the SRC-L inplace
+</pre><p><br>
+
+<h4><a name='docfunc47269' href='#tocfunc47269'>list-tail-diff</a></h4>
+(define (list-tail-diff list1 list2)<i><br> ... <a href='#codefunc47269'>Full Code</a> ... )</i><p><br>
+
+<hr width='40%' align='center'><center><h3><a name='sect6268' href='#tocsect6268'>			String utilities</a></h3></center>
+
+<pre> See SRFI-13 or srfi-13-local.scm
+</pre>
+<h4><a name='docfunc35783' href='#tocfunc35783'>string-rindex</a></h4>
+(define string-rindex <i><br> ... <a href='#codefunc35783'>Full Code</a> ... )</i>
+<pre> Return the index of the last occurence of a-char in str, or #f
+ See SRFI-13
+</pre><p><br>
+
+<h4><a name='docfunc2331' href='#tocfunc2331'>substring?</a></h4>
+(define (substring? pattern str)<i><br> ... <a href='#codefunc2331'>Full Code</a> ... )</i>
+<pre> -- procedure+: substring? PATTERN STRING
+     Searches STRING to see if it contains the substring PATTERN.
+     Returns the index of the first substring of STRING that is equal
+     to PATTERN; or `#f' if STRING does not contain PATTERN.
+
+          (substring? &quot;rat&quot; &quot;pirate&quot;)             =&gt;  2
+          (substring? &quot;rat&quot; &quot;outrage&quot;)            =&gt;  #f
+          (substring? &quot;&quot; any-string)              =&gt;  0
+</pre><p><br>
+
+<h4><a name='docfunc39259' href='#tocfunc39259'>string-split</a></h4>
+(define (string-split str . rest)<i><br> ... <a href='#codefunc39259'>Full Code</a> ... )</i>
+<pre> 
+ -- procedure+: string-split STRING
+ -- procedure+: string-split STRING '()
+ -- procedure+: string-split STRING '() MAXSPLIT
+
+ Returns a list of whitespace delimited words in STRING.
+ If STRING is empty or contains only whitespace, then the empty list
+ is returned. Leading and trailing whitespaces are trimmed.
+ If MAXSPLIT is specified and positive, the resulting list will
+ contain at most MAXSPLIT elements, the last of which is the string
+ remaining after (MAXSPLIT - 1) splits. If MAXSPLIT is specified and
+ non-positive, the empty list is returned. &quot;In time critical
+ applications it behooves you not to split into more fields than you
+ really need.&quot;
+
+ -- procedure+: string-split STRING CHARSET
+ -- procedure+: string-split STRING CHARSET MAXSPLIT
+
+ Returns a list of words delimited by the characters in CHARSET in
+ STRING. CHARSET is a list of characters that are treated as delimiters.
+ Leading or trailing delimeters are NOT trimmed. That is, the resulting
+ list will have as many initial empty string elements as there are
+ leading delimiters in STRING.
+
+ If MAXSPLIT is specified and positive, the resulting list will
+ contain at most MAXSPLIT elements, the last of which is the string
+ remaining after (MAXSPLIT - 1) splits. If MAXSPLIT is specified and
+ non-positive, the empty list is returned. &quot;In time critical
+ applications it behooves you not to split into more fields than you
+ really need.&quot;
+
+ This is based on the split function in Python/Perl
+
+ (string-split &quot; abc d e f  &quot;) ==&gt; (&quot;abc&quot; &quot;d&quot; &quot;e&quot; &quot;f&quot;)
+ (string-split &quot; abc d e f  &quot; '() 1) ==&gt; (&quot;abc d e f  &quot;)
+ (string-split &quot; abc d e f  &quot; '() 0) ==&gt; ()
+ (string-split &quot;:abc:d:e::f:&quot; '(#\:)) ==&gt; (&quot;&quot; &quot;abc&quot; &quot;d&quot; &quot;e&quot; &quot;&quot; &quot;f&quot; &quot;&quot;)
+ (string-split &quot;:&quot; '(#\:)) ==&gt; (&quot;&quot; &quot;&quot;)
+ (string-split &quot;root:x:0:0:Lord&quot; '(#\:) 2) ==&gt; (&quot;root&quot; &quot;x:0:0:Lord&quot;)
+ (string-split &quot;/usr/local/bin:/usr/bin:/usr/ucb/bin&quot; '(#\:))
+ ==&gt; (&quot;/usr/local/bin&quot; &quot;/usr/bin&quot; &quot;/usr/ucb/bin&quot;)
+ (string-split &quot;/usr/local/bin&quot; '(#\/)) ==&gt; (&quot;&quot; &quot;usr&quot; &quot;local&quot; &quot;bin&quot;)
+</pre><p><br>
+
+<h4><a name='docfunc35218' href='#tocfunc35218'>make-char-quotator</a></h4>
+(define (make-char-quotator char-encoding)<i><br> ... <a href='#codefunc35218'>Full Code</a> ... )</i>
+<pre> make-char-quotator QUOT-RULES
+
+ Given QUOT-RULES, an assoc list of (char . string) pairs, return
+ a quotation procedure. The returned quotation procedure takes a string
+ and returns either a string or a list of strings. The quotation procedure
+ check to see if its argument string contains any instance of a character
+ that needs to be encoded (quoted). If the argument string is &quot;clean&quot;,
+ it is returned unchanged. Otherwise, the quotation procedure will
+ return a list of string fragments. The input straing will be broken
+ at the places where the special characters occur. The special character
+ will be replaced by the corresponding encoding strings.
+
+ For example, to make a procedure that quotes special HTML characters,
+ do
+	(make-char-quotator
+	    '((#\&lt; . &quot;&amp;lt;&quot;) (#\&gt; . &quot;&amp;gt;&quot;) (#\&amp; . &quot;&amp;amp;&quot;) (#\&quot; . &quot;&amp;quot;&quot;)))
+</pre><p><br>
+<center><h1>Code</h1></center>
+
+<h5><a name='codeapp6205' href='#docapp6205'>cond-expand</a></h5>
+<i><a href='#tocapp6205'>Index</a></i><br>
+
+<pre>                               Iterator ANY?
+
+ -- procedure+: any? PRED COLLECTION
+       Searches for the first element in the collection satisfying a
+       given predicate
+       That is, the procedure applies PRED to every element of the
+       COLLECTION in turn.
+       The first element for which PRED returns non-#f stops the iteration;
+       the value of the predicate is returned.
+       If none of the elements of the COLLECTION satisfy the predicate,
+       the return value from the procedure is #f
+       COLLECTION can be a list, a vector, a string, or an input port.
+ See vmyenv.scm for validation tests.
+</pre>
+<pre>(cond-expand
+ (bigloo  ; Bigloo provides a native support for `any?',
+          ; however, not such a general one
+  #t)
+ (else
+
+(define (any? &lt;pred?&gt; coll)
+  (cond
+    ((list? coll)
+      (let loop ((curr-l coll))
+        (if (null? curr-l) #f
+          (or (&lt;pred?&gt; (car curr-l)) (loop (cdr curr-l))))))
+          
+    ((vector? coll)
+      (let ((len (vector-length coll)))
+       (let loop ((i 0))
+        (if (&gt;= i len) #f
+          (or (&lt;pred?&gt; (vector-ref coll i)) (loop (inc i)))))))
+
+    ((string? coll)
+      (let ((len (string-length coll)))
+       (let loop ((i 0))
+        (if (&gt;= i len) #f
+          (or (&lt;pred?&gt; (string-ref coll i)) (loop (inc i)))))))
+
+    ((input-port? coll)
+      (let loop ((c (read-char coll)))
+        (if (eof-object? c) #f
+          (or (&lt;pred?&gt; c) (loop (read-char coll))))))
+
+    (else (error &quot;any? on an invalid collection&quot;))))
+
+ ))
+</pre>
+<h4><a name='codefunc30253' href='#docfunc30253'>list-intersperse</a></h4>
+<i><a href='#tocfunc30253'>Index</a></i><br>
+
+<pre> -- procedure+: list-intersperse SRC-L ELEM
+ inserts ELEM between elements of the SRC-L, returning a freshly allocated
+ list (cells, that is)
+</pre>
+<pre>(define (<a href="util.html#codefunc30253">list-intersperse</a> src-l elem)
+  (if (null? src-l) src-l
+    (let loop ((l (cdr src-l)) (dest (cons (car src-l) '())))
+      (if (null? l) (reverse dest)
+        (loop (cdr l) (cons (car l) (cons elem dest)))))))
+</pre>
+<h4><a name='codefunc30286' href='#docfunc30286'>list-intersperse!</a></h4>
+<i><a href='#tocfunc30286'>Index</a></i><br>
+
+<pre> -- procedure+: list-intersperse! SRC-L ELEM
+ inserts ELEM between elements of the SRC-L inplace
+</pre>
+<pre>(define (<a href="util.html#codefunc30286">list-intersperse!</a> src-l elem)
+  (if (null? src-l) src-l
+    (let loop ((l src-l))
+      (let ((next-l (cdr l)))
+        (if (null? next-l) src-l
+          (begin
+            (set-cdr! l (cons elem next-l))
+            (loop next-l)))))))
+</pre>
+<h4><a name='codefunc47269' href='#docfunc47269'>list-tail-diff</a></h4>
+<i><a href='#tocfunc47269'>Index</a></i><br>
+
+<pre>(define (<a href="util.html#codefunc47269">list-tail-diff</a> list1 list2)
+  (let loop ((l1-curr list1) (difference '()))
+    (cond
+      ((eq? l1-curr list2) (reverse difference))
+      ((null? l1-curr) (reverse difference))
+      (else (loop (cdr l1-curr) (cons (car l1-curr) difference))))))
+</pre>
+<h4><a name='codefunc35783' href='#docfunc35783'>string-rindex</a></h4>
+<i><a href='#tocfunc35783'>Index</a></i><br>
+
+<pre> Return the index of the last occurence of a-char in str, or #f
+ See SRFI-13
+</pre>
+<pre>(define <a href="util.html#codefunc35783">string-rindex</a> string-index-right)
+</pre>
+<h4><a name='codefunc2331' href='#docfunc2331'>substring?</a></h4>
+<i><a href='#tocfunc2331'>Index</a></i><br>
+
+<pre> -- procedure+: substring? PATTERN STRING
+     Searches STRING to see if it contains the substring PATTERN.
+     Returns the index of the first substring of STRING that is equal
+     to PATTERN; or `#f' if STRING does not contain PATTERN.
+
+          (substring? &quot;rat&quot; &quot;pirate&quot;)             =&gt;  2
+          (substring? &quot;rat&quot; &quot;outrage&quot;)            =&gt;  #f
+          (substring? &quot;&quot; any-string)              =&gt;  0
+</pre>
+<pre>(define (<a href="util.html#codefunc2331">substring?</a> pattern str) (string-contains str pattern))
+</pre>
+<h5><a name='codeapp6205' href='#docapp6205'>cond-expand</a></h5>
+<i><a href='#tocapp6205'>Index</a></i><br>
+
+<pre> -- procedure+: string-&gt;integer STR START END
+
+ Makes sure a substring of the STR from START (inclusive) till END
+ (exclusive) is a representation of a non-negative integer in decimal
+ notation. If so, this integer is returned. Otherwise -- when the
+ substring contains non-decimal characters, or when the range from
+ START till END is not within STR, the result is #f.
+
+ This procedure is a simplification of the standard string-&gt;number.
+ The latter is far more generic: for example, it will try to read
+ strings like &quot;1/2&quot; &quot;1S2&quot; &quot;1.34&quot; and even &quot;1/0&quot; (the latter causing
+ a zero-divide error). Note that to string-&gt;number,  &quot;1S2&quot; is a valid
+ representation of an _inexact_ integer (100 to be precise).
+ Oftentimes we want to be more restrictive about what we consider a
+ number; we want merely to read an integral label.
+</pre>
+<pre>(cond-expand
+ (bigloo  ; string-&gt;integer is provided in Bigloo natively
+  #t)
+ (else
+
+(define (string-&gt;integer str start end)
+  (and (&lt; -1 start end (inc (string-length str)))
+    (let loop ((pos start) (accum 0))
+      (cond
+        ((&gt;= pos end) accum)
+        ((char-numeric? (string-ref str pos))
+          (loop (inc pos) (+ (char-&gt;integer (string-ref str pos)) 
+              (- (char-&gt;integer #\0)) (* 10 accum))))
+        (else #f)))))
+
+ ))
+</pre>
+<h4><a name='codefunc39259' href='#docfunc39259'>string-split</a></h4>
+<i><a href='#tocfunc39259'>Index</a></i><br>
+
+<pre> 
+ -- procedure+: string-split STRING
+ -- procedure+: string-split STRING '()
+ -- procedure+: string-split STRING '() MAXSPLIT
+
+ Returns a list of whitespace delimited words in STRING.
+ If STRING is empty or contains only whitespace, then the empty list
+ is returned. Leading and trailing whitespaces are trimmed.
+ If MAXSPLIT is specified and positive, the resulting list will
+ contain at most MAXSPLIT elements, the last of which is the string
+ remaining after (MAXSPLIT - 1) splits. If MAXSPLIT is specified and
+ non-positive, the empty list is returned. &quot;In time critical
+ applications it behooves you not to split into more fields than you
+ really need.&quot;
+
+ -- procedure+: string-split STRING CHARSET
+ -- procedure+: string-split STRING CHARSET MAXSPLIT
+
+ Returns a list of words delimited by the characters in CHARSET in
+ STRING. CHARSET is a list of characters that are treated as delimiters.
+ Leading or trailing delimeters are NOT trimmed. That is, the resulting
+ list will have as many initial empty string elements as there are
+ leading delimiters in STRING.
+
+ If MAXSPLIT is specified and positive, the resulting list will
+ contain at most MAXSPLIT elements, the last of which is the string
+ remaining after (MAXSPLIT - 1) splits. If MAXSPLIT is specified and
+ non-positive, the empty list is returned. &quot;In time critical
+ applications it behooves you not to split into more fields than you
+ really need.&quot;
+
+ This is based on the split function in Python/Perl
+
+ (string-split &quot; abc d e f  &quot;) ==&gt; (&quot;abc&quot; &quot;d&quot; &quot;e&quot; &quot;f&quot;)
+ (string-split &quot; abc d e f  &quot; '() 1) ==&gt; (&quot;abc d e f  &quot;)
+ (string-split &quot; abc d e f  &quot; '() 0) ==&gt; ()
+ (string-split &quot;:abc:d:e::f:&quot; '(#\:)) ==&gt; (&quot;&quot; &quot;abc&quot; &quot;d&quot; &quot;e&quot; &quot;&quot; &quot;f&quot; &quot;&quot;)
+ (string-split &quot;:&quot; '(#\:)) ==&gt; (&quot;&quot; &quot;&quot;)
+ (string-split &quot;root:x:0:0:Lord&quot; '(#\:) 2) ==&gt; (&quot;root&quot; &quot;x:0:0:Lord&quot;)
+ (string-split &quot;/usr/local/bin:/usr/bin:/usr/ucb/bin&quot; '(#\:))
+ ==&gt; (&quot;/usr/local/bin&quot; &quot;/usr/bin&quot; &quot;/usr/ucb/bin&quot;)
+ (string-split &quot;/usr/local/bin&quot; '(#\/)) ==&gt; (&quot;&quot; &quot;usr&quot; &quot;local&quot; &quot;bin&quot;)
+</pre>
+<pre>(define (<a href="util.html#codefunc39259">string-split</a> str . rest)
+		; maxsplit is a positive number
+  (define (split-by-whitespace str maxsplit)
+    (define (skip-ws i yet-to-split-count)
+      (cond
+        ((&gt;= i (string-length str)) '())
+        ((char-whitespace? (string-ref str i))
+          (skip-ws (<a href="myenv.html#codemacro28364">inc</a> i) yet-to-split-count))
+        (else (scan-beg-word (<a href="myenv.html#codemacro28364">inc</a> i) i yet-to-split-count))))
+    (define (scan-beg-word i from yet-to-split-count)
+      (cond
+        ((zero? yet-to-split-count)
+          (cons (substring str from (string-length str)) '()))
+        (else (scan-word i from yet-to-split-count))))
+    (define (scan-word i from yet-to-split-count)
+      (cond
+        ((&gt;= i (string-length str))
+          (cons (substring str from i) '()))
+        ((char-whitespace? (string-ref str i))
+          (cons (substring str from i) 
+            (skip-ws (<a href="myenv.html#codemacro28364">inc</a> i) (- yet-to-split-count 1))))
+        (else (scan-word (<a href="myenv.html#codemacro28364">inc</a> i) from yet-to-split-count))))
+    (skip-ws 0 (- maxsplit 1)))
+
+		; maxsplit is a positive number
+		; str is not empty
+  (define (split-by-charset str delimeters maxsplit)
+    (define (scan-beg-word from yet-to-split-count)
+      (cond
+        ((&gt;= from (string-length str)) '(&quot;&quot;))
+        ((zero? yet-to-split-count)
+          (cons (substring str from (string-length str)) '()))
+        (else (scan-word from from yet-to-split-count))))
+    (define (scan-word i from yet-to-split-count)
+      (cond
+        ((&gt;= i (string-length str))
+          (cons (substring str from i) '()))
+        ((memq (string-ref str i) delimeters)
+          (cons (substring str from i) 
+            (scan-beg-word (<a href="myenv.html#codemacro28364">inc</a> i) (- yet-to-split-count 1))))
+        (else (scan-word (<a href="myenv.html#codemacro28364">inc</a> i) from yet-to-split-count))))
+    (scan-beg-word 0 (- maxsplit 1)))
+
+			; resolver of overloading...
+			; if omitted, maxsplit defaults to
+			; (<a href="myenv.html#codemacro28364">inc</a> (string-length str))
+  (if (string-null? str) '()
+    (if (null? rest) 
+      (split-by-whitespace str (<a href="myenv.html#codemacro28364">inc</a> (string-length str)))
+      (let ((charset (car rest))
+          (maxsplit
+            (if (pair? (cdr rest)) (cadr rest) (<a href="myenv.html#codemacro28364">inc</a> (string-length str)))))
+        (cond 
+          ((not (positive? maxsplit)) '())
+          ((null? charset) (split-by-whitespace str maxsplit))
+          (else (split-by-charset str charset maxsplit))))))
+)
+</pre>
+<h4><a name='codefunc35218' href='#docfunc35218'>make-char-quotator</a></h4>
+<i><a href='#tocfunc35218'>Index</a></i><br>
+
+<pre> make-char-quotator QUOT-RULES
+
+ Given QUOT-RULES, an assoc list of (char . string) pairs, return
+ a quotation procedure. The returned quotation procedure takes a string
+ and returns either a string or a list of strings. The quotation procedure
+ check to see if its argument string contains any instance of a character
+ that needs to be encoded (quoted). If the argument string is &quot;clean&quot;,
+ it is returned unchanged. Otherwise, the quotation procedure will
+ return a list of string fragments. The input straing will be broken
+ at the places where the special characters occur. The special character
+ will be replaced by the corresponding encoding strings.
+
+ For example, to make a procedure that quotes special HTML characters,
+ do
+	(make-char-quotator
+	    '((#\&lt; . &quot;&amp;lt;&quot;) (#\&gt; . &quot;&amp;gt;&quot;) (#\&amp; . &quot;&amp;amp;&quot;) (#\&quot; . &quot;&amp;quot;&quot;)))
+</pre>
+<pre>(define (<a href="util.html#codefunc35218">make-char-quotator</a> char-encoding)
+  (let ((bad-chars (map car char-encoding)))
+
+    ; Check to see if str contains one of the characters in charset,
+    ; from the position i onward. If so, return that character's index.
+    ; otherwise, return #f
+    (define (index-cset str i charset)
+      (let loop ((i i))
+	(and (&lt; i (string-length str))
+	     (if (memv (string-ref str i) charset) i
+		 (loop (<a href="myenv.html#codemacro28364">inc</a> i))))))
+
+    ; The body of the function
+    (lambda (str)
+      (let ((bad-pos (index-cset str 0 bad-chars)))
+	(if (not bad-pos) str	; str had all good chars
+	    (let loop ((from 0) (to bad-pos))
+	      (cond
+	       ((&gt;= from (string-length str)) '())
+	       ((not to)
+		(cons (substring str from (string-length str)) '()))
+	       (else
+		(let ((quoted-char
+		       (cdr (assv (string-ref str to) char-encoding)))
+		      (new-to 
+		       (index-cset str (<a href="myenv.html#codemacro28364">inc</a> to) bad-chars)))
+		  (if (&lt; from to)
+		      (cons
+		       (substring str from to)
+		       (cons quoted-char (loop (<a href="myenv.html#codemacro28364">inc</a> to) new-to)))
+		      (cons quoted-char (loop (<a href="myenv.html#codemacro28364">inc</a> to) new-to))))))))))
+))
+</pre></body></html>

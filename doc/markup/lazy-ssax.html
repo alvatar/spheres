@@ -1,0 +1,275 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN""http://www.w3.org/TR/html401/loose.dtd"><html><head><meta name="GENERATOR" content="Mole: The Scheme Source Code Digger"><title>Module: lazy-ssax</title><meta name='keywords' content=''></head><body bgcolor='#ffffff' text='#384412'  link='#11af05' vlink='#728b09'>
+<center><h1>Module: lazy-ssax</h1></center>
+
+<pre> A specialized lazy XML-&gt;SXML parser
+ Is heavily based on continuations
+</pre><p><br>
+<!-- Table of content -->
+<p><dl>
+
+<dl><dt><a name='tocsect49518' href='#sect49518'><b>Preliminary helper functions</b></a><dd>
+
+f:  <a name='tocfunc39982' href='#docfunc39982' style='text-decoration:none'>lazy:force-descendants</a><br>
+
+f:  <a name='tocfunc5971' href='#docfunc5971' style='text-decoration:none'>lazy:except-last</a><br>
+</dl>
+
+<dl><dt><a name='tocsect0' href='#sect0'><b></b></a><dd>
+
+f:  <a name='tocfunc11307' href='#docfunc11307' style='text-decoration:none'>lazy:seed-common</a><br>
+
+f:  <a name='tocfunc50382' href='#docfunc50382' style='text-decoration:none'>lazy:replace-common</a><br>
+
+f:  <a name='tocfunc58012' href='#docfunc58012' style='text-decoration:none'>lazy:xml->sxml</a><br>
+</dl>
+</dl>
+
+<hr width='40%' align='center'><center><h3><a name='sect49518' href='#tocsect49518'>Preliminary helper functions</a></h3></center>
+
+<pre></pre>
+<h4><a name='docfunc39982' href='#tocfunc39982'>lazy:force-descendants</a></h4>
+(define (lazy:force-descendants node)<i><br> ... <a href='#codefunc39982'>Full Code</a> ... )</i>
+<pre> A helper that forces all descendants of a given node or a nodeset
+</pre><p><br>
+
+<h4><a name='docfunc5971' href='#tocfunc5971'>lazy:except-last</a></h4>
+(define (lazy:except-last lst)<i><br> ... <a href='#codefunc5971'>Full Code</a> ... )</i>
+<pre> Returns the list containing of all members of the argument list except
+ for the last member
+</pre><p><br>
+
+<hr width='40%' align='center'><center><h3><a name='sect0' href='#tocsect0'></a></h3></center>
+
+<pre></pre>
+<h4><a name='docfunc11307' href='#tocfunc11307'>lazy:seed-common</a></h4>
+(define (lazy:seed-common seed)<i><br> ... <a href='#codefunc11307'>Full Code</a> ... )</i>
+<pre> Returns the common part of the seed
+</pre><p><br>
+
+<h4><a name='docfunc50382' href='#tocfunc50382'>lazy:replace-common</a></h4>
+(define (lazy:replace-common seed new-common)<i><br> ... <a href='#codefunc50382'>Full Code</a> ... )</i>
+<pre> A monad-like handler
+ Replaces the common part of the seed
+</pre><p><br>
+
+<h4><a name='docfunc58012' href='#tocfunc58012'>lazy:xml->sxml</a></h4>
+(define (lazy:xml-&gt;sxml port namespace-prefix-assig)<i><br> ... <a href='#codefunc58012'>Full Code</a> ... )</i>
+<pre> Produces a lazy SXML document, which corresponds to reading a source
+ document in a stream-wise fashion
+</pre><p><br>
+<center><h1>Code</h1></center>
+
+<h4><a name='codefunc39982' href='#docfunc39982'>lazy:force-descendants</a></h4>
+<i><a href='#tocfunc39982'>Index</a></i><br>
+
+<pre> A helper that forces all descendants of a given node or a nodeset
+</pre>
+<pre>(define (<a href="lazy-ssax.html#codefunc39982">lazy:force-descendants</a> node)
+  (cond
+    ((<a href="lazy-xpath.html#codefunc35251">lazy:promise?</a> node)  ; force it
+     (<a href="lazy-ssax.html#codefunc39982">lazy:force-descendants</a> (force node)))
+    ((pair? node)  ; not null
+     (for-each <a href="lazy-ssax.html#codefunc39982">lazy:force-descendants</a> node))
+    (else  ; null or not pair
+     #t  ; nothing to be done
+   )))
+</pre>
+<h4><a name='codefunc5971' href='#docfunc5971'>lazy:except-last</a></h4>
+<i><a href='#tocfunc5971'>Index</a></i><br>
+
+<pre> Returns the list containing of all members of the argument list except
+ for the last member
+</pre>
+<pre>(define (<a href="lazy-ssax.html#codefunc5971">lazy:except-last</a> lst)
+  (if
+    (or (null? lst)  ; this shouldn't happen
+        (null? (cdr lst)))
+    '()
+    (cons (car lst) (<a href="lazy-ssax.html#codefunc5971">lazy:except-last</a> (cdr lst)))))
+</pre>
+<h4><a name='codefunc11307' href='#docfunc11307'>lazy:seed-common</a></h4>
+<i><a href='#tocfunc11307'>Index</a></i><br>
+
+<pre> Returns the common part of the seed
+</pre>
+<pre>(define (<a href="lazy-ssax.html#codefunc11307">lazy:seed-common</a> seed)
+  ((if (null? (cdr seed))  ; a short seed
+       car caddr)
+   seed))
+</pre>
+<h4><a name='codefunc50382' href='#docfunc50382'>lazy:replace-common</a></h4>
+<i><a href='#tocfunc50382'>Index</a></i><br>
+
+<pre> A monad-like handler
+ Replaces the common part of the seed
+</pre>
+<pre>(define (<a href="lazy-ssax.html#codefunc50382">lazy:replace-common</a> seed new-common)
+  (if (null? (cdr seed))  ; a short seed
+      (list new-common)
+      (list (car seed)
+            (cadr seed)
+            new-common
+            (cadddr seed))))
+</pre>
+<h4><a name='codefunc58012' href='#docfunc58012'>lazy:xml->sxml</a></h4>
+<i><a href='#tocfunc58012'>Index</a></i><br>
+
+<pre> Produces a lazy SXML document, which corresponds to reading a source
+ document in a stream-wise fashion
+</pre>
+<pre>(define (<a href="lazy-ssax.html#codefunc58012">lazy:xml-&gt;sxml</a> port namespace-prefix-assig)
+  (let ((namespaces
+         (map (lambda (el)
+                (<a href="myenv.html#codefunc58107">cons*</a> #f (car el) (<a href="SSAX-code.html#codefunc40058">ssax:uri-string-&gt;symbol</a> (cdr el))))
+              namespace-prefix-assig))
+        (<a href="ssax-prim.html#codefunc56334">RES-NAME-&gt;SXML</a>
+         (lambda (res-name)
+           (string-&gt;symbol
+            (string-append
+             (symbol-&gt;string (car res-name))
+             &quot;:&quot;
+             (symbol-&gt;string (cdr res-name)))))))
+    ((lambda (result)
+       ; We assume that nobody follows the document element       
+       (if (null? namespace-prefix-assig)
+           (cons '*TOP* (<a href="lazy-ssax.html#codefunc5971">lazy:except-last</a> result))
+           (cons
+            '*TOP*
+            (cons
+             `(@@ (*NAMESPACES*
+                   ,@(map
+                      (lambda (ns) (list (car ns) (cdr ns)))
+                      namespace-prefix-assig)))
+             (<a href="lazy-ssax.html#codefunc5971">lazy:except-last</a> result)))))
+     (call-with-current-continuation   ; we grab the continuation to escape from parsing
+      (lambda (result-k)
+        ; seed ::= (list result-k state-k common-seed level)
+        ; result-k - continuation on what to do with the current result portion
+        ; state-k - continuation to return to SSAX state on this level of XML
+        ;  tree hierarchy
+        ; common-seed - general seed information
+        ; level - level of a current node in a tree hierarchy
+        ((ssax:make-parser
+          NEW-LEVEL-SEED 
+          (lambda (elem-gi attributes namespaces expected-content seed)
+            ;(pp (cons elem-gi (cadddr seed)))
+            (if
+             (or (null? (cdr seed))  ; short seed
+                 (&gt; (cadddr seed) 3))   ; deep level
+             (list '())  ; work like a conventional SSAX parser
+             (let ((attrs
+                    (<a href="SSAX-code.html#codefunc21894">attlist-fold</a>
+                     (lambda (attr accum)
+                       (cons (list 
+                              (if (symbol? (car attr)) (car attr)
+                                  (<a href="ssax-prim.html#codefunc56334">RES-NAME-&gt;SXML</a> (car attr)))
+                              (cdr attr)) accum))
+                     '() attributes)))
+               (call-with-current-continuation
+                (lambda (new-level-k)  ; how to parse next
+                  ((car seed)  ; return the result
+                   (let ((elem-content
+                          ; A promise to continue parsing
+                          (call-with-current-continuation  ; where to put the result
+                           (lambda (elem-k)
+                             (new-level-k
+                              (list  ; now form a seed
+                               elem-k  ; what to do with result
+                               new-level-k   ; SSAX state on this level
+                               '()  ; common-seed is empty
+                               (+ (cadddr seed) 1)  ; increase level
+                               ))))))
+                     (append
+                      ; Previous string content
+                      (<a href="SSAX-code.html#codefunc45027">ssax:reverse-collect-str-drop-ws</a> (caddr seed))
+                      (list
+                       (cons
+                        (if (symbol? elem-gi) elem-gi
+                            (<a href="ssax-prim.html#codefunc56334">RES-NAME-&gt;SXML</a> elem-gi))
+                        (if (null? attrs) elem-content
+                            (cons (cons '@ attrs) elem-content)))
+                       ; The following siblings of this element
+                       (delay
+                         (call-with-current-continuation  ; where to put the result
+                          (lambda (foll-k)
+                            ; First we force the parsing of the current element
+                            (<a href="lazy-ssax.html#codefunc39982">lazy:force-descendants</a> elem-content)
+                            ; Than continue parsing
+                            ((cadr seed)  ; recover the parent level of nesting
+                             (list
+                              foll-k  ; what to do with result
+                              (cadr seed)
+                              '()  ; common-seed is empty
+                              (cadddr seed)  ; the same level for siblings
+                              ))))))))))))))
+   
+	     FINISH-ELEMENT
+	     (lambda (elem-gi attributes namespaces parent-seed seed)
+               (if
+                (null? (cdr seed))  ; a short seed
+                (let ((common (<a href="SSAX-code.html#codefunc45027">ssax:reverse-collect-str-drop-ws</a>
+                               (<a href="lazy-ssax.html#codefunc11307">lazy:seed-common</a> seed)))
+                      (attrs
+                       (<a href="SSAX-code.html#codefunc21894">attlist-fold</a>
+                        (lambda (attr accum)
+                          (cons (list 
+                                 (if (symbol? (car attr)) (car attr)
+                                     (<a href="ssax-prim.html#codefunc56334">RES-NAME-&gt;SXML</a> (car attr)))
+                                 (cdr attr)) accum))
+                        '() attributes)))
+                  (<a href="lazy-ssax.html#codefunc50382">lazy:replace-common</a>
+                   parent-seed
+                   (cons
+                    (cons 
+                     (if (symbol? elem-gi) elem-gi
+                         (<a href="ssax-prim.html#codefunc56334">RES-NAME-&gt;SXML</a> elem-gi))
+                     (if (null? attrs) common
+                         (cons (cons '@ attrs) common)))
+                    (<a href="lazy-ssax.html#codefunc11307">lazy:seed-common</a> parent-seed))))
+                ; Otherwise - just return the remaining character content
+                ((car seed)  ; continuation
+                 (<a href="SSAX-code.html#codefunc45027">ssax:reverse-collect-str-drop-ws</a>
+                  (<a href="lazy-ssax.html#codefunc11307">lazy:seed-common</a> seed)))))
+             
+	     CHAR-DATA-HANDLER
+	     (lambda (string1 string2 seed)
+               ;(pp (list string1 string2 seed))
+               (<a href="lazy-ssax.html#codefunc50382">lazy:replace-common</a>
+                seed
+                (if (string-null? string2)
+                    (cons string1 (<a href="lazy-ssax.html#codefunc11307">lazy:seed-common</a> seed))
+                    (<a href="myenv.html#codefunc58107">cons*</a> string2 string1 (<a href="lazy-ssax.html#codefunc11307">lazy:seed-common</a> seed)))))
+
+	     DOCTYPE
+	     (lambda (port docname systemid internal-subset? seed)
+	       (when internal-subset?
+		     (<a href="parse-error.html#codefunc54750">ssax:warn</a> port
+			   &quot;Internal DTD subset is not currently handled &quot;)
+		     (<a href="SSAX-code.html#codefunc27966">ssax:skip-internal-dtd</a> port))
+	       (<a href="parse-error.html#codefunc54750">ssax:warn</a> port &quot;DOCTYPE DECL &quot; docname &quot; &quot;
+		     systemid &quot; found and skipped&quot;)
+	       (values #f '() namespaces seed))
+
+	     UNDECL-ROOT
+	     (lambda (elem-gi seed)
+	       (values #f '() namespaces seed))
+
+	     PI
+	     ((*DEFAULT* .
+		(lambda (port pi-tag seed)
+                  (<a href="lazy-ssax.html#codefunc50382">lazy:replace-common</a>
+                   seed
+                   (cons
+                    (list '*PI* pi-tag (<a href="SSAX-code.html#codefunc4659">ssax:read-pi-body-as-string</a> port))
+                    (<a href="lazy-ssax.html#codefunc11307">lazy:seed-common</a> seed))))))
+	     )
+	    port
+            (list  ; form initial seed
+             result-k   ; put the result
+             (lambda (seed)  ; dummy top-level parser state that produces '()
+               ((car seed)  ; where to put the result nodeset
+                '()))
+             '()
+             1  ; level for the document element
+             )))))))
+</pre></body></html>
