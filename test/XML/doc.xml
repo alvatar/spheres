@@ -1,0 +1,94 @@
+<?xml version='1.0'?>
+<!DOCTYPE doc [
+
+  <!ELEMENT doc (multidirectional, item*, body)>
+  <!ELEMENT body (chapter*, appendix)>
+  <!ELEMENT chapter (title, p*)>
+
+  <!ATTLIST item
+ 	id	ID	#REQUIRED>
+
+  <!ATTLIST chapter
+ 	id	ID	#REQUIRED>
+
+  <!ATTLIST section
+ 	ID	ID	#IMPLIED>
+
+  <!ATTLIST appendix
+ 	id	ID	#IMPLIED>
+]>
+
+<doc xmlns:xlink="http://www.w3.org/1999/xlink">
+
+<multidirectional xlink:type="extended">
+<loc xlink:type="locator" xlink:label="boo" xlink:href="#toc1"/>
+<loc xlink:type="locator" xlink:label="hoge" xlink:href="#chap1"/>
+<arc xlink:type="arc" xlink:from="boo" xlink:to="hoge"
+     xlink:title="Traversal to content page"/>
+<arc xlink:type="arc" xlink:from="hoge" xlink:to="boo"
+     xlink:title="Traversal to toc page"/>
+</multidirectional>
+
+<item id="toc1">chapter1</item>
+<item id="toc2">chapter2</item>
+<item id="toc3">chapter3</item>
+<item id="toc4">chapter4</item>
+<item id="toc5">chapter5</item>
+<item id="toc6">chapter6</item>
+<item id="toc7">chapter7</item>
+
+
+<body>
+<chapter id='chap1'>
+<title>Abstract</title>
+<p>This document describes about XLink Engine...</p>
+</chapter>
+
+<chapter id='chap2'>
+<title>Introduction</title>
+<section ID='sec2-1'>
+<p>This document is written in XML (eXtensible Markup Language) ver.1.0.</p>
+</section>
+</chapter>
+
+<chapter id='chap3'>
+<title>What is XLink?</title>
+<p>hyperlink</p>
+</chapter>
+
+<chapter id='chap4'>
+<title>What is XPointer?</title>
+<p>XPointer is the fragment identifier of documents having the mime-type...</p>
+</chapter>
+
+<chapter id='chap5'>
+<title>Models for using XLink/XPointer </title>
+<p>There are important keywords.</p>
+</chapter>
+
+<chapter id='chap6'>
+<title>samples</title>
+</chapter>
+
+<chapter id='chap7'>
+<title>Conclusion</title>
+<p>Thanks a lot.</p>
+</chapter>
+
+<appendix id="here">
+<bibliographic>
+<item>
+<author>Who1</author>
+<title>XML Linking Language (XLink)</title>
+<ref>foo.com</ref>
+</item>
+<item>
+<author>Who2</author>
+<title>XML Pointing Language (XPointer)</title>
+<ref>boo.com</ref>
+</item>
+</bibliographic>
+</appendix>
+
+</body>
+</doc>

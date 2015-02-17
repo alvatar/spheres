@@ -1,0 +1,5 @@
+The files in this folder are the implementations for the benchmarks
+that were used in the Termite paper (http://toute.ca/termite.pdf).
+
+They were run automatically by a Perl script that I'm too ashamed of
+to include here.

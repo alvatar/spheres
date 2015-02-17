@@ -1,0 +1,13 @@
+<?xml version='1.0'?>
+<poem title="The Lovesong of J. Alfred Prufrock"
+      poet="T. S. Eliot">
+ <stanza>
+  <line>Let us go then, you and I,</line>
+  <line>When the evening is spread out against the sky</line>
+  <line>Like a patient etherized upon a table:</line>
+ </stanza>
+ <stanza>
+  <line>In the room the women come and go</line>
+  <line>Talking of Michaelangelo.</line>
+ </stanza>
+</poem>
