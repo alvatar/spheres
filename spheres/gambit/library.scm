@@ -73,8 +73,8 @@
            (option-system (string-append
                            (path-expand "~~lib/")
                            option-here)))
-      (let ((try-options `(,(string-append option-here ".sld")
-                           ,(string-append option-here ".scm")
+      (let ((try-options `(,(string-append option-here ".sld") ;; First option
+                           ,(string-append option-here ".scm") ;; Second option
                            ,@(let recur ((paths %library-paths))
                                (if (null? paths)
                                    paths
@@ -82,8 +82,8 @@
                                      (cons (string-append lib-path lib-relative ".sld")
                                            (cons (string-append lib-path lib-relative ".scm")
                                                  (recur (cdr paths)))))))
-                           ,(string-append option-system ".sld")
-                           ,(string-append option-system ".scm"))))
+                           ,(string-append option-system ".sld") ;; Third option
+                           ,(string-append option-system ".scm")))) ;; Fourth option
         (let find ((l try-options))
           (cond ((null? l) (error "Library not found -" lib))
                 ((file-exists? (car l)) (car l))
@@ -102,7 +102,7 @@
               (symbol? (car lib))
               (or (= len 1) (symbol? (cadr lib)))))))
 
-(define^ (%find-library-default-object lib)
+(define^ (%find-library-object lib)
   (let find-with-suffix ((found #f)
                          (i 1))
     (let ((f (string-append (path-strip-extension (%find-library lib))
@@ -113,6 +113,9 @@
 
 (define^ (%find-library-path lib)
   (path-directory (%find-library lib)))
+
+(define^ (%find-library-filename-no-extension lib)
+  (path-strip-extension (path-strip-directory (%find-library lib))))
 
 (define^ (%find-library-path-root lib)
   (let* ((path (%find-library-path lib))
@@ -130,19 +133,38 @@
            (- path-length i 1))))
     path))
 
-(define^ (%find-library-default-scm lib)
-  (let ((f (string-append (path-strip-extension (%find-library lib)) ".scm")))
+(define^ (%library-scm-path lib)
+  (string-append (path-strip-extension (%find-library lib)) ".scm"))
+
+(define^ (%library-sld-path lib)
+ (string-append (path-strip-extension (%find-library lib)) ".sld"))
+
+(define^ (%library-c-path lib)
+  (string-append (path-strip-extension (%find-library lib)) ".o1.c"))
+
+(define^ (%library-object-path lib)
+  (string-append (path-strip-extension (%find-library lib)) ".o1"))
+
+(define^ (%library-merged-scm-path lib)
+  (string-append (%find-library-path lib) "merged-%-"
+                 (%find-library-filename-no-extension lib)
+                 ".scm"))
+
+(define^ (%find-library-scm lib)
+  (let ((f (%library-scm-path lib)))
     (and (file-exists? f) f)))
 
 (define^ (%find-library-sld lib)
-  (let ((f (string-append (path-strip-extension (%find-library lib)) ".sld")))
+  (let ((f (%library-sld-path lib)))
     (and (file-exists? f) f)))
 
-(define^ (%library-object-filename lib)
-  (string-append (path-strip-extension (%find-library lib)) ".o1"))
+(define^ (%find-library-c lib)
+  (let ((f (%library-c-path lib)))
+    (and (file-exists? f) f)))
 
-(define^ (%library-c-filename lib)
-  (string-append (path-strip-extension (%find-library lib)) ".o1.c"))
+(define^ (%find-library-object lib)
+  (let ((f (%library-object-path lib)))
+    (and (file-exists? f) f)))
 
 (define^ %library-declaration
   (let ((library-declarations (make-table)))
@@ -267,15 +289,15 @@
           (set! import-seq (cons lib import-seq)))
       (cdr import-seq))))
 
-;; Expand cond-expand-features and eval syntax definitions
-(define^ (%library-eval-syntax&find-includes file)
+;;! Expand cond-expand-features and eval syntax definitions
+(define^ (%library-read-syntax&find-includes lib eval?)
   (define (filter f l)
     (let recur ((l l))
       (if (null? l) '()
           (let ((head (car l)))
             (if (f head) (cons head (filter f (cdr l)))
                 (filter f (cdr l)))))))
-  (let* ((file-sexps (with-input-from-file file read))
+  (let* ((file-sexps (with-input-from-file (%find-library-sld lib) read))
          (define-library-args (cdr file-sexps))
          (syntax-defines (filter (lambda (sexp) (let ((head-sexp (car sexp)))
                                              (or (eq? head-sexp 'define-syntax)
@@ -290,10 +312,10 @@
             (if (and (pair? head) (not (null? head)))
                 (case (car head)
                   ((define-syntax)
-                   (eval head)
+                   (if eval? (eval head))
                    (recur (cdr sexps)))
                   ((define-macro)
-                   (eval head)
+                   (if eval? (eval head))
                    (recur (cdr sexps)))
                   ((include)
                    (set! found-includes (cons head found-includes))
@@ -355,13 +377,13 @@
                   (lib-path (%find-library-path lib)))
               (if compile (%call-task lib-path-root 'compile lib))
               (let ((sld-file (%find-library-sld lib))
-                    (procedures-file (or (%find-library-default-object lib)
-                                         (%find-library-default-scm lib))))
+                    (procedures-file (or (%find-library-object lib)
+                                         (%find-library-scm lib))))
                 (set! loaded-libs (cons lib loaded-libs))
                 (if sld-file
                     (begin
                       (if verbose (println "including: " (path-expand sld-file)))
-                      (let ((eval&get-includes (%library-eval-syntax&find-includes sld-file)))
+                      (let ((eval&get-includes (%library-read-syntax&find-includes lib #t)))
                         (if (not only-syntax)
                             (if procedures-file
                                 (load* procedures-file)
