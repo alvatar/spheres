@@ -1,5 +1,5 @@
-;;		XML/HTML processing in Scheme
-;;		SXML expression tree transformers
+;;!!! XML/HTML processing in Scheme
+;; SXML expression tree transformers
 ;;
 ;; IMPORT
 ;; A prelude appropriate for your Scheme system
