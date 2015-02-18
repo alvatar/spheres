@@ -49,6 +49,7 @@
     (spheres/markup html)
     (spheres/markup html-escape)
     (spheres/markup ssax)
+    (spheres/markup sxml-serializer)
     (spheres/markup sxml-tree-transform)
     (spheres/math arithmetic)
     (spheres/math arithmetic-inexact)
