@@ -1400,5 +1400,5 @@
 ;; The equivalences below show the deprecated expressions below, the code on
 ;; the left is deprecated and should be replaced with the code on the right.
 
-(define sxml->html lshtml->html)
+(define sxml->html shtml->html)
 (define write-sxml-html write-shtml-as-html)
