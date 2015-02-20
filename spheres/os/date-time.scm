@@ -791,7 +791,7 @@
 ;;  (time-utc->date (current-time time-utc)
 ;;                  (:optional tz-offset (tm:local-tz-offset))))
 (define* (current-date (tz-offset (tm:local-tz-offset)))
-  (time-utc->date (tm:current-time time-utc)
+  (time-utc->date (current-time time-utc)
 		  tz-offset))
 
 ;; given a 'two digit' number, find the year within 50 years +/-
