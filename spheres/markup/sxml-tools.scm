@@ -20,12 +20,8 @@
 ;;-------------------------------------------------------------------------------
 ;;!! Auxiliary functions
 
-;; Filter (like SRFI-1)
 
-
-;; make-char-quotator QUOT-RULES
-
-;; Given QUOT-RULES, an assoc list of (char . string) pairs, return
+;;! Given QUOT-RULES, an assoc list of (char . string) pairs, return
 ;; a quotation procedure. The returned quotation procedure takes a string
 ;; and returns either a string or a list of strings. The quotation procedure
 ;; check to see if its argument string contains any instance of a character
@@ -69,7 +65,7 @@
 		       (cons quoted-char (loop (+ 1 to) new-to)))
 		      (cons quoted-char (loop (+ 1 to) new-to))))))))))))
 
-;; optimized (string-rindex name #\:)
+;;! optimized (string-rindex name #\:)
 ;; returns position of a separator between namespace-id and LocalName
 (define (sxml:find-name-separator name len)
   (let rpt ((pos (- len 1)))
@@ -78,19 +74,7 @@
      ((char=? #\: (string-ref name pos)) pos)
      (else (rpt (- pos 1))))))
 
-;; unlike filter-map from SRFI-1 this function uses separate predicate
-;; and mapping functions.
-;; Applies proc to  all the elements of source list that satisfy the predicate
-;; and return the list of the results.
-;; (define (sxml-tools:filter-and-map pred proc lis)
-;;   (let rpt ((l lis))
-;;     (if (null? l)
-;;         '()
-;;         (if (pred (car l))
-;;             (cons (proc (car l)) (rpt (cdr l)))
-;;             (rpt (cdr l))))))
-
-;; Applies pred to every member of lst and yields #t if all the results
+;;! Applies pred to every member of lst and yields #t if all the results
 ;; are #t
 (define (check-list pred lst)
   (cond
@@ -99,7 +83,7 @@
     (check-list pred (cdr lst)))
    (else #f)))
 
-;; Returns attr-list node for a given obj
+;;! Returns attr-list node for a given obj
 ;;   or #f if it is absent
 (define (sxml:attr-list-node obj)
   (if (and (not (null? (cdr obj)))
@@ -108,7 +92,7 @@
       (cadr obj)
       #f))
 
-;; Returns attr-list wrapped in list
+;;! Returns attr-list wrapped in list
 ;;   or '((@)) if it is absent and aux-list is present
 ;;   or '() if both lists are absent
 (define (sxml:attr-as-list obj)
@@ -119,7 +103,7 @@
     '((@)))
    (else '())))
 
-;; Returns aux-list node for a given obj
+;;! Returns aux-list node for a given obj
 ;;   or #f if it is absent
 (define (sxml:aux-list-node obj)
   (if
@@ -130,7 +114,7 @@
    #f
    (caddr obj)))
 
-;; Returns aux-list wrapped in list
+;;! Returns aux-list wrapped in list
 ;;   or '() if it is absent
 (define (sxml:aux-as-list obj)
   (cond
@@ -138,7 +122,7 @@
     => list)
    (else '())))
 
-;; sxml error message
+;;! sxml error message
 (define (sxml:error . messages)
   (display "\nSXML ERROR: " (current-error-port))
   (for-each (lambda (m) (display m (current-error-port))) messages)
@@ -148,7 +132,7 @@
 ;;-------------------------------------------------------------------------------
 ;;!! Predicates
 
-;; Predicate which returns #t if given element <obj> is empty.
+;;! Predicate which returns #t if given element <obj> is empty.
 ;; Empty element has no nested elements, text nodes, PIs, Comments or entities
 ;; but it may contain attributes or namespace-id.
 ;; It is a SXML counterpart of XML empty-element.
@@ -160,7 +144,7 @@
            ((ntype?? '*) x)
 	   (string? x)))) obj)))
 
-;; Returns #t if the given <obj> is shallow-normalized SXML element.
+;;! Returns #t if the given <obj> is shallow-normalized SXML element.
 ;; The element itself has to be normalised but its nested elements are not tested.
 (define (sxml:shallow-normalized? obj)
   (or
@@ -175,7 +159,7 @@
                  (eq? (caaddr obj) '@@))
             (not ((select-first-kid (ntype?? '@@)) obj))))))
 
-;; Returns #t if the given <obj> is normalized SXML element.
+;;! Returns #t if the given <obj> is normalized SXML element.
 ;;  The element itself and all its nested elements have to be normalised.
 (define (sxml:normalized? obj)
   (and
@@ -188,7 +172,7 @@
        #t))
     (sxml:content obj))))
 
-;; Returns #t if the given <obj> is shallow-minimized SXML element.
+;;! Returns #t if the given <obj> is shallow-minimized SXML element.
 ;; The element itself has to be minimised but its nested elements are not tested.
 (define (sxml:shallow-minimized? obj)
   (and
@@ -199,7 +183,7 @@
              (null? (sxml:attr-list obj))
              (not (sxml:aux-list-node obj))))))
 
-;; Returns #t if the given <obj> is minimized SXML element.
+;;! Returns #t if the given <obj> is minimized SXML element.
 ;;  The element itself and all its nested elements have to be minimised.
 (define (sxml:minimized? obj)
   (and
@@ -215,18 +199,18 @@
 ;;-------------------------------------------------------------------------------
 ;;!! Accessors
 
-;; Returns a name of a given SXML node
+;;! Returns a name of a given SXML node
 ;; It is introduced for the sake of encapsulation.
 (define sxml:name car)
 
-;; A version of sxml:name, which returns #f if the given <obj> is
+;;! A version of sxml:name, which returns #f if the given <obj> is
 ;; not a SXML element.
 ;; Otherwise returns its name.
 (define (sxml:element-name obj)
   (and ((ntype?? '*) obj)
        (car obj)))
 
-;; Safe version of sxml:name, which returns #f if the given <obj> is
+;;! Safe version of sxml:name, which returns #f if the given <obj> is
 ;; not a SXML node.
 ;; Otherwise returns its name.
 (define (sxml:node-name obj)
@@ -234,7 +218,7 @@
        (symbol? (car obj))
        (car obj)))
 
-;; Returns Local Part of Qualified Name (Namespaces in XML production [6])
+;;! Returns Local Part of Qualified Name (Namespaces in XML production [6])
 ;; for given obj, which is ":"-separated suffix of its Qualified Name
 ;; If a name of a node given is NCName (Namespaces in XML production [4]), then
 ;; it is returned as is.
@@ -248,7 +232,7 @@
            (substring name (+ pos 1) len)))
      (else name))))
 
-;; Returns namespace-id part of given name, or #f if it's LocalName
+;;! Returns namespace-id part of given name, or #f if it's LocalName
 (define (sxml:name->ns-id sxml-name)
   (let* ((name (symbol->string sxml-name)))
     (cond
@@ -257,7 +241,7 @@
            (substring name  0 pos)))
      (else #f))))
 
-;; Returns the content of given SXML element or nodeset (just text and element
+;;! Returns the content of given SXML element or nodeset (just text and element
 ;; nodes) representing it as a list of strings and nested elements in document
 ;; order.  This list is empty if <obj> is empty element or empty list.
 (define (sxml:content obj)
@@ -270,7 +254,7 @@
        ((ntype?? '*) x))))
    obj))
 
-;; Returns a string which combines all the character data
+;;! Returns a string which combines all the character data
 ;; from text node childrens of the given SXML element
 ;; or "" if there is no text node children
 (define (sxml:text obj)
@@ -295,8 +279,8 @@
 ;; "Fast" accessors are optimized for normalized SXML data.
 ;; They are not applicable to arbitrary non-normalized SXML data
 ;; Their names has no specific suffixes
-;;
-;; Returns all the content of normalized SXML element except attr-list and
+
+;;! Returns all the content of normalized SXML element except attr-list and
 ;; aux-list.
 ;; Thus it includes PI, COMMENT and  ENTITY nodes as well as TEXT and ELEMENT nodes
 ;; returned by sxml:content.
@@ -312,7 +296,7 @@
            cddr)
        cdr) obj))
 
-;; Returns the list of attributes for given element or nodeset.
+;;! Returns the list of attributes for given element or nodeset.
 ;; Analog of ((sxpath '(@ *)) obj)
 ;; Empty list is returned if there is no list of attributes.
 (define (sxml:attr-list-u obj)
@@ -320,7 +304,7 @@
 	 => cdr)
 	(else '())))
 
-;; Returns the list of auxiliary nodes for given element or nodeset.
+;;! Returns the list of auxiliary nodes for given element or nodeset.
 ;; Analog of ((sxpath '(@@ *)) obj)
 ;; Empty list is returned if a list of auxiliary nodes is absent.
 (define (sxml:aux-list obj)
@@ -332,7 +316,7 @@
    '()
    (cdaddr obj)))
 
-;; Returns the list of auxiliary nodes for given element or nodeset.
+;;! Returns the list of auxiliary nodes for given element or nodeset.
 ;; Analog of ((sxpath '(@@ *)) obj)
 ;; Empty list is returned if a list of auxiliary nodes is absent.
 (define (sxml:aux-list-u obj)
@@ -340,7 +324,7 @@
 	 => cdr)
 	(else '())))
 
-;; Return the first aux-node with <aux-name> given in SXML element <obj>
+;;! Return the first aux-node with <aux-name> given in SXML element <obj>
 ;; or #f is such a node is absent.
 ;; NOTE: it returns just the FIRST node found even if multiple nodes are
 ;; present, so it's mostly intended for nodes with unique names
@@ -349,7 +333,7 @@
    ((assq aux-name (sxml:aux-list obj)))
    (else #f)))
 
-;; Return a list of aux-node with <aux-name> given in SXML element <obj>
+;;! Return a list of aux-node with <aux-name> given in SXML element <obj>
 ;; or '() if such a node is absent.
 (define (sxml:aux-nodes obj aux-name)
   (define (sxml-tools:filter proc lst)
@@ -364,7 +348,7 @@
    (lambda(x) (eq? aux-name (car x)))
    (sxml:aux-list obj)))
 
-;; Accessor for an attribute <attr-name> of given SXML element <obj> which
+;;! Accessor for an attribute <attr-name> of given SXML element <obj> which
 ;; It returns:
 ;;    the value of the attribute if the attribute is present
 ;;    #f if there is no such an attribute in the given element
@@ -374,14 +358,14 @@
     => cadr)
    (else #f)))
 
-;; Extracts a value of attribute with given name from attr-list
+;;! Extracts a value of attribute with given name from attr-list
 (define (sxml:attr-from-list attr-list name)
   (cond
    ((assq name attr-list)
     => cadr)
    (else #f)))
 
-;; Accessor for a numerical attribute <attr-name> of given SXML element <obj>
+;;! Accessor for a numerical attribute <attr-name> of given SXML element <obj>
 ;; which It returns:
 ;;    a value of the attribute as the attribute as a number if the attribute
 ;;    is present and its value may be converted to number using string->number
@@ -393,7 +377,7 @@
     => (lambda(x) (string->number (cadr x))))
    (else #f)))
 
-;; Accessor for an attribute <attr-name> of given SXML element <obj> which
+;;! Accessor for an attribute <attr-name> of given SXML element <obj> which
 ;; may also be an attributes-list or nodeset (usually content of SXML element)
 ;;
 ;; It returns:
@@ -407,14 +391,14 @@
            ((and (not (null? (cdr obj)))
                  (pair? (cadr obj))
                  (eq? '@ (caadr obj)))
-            (cdadr obj))         ; fast track for normalized elements
+            (cdadr obj))          ; fast track for normalized elements
            ((eq? '@ (car obj))
             (cdr obj))                  ; if applied to attr-list
            (else (sxml:attr-list-u obj))))
     => cadr)
    (else #f)))
 
-;; Returns the list of namespaces for given element.
+;;! Returns the list of namespaces for given element.
 ;; Analog of ((sxpath '(@@ *NAMESPACES* *)) obj)
 ;; Empty list is returned if there is no list of namespaces.
 (define (sxml:ns-list obj)
@@ -422,7 +406,7 @@
 	 => cdr)
 	(else '())))
 
-;; Returns the list of namespace-assoc's for given namespace-id in
+;;! Returns the list of namespace-assoc's for given namespace-id in
 ;; SXML element <obj>.
 ;; Analog of ((sxpath '(@@ *NAMESPACES* namespace-id)) obj)
 ;; Empty list is returned if there is no namespace-assoc with namespace-id
@@ -441,7 +425,7 @@
      (eq? (car x) namespace-id))
    (sxml:ns-list obj)))
 
-;; It returns:
+;;! It returns:
 ;;    A  URI's for namespace-id given
 ;;    #f if there is no namespace-assoc with namespace-id given
 (define (sxml:ns-id->uri obj namespace-id)
@@ -450,7 +434,7 @@
     => cadr)
    (else #f)))
 
-;; Returns a list of namespace-assocs nodes for NS URI given
+;;! Returns a list of namespace-assocs nodes for NS URI given
 (define (sxml:ns-uri->nodes obj URI)
   (define (sxml-tools:filter proc lst)
     (let recur ((lst lst))
@@ -465,7 +449,7 @@
      (string=? (cadr ns-assoc) URI))
    (sxml:ns-list obj)))
 
-;; Returns a namespace-id for NS URI given
+;;! Returns a namespace-id for NS URI given
 (define (sxml:ns-uri->id obj URI)
   (let rpt ((ns-assocs (sxml:ns-list obj)))
     (cond
@@ -474,13 +458,13 @@
       (caar ns-assocs))
      (else (rpt (cdr ns-assocs))))))
 
-;; Returns namespace-id for given namespace-assoc list
+;;! Returns namespace-id for given namespace-assoc list
 (define sxml:ns-id car)
 
-;; Returns URI for given namespace-assoc list
+;;! Returns URI for given namespace-assoc list
 (define sxml:ns-uri cadr)
 
-;; It returns namespace prefix for given namespace-assoc list
+;;! It returns namespace prefix for given namespace-assoc list
 ;;  Original (as in XML document) prefix for namespace-id given
 ;; has to be strored as the third element in namespace-assoc list
 ;; if it is different from namespace-id.
@@ -507,7 +491,7 @@
 ;;   An example:
 ;;      sxml:change-content
 
-;; Change the content of given SXML element to <new-content>
+;;! Change the content of given SXML element to <new-content>
 ;; If <new-content> is an empty list then the <obj> is transformed
 ;; The resulting SXML element is normalized
 ;; Former name sxml:content!
@@ -517,7 +501,7 @@
               ,@(sxml:aux-as-list obj)
 	      ,@new-content)))
 
-;; Change the content of given SXML element to <new-content>
+;;! Change the content of given SXML element to <new-content>
 ;; If <new-content> is an empty list then the <obj> is transformed
 ;; to an empty element
 ;; The resulting SXML element is normalized
@@ -527,7 +511,7 @@
     ,@(sxml:aux-as-list obj)
     ,@new-content))
 
-;; The resulting SXML element is normalized, if <new-attrlist> is empty,
+;;! The resulting SXML element is normalized, if <new-attrlist> is empty,
 ;; the cadr of <obj> is (@)
 (define (sxml:change-attrlist obj new-attrlist)
   `(,(sxml:name obj)
@@ -540,7 +524,7 @@
     ,@(sxml:aux-as-list obj)
     ,@(sxml:content obj)))
 
-;; The resulting SXML element is normalized, if <new-attrlist> is empty,
+;;! The resulting SXML element is normalized, if <new-attrlist> is empty,
 ;; the cadr of <obj> is (@)
 ;; Former name sxml:attrlist!
 (define (sxml:change-attrlist! obj new-attrlist)
@@ -554,16 +538,16 @@
               ,@(sxml:aux-as-list obj)
               ,@(sxml:content obj))))
 
-;; Change a name of SXML element destructively
+;;! Change a name of SXML element destructively
 ;; Former name was 'sxml:name!'
 (define (sxml:change-name! obj new-name)
   (set-car! obj new-name))
 
-;; Returns SXML element with its name changed
+;;! Returns SXML element with its name changed
 (define (sxml:change-name obj new-name)
   (cons new-name (cdr obj)))
 
-;; Returns SXML element <obj> with attribute <attr> added or #f
+;;! Returns SXML element <obj> with attribute <attr> added or #f
 ;; if the attribute with given name already exists,
 ;; <attr> is (<attr-name> <attr-value>)
 ;; Pure functional counterpart to sxml:add-attr!
@@ -576,7 +560,7 @@
           ,@(sxml:aux-as-list obj)
           ,@(sxml:content obj)))))
 
-;; Add an attribute <attr> for an element <obj>
+;;! Add an attribute <attr> for an element <obj>
 ;; Returns #f if the attribute with given name already exists.
 ;; The resulting SXML node is normalized.
 ;; Linear update counterpart to sxml:add-attr
@@ -591,7 +575,7 @@
                       ,@(sxml:content obj)))
           obj))))
 
-;; Returns SXML element <obj> with changed value of attribute <attr> or #f
+;;! Returns SXML element <obj> with changed value of attribute <attr> or #f
 ;; if where is no attribute with given name.
 ;; <attr> is (<attr-name> <attr-value>)
 (define (sxml:change-attr obj attr)
@@ -614,7 +598,7 @@
 		 )))
          (else #f)))))
 
-;; Change value of the attribute for element <obj>
+;;! Change value of the attribute for element <obj>
 ;; <attr> is (<attr-name> <attr-value>)
 ;; Returns #f if where is no such attribute
 (define (sxml:change-attr! obj attr)
@@ -627,7 +611,7 @@
             (set-cdr! y (cdr attr)) obj))
 	 (else #f)))))
 
-;; Set attribute <attr> of element <obj>
+;;! Set attribute <attr> of element <obj>
 ;; If there is no such attribute the new one is added
 (define (sxml:set-attr obj attr)
   (let ((attr-list (sxml:attr-list obj)))
@@ -650,7 +634,7 @@
         ,@(sxml:aux-as-list obj)
         ,@(sxml:content obj))))))
 
-;; Set attribute <attr> of element <obj>
+;;! Set attribute <attr> of element <obj>
 ;; If there is no such attribute the new one is added
 (define (sxml:set-attr! obj attr)
   (let ((attr-list (sxml:attr-list obj)))
@@ -662,14 +646,14 @@
                        ,@(sxml:aux-as-list obj)
                        ,@(sxml:content obj)))))))
 
-;; Returns SXML element <obj> with an auxiliary node <aux-node> added
+;;! Returns SXML element <obj> with an auxiliary node <aux-node> added
 (define (sxml:add-aux obj aux-node)
   `(,(sxml:name obj)
     (@ ,@(sxml:attr-list obj))
     (@@ ,@(cons aux-node (sxml:aux-list obj)))
     ,@(sxml:content obj)))
 
-;; Add an auxiliary node <aux-node> for an element <obj>
+;;! Add an auxiliary node <aux-node> for an element <obj>
 (define (sxml:add-aux! obj aux-node)
   (set-cdr! obj
             `((@ ,@(sxml:attr-list obj))
@@ -677,7 +661,7 @@
               ,@(sxml:content obj)))
   obj)
 
-;; Eliminates empty lists of attributes and aux-lists for given SXML element
+;;! Eliminates empty lists of attributes and aux-lists for given SXML element
 ;; <obj> and its descendants ("minimize" it)
 ;; Returns: minimized and normalized SXML element
 (define (sxml:squeeze! obj)
@@ -705,7 +689,7 @@
                     (else x)))
                  (sxml:content obj)))))
 
-;; Eliminates empty lists of attributes and aux-lists for given SXML element
+;;! Eliminates empty lists of attributes and aux-lists for given SXML element
 ;; <obj> and its descendants ("minimize" it)
 ;; Returns: minimized and normalized SXML element
 (define (sxml:squeeze obj)
@@ -732,7 +716,7 @@
           (else x)))
        (sxml:content obj))))
 
-;; Eliminates empty lists of attributes and ALL aux-lists for given SXML element
+;;! Eliminates empty lists of attributes and ALL aux-lists for given SXML element
 ;; <obj> and its descendants
 ;; Returns: minimized and normalized SXML element
 (define (sxml:clean obj)
@@ -756,9 +740,7 @@
 ;;-------------------------------------------------------------------------------
 ;;!! SXPath-related
 
-;; Extensions
-;;
-;; select-first-kid:: Pred -> Node -> Node
+;;! select-first-kid:: Pred -> Node -> Node
 ;; Given a Node, return its first child that satisfy
 ;; the test-pred?
 ;; Returns #f if there is no such a child
@@ -777,10 +759,11 @@
 	(car lst))
        (else (rpt (cdr lst)))))))
 
+
 ;;-------------------------------------------------------------------------------
 ;;!! Fast node-parent
 
-;; Returns a function of one argument - SXML element - which returns its parent
+;;! Returns a function of one argument - SXML element - which returns its parent
 ;; node using *PARENT* pointer in aux-list
 ;; '*TOP-PTR* may be used as a pointer to root node
 ;; It return an empty list when applyed to root node
@@ -826,7 +809,7 @@
       (set-cdr! h b)
       h)))
 
-;; Lookup an element using its ID
+;;! Lookup an element using its ID
 (define (sxml:lookup id index)
   (cond
    ((assoc id index)
@@ -837,15 +820,14 @@
 ;;-------------------------------------------------------------------------------
 ;;!! Markup generation
 
-;;-------------------------------------------------------------------------------
 ;;!! XML generation
 
-;; Creates the XML markup for attributes.
+;;! Creates the XML markup for attributes.
 (define (sxml:attr->xml attr)
   (list " " (sxml:ncname attr)
         "='" (cadr attr) "'"))
 
-;; Return a string or a list of strings where all the occurences of
+;;! Return a string or a list of strings where all the occurences of
 ;; characters < > & " ' in a given string are replaced by corresponding
 ;; character entity references. See also:  sxml:string->html
 (define sxml:string->xml
@@ -853,7 +835,7 @@
    '((#\< . "&lt;") (#\> . "&gt;") (#\& . "&amp;")
      (#\" . "&quot;") (#\' . "&apos;"))))
 
-;; A version of dispatch-node specialized and optimized for SXML->XML
+;;! A version of dispatch-node specialized and optimized for SXML->XML
 ;; transformation.
 (define (sxml:sxml->xml tree)
   (cond
@@ -875,13 +857,13 @@
 ;;-------------------------------------------------------------------------------
 ;;!! HTML generation
 
-;; Creates the HTML markup for attributes.
+;;! Creates the HTML markup for attributes.
 (define (sxml:attr->html attr)
   (if (equal? "" (cadr attr))
       (list " " (sxml:ncname attr))
       (list " " (sxml:ncname attr) "='" (cadr attr) "'")))
 
-;; Given a string, check to make sure it does not contain characters
+;;! Given a string, check to make sure it does not contain characters
 ;; < > & " that require encoding. Return either the original
 ;; string, or a list of string fragments with special characters
 ;; replaced by appropriate character entities.
@@ -891,12 +873,12 @@
   (make-char-quotator
    '((#\< . "&lt;") (#\> . "&gt;") (#\& . "&amp;") (#\" . "&quot;"))))
 
-;; This predicate yields #t for "unterminated" HTML 4.0 tags
+;;! This predicate yields #t for "unterminated" HTML 4.0 tags
 (define (sxml:non-terminated-html-tag? tag)
   (memq tag
         '(area base basefont br col frame hr img input isindex link meta param)))
 
-;; A version of dispatch-node specialized and optimized for SXML->HTML
+;;! A version of dispatch-node specialized and optimized for SXML->HTML
 ;; transformation.
 (define (sxml:sxml->html tree)
   (cond
