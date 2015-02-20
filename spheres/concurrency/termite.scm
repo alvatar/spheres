@@ -94,12 +94,11 @@
 
 ;; Get the current time in seconds.
 (define (now)
-  (time->seconds 
+  (time->seconds
    (current-time)))
 
-;; TODO
-(define (formatted-current-time) 
-  (string-append "time: "(number->string (time->seconds (current-time)))))
+(define (formatted-current-time)
+  (date->string (curent-date)))
 
 ;; ----------------------------------------------------------------------------
 ;; Datatypes
@@ -153,7 +152,7 @@
 (define (base-exception-handler e)
   (continuation-capture
    (lambda (k)
-     (let ((log-crash 
+     (let ((log-crash
             (lambda (e)
               (termite-log
                'error
@@ -202,7 +201,7 @@
     (outbound-link pid)
     pid))
 
-;;! Start a new process on remote node 'node', executing the code 
+;;! Start a new process on remote node 'node', executing the code
 ;; in 'thunk'.
 (define (remote-spawn node thunk #!key (links '()) (name 'anonymous-remote))
   (if (equal? node (current-node))
@@ -232,7 +231,7 @@
   (thread-terminate! (current-thread)))
 
 ;;! Forcefully terminate a local process.  Warning: it only works on
-;; local processes!  This should be used with caution. 
+;; local processes!  This should be used with caution.
 (define (terminate! victim)
   (thread-terminate! victim)
   (for-each
@@ -270,7 +269,7 @@
 
 ;;! Send a message 'msg' to 'pid'.  This means that the message will
 ;; be enqueued in the mailbox of the destination process.
-;; 
+;;
 ;; Delivery of the message is unreliable in theory, but in practice
 ;; local messages will always be delivered, and remote messages will
 ;; not be delivered only if the connection is currently broken to the
@@ -508,10 +507,10 @@
   (cond
    ((process? obj)
     (pid->upid obj))
-   ((tag? obj) 
+   ((tag? obj)
     (tag->utag obj))
    ;; unserializable objects, so instead of crashing we set them to #f
-   ((or (port? obj)) 
+   ((or (port? obj))
     #f)
    (else obj)))
 
@@ -521,7 +520,7 @@
     => (lambda (pid) pid))
    ((and (symbol? (upid-tag obj))
          (resolve-service (upid-tag obj)))
-    => (lambda (pid) 
+    => (lambda (pid)
          pid))
    (else
     (error "don't know how to upid->pid"))))
@@ -622,7 +621,7 @@
                            coalesce: #f))))
     (spawn
      (lambda ()
-       (let loop () 
+       (let loop ()
          (on-connect (read tcp-server-port)) ;; io override
          (loop)))
      name: 'termite-tcp-server)))
@@ -704,7 +703,7 @@
                        (recur (cdr lst))
                        (cons head (recur (cdr lst))))))))))
     (spawn
-     (lambda () 
+     (lambda ()
        ;; the KNOWN-NODES of the DISPATCHER LOOP is an a-list of NODE => MESSENGER
        (let loop ((known-nodes '()))
          (recv
@@ -715,8 +714,8 @@
           (('relay upid message)
            (let ((node (upid-node upid)))
              (cond
-              ;; the message should be sent locally (ideally should not happen 
-              ;; for performance reasons, but if the programmer wants to do 
+              ;; the message should be sent locally (ideally should not happen
+              ;; for performance reasons, but if the programmer wants to do
               ;; that, then OK...)
               ((equal? node (current-node))
                (! (upid->pid upid) message)
@@ -778,7 +777,7 @@
 ;; the PUBLISHER is used to implement a mutable global env. for
 ;; process names
 (define publisher
-  (spawn 
+  (spawn
    (lambda ()
      (define dict (make-dict))
      (let loop ()
@@ -818,7 +817,7 @@
 ;;!! Erlang/OTP-like behavior for "generic servers"
 
 ;; "Types" for the functions in a SERVER plugin
-;; 
+;;
 ;; INIT      :: args         -> state
 ;; CALL      :: term   state -> reply state
 ;; CAST      :: term   state -> state
@@ -840,7 +839,7 @@
       (let ((state ((server-plugin-init plugin) args)))
         (! from (list tag state))
         (loop state)))
-      
+
      ((from tag ('call term))
       (call-with-values
           (lambda ()
@@ -855,7 +854,7 @@
 
 (define (internal-server-start spawner plugin args name)
   (let ((server (spawner (lambda () (make-server plugin)) name: name)))
-    (!? server (list 'init args) *server-timeout*) 
+    (!? server (list 'init args) *server-timeout*)
     server))
 
 (define (server:start plugin args #!key (name 'anonymous-generic-server))
@@ -894,7 +893,7 @@
 ;;!! Erlang/OTP-like behavior for "event handlers"
 
 ;; "Types" for the functions in a EVENT-HANDLER
-;; 
+;;
 ;; INIT      :: arg           -> state
 ;; NOTIFY    :: event  state  -> state
 ;; CALL      :: args   state  -> reply state
@@ -924,7 +923,7 @@
       (termite-match (assq handler handlers)
                      ((handler . state)
                       (call-with-values
-                          (lambda () 
+                          (lambda ()
                             ((event-handler-call handler) args state))
                         (lambda (reply state)
                           (! from (list tag reply))
@@ -943,10 +942,10 @@
              (lambda (pair)
                (termite-match pair
                               ((handler . state)
-                               (cons handler 
+                               (cons handler
                                      ((event-handler-notify handler) event state)))))
              handlers)))
-     (('stop) 
+     (('stop)
       (for-each
        (lambda (pair)
          (termite-match pair
@@ -963,12 +962,12 @@
      handlers)
     em))
 
-(define (event-manager:start 
+(define (event-manager:start
          #!key (name 'anonymous-event-manager)
          #!rest handlers)
   (internal-event-manager-start spawn handlers name))
 
-(define (event-manager:start-link 
+(define (event-manager:start-link
          #!key (name 'anonymous-linked-event-manager)
          #!rest handlers)
   (internal-event-manager-start spawn-link handlers name))
@@ -1007,11 +1006,11 @@
 
 ;; (it would be "better" if those were implemented functionally)
 (define (data-make-process-name type)
-  (string->symbol 
-   (string-append 
-    (symbol->string 
-     (thread-name 
-      (current-thread))) 
+  (string->symbol
+   (string-append
+    (symbol->string
+     (thread-name
+      (current-thread)))
     "-"
     (symbol->string type))))
 
@@ -1064,15 +1063,15 @@
 ;;   (if (not (eq? id id:))
 ;;       (error "id: is mandatory in define-termite-type"))
 ;;   (let* ((maker (make-maker type))
-;;          (getters (map (lambda (field) 
-;;                          (make-getter type field)) 
+;;          (getters (map (lambda (field)
+;;                          (make-getter type field))
 ;;                        fields))
-;;          (setters (map (lambda (field) 
-;;                          (make-setter type field)) 
+;;          (setters (map (lambda (field)
+;;                          (make-setter type field))
 ;;                        fields))
 ;;          (internal-type (gensym type))
 ;;          (internal-maker (make-maker internal-type))
-;;          (internal-getters (map (lambda (field) 
+;;          (internal-getters (map (lambda (field)
 ;;                                   (make-getter internal-type field))
 ;;                                 fields))
 ;;          (internal-setters (map (lambda (field)
@@ -1115,12 +1114,12 @@
 ;;          (,facade-maker (server:start ,plugin (list ,@fields) name: ',type)))
 ;;        ,@(map (lambda (getter)
 ;;                 `(define (,getter x)
-;;                    (server:call (,(make-getter type pid) x) 
+;;                    (server:call (,(make-getter type pid) x)
 ;;                                 ',getter)))
 ;;               getters)
 ;;        ,@(map (lambda (setter)
 ;;                 `(define (,setter x value)
-;;                    (server:cast (,(make-getter type pid) x) 
+;;                    (server:cast (,(make-getter type pid) x)
 ;;                                 (list ',setter value))))
 ;;               setters))))
 
@@ -1142,13 +1141,13 @@
            (table-set! table key))
           (('dict-set! key value)
            (table-set! table key value))
-          ((from tag ('dict-search proc)) 
+          ((from tag ('dict-search proc))
            (! from (list tag (table-search proc table))))
           (('dict-for-each proc)
            (table-for-each proc table))
           ((from tag ('dict->list))
            (! from (list tag (table->list table))))
-          ((msg 
+          ((msg
             (termite-warning (list ignored: msg)))))
          (loop))))
    name: name))
@@ -1181,9 +1180,9 @@
 ;; test...
 
 ;; (init)
-;; 
+;;
 ;; (define dict (make-dict))
-;; 
+;;
 ;; (print (dict->list dict))
 ;; (dict-set! dict 'foo 123)
 ;; (dict-set! dict 'bar 42)
@@ -1213,7 +1212,7 @@
            (table-set! table elt))
           ((from tag ('bag-member? elt))
            (table-ref table elt))
-          ((from tag ('bag-search proc)) 
+          ((from tag ('bag-search proc))
            (! from (list tag (table-search (lambda (k v) (proc k)) table))))
           (('bag-for-each proc)
            (table-for-each (lambda (k v) (proc k)) table))
@@ -1249,9 +1248,9 @@
 ;; test...
 
 ;; (init)
-;; 
+;;
 ;; (define bag (make-bag))
-;; 
+;;
 ;; (print (bag->list bag))
 ;; (bag-add! bag 'foo)
 ;; (bag-add! bag 'bar)
@@ -1317,7 +1316,7 @@
    ;; init
    (lambda (args)
      (termite-match args
-                    ((filename) 
+                    ((filename)
                      (open-output-file (list path: filename
                                              create: 'maybe
                                              append: #t)))))
@@ -1355,11 +1354,11 @@
     logger))
 
 (define ping-server
-  (spawn 
+  (spawn
    (lambda ()
      (let loop ()
        (recv
-        ((from tag 'ping) 
+        ((from tag 'ping)
          (! from (list tag 'pong)))
         (msg (termite-debug "ping-server ignored message" msg)))
        (loop)))

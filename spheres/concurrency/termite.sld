@@ -12,7 +12,7 @@
            !?
            on
            make-node
-           spawn pid? 
+           spawn pid?
            spawn-link
            remote-spawn
            remote-spawn-link
@@ -30,7 +30,7 @@
            termite-exception? ;; actually that has to be exported for RECV
            ;; Migration
            migrate-task
-           migrate/proxy 
+           migrate/proxy
            ;; Useful condition reporting/logging procedures
            termite-warning
            termite-debug
@@ -39,22 +39,22 @@
            node-init
            node?
            node-host
-           node-port 
+           node-port
            ;; Nameserver mechanism
-           make-nameserver-node 
+           make-nameserver-node
            ;; OTP-style stuff (genserver)
            make-server-plugin
            server:start
-           server:start-link 
+           server:start-link
            server:call
            server:cast
-           server:stop 
+           server:stop
            ;; Distributed data structures
            make-dict
            dict?
            dict->list
            dict-for-each
-           dict-search 
+           dict-search
            dict-set!
            dict-ref
            dict-length
@@ -75,8 +75,9 @@
            termite-match
            termite-match/action
            recv))
-  
-  (import (spheres/net uuid))
+
+  (import (spheres/net uuid)
+          (spheres/os date-time))
 
   ;; Clause manipulation
   ;;
@@ -429,8 +430,8 @@
         `(let ,(map car (filter car data))
            ,(translate (map cdr data) '() '() '()))))
     (let ((tmp (gensym))
-          (succ (gensym))	 
-          (fail (gensym))) 
+          (succ (gensym))
+          (fail (gensym)))
       `(let ((,tmp ,datum)
              (,succ (lambda () ,on-success)) ;; the thunk for success is lifted
              (,fail (lambda () ,on-fail))) ;; the thunk for failure is lifted
@@ -441,8 +442,8 @@
       #f
       (raise (list bad-match: ',clauses))
       ,datum
-      ,@clauses))  
-  
+      ,@clauses))
+
   (define-macro (recv . clauses)
     (let ((msg  (gensym 'msg)) ;; the current mailbox message
           (loop (gensym 'loop))) ;; the mailbox seeking loop
@@ -472,11 +473,11 @@
                     (let ,loop ((,msg (thread-mailbox-next ,timeout)))
                          (termite-match/action
                           (thread-mailbox-extract-and-rewind)
-                          (,loop 
+                          (,loop
                            (thread-mailbox-next ,timeout))
                           ,msg
                           ;; extra clause to handle system events
-                          (event 
+                          (event
                            (where (termite-exception? event))
                            (handle-exception-message event))
                           ;; the user clauses
@@ -489,10 +490,10 @@
                     (thread-mailbox-next))
                    ,msg
                    ;; extra clause to handle system events
-                   (event 
+                   (event
                     (where (termite-exception? event))
                     (handle-exception-message event))
                    ;; the user clauses
                    ,@clauses))))))
-  
+
   (include "termite.scm"))
