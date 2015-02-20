@@ -31,7 +31,7 @@
 ;; XPathLink as well. Neil W. Van Dyke <neil@neilvandyke.org> and his permissive
 ;; HTML parser HtmlPrag have made this feature possible.
 
-(define-library (spheres/markup sxpath-context)
+(define-library (spheres/markup sxpath-context-xlink)
   (export txpath-with-context
           txpath/c
           sxpath-with-context
@@ -47,13 +47,14 @@
           (spheres/markup sxpath))
 
   ;; SSAX: we are using the original version for this. Has to be first.
-  (include "sxpath-context-xlink/ssax.scm")
-  (include "sxpath-context-xlink/id/access-remote.scm")
-  (include "sxpath-context-xlink/id/id.scm")
-  (include "sxpath-context-xlink/id/mime.scm")
-  (include "sxpath-context-xlink/id/http.scm")
-  (include "sxpath-context-xlink/multi-parser.scm")
-  (include "sxpath-context-xlink/xlink-parser.scm")
-  (include "sxpath-context-xlink/xlink.scm")
-  (include "sxpath-context-xlink/xpath-ast.scm")
-  (include "sxpath-context-xlink/sxpath-context.scm"))
+  (include "internal/ssax-macros.scm")
+  (include "internal/ssax.scm")
+  (include "internal/id/access-remote.scm")
+  (include "internal/id/id.scm")
+  (include "internal/id/mime.scm")
+  (include "internal/id/http.scm")
+  (include "internal/multi-parser.scm")
+  (include "internal/xlink-parser.scm")
+  (include "internal/xlink.scm")
+  (include "internal/xpath-ast.scm")
+  (include "internal/sxpath-context.scm"))

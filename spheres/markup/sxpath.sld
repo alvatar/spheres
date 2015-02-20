@@ -38,7 +38,7 @@
           (spheres/markup sxml-tools))
 
   ;; (include "sxpath/sxpath-lib.scm") ; included in sxml-tools
-  (include "sxpath/xpath-parser.scm")
-  (include "sxpath/sxpath-ext.scm")
-  (include "sxpath/txpath.scm")
-  (include "sxpath/sxpath-core.scm"))
+  (include "internal/xpath-parser.scm")
+  (include "internal/sxpath-ext.scm")
+  (include "internal/txpath.scm")
+  (include "internal/sxpath-core.scm"))

@@ -73,5 +73,5 @@
   (import (spheres/core base)
           (spheres/string string))
 
-  (include "sxpath/sxpath-lib.scm")
-  (include "sxml-tools.scm"))
+  (include "internal/sxpath-lib.scm")
+  (include "internal/sxml-tools.scm"))
