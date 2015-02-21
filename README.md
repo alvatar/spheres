@@ -20,7 +20,7 @@ To load and include all necessary files for a library within the REPL, use:
 
     (load '(spheres/core base))
 
-SchemeSpheres also supports automated compilation and multiplatform build scripts. In order to make this functionality available, you need to install [Ssrun](https://github.com/fourthbit/ssrun). Once you do this, you can download the [project template](https://github.com/fourthbit/sphere-project) if you want to create a project based on SchemeSpheres.
+SchemeSpheres also brings automated compilation and __multiplatform/mobile__ build scripts. In order to make this functionality available, you need to install [Ssrun](https://github.com/fourthbit/ssrun). Once you do this, you can download the [project template](https://github.com/fourthbit/sphere-project) if you want to create a project based on SchemeSpheres.
 
 
 ## Notes
