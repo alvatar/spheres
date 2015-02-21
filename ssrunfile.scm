@@ -91,6 +91,7 @@
     (spheres/structure/multi-dimensional-array tter)
     (spheres/util check)
     (spheres/util inspect)
+    (spheres/util log)
     (spheres/util profile)
     (spheres/util test)))
 
