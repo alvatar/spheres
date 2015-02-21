@@ -218,7 +218,7 @@
 
 ;;! Handler for error messages
 (define (xlink:api-error . text)
-  (display (string-append "XLink API error: " text "\n")
+  (display (string-append "XLink API error: " (apply string-append text) "\n")
            (current-error-port)))
 
 ;;! Id+XLink parser parameterized

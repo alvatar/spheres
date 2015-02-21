@@ -921,7 +921,9 @@
 ;; first character after the root element.
 (define (xlink:xml->sxml port namespace-prefix-assig)
   (define (cons* a1 a2 . rest)
-    (cons a1 (apply cons* (cons a2 rest))))
+    (if (null? rest)
+        (cons a1 a2)
+        (cons a1 (apply cons* (cons a2 rest)))))
   (letrec ((namespaces
             (map
              (lambda (el)
