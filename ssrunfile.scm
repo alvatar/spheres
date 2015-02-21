@@ -93,6 +93,7 @@
     (spheres/util inspect)
     (spheres/util log)
     (spheres/util profile)
+    (spheres/util quickcheck)
     (spheres/util test)))
 
 (define features
