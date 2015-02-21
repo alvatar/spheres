@@ -90,8 +90,9 @@
     (spheres/structure/multi-dimensional-array mbda)
     (spheres/structure/multi-dimensional-array tter)
     (spheres/util check)
-    (spheres/util test)
-    (spheres/util profile)))
+    (spheres/util inspect)
+    (spheres/util profile)
+    (spheres/util test)))
 
 (define features
   '(((spheres/core let-multiple) only-macros)
