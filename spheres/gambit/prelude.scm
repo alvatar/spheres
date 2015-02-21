@@ -8,10 +8,17 @@
 (define^ (expander:include file)
   (for-each eval (with-input-from-file file read-all)))
 
-(eval '(define-syntax include
-         (syntax-rules ()
-           ((_ ?file)
-            (for-each eval (with-input-from-file ?file read-all))))))
+(eval '(define-macro (include ?file)
+         (let ((forms (with-input-from-file ?file read-all)))
+           ;; Force expand-time evaluation of loaded libraries
+           (for-each
+            (lambda (f)
+              (if (pair? f)
+                  (case (car f)
+                    ((%load-library load)
+                     (eval f)))))
+            forms)
+           `(begin ,@forms))))
 
 (define load-procedures load)
 

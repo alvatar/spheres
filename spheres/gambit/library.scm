@@ -367,9 +367,11 @@
   (let ((loaded-libs '()))
     (lambda (lib #!key compile only-syntax force (verbose #t))
       (define (load* file)
-        (let ((load-result (load file)))
-          (if verbose
-              (println (string-append "loading: " load-result)))))
+        (parameterize
+         ((current-directory (path-directory file)))
+         (let ((load-result (load file)))
+           (if verbose
+               (println (string-append "loading: " load-result))))))
       (let recur ((lib lib))
         (for-each recur (%library-imports lib))
         (if (or force (not (member lib loaded-libs)))
@@ -377,20 +379,22 @@
                   (lib-path (%find-library-path lib)))
               (if compile (%call-task lib-path-root 'compile lib))
               (let ((sld-file (%find-library-sld lib))
-                    (procedures-file (or (%find-library-object lib)
-                                         (%find-library-scm lib))))
+                    (obj-file (%find-library-object lib))
+                    (scm-file (%find-library-scm lib)))
                 (set! loaded-libs (cons lib loaded-libs))
                 (if sld-file
                     (begin
                       (if verbose (println "including: " (path-expand sld-file)))
                       (let ((eval&get-includes (%library-read-syntax&find-includes lib #t)))
                         (if (not only-syntax)
-                            (for-each (lambda (f)
-                                        (load* (path-strip-extension
-                                                (string-append lib-path (cadr f)))))
-                                      eval&get-includes))))
+                            (if obj-file
+                                (load* obj-file)
+                                (for-each (lambda (f)
+                                            (load* (path-strip-extension
+                                                    (string-append lib-path (cadr f)))))
+                                          eval&get-includes)))))
                     ;; Default procedure file is only loaded if there is no *.sld
-                    (if (and procedures-file
+                    (if (and (or obj-file scm-file)
                              (not only-syntax))
                         (begin (if verbose (println "loading: " procedures-file))
-                               (load procedures-file)))))))))))
+                               (load (or obj-file scm-file))))))))))))
