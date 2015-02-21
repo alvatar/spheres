@@ -385,12 +385,10 @@
                       (if verbose (println "including: " (path-expand sld-file)))
                       (let ((eval&get-includes (%library-read-syntax&find-includes lib #t)))
                         (if (not only-syntax)
-                            (if procedures-file
-                                (load* procedures-file)
-                                (for-each (lambda (f)
-                                            (load* (path-strip-extension
-                                                    (string-append lib-path (cadr f)))))
-                                          eval&get-includes)))))
+                            (for-each (lambda (f)
+                                        (load* (path-strip-extension
+                                                (string-append lib-path (cadr f)))))
+                                      eval&get-includes))))
                     ;; Default procedure file is only loaded if there is no *.sld
                     (if (and procedures-file
                              (not only-syntax))
