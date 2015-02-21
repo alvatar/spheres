@@ -25,12 +25,12 @@
 ;;   is performed no more than once for each combination of
 ;;   (context-node, context-position, context-size)
 
-(define-library (spheres/markup ddo-txpath)
+(define-library (spheres/markup ddo-xpath)
   (export ddo:txpath
           ddo:xpath-expr
           ddo:sxpath)
-  
+
   (import (spheres/markup sxml-tools)
           (spheres/markup sxpath-context-xlink))
 
-  (include "ddo-txpath.scm"))
+  (include "ddo-xpath.scm"))
