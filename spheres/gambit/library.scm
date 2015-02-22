@@ -327,7 +327,7 @@
                    (recur (cdr sexps))))))))
     (reverse found-includes)))
 
-;;! Call 
+;;! Call
 (define^ %call-task
   (lambda (where task . arguments)
     (define (escape str)
@@ -396,5 +396,5 @@
                     ;; Default procedure file is only loaded if there is no *.sld
                     (if (and (or obj-file scm-file)
                              (not only-syntax))
-                        (begin (if verbose (println "loading: " procedures-file))
+                        (begin (if verbose (println "loading: " (or obj-file scm-file)))
                                (load (or obj-file scm-file))))))))))))
