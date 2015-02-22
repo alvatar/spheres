@@ -23,12 +23,12 @@
 ;;       (do ((i 0 (+ i 1)))
 ;; 	  ((= i count))
 ;;         (u8vector-set! target
-;;                        (+ target-start i) 
+;;                        (+ target-start i)
 ;;                        (u8vector-ref source (+ source-start i))))
 ;;       (do ((i (- count 1) (- i 1)))
 ;; 	  ((= i -1))
 ;;         (u8vector-set! target
-;;                        (+ target-start i) 
+;;                        (+ target-start i)
 ;;                        (u8vector-ref source (+ source-start i))))))
 ;; .author Arthur T Smyles
 (define (u8vector-copy! source source-start target target-start n)
@@ -37,10 +37,10 @@
 ;;; TODO: Pending fix for () in FFI functions
 ;; (define native-endianness
 ;;   (let ((ne (c-lambda () bool "
-;; 	#ifdef ___BIG_ENDIAN 
-;; 	   ___result=1; 
-;; 	#else 
-;; 	   ___result=0; 
+;; 	#ifdef ___BIG_ENDIAN
+;; 	   ___result=1;
+;; 	#else
+;; 	   ___result=0;
 ;; 	#endif")))
 ;;     (lambda () (if (ne) 'big 'little))))
 
@@ -81,7 +81,7 @@
 (define (u8vector=? u8vector-1 u8vector-2) (= (u8vector-compare u8vector-1 u8vector-2) 0))
 
 ;; U8vector manipulation / handling
-;; Author: Marc Feeley 
+;; Author: Marc Feeley
 ;;
 ;; (apply-u8vector-append u8vector-list)
 ;;
@@ -113,6 +113,16 @@
       (if (> target-idx 0)
           (loop (+ src-idx 1) (- target-idx 1))))
     r))
+
+(define (subu8vector-reverse v8b start end)
+  (let* ((length (- end start))
+         (v8b* (make-u8vector length)))
+    (let loop ((index start) (index* length))
+      (if (< index end)
+          (let ((index* (- index* 1)))
+            (u8vector-set! v8b* index* (u8vector-ref v8b index))
+            (loop (+ index 1) index*))))
+    v8b*))
 
 ;;! u8vector-invert!
 (define (u8vector-invert! v)
@@ -158,7 +168,7 @@
     new-u8v))
 
 ;; TODO: Review
-;;; dump-u8vector-port-to-other-u8vector-port 
+;;; dump-u8vector-port-to-other-u8vector-port
 ;; (define (dump-u8vector-port-to-other-u8vector-port content-in
 ;;                                                    #!optional
 ;;                                                    (content-out '()))
