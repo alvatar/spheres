@@ -47,6 +47,7 @@
     (spheres/gambit/ffi objective-c)
     (spheres/gambit/ffi serialization)
     (spheres/gambit/ffi types)
+    (spheres/io base)
     (spheres/io binary)
     (spheres/io file)
     (spheres/io shared-structure)
