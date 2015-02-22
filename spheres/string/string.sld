@@ -72,6 +72,6 @@
           string-join
           string-tokenize
           string-replace)
-  (import (spheres/string char))
+  (import (spheres/string char-set))
 
   (include "string.scm"))

@@ -1,6 +1,6 @@
 ;;!!! SRFI-14: Char library
 
-(define-library (spheres/string char)
+(define-library (spheres/string char-set)
   (export char-set?
           char-set=
           char-set<=
@@ -66,4 +66,4 @@
           char-set:empty
           char-set:full)
 
-  (include "char.scm"))
+  (include "char-set.scm"))

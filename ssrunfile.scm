@@ -79,7 +79,7 @@
     (spheres/streams derived)
     (spheres/streams primitive)
     (spheres/streams extra)
-    (spheres/string char)
+    (spheres/string char-set)
     (spheres/string format)
     (spheres/string/format format-srfi-28)
     (spheres/string/format format-srfi-48)
