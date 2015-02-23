@@ -1,7 +1,7 @@
-;;!!! SRFI-66 Octet Vectors
-;; .author Mikael More, 2008, 2011-2014
+;;!!! SRFI-66 Octet Vectors + extensions
 ;; .author Michael Sperber, 2005
-;; .author Alvaro Castro-Castilla, 2012-2014
+;; .author Mikael More, 2008, 2011-2014
+;; .author Alvaro Castro-Castilla, 2012-2015
 ;;
 ;; Part of the API is implemented natively by Gambit
 ;;
@@ -133,6 +133,21 @@
                               (u8vector-ref v i)
                               255))
           (loop i)))))
+
+;;! Shift elements of the vector, padding on either end with 0
+(define (u8vector-shift! vec n)
+  (let ((len (u8vector-length vec)))
+    (if (positive? n)
+        (do ((from (- len n 1) (- from 1))
+             (to (- len 1) (- to 1)))
+            ((< from 0)                 ; zero pad
+             (u8vector-fill! vec 0 0 (+ to 1)))
+          (u8vector-set! vec to (u8vector-ref vec from)))
+        (do ((from (- n) (+ from 1))
+             (to 0 (+ to 1)))
+            ((= from len)               ; zero pad
+             (u8vector-fill! vec 0 to))
+          (u8vector-set! vec to (u8vector-ref vec from))))))
 
 ;; May return the originally passed |u8v| object reference.
 (define* (u8vector-pad-to-length u8v to-length (pad-byte 0))
