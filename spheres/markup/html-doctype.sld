@@ -3,9 +3,9 @@
 ;; see HTML5 spec 8.1.1 "The DOCTYPE"
 ;; (http://dev.w3.org/html5/spec/Overview.html#the-doctype)
 
-(define-library (spheres/fileformat html-doctype)
+(define-library (spheres/markup html-doctype)
   (export doctype-html
-          ;; legacy doctype string 
+          ;; legacy doctype string
           doctype-html-legacy
 
           ;; obsolete permitted doctype strings
