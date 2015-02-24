@@ -1,0 +1,732 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<title>atom - The Chicken Scheme wiki</title>
+<meta http-equiv="Content-Style-Type" content="text/css" />
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+<link rel="stylesheet" type="text/css" href="/chicken.css" /></head>
+<body>
+<div id="menu">
+<ul>
+<li><a href="/" class="internal">Wiki</a></li>
+<li><a href="http://code.call-cc.org/" class="external">Download</a></li>
+<li><a href="/manual/index" class="internal">Manual</a></li>
+<li><a href="/eggs" class="internal">Eggs</a></li>
+<li><a href="http://api.call-cc.org/doc/" class="external">API</a></li>
+<li><a href="http://tests.call-cc.org/" class="external">Tests</a></li>
+<li><a href="http://bugs.call-cc.org/" class="external">Bugs</a></li></ul></div>
+<ul id="page-specific-links">
+<li><a href="?action=show">show</a></li>
+<li><a href="?action=edit" rel="nofollow">edit</a></li>
+<li><a href="?action=history">history</a></li></ul>
+<div id="content">
+<h2 id="atom">atom</h2>
+<p>Read and write Atom 1.0 feeds.</p>
+<div id="toc">
+<ol>
+<li><a href="#atom">atom</a>
+<ol>
+<li><a href="#overview">Overview</a></li>
+<li><a href="#read-interface">Read interface</a>
+<ol>
+<li><a href="#atom-document">Atom document</a></li>
+<li><a href="#feeds">Feeds</a></li>
+<li><a href="#entries">Entries</a></li>
+<li><a href="#persons">Persons</a></li>
+<li><a href="#rights-summary-title-subtitle">Rights, Summary, Title, Subtitle</a></li>
+<li><a href="#generators">Generators</a></li>
+<li><a href="#icons-logos">Icons &amp; Logos</a></li>
+<li><a href="#categories">Categories</a></li>
+<li><a href="#links">Links</a></li>
+<li><a href="#source-feeds">Source feeds</a></li>
+<li><a href="#content">Content</a></li>
+<li><a href="#ids">IDs</a></li></ol></li>
+<li><a href="#write-interface">Write interface</a>
+<ol>
+<li><a href="#producing-an-atom-document">Producing an Atom document</a></li>
+<li><a href="#feed-constructor">Feed constructor</a></li>
+<li><a href="#entry-constructor">Entry constructor</a></li>
+<li><a href="#person-constructors">Person constructors</a></li>
+<li><a href="#text-constructors">Text constructors</a></li>
+<li><a href="#generator-constructor">Generator constructor</a></li>
+<li><a href="#icon-logo-constructors">Icon &amp; Logo constructors</a></li>
+<li><a href="#id-constructor">ID constructor</a></li>
+<li><a href="#category-constructor">Category constructor</a></li>
+<li><a href="#link-constructor">Link constructor</a></li>
+<li><a href="#source-constructor">Source constructor</a></li>
+<li><a href="#content-constructor">Content constructor</a></li></ol></li>
+<li><a href="#miscellany">Miscellany</a></li>
+<li><a href="#examples">Examples</a></li>
+<li><a href="#known-issues">Known Issues</a></li>
+<li><a href="#about-this-egg">About this egg</a>
+<ol>
+<li><a href="#author">Author</a></li>
+<li><a href="#version-history">Version history</a></li>
+<li><a href="#license">License</a></li></ol></li></ol></li></ol></div>
+<h3 id="overview">Overview</h3>
+<p><a href="atom" class="internal">atom</a> provides the means to read <a href="http://tools.ietf.org/html/rfc4287" class="external">RFC 4287</a> conforming Atom 1.0 documents, which are either feeds or single entries.  Procedures are provided to access child elements of feeds and entries, such as the feed author, and also to access the child elements and contents of these children, such as author name and email.</p>
+<p>Elements themselves are returned as plain SXML documents, which are for the most part verbatim copies of the XML input elements.  This is true even for the Atom document itself, which is the SXML representation of the original XML document.  This means that if desired, you can access elements or the entire document using standard list deconstructors or <a href="sxpath" class="internal">sxpath</a> rather than the provided accessors.</p>
+<p>For example, accessing the feed author returns an <tt>atom:author</tt> child:</p>
+<pre><tt>&gt; (feed-author feed)
+  ;=&gt; (atom:author (atom:name &quot;A. Hacker&quot;)
+                   (atom:uri &quot;http://www.hacker.dim&quot;)
+                   (atom:email &quot;buzz+off@hacker.dim&quot;))</tt></pre>
+<p>and you can either use the accessors, or deconstruct the result manually:</p>
+<pre><tt>&gt; (author-name (feed-author feed))
+  ;=&gt; &quot;A. Hacker&quot;
+&gt; (cadr (assq 'atom:name (cdr (feed-author G))))
+  ;=&gt; &quot;A. Hacker&quot;</tt></pre>
+<p>Or for a list of all people (authors, contributors, etc.) mentioned in <tt>atom:name</tt> elements anywhere in the feed:</p>
+<pre><tt>&gt; (delete-duplicates ((sxpath '(// atom:name *text*)) feed))
+  ;=&gt; (&quot;A. Hacker&quot; &quot;A. Contributor&quot; &quot;A. Groupie&quot;)</tt></pre>
+<p>Element contents and element attributes are generally returned as text strings.  This includes HTML contents, which will be unescaped for you.  It also includes RFC3339 datetime strings, which can be deconstructed using the <a href="rfc3339" class="internal">rfc3339</a> egg, and URIs, which can be manipulated with <a href="uri-common" class="internal">uri-common</a>.  Certain elements may contain XHTML or XML documents; special accessors for these elements are provided, which return their contents as SXML.</p>
+<p>The same rules apply when creating a document; elements may be generated using their constructors or created directly in SXML if you understand the format.  For example, these two excerpts are equivalent:</p>
+<pre><tt>&gt; (make-feed authors: (list (make-author name: &quot;Jim&quot; 
+                                         email: &quot;himmy@pimmy.dim&quot;))
+             ...)
+&gt; (make-feed authors: (list '(atom:author (atom:name &quot;Jim&quot;)
+                                          (atom:email &quot;himmy@pimmy.dim&quot;)))
+             ...)</tt></pre>
+<p>except that <tt>make-author</tt> checks its input, ensuring the required <tt>name</tt> element is present and that all arguments are strings.  Other constructors may do more complicated constraint checking or simplify element creation.</p>
+<h3 id="read-interface">Read interface</h3>
+<h4 id="atom-document">Atom document</h4><span class="definition procedure"><em>[procedure]</em> <tt>(read-atom-doc port)</tt>
+<br /></span>
+<p>Reads an Atom Feed Document or Atom Entry Document from PORT and returns an SXML document representing the entire XML document, including any processing instructions.  If the document is not readable as XML or does not contain a single <tt>atom:feed</tt> or <tt>atom:entry</tt> root element, an error is thrown.</p><span class="definition procedure"><em>[procedure]</em> <tt>(atom-doc-root doc)</tt>
+<br /></span>
+<p>Return the root element of the document, which will be an <tt>atom:feed</tt> or <tt>atom:entry</tt> node.</p><span class="definition procedure"><em>[procedure]</em> <tt>(atom-doc-encoding doc)</tt>
+<br /></span>
+<p>Return XML document encoding as provided in the document; defaults to &quot;utf-8&quot;.</p><span class="definition procedure"><em>[procedure]</em> <tt>(read-atom-feed port)</tt>
+<br /></span>
+<p>Convenience function which reads an Atom Feed Document and returns the root <tt>atom:feed</tt> element.  If this fails, an error is thrown.</p><span class="definition procedure"><em>[procedure]</em> <tt>(read-atom-entry port)</tt>
+<br /></span>
+<p>Convenience function which reads an Atom Entry Document and returns the root <tt>atom:entry</tt> element.  If this fails, an error is thrown.</p>
+<h4 id="feeds">Feeds</h4><span class="definition record"><em>[record]</em> <tt>atom:feed</tt>
+<br /></span>
+<p>An <tt>atom:feed</tt> element, which represents an Atom feed.  Records such as <tt>atom:feed</tt> are just SXML documents (list structures) like</p>
+<pre><tt>(atom:feed (atom:author ...) (atom:title ...) ...)</tt></pre>
+<p>and can be queried either via the provided accessors, or directly via list destructuring if desired.</p><span class="definition procedure"><em>[procedure]</em> <tt>(feed? F)</tt>
+<br /></span>
+<p>Returns true if F is an <tt>atom:feed</tt> element.</p><span class="definition procedure"><em>[procedure]</em> <tt>(feed-authors F)</tt>
+<br /></span><span class="definition procedure"><em>[procedure]</em> <tt>(feed-author F)</tt>
+<br /></span>
+<p><tt>feed-authors</tt> returns a list of feed authors; that is, <tt>atom:author</tt> children of the feed.  A null list designates no authors.</p>
+<p><tt>feed-author</tt> returns the first feed author, or <tt>#f</tt> if none.</p>
+<p>Feeds must contain at least one author element unless every feed entry contains one, as the default authorship for entries is that of the feed.</p><span class="definition procedure"><em>[procedure]</em> <tt>(feed-categories F)</tt>
+<br /></span>
+<p>Returns a list of feed categories (<tt>atom:category</tt> children), or null.</p><span class="definition procedure"><em>[procedure]</em> <tt>(feed-contributors F)</tt>
+<br /></span>
+<p>Returns a list of feed contributors (<tt>atom:contributor</tt> children), or null.</p><span class="definition procedure"><em>[procedure]</em> <tt>(feed-generator F)</tt>
+<br /></span>
+<p>Returns the feed generator (the <tt>atom:generator</tt> child), or <tt>#f</tt> if none.</p><span class="definition procedure"><em>[procedure]</em> <tt>(feed-icon F)</tt>
+<br /></span>
+<p>Returns the feed icon (the <tt>atom:icon</tt> child), or <tt>#f</tt> if none.</p><span class="definition procedure"><em>[procedure]</em> <tt>(feed-id F)</tt>
+<br /></span>
+<p>Returns the feed ID as a string (the text contents of the <tt>atom:id</tt> child), or the empty string if no ID.  The ID is required in an Atom feed.</p><span class="definition procedure"><em>[procedure]</em> <tt>(feed-links F)</tt>
+<br /></span>
+<p>Returns a list of feed links (<tt>atom:link</tt> children), or null.</p><span class="definition procedure"><em>[procedure]</em> <tt>(feed-logo F)</tt>
+<br /></span>
+<p>Returns the feed logo (<tt>atom:logo</tt> child), or <tt>#f</tt> if none.</p><span class="definition procedure"><em>[procedure]</em> <tt>(feed-rights F)</tt>
+<br /></span>
+<p>Returns the feed rights (<tt>atom:rights</tt> child), or <tt>#f</tt> if none.</p><span class="definition procedure"><em>[procedure]</em> <tt>(feed-subtitle F)</tt>
+<br /></span>
+<p>Returns the feed subtitle (<tt>atom:subtitle</tt> child), or <tt>#f</tt> if none.</p><span class="definition procedure"><em>[procedure]</em> <tt>(feed-title F)</tt>
+<br /></span>
+<p>Returns the feed title (<tt>atom:title</tt> child), or <tt>#f</tt> if none. The Atom spec requires a feed title.</p><span class="definition procedure"><em>[procedure]</em> <tt>(feed-updated F)</tt>
+<br /></span>
+<p>Returns an <a href="rfc3339" class="internal">rfc3339</a> string representing the last time the feed was updated. The Atom spec requires this field to be present.</p><span class="definition procedure"><em>[procedure]</em> <tt>(feed-entries F)</tt>
+<br /></span>
+<p>Return a list of feed entries (<tt>atom:entry</tt> children), or null.</p>
+<h4 id="entries">Entries</h4><span class="definition record"><em>[record]</em> <tt>atom:entry</tt>
+<br /></span>
+<p>An <tt>atom:entry</tt> element, which represents an Atom entry.  Records such as <tt>atom:entry</tt> are just SXML documents (list structures) like</p>
+<pre><tt>(atom:entry (atom:author ...) (atom:id ...) ...)</tt></pre>
+<p>and can be queried either via the provided accessors, or directly if desired.</p><span class="definition procedure"><em>[procedure]</em> <tt>(entry? E)</tt>
+<br /></span>
+<p>Returns true if E is an <tt>atom:entry</tt>.</p><span class="definition procedure"><em>[procedure]</em> <tt>(entry=? E1 E2)</tt>
+<br /></span>
+<p>Returns true if E1 and E2 represent the same <tt>atom:entry</tt>.  This tests the entry IDs for equivalence.</p><span class="definition procedure"><em>[procedure]</em> <tt>(entry-authors E)</tt>
+<br /></span><span class="definition procedure"><em>[procedure]</em> <tt>(entry-author E)</tt>
+<br /></span>
+<p><tt>entry-authors</tt> returns a list of entry authors; that is, <tt>atom:author</tt> children of the entry.  A null list designates no authors.</p>
+<p><tt>entry-author</tt> returns the first entry author, or <tt>#f</tt> if none.</p>
+<p>Each entry must have at least one author.  If not present as a child of the entry, it must be present in the entry's source feed element (for aggregated content), or in the feed element itself.</p>
+<p>Currently, you must handle this manually.  One possibility is:</p>
+<pre><tt>(or (entry-author E)
+    (feed-author F))</tt></pre><span class="definition procedure"><em>[procedure]</em> <tt>(entry-categories E)</tt>
+<br /></span>
+<p>Returns a list of entry categories (<tt>atom:category</tt> children), or null.</p><span class="definition procedure"><em>[procedure]</em> <tt>(entry-contributors E)</tt>
+<br /></span>
+<p>Returns a list of entry contributors (<tt>atom:contributor</tt> children), or null.</p><span class="definition procedure"><em>[procedure]</em> <tt>(entry-content E)</tt>
+<br /></span>
+<p>Returns the entry content (the <tt>atom:content</tt> child), or <tt>#f</tt> if none. Entries need not contain a content element, but if not, they must contain an <tt>atom:link</tt> with a <tt>link-relation</tt> of &quot;alternate&quot;.</p><span class="definition procedure"><em>[procedure]</em> <tt>(entry-id E)</tt>
+<br /></span>
+<p>Returns the entry ID as a string (the text contents of the <tt>atom:id</tt> child), or the empty string if no ID.  Atom entries must contain exactly one <tt>atom:id</tt> element.</p><span class="definition procedure"><em>[procedure]</em> <tt>(entry-links E)</tt>
+<br /></span>
+<p>Returns a list of entry links (<tt>atom:link</tt> children), or null.</p><span class="definition procedure"><em>[procedure]</em> <tt>(entry-published E)</tt>
+<br /></span>
+<p>Returns an <a href="rfc3339" class="internal">rfc3339</a> datetime string, typically representing the entry's initial creation time or first availability.</p><span class="definition procedure"><em>[procedure]</em> <tt>(entry-rights E)</tt>
+<br /></span>
+<p>Returns the entry rights (<tt>atom:rights</tt> child), or <tt>#f</tt> if none.</p>
+<p>If no entry rights are present, the feed's rights are considered to apply.  Currently, you must do this manually:</p>
+<pre><tt>(or (entry-rights E)
+    (feed-rights F))</tt></pre><span class="definition procedure"><em>[procedure]</em> <tt>(entry-source E)</tt>
+<br /></span>
+<p>Returns the entry's source feed information (<tt>atom:source</tt> child), or <tt>#f</tt> if none.</p>
+<p>The entry's source feed is used by Atom content aggregators to record information on where the entry came from.</p><span class="definition procedure"><em>[procedure]</em> <tt>(entry-summary E)</tt>
+<br /></span>
+<p>Returns the entry summary (<tt>atom:summary</tt> child), or <tt>#f</tt> if none. The summary must be present if the entry's content is of kind <tt>'external</tt> or <tt>'binary</tt>.</p><span class="definition procedure"><em>[procedure]</em> <tt>(entry-title E)</tt>
+<br /></span>
+<p>Returns the entry title (<tt>atom:title</tt> child), or <tt>#f</tt> if none. Atom entries must contain exactly one <tt>atom:title</tt> element.</p><span class="definition procedure"><em>[procedure]</em> <tt>(entry-updated E)</tt>
+<br /></span>
+<p>Returns an <a href="rfc3339" class="internal">rfc3339</a> string representing the last time the entry was updated. Atom entries must contain exactly one <tt>atom:updated</tt> element.</p>
+<h4 id="persons">Persons</h4><span class="definition record"><em>[record]</em> <tt>atom:author</tt>
+<br /></span><span class="definition procedure"><em>[procedure]</em> <tt>(author? A)</tt>
+<br /></span><span class="definition procedure"><em>[procedure]</em> <tt>(author-name A)</tt>
+<br /></span><span class="definition procedure"><em>[procedure]</em> <tt>(author-uri A)</tt>
+<br /></span><span class="definition procedure"><em>[procedure]</em> <tt>(author-email A)</tt>
+<br /></span>
+<p>Predicate and accessors for <tt>atom:author</tt> elements, representing the authors of the feed or entry.</p>
+<dl>
+<dt>name</dt>
+<dd>(<i>required by spec</i>) the author's name, a string</dd>
+<dt>uri</dt>
+<dd>a URI associated with the author, a string</dd>
+<dt>email</dt>
+<dd>the author's email address, a string conforming to RFC2822</dd></dl>
+<p>Accessors return the empty string if the field is not present.</p><span class="definition record"><em>[record]</em> <tt>atom:contributor</tt>
+<br /></span><span class="definition procedure"><em>[procedure]</em> <tt>(contributor? A)</tt>
+<br /></span><span class="definition procedure"><em>[procedure]</em> <tt>(contributor-name A)</tt>
+<br /></span><span class="definition procedure"><em>[procedure]</em> <tt>(contributor-uri A)</tt>
+<br /></span><span class="definition procedure"><em>[procedure]</em> <tt>(contributor-email A)</tt>
+<br /></span>
+<p>Predicate and accessors for <tt>atom:contributor</tt> elements, representing contributors to the feed or entry.</p>
+<dl>
+<dt>name</dt>
+<dd>(<i>required by spec</i>) the contributor's name, a string</dd>
+<dt>uri</dt>
+<dd>a URI associated with the contributor, a string</dd>
+<dt>email</dt>
+<dd>the contributor's email address, a string conforming to RFC2822</dd></dl>
+<p>Accessors return the empty string if the field is not present.</p>
+<h4 id="rights-summary-title-subtitle">Rights, Summary, Title, Subtitle</h4><span class="definition record"><em>[record]</em> <tt>atom:rights</tt>
+<br /></span><span class="definition procedure"><em>[procedure]</em> <tt>(rights? A)</tt>
+<br /></span><span class="definition procedure"><em>[procedure]</em> <tt>(rights-type A)</tt>
+<br /></span><span class="definition procedure"><em>[procedure]</em> <tt>(rights-text A)</tt>
+<br /></span><span class="definition procedure"><em>[procedure]</em> <tt>(rights-xhtml A)</tt>
+<br /></span>
+<p>Predicate and accessors for <tt>atom:rights</tt> elements, which represent human-readable rights information for the feed.  This element is an <i>atomtextConstruct</i>, so it may contain either text (here meaning either plain text or HTML), or XHTML content.</p>
+<p><tt>rights-type</tt> will return the type of content as a symbol:</p>
+<dl>
+<dt>'text</dt>
+<dd>text content</dd>
+<dt>'html</dt>
+<dd>html content (considered to be text)</dd>
+<dt>'xhtml</dt>
+<dd>XHTML content</dd></dl>
+<p><tt>rights-text</tt> returns the contents of the element as a string, and is what you should use for 'text or 'html types.  HTML will be unescaped for you, but is still returned as a string.  It returns the empty string if no text is present.</p>
+<p><tt>rights-xhtml</tt> returns the XHTML contents of the element as an SXML document.  The root element inside the contents <i>must</i> be an XHTML div (<tt>xhtml:div</tt>).  If such an element is not found, it returns <tt>#f</tt>.  Note that we return the div as the root of the SXML document, but the Atom spec says you must not consider the div itself part of the content.</p><span class="definition record"><em>[record]</em> <tt>atom:summary</tt>
+<br /></span><span class="definition procedure"><em>[procedure]</em> <tt>(summary? A)</tt>
+<br /></span><span class="definition procedure"><em>[procedure]</em> <tt>(summary-type A)</tt>
+<br /></span><span class="definition procedure"><em>[procedure]</em> <tt>(summary-text A)</tt>
+<br /></span><span class="definition procedure"><em>[procedure]</em> <tt>(summary-xhtml A)</tt>
+<br /></span>
+<p>Predicate and accessors for <tt>atom:summary</tt> elements, representing an excerpt or abstract for an entry.  For meaning, see <tt>atom:rights</tt>.</p><span class="definition record"><em>[record]</em> <tt>atom:subtitle</tt>
+<br /></span><span class="definition procedure"><em>[procedure]</em> <tt>(subtitle? A)</tt>
+<br /></span><span class="definition procedure"><em>[procedure]</em> <tt>(subtitle-type A)</tt>
+<br /></span><span class="definition procedure"><em>[procedure]</em> <tt>(subtitle-text A)</tt>
+<br /></span><span class="definition procedure"><em>[procedure]</em> <tt>(subtitle-xhtml A)</tt>
+<br /></span>
+<p>Predicate and accessors for <tt>atom:subtitle</tt> elements, representing a subtitle for the feed.  For meaning, see <tt>atom:rights</tt>.</p><span class="definition record"><em>[record]</em> <tt>atom:title</tt>
+<br /></span><span class="definition procedure"><em>[procedure]</em> <tt>(title? A)</tt>
+<br /></span><span class="definition procedure"><em>[procedure]</em> <tt>(title-type A)</tt>
+<br /></span><span class="definition procedure"><em>[procedure]</em> <tt>(title-text A)</tt>
+<br /></span><span class="definition procedure"><em>[procedure]</em> <tt>(title-xhtml A)</tt>
+<br /></span>
+<p>Predicate and accessors for <tt>atom:title</tt> elements, representing a title for the feed or entry.  For meaning, see <tt>atom:rights</tt>.</p>
+<h4 id="generators">Generators</h4><span class="definition record"><em>[record]</em> <tt>atom:generator</tt>
+<br /></span><span class="definition procedure"><em>[procedure]</em> <tt>(generator? G)</tt>
+<br /></span><span class="definition procedure"><em>[procedure]</em> <tt>(generator-agent G)</tt>
+<br /></span><span class="definition procedure"><em>[procedure]</em> <tt>(generator-uri G)</tt>
+<br /></span><span class="definition procedure"><em>[procedure]</em> <tt>(generator-version G)</tt>
+<br /></span>
+<p>Predicate and accessors for <tt>atom:generator</tt> elements, which represent the (machine) agent that generated the feed.</p>
+<dl>
+<dt>agent</dt>
+<dd>a human-readable, plain-text name for the generating agent, as a string</dd>
+<dt>uri</dt>
+<dd>URI relevant to the agent, as a string</dd>
+<dt>version</dt>
+<dd>version of the generating agent, as a string</dd></dl>
+<h4 id="icons-logos">Icons &amp; Logos</h4><span class="definition record"><em>[record]</em> <tt>atom:icon</tt>
+<br /></span><span class="definition procedure"><em>[procedure]</em> <tt>(icon? I)</tt>
+<br /></span><span class="definition procedure"><em>[procedure]</em> <tt>(icon-uri I)</tt>
+<br /></span>
+<p>Predicate and accessors for <tt>atom:icon</tt> elements, which represent iconic visual identification for the feed.  <tt>icon-uri</tt> returns a URI string which points to the icon image.</p><span class="definition record"><em>[record]</em> <tt>atom:logo</tt>
+<br /></span><span class="definition procedure"><em>[procedure]</em> <tt>(logo? I)</tt>
+<br /></span><span class="definition procedure"><em>[procedure]</em> <tt>(logo-uri I)</tt>
+<br /></span>
+<p>Predicate and accessors for <tt>atom:logo</tt> elements, which represent visual identification for the feed.  <tt>logo-uri</tt> returns a URI string which points to the logo image.</p>
+<h4 id="categories">Categories</h4><span class="definition record"><em>[record]</em> <tt>atom:category</tt>
+<br /></span><span class="definition procedure"><em>[procedure]</em> <tt>(category? I)</tt>
+<br /></span><span class="definition procedure"><em>[procedure]</em> <tt>(category-term I)</tt>
+<br /></span><span class="definition procedure"><em>[procedure]</em> <tt>(category-scheme I)</tt>
+<br /></span><span class="definition procedure"><em>[procedure]</em> <tt>(category-label I)</tt>
+<br /></span><span class="definition procedure"><em>[procedure]</em> <tt>(category-contents C)</tt>
+<br /></span>
+<p>Predicate and accessors for <tt>atom:category</tt> elements, which represent the categorization of the feed or entry.</p>
+<dl>
+<dt>term</dt>
+<dd>(<i>required by spec</i>) category name, as a string</dd>
+<dt>scheme</dt>
+<dd>URI that identifies a categorization scheme, as a string</dd>
+<dt>label</dt>
+<dd>human-readable plain-text label for the category, as a string</dd>
+<dt>contents</dt>
+<dd>Contents of the category element as an SXML document; undefined by the specification, but it might be useful.</dd></dl>
+<p><tt>term</tt>, <tt>scheme</tt> and <tt>label</tt> accessors return <tt>#f</tt> for missing information instead of the empty string as <tt>atom:author</tt> and <tt>atom:rights</tt> accessors do.  This inconsistency is probably a bug.</p>
+<h4 id="links">Links</h4><span class="definition record"><em>[record]</em> <tt>atom:link</tt>
+<br /></span><span class="definition procedure"><em>[procedure]</em> <tt>(link? L)</tt>
+<br /></span><span class="definition procedure"><em>[procedure]</em> <tt>(link-uri L)</tt>
+<br /></span><span class="definition procedure"><em>[procedure]</em> <tt>(link-relation L)</tt>
+<br /></span><span class="definition procedure"><em>[procedure]</em> <tt>(link-type L)</tt>
+<br /></span><span class="definition procedure"><em>[procedure]</em> <tt>(link-uri-language L)</tt>
+<br /></span><span class="definition procedure"><em>[procedure]</em> <tt>(link-title L)</tt>
+<br /></span><span class="definition procedure"><em>[procedure]</em> <tt>(link-length L)</tt>
+<br /></span><span class="definition procedure"><em>[procedure]</em> <tt>(link-contents L)</tt>
+<br /></span>
+<p>Predicate and accessors for <tt>atom:link</tt> elements, which represent a reference from an entry or feed to a Web resource.</p>
+<dl>
+<dt>uri</dt>
+<dd>(<i>required by spec</i>) the URI (@href) of the link, as a string</dd>
+<dt>relation</dt>
+<dd>the link relation type (@rel) as a string (defaults to &quot;alternate&quot; if not present)</dd>
+<dt>title</dt>
+<dd>human-readable, plain-text title for the link, as a string</dd>
+<dt>type</dt>
+<dd>advisory MIME media type for the referenced resource, as a string</dd>
+<dt>length</dt>
+<dd>advisory length in octets for the referenced resource, as an exact integer</dd>
+<dt>uri-language</dt>
+<dd>an <a href="http://tools.ietf.org/html/rfc3066" class="external">RFC3066</a> language tag (@hreflang) for the referenced resource, as a string</dd>
+<dt>contents</dt>
+<dd>Contents of the atom:link element as an SXML document; undefined by the specification, and unlikely to be present</dd></dl>
+<p>Accessors return <tt>#f</tt> if the associate attribute is not present in the document, except for <tt>link-relation</tt>, which returns &quot;alternate&quot;.</p>
+<h4 id="source-feeds">Source feeds</h4><span class="definition record"><em>[record]</em> <tt>(source? S)</tt>
+<br /></span><span class="definition procedure"><em>[procedure]</em> <tt>(source-authors S)</tt>
+<br /></span><span class="definition procedure"><em>[procedure]</em> <tt>(source-author S)</tt>
+<br /></span><span class="definition procedure"><em>[procedure]</em> <tt>(source-categories S)</tt>
+<br /></span><span class="definition procedure"><em>[procedure]</em> <tt>(source-contributors S)</tt>
+<br /></span><span class="definition procedure"><em>[procedure]</em> <tt>(source-generator S)</tt>
+<br /></span><span class="definition procedure"><em>[procedure]</em> <tt>(source-icon S)</tt>
+<br /></span><span class="definition procedure"><em>[procedure]</em> <tt>(source-id S)</tt>
+<br /></span><span class="definition procedure"><em>[procedure]</em> <tt>(source-links S)</tt>
+<br /></span><span class="definition procedure"><em>[procedure]</em> <tt>(source-logo S)</tt>
+<br /></span><span class="definition procedure"><em>[procedure]</em> <tt>(source-rights S)</tt>
+<br /></span><span class="definition procedure"><em>[procedure]</em> <tt>(source-subtitle S)</tt>
+<br /></span><span class="definition procedure"><em>[procedure]</em> <tt>(source-title S)</tt>
+<br /></span><span class="definition procedure"><em>[procedure]</em> <tt>(source-updated S)</tt>
+<br /></span>
+<p>Predicate and accessors for <tt>atom:source</tt> elements, which represent metadata about the source feed from which the containing entry was taken, and are used for feed aggregators.</p>
+<p>Accessors have the same meaning as the corresponding accessors <a href="#feeds" class="internal">for feeds</a>.</p>
+<h4 id="content">Content</h4><span class="definition record"><em>[record]</em> <tt>atom:content</tt>
+<br /></span><span class="definition procedure"><em>[procedure]</em> <tt>content?</tt>
+<br /></span><span class="definition procedure"><em>[procedure]</em> <tt>(content-kind C)</tt>
+<br /></span><span class="definition procedure"><em>[procedure]</em> <tt>(content-type C)</tt>
+<br /></span><span class="definition procedure"><em>[procedure]</em> <tt>(content-source C)</tt>
+<br /></span><span class="definition procedure"><em>[procedure]</em> <tt>(content-text C)</tt>
+<br /></span><span class="definition procedure"><em>[procedure]</em> <tt>(content-xhtml C)</tt>
+<br /></span><span class="definition procedure"><em>[procedure]</em> <tt>(content-xml C)</tt>
+<br /></span><span class="definition procedure"><em>[procedure]</em> <tt>(content-contents C)</tt>
+<br /></span>
+<p>Predicate and accessors for <tt>atom:content</tt> elements, which represent feed or entry content.</p>
+<p>Atom content types may be one of &quot;text&quot;, &quot;html&quot;, &quot;xhtml&quot;, or any valid MIME type; further, the structure and meaning of the content itself depends on the MIME type.  To simplify this, we normalize the MIME type and we categorize it by kind:</p>
+<dl>
+<dt>type</dt>
+<dd>The indicated MIME media type of the contents.  If the type in the source document is <tt>text</tt>, <tt>html</tt>, or <tt>xhtml</tt>, we normalize this to <tt>text/plain</tt>, <tt>text/html</tt>, or <tt>application/xhtml+xml</tt> respectively. If no type is explicitly indicated, it defaults to <tt>text/plain</tt>.</dd>
+<dt>kind</dt>
+<dd>The computed &quot;kind&quot; of the contents, as a symbol.  This determines how you should handle the content.</dd></dl>
+<p><tt>kind</tt> may be one of the following symbols, which represent</p>
+<dl>
+<dt>text</dt>
+<dd>plain text (<tt>text/plain</tt>), the default</dd>
+<dt>html</dt>
+<dd>HTML text (<tt>text/html</tt>)</dd>
+<dt>xhtml</dt>
+<dd>an XHTML div element (<tt>application/xhtml+xml</tt>)</dd>
+<dt>xml</dt>
+<dd>XML; any MIME type string ending with <tt>/xml</tt> or <tt>+xml</tt>, or one of the <a href="http://tools.ietf.org/html/rfc3023" class="external">RFC3023</a> XML media types</dd>
+<dt>textual</dt>
+<dd>text data; any other MIME type starting with <tt>text/</tt></dd>
+<dt>binary</dt>
+<dd>base64-encoded binary data; any other MIME type other than those mentioned above</dd>
+<dt>external</dt>
+<dd>external data pointed to by a URI</dd></dl>
+<p>To obtain the content, you should use the proper accessor based on the kind:</p>
+<dl>
+<dt>text</dt>
+<dd><tt>content-text</tt>, returning a string (or empty string, if no content)</dd>
+<dt>html</dt>
+<dd><tt>content-text</tt>, returning an unescaped HTML string (or empty string)</dd>
+<dt>xhtml</dt>
+<dd><tt>content-xhtml</tt>, returning the XHTML div element as SXML, or <tt>#f</tt></dd>
+<dt>xml</dt>
+<dd><tt>content-xml</tt>, returning the root element (whatever it is) as SXML, or <tt>#f</tt> [*]</dd>
+<dt>textual</dt>
+<dd><tt>content-text</tt>, returning a string (or empty string)</dd>
+<dt>binary</dt>
+<dd><tt>content-text</tt>, returning a base64-encoded string; use <a href="base64" class="internal">base64</a> to decode it</dd>
+<dt>external</dt>
+<dd><tt>content-source</tt>, returning the external URI as a string, or <tt>#f</tt></dd></dl>
+<p>[*] XML contents conventionally consist of a single root element with no siblings, which is returned directly as <tt>(node ...)</tt>.  If more than one such element is found, they are all returned wrapped in a <tt>*TOP*</tt> node, like <tt>(*TOP* (node1 ...) (node2 ...) ...)</tt>.</p>
+<p>For <tt>xml</tt>, <tt>textual</tt>, <tt>binary</tt> and <tt>external</tt> kinds, you will then need to refer to the content media <tt>type</tt> to actually process it.</p>
+<p>And finally the raw content accessor, just in case:</p>
+<dl>
+<dt>contents</dt>
+<dd>Contents of the <tt>atom:contents</tt> element as a raw list of nodes.  Does not try to process the content.</dd></dl>
+<h4 id="ids">IDs</h4><span class="definition record"><em>[record]</em> <tt>atom:id</tt>
+<br /></span><span class="definition procedure"><em>[procedure]</em> <tt>(id=? id1 id2)</tt>
+<br /></span>
+<p>Atom IDs are represented by plain strings in this egg, rather than <tt>atom:id</tt> elements.  ID equality should be tested using <tt>id=?</tt>, which is aliased to <tt>string=?</tt>.</p>
+<h3 id="write-interface">Write interface</h3>
+<h4 id="producing-an-atom-document">Producing an Atom document</h4><span class="definition procedure"><em>[procedure]</em> <tt>(write-atom-doc doc #!optional (port (current-output-port)))</tt>
+<br /></span>
+<p>Write the Atom Feed or Atom Entry Document DOC, an SXML document typically created by <tt>make-atom-doc</tt>, to PORT.</p><span class="definition procedure"><em>[procedure]</em> <tt>(make-atom-doc root #!key (declare-xml? #t) (encoding &quot;utf-8&quot;) (headers '()))</tt>
+<br /></span>
+<p>Create an Atom Feed Document or Atom Entry Document.  ROOT is the <tt>atom:feed</tt> or <tt>atom:entry</tt> SXML root node, usually created by <tt>make-feed</tt> or <tt>make-entry</tt>.  Returns a SXML document representing the entire Atom document, which can be written out using <tt>write-atom-doc</tt>.</p>
+<dl>
+<dt>declare-xml?</dt>
+<dd>Whether to add an XML declaration to the document, as a boolean value.</dd>
+<dt>encoding</dt>
+<dd>The encoding to declare in the (optional) XML declaration, as a string.</dd>
+<dt>headers</dt>
+<dd>A list of headers to include in the output document; see below.</dd></dl>
+<p>Arbitrary headers may be added to the output document.  These headers should, generally, be XML processing instructions or comments, since the document must consist of only one root node.  For example, you can prepend some stylesheet instructions:</p>
+<pre><tt>(write-atom-doc
+ (make-atom-doc feed
+  headers: '((*PI* xml-stylesheet
+              &quot;type=\&quot;text/xsl\&quot; href=\&quot;http://3e8.org/styles/atom.xsl\&quot;&quot;)
+             (*PI* xml-stylesheet
+              &quot;type=\&quot;text/css\&quot; href=\&quot;http://3e8.org/styles/atom.css\&quot;&quot;)))
+
+&lt;?xml version=&quot;1.0&quot; encoding=&quot;utf-8&quot;?&gt;
+&lt;?xml-stylesheet type=&quot;text/xsl&quot; href=&quot;http://3e8.org/styles/atom.xsl&quot;?&gt;
+&lt;?xml-stylesheet type=&quot;text/css&quot; href=&quot;http://3e8.org/styles/atom.css&quot;?&gt;
+&lt;atom:feed xmlns:atom=&quot;http://www.w3.org/2005/Atom&quot;&gt;
+ ...</tt></pre>
+<p>Since this procedure just returns a complete SXML document beginning with a *TOP* node, you could instead modify the returned document and add any processing instructions yourself.  <tt>headers</tt> is just a convenient way of doing so.</p>
+<h4 id="feed-constructor">Feed constructor</h4><span class="definition procedure"><em>[procedure]</em> <tt>(make-feed #!key KEYS)</tt>
+<br /></span>
+<p>Make a new <tt>atom:feed</tt> element, with KEYS corresponding to child elements. Raises an error if any required elements are missing.</p>
+<p>Required elements:</p>
+<dl>
+<dt>authors</dt>
+<dd>a list of atom:author elements, the authors of the feed</dd>
+<dt>id</dt>
+<dd>an atom:id string, a permanent, unique absolute IRI identifier</dd>
+<dt>title</dt>
+<dd>an atom:title element, a human-readable title for the feed</dd>
+<dt>updated</dt>
+<dd>an atom:updated element, an RFC3339 timestamp indicating last update time</dd></dl>
+<p>Optional elements:</p>
+<dl>
+<dt>categories</dt>
+<dd>a list of atom:category elements, the feed categories</dd>
+<dt>contributors</dt>
+<dd>a list of atom:contributor elements, the contributors to the feed</dd>
+<dt>generator</dt>
+<dd>an atom:generator element, the feed generator</dd>
+<dt>icon</dt>
+<dd>an atom:icon element, the feed icon</dd>
+<dt>links</dt>
+<dd>a list of atom:link elements, the feed links</dd>
+<dt>logo</dt>
+<dd>an atom:logo element, the feed logo</dd>
+<dt>rights</dt>
+<dd>an atom:rights element, a human-readable description of rights held over the feed</dd>
+<dt>subtitle</dt>
+<dd>an atom:subtitle element, a human-readable subtitle for the feed</dd>
+<dt>entries</dt>
+<dd>a list of atom:entry elements, the feed entries</dd></dl>
+<p>Notes:</p>
+<ul>
+<li>It's a good idea to provide an &quot;alternate&quot; link for your feed and for each entry, pointing to the source document.  See <a href="#link-constructor" class="internal">make-link</a>.</li>
+<li><tt>authors</tt> may be omitted if all entries contain authorship information (meaning, <tt>atom:author</tt> elements as direct children).  <tt>make-feed</tt> will detect this case.</li>
+<li>If you omit <tt>generator</tt>, it defaults to describing this egg.  To completely omit the generator element, which would make me sad, pass <tt>#f</tt>.</li></ul>
+<h4 id="entry-constructor">Entry constructor</h4><span class="definition procedure"><em>[procedure]</em> <tt>(make-entry #!key KEYS)</tt>
+<br /></span>
+<p>Make a new <tt>atom:entry</tt> element, with KEYS corresponding to child elements. Raises an error if any required elements are missing.</p>
+<p>Required elements:</p>
+<dl>
+<dt>id</dt>
+<dd>an atom:id string, a permanent, unique absolute IRI identifier for the entry</dd>
+<dt>title</dt>
+<dd>an atom:title element, a human-readable title for the entry</dd>
+<dt>updated</dt>
+<dd>an atom:updated element, an RFC3339 timestamp indicating last update time</dd></dl>
+<p>Optional elements:</p>
+<dl>
+<dt>authors</dt>
+<dd>a list of atom:author elements, the authors of the entry</dd>
+<dt>categories</dt>
+<dd>a list of atom:category elements, the entry categories</dd>
+<dt>contributors</dt>
+<dd>a list of atom:contributor elements, the contributors to the entry</dd>
+<dt>content</dt>
+<dd>an atom:content element, the entry content</dd>
+<dt>links</dt>
+<dd>a list of atom:link elements, the entry links</dd>
+<dt>published</dt>
+<dd>an atom:published element, an RFC3339 timestamp indicating initial creation time</dd>
+<dt>rights</dt>
+<dd>an atom:rights element, a human-readable description of rights held over the entry</dd>
+<dt>source</dt>
+<dd>an atom:source element, information about the feed source for content aggregators</dd>
+<dt>summary</dt>
+<dd>an atom:summary element, a human-readable summary, abstract or excerpt of the entry</dd></dl>
+<p>Additional notes:</p>
+<p>Entry author elements are optional as long as the containing feed contains authorship information.  If the feed does not, the entry must contain least one author element.  This will be checked in <tt>make-feed</tt>.</p>
+<p>Entry elements without a <tt>atom:content</tt> element must contain an <tt>atom:link</tt> with link-relation &quot;alternate&quot;.  This is checked in <tt>make-entry</tt>.</p>
+<p>Entry summary elements are optional unless an atom:content element is present and its content kind is <tt>'external</tt> or <tt>'binary</tt>.  This is checked in <tt>make-entry</tt>.</p>
+<p>It is illegal for entries to contain more than one atom:link element with a link-relation of &quot;alternate&quot; and the same type and uri-language values. This is <i>not</i> checked in <tt>make-entry</tt>.</p>
+<h4 id="person-constructors">Person constructors</h4><span class="definition procedure"><em>[procedure]</em> <tt>(make-author #!key name uri email)</tt>
+<br /></span>
+<p>Create an atom:author element.</p>
+<dl>
+<dt>name</dt>
+<dd>(<i>required</i>) the author's name, a string</dd>
+<dt>uri</dt>
+<dd>a URI associated with the author, a string</dd>
+<dt>email</dt>
+<dd>the author's email address, a string conforming to RFC2822</dd></dl><span class="definition procedure"><em>[procedure]</em> <tt>(make-contributor #!key name uri email)</tt>
+<br /></span>
+<p>Create an atom:contributor element.</p>
+<dl>
+<dt>name</dt>
+<dd>(<i>required</i>) the contributor's name, a string</dd>
+<dt>uri</dt>
+<dd>a URI associated with the contributor, a string</dd>
+<dt>email</dt>
+<dd>the contributor's email address, a string conforming to RFC2822</dd></dl>
+<h4 id="text-constructors">Text constructors</h4><span class="definition procedure"><em>[procedure]</em> <tt>(make-rights contents #!key (type 'text))</tt>
+<br /></span><span class="definition procedure"><em>[procedure]</em> <tt>(make-subtitle contents #!key (type 'text))</tt>
+<br /></span><span class="definition procedure"><em>[procedure]</em> <tt>(make-summary contents #!key (type 'text))</tt>
+<br /></span><span class="definition procedure"><em>[procedure]</em> <tt>(make-title contents #!key (type 'text))</tt>
+<br /></span>
+<p>Create a new <tt>atom:rights</tt>, <tt>atom:subtitle</tt>, <tt>atom:summary</tt>, or <tt>atom:title</tt> element with CONTENTS of type TYPE. The accepted value for CONTENT varies according to TYPE:</p>
+<dl>
+<dt>'text</dt>
+<dd>(<i>default</i>) a plain text string</dd>
+<dt>'html</dt>
+<dd>an HTML string (it will be escaped for you when written to XML)</dd>
+<dt>'xhtml</dt>
+<dd>an XHTML div element as SXML</dd></dl>
+<pre><tt>&gt; (make-title &quot;Mesoamerican Deities and You&quot;)
+  ; =&gt; (atom:title (@ (type &quot;text&quot;)) &quot;Mesoamerican Deities and You&quot;)
+&gt; (make-rights '(xhtml:div &quot;Copyright (c) 2012 the feathered serpent, &quot;
+                           (xhtml:b &quot;Quetzlcoatl&quot;))
+               type: 'xhtml)
+  ; =&gt; (atom:rights (@ (type &quot;xhtml&quot;))
+        (xhtml:div &quot;Copyright (c) 2012 the feathered serpent, &quot;
+                   (xhtml:b &quot;Quetzlcoatl&quot;)))
+&gt; (make-summary
+   &quot;&lt;p&gt;Coping strategies for when your best friend is a 
+   &lt;a href='http://en.wikipedia.org/wiki/Quetzalcoatl'&gt;mythical god&lt;/a&gt;
+   and just &lt;i&gt;won't move out&lt;/i&gt; of your cramped apartment&lt;/p&gt;&quot;
+   type: 'html)
+  ; =&gt; (atom:summary (@ (type &quot;html&quot;))
+        &quot;&lt;p&gt;Coping strategies for when your best friend is a
+         &lt;a href='http://en.wikipedia.org/wiki/Quetzalcoatl'&gt;mythical god&lt;/a&gt;
+         and just &lt;i&gt;won't move out&lt;/i&gt; of your cramped apartment&lt;/p&gt;&quot;)</tt></pre>
+<h4 id="generator-constructor">Generator constructor</h4><span class="definition procedure"><em>[procedure]</em> <tt>(make-generator agent #!key uri version)</tt>
+<br /></span>
+<p>Create an atom:generator element representing the feed generator.</p>
+<dl>
+<dt>agent</dt>
+<dd>a human-readable, plain-text name for the generating agent, as a string</dd>
+<dt>uri</dt>
+<dd>URI relevant to the agent, as a string</dd>
+<dt>version</dt>
+<dd>version of the generating agent, as a string</dd></dl>
+<h4 id="icon-logo-constructors">Icon &amp; Logo constructors</h4><span class="definition procedure"><em>[procedure]</em> <tt>(make-icon uri)</tt>
+<br /></span>
+<p>Create an atom:icon element, which represents iconic visual identification for the feed. URI should be a URI string pointing to the icon image.</p><span class="definition procedure"><em>[procedure]</em> <tt>(make-logo uri)</tt>
+<br /></span>
+<p>Create an atom:logo element, which represents visual identification for the feed. URI should be a URI string pointing to the logo image.  Compare to <tt>make-icon</tt>.</p>
+<h4 id="id-constructor">ID constructor</h4>
+<p>IDs are plain strings, and will be automatically converted to <tt>atom:id</tt> elements when passed to <tt>make-feed</tt> or <tt>make-entry</tt>. No constructors are currently provided.</p>
+<p>Each unique entry and feed must contain a unique <tt>atom:id</tt>, which must be an absolute URI.  One option is to use the permalink of your entry or feed in this field.  Another is to use a <a href="http://www.faqs.org/rfcs/rfc4151.html" class="external">tag URI</a>, which is generally considered more robust.  An example tag URI for an entry might look like:</p>
+<pre><tt>tag:domain.org,2012-12-21:/blog/the-mayans-are-coming</tt></pre>
+<p>Also see <a href="http://tools.ietf.org/html/rfc4287#section-4.2.6" class="external">The &quot;atom:id&quot; Element</a> in RFC 4287 for details on <tt>atom:id</tt> and e.g. <a href="http://diveintomark.org/archives/2004/05/28/howto-atom-id" class="external">these</a> <a href="http://starling.us/atom/#GUS-3" class="external">tutorials</a> for ideas on ID creation. Note that tag URIs have some important restrictions on which characters are valid.</p>
+<h4 id="category-constructor">Category constructor</h4><span class="definition procedure"><em>[procedure]</em> <tt>(make-category #!key term scheme label)</tt>
+<br /></span>
+<p>Create an atom:category element representing the feed or entry category.</p>
+<dl>
+<dt>term</dt>
+<dd>(<i>required</i>) category name, as a string</dd>
+<dt>scheme</dt>
+<dd>URI that identifies a categorization scheme, as a string</dd>
+<dt>label</dt>
+<dd>human-readable plain-text label for the category, as a string</dd></dl>
+<h4 id="link-constructor">Link constructor</h4><span class="definition procedure"><em>[procedure]</em> <tt>(make-link #!key uri relation title ...)</tt>
+<br /></span>
+<p>Create an atom:link element representing a reference from an entry or feed to a Web resource.</p>
+<dl>
+<dt>uri</dt>
+<dd>(<i>required</i>) the URI (@href) of the link</dd>
+<dt>relation</dt>
+<dd>(default &quot;alternate&quot;) the link relation type (@rel) as a string; see below</dd>
+<dt>title</dt>
+<dd>human-readable, plain-text title for the link, as a string</dd>
+<dt>type</dt>
+<dd>advisory MIME media type for the referenced resource, as a string or MIME-type symbol</dd>
+<dt>length</dt>
+<dd>advisory length in octets for the referenced resource, as an exact integer</dd>
+<dt>uri-language</dt>
+<dd>an <a href="http://tools.ietf.org/html/rfc3066" class="external">RFC3066</a> language tag (@hreflang) for the referenced resource, as a string</dd></dl>
+<p>The five common link relations are:</p>
+<dl>
+<dt>&quot;alternate&quot;</dt>
+<dd>an alternate version of this resource.  For a feed, it might be a link to your webpage; for an entry, it might be a permalink to your blog entry, with <tt>type: 'html</tt>.  Feed readers work better when you include such a link.</dd>
+<dt>&quot;self&quot;</dt>
+<dd>a link to this Atom document, usually the URI to your Atom feed with <tt>type: 'atom</tt>.</dd>
+<dt>&quot;related&quot;</dt>
+<dd>a related link</dd>
+<dt>&quot;enclosure&quot;</dt>
+<dd>identifies a &quot;potentially large&quot; external resource; you should provide <tt>length:</tt></dd>
+<dt>&quot;via&quot;</dt>
+<dd>a link to the source of the information</dd></dl>
+<p>For <tt>type:</tt>, the currently known MIME-type symbol shortcuts are 'text, 'html, 'xhtml, and 'atom.  Otherwise, use the full type name as a string.</p>
+<h4 id="source-constructor">Source constructor</h4><span class="definition procedure"><em>[procedure]</em> <tt>(make-source #!key authors categories contributors ...)</tt>
+<br /></span>
+<p>Create an atom:source element representing the source feed from which the containing entry was taken.  This is used by content aggregators to preserve metadata about their source feeds.</p>
+<p>See the feed constructor <a href="#feed-constructor" class="internal">make-feed</a> for the meaning of these elements, and then see <a href="http://tools.ietf.org/html/rfc4287" class="external">RFC 4287</a> for what metadata you would typically preserve.</p>
+<h4 id="content-constructor">Content constructor</h4><span class="definition procedure"><em>[procedure]</em> <tt>(make-content content #!key (type 'text) source)</tt>
+<br /></span>
+<p>Create an atom:content element representing the content of an entry. Acceptable values for CONTENT vary according to the value of TYPE.</p>
+<dl>
+<dt>type</dt>
+<dd>(default <tt>'text</tt>) the MIME media type of the content as a string, or one of the shorthand symbols 'text, 'html or 'xhtml.  See below.</dd>
+<dt>source</dt>
+<dd>a source URI the client must dereference to obtain the content, as a string.  In this case, CONTENT is ignored and the element content will be empty.  Use a dummy value for content such as <tt>#f</tt> or the empty string.</dd></dl>
+<p>The content type may be:</p>
+<dl>
+<dt>'text or &quot;text/plain&quot;</dt>
+<dd>a human-readable, plain text string</dd>
+<dt>'html or &quot;text/html&quot;</dt>
+<dd>a string containing HTML markup (which will be escaped for you)</dd>
+<dt>'xhtml or &quot;application/xhtml+xml&quot;</dt>
+<dd>an <tt>xhtml:div</tt> element</dd>
+<dt>an XML MIME type</dt>
+<dd>an SXML document consisting of a single root node.  An XML MIME type is any MIME type string ending with &quot;/xml&quot; or &quot;+xml&quot;, or one of the <a href="http://tools.ietf.org/html/rfc3023" class="external">RFC3023</a> XML media types</dd>
+<dt>a textual MIME type</dt>
+<dd>a text string; a textual MIME type is any MIME type string starting with &quot;text/&quot;</dd>
+<dt>any other MIME type</dt>
+<dd>the content is considered binary, and the user must pass a <a href="base64" class="internal">base64</a> encoded string as the content.</dd></dl>
+<h3 id="miscellany">Miscellany</h3><span class="definition parameter"><em>[parameter]</em> <tt>(atom-ns-prefixes)</tt>
+<br /></span>
+<p>An alist of XML namespace prefixes used when reading or writing feeds. Most known namespaces relevant to Atom are included, so it is normally not necessary to touch this unless you come across an unusual namespace.</p>
+<p>A symptom of a missing namespace is that on read, some feed elements are qualified with a full URI instead of a prefix abbreviation, and on write that some are qualified with namespace 'prfx1:' or the like.</p>
+<h3 id="examples">Examples</h3>
+<p>Creating the &quot;extensive&quot; example feed from RFC4287:</p>
+<pre><tt class="highlight scheme-language"><span class="paren1">(<span class="default">use atom rfc3339</span>)</span>
+<span class="paren1">(<span class="default">write-atom-doc
+ <span class="paren2">(<span class="default">make-atom-doc
+  <span class="paren3">(<span class="default">make-feed
+   <span class="keyword">title:</span> <span class="paren4">(<span class="default">make-title <span class="string">&quot;dive into mark&quot;</span></span>)</span>
+   <span class="keyword">subtitle:</span> <span class="paren4">(<span class="default">make-subtitle <span class="string">&quot;A &lt;em&gt;lot&lt;/em&gt; of effort went into making this effortless&quot;</span>
+			    <span class="keyword">type:</span> 'html</span>)</span>
+   <span class="keyword">updated:</span> <span class="string">&quot;2005-07-31T12:29:29Z&quot;</span>
+   <span class="keyword">id:</span> <span class="string">&quot;tag:example.org,2003:3&quot;</span>
+   <span class="keyword">links:</span> <span class="paren4">(<span class="default">list <span class="paren5">(<span class="default">make-link <span class="keyword">type:</span> 'html
+			   <span class="keyword">uri-language:</span> <span class="string">&quot;en&quot;</span>
+			   <span class="keyword">uri:</span> <span class="string">&quot;http://example.org&quot;</span></span>)</span>
+		<span class="paren5">(<span class="default">make-link <span class="keyword">relation:</span> <span class="string">&quot;self&quot;</span>
+			   <span class="keyword">type:</span> <span class="string">&quot;application/atom+xml&quot;</span>
+			   <span class="keyword">uri:</span> <span class="string">&quot;http://example.org/feed.atom&quot;</span></span>)</span></span>)</span>
+   <span class="keyword">rights:</span> <span class="paren4">(<span class="default">make-rights <span class="string">&quot;Copyright (c) 2003, Mark Pilgrim&quot;</span></span>)</span>
+   <span class="keyword">generator:</span> <span class="paren4">(<span class="default">make-generator <span class="string">&quot;Example Toolkit&quot;</span>
+			      <span class="keyword">uri:</span> <span class="string">&quot;http://www.example.com&quot;</span>
+			      <span class="keyword">version:</span> <span class="string">&quot;1.0&quot;</span></span>)</span>
+   <span class="keyword">entries:</span> <span class="paren4">(<span class="default">list
+	     <span class="paren5">(<span class="default">make-entry
+	      <span class="keyword">title:</span> <span class="paren6">(<span class="default">make-title <span class="string">&quot;Atom draft-07 snapshot&quot;</span></span>)</span>
+	      <span class="keyword">links:</span> <span class="paren6">(<span class="default">list <span class="paren1">(<span class="default">make-link <span class="keyword">type:</span> 'html
+				      <span class="keyword">uri:</span> <span class="string">&quot;http://example.org/2005/04/02/atom&quot;</span></span>)</span>
+			   <span class="paren1">(<span class="default">make-link <span class="keyword">relation:</span> <span class="string">&quot;enclosure&quot;</span>
+				      <span class="keyword">type:</span> <span class="string">&quot;audio/mpeg&quot;</span>
+				      <span class="keyword">length:</span> 1337
+				      <span class="keyword">uri:</span> <span class="string">&quot;http://example.org/audio/ph34r_my_podcast.mp3&quot;</span></span>)</span></span>)</span>
+	      <span class="keyword">id:</span> <span class="string">&quot;tag:example.org,2003:3.2397&quot;</span>
+	      <span class="keyword">updated:</span> <span class="paren6">(<span class="default">rfc3339-&gt;string <span class="paren1">(<span class="default">make-rfc3339 2005 07 31 12 29 29 0 0</span>)</span></span>)</span>
+	      <span class="keyword">published:</span> <span class="paren6">(<span class="default">rfc3339-&gt;string <span class="paren1">(<span class="default">make-rfc3339 2003 12 13 08 29 29 0 <span class="paren2">(<span class="default">* 3600 4</span>)</span></span>)</span></span>)</span>
+	      <span class="keyword">authors:</span> <span class="paren6">(<span class="default">list <span class="paren1">(<span class="default">make-author <span class="keyword">name:</span> <span class="string">&quot;Mark Pilgrim&quot;</span>
+					  <span class="keyword">uri:</span> <span class="string">&quot;http://example.org&quot;</span>
+					  <span class="keyword">email:</span> <span class="string">&quot;f8dy@example.com&quot;</span></span>)</span></span>)</span>
+	      <span class="keyword">contributors:</span> <span class="paren6">(<span class="default">list <span class="paren1">(<span class="default">make-contributor
+				   <span class="keyword">name:</span> <span class="string">&quot;Sam Ruby&quot;</span></span>)</span>
+				  <span class="paren1">(<span class="default">make-contributor
+				   <span class="keyword">name:</span> <span class="string">&quot;Joe Gregorio&quot;</span></span>)</span></span>)</span>
+	      <span class="comment">;; xml:base, xml:lang cannot be handled yet
+</span>	      <span class="keyword">content:</span> <span class="paren6">(<span class="default">make-content
+			'<span class="paren1">(<span class="default">xhtml:div
+			  <span class="paren2">(<span class="default">xhtml:p <span class="paren3">(<span class="default">xhtml:i <span class="string">&quot;[Update: The Atom draft is finished.]&quot;</span></span>)</span></span>)</span></span>)</span>
+			<span class="keyword">type:</span> 'xhtml</span>)</span></span>)</span></span>)</span></span>)</span></span>)</span></span>)</span></tt></pre>
+<pre><tt class="highlight scheme-language">&lt;?xml version=<span class="string">&quot;1.0&quot;</span> encoding=<span class="string">&quot;utf-8&quot;</span>?&gt;
+&lt;feed xmlns=<span class="string">&quot;http://www.w3.org/2005/Atom&quot;</span>&gt;
+  &lt;generator uri=<span class="string">&quot;http://www.example.com&quot;</span> 
+             version=<span class="string">&quot;1.0&quot;</span>&gt;Example Toolkit&lt;/generator&gt;
+  &lt;id&gt;tag:example.org,2003:3&lt;/id&gt;
+  &lt;link href=<span class="string">&quot;http://example.org&quot;</span> rel=<span class="string">&quot;alternate&quot;</span> 
+        type=<span class="string">&quot;text/html&quot;</span> hreflang=<span class="string">&quot;en&quot;</span> /&gt;
+  &lt;link href=<span class="string">&quot;http://example.org/feed.atom&quot;</span> 
+        rel=<span class="string">&quot;self&quot;</span> type=<span class="string">&quot;application/atom+xml&quot;</span> /&gt;
+  &lt;rights type=<span class="string">&quot;text&quot;</span>&gt;Copyright <span class="paren1">(<span class="default">c</span>)</span> 2003, Mark Pilgrim&lt;/rights&gt;
+  &lt;subtitle type=<span class="string">&quot;html&quot;</span>&gt;A &amp;lt<span class="comment">;em&amp;gt;lot&amp;lt;/em&amp;gt; of effort
+</span>    went into making this effortless&lt;/subtitle&gt;
+  &lt;title type=<span class="string">&quot;text&quot;</span>&gt;dive into mark&lt;/title&gt;
+  &lt;updated&gt;2005-07-31T12:29:29Z&lt;/updated&gt;
+  &lt;entry&gt;
+    &lt;author&gt;
+      &lt;name&gt;Mark Pilgrim&lt;/name&gt;
+      &lt;uri&gt;http://example.org&lt;/uri&gt;
+      &lt;email&gt;f8dy@example.com&lt;/email&gt;
+    &lt;/author&gt;
+    &lt;contributor&gt;
+      &lt;name&gt;Sam Ruby&lt;/name&gt;
+    &lt;/contributor&gt;
+    &lt;contributor&gt;
+      &lt;name&gt;Joe Gregorio&lt;/name&gt;
+    &lt;/contributor&gt;
+    &lt;content type=<span class="string">&quot;xhtml&quot;</span>&gt;
+      &lt;div xmlns=<span class="string">&quot;http://www.w3.org/1999/xhtml&quot;</span>&gt;
+        &lt;p&gt;
+          &lt;i&gt;<span class="paren1">[<span class="default"><span class="keyword">Update:</span> The Atom draft is finished.</span>]</span>&lt;/i&gt;
+        &lt;/p&gt;
+      &lt;/div&gt;
+    &lt;/content&gt;
+    &lt;id&gt;tag:example.org,2003:3.2397&lt;/id&gt;
+    &lt;published&gt;2003-12-13T08:29:29-04:00&lt;/published&gt;
+    &lt;title type=<span class="string">&quot;text&quot;</span>&gt;Atom draft-07 snapshot&lt;/title&gt;
+    &lt;updated&gt;2005-07-31T12:29:29Z&lt;/updated&gt;
+    &lt;link href=<span class="string">&quot;http://example.org/2005/04/02/atom&quot;</span> 
+          rel=<span class="string">&quot;alternate&quot;</span> type=<span class="string">&quot;text/html&quot;</span> /&gt;
+    &lt;link href=<span class="string">&quot;http://example.org/audio/ph34r_my_podcast.mp3&quot;</span> 
+          rel=<span class="string">&quot;enclosure&quot;</span> type=<span class="string">&quot;audio/mpeg&quot;</span> length=<span class="string">&quot;1337&quot;</span> /&gt;
+  &lt;/entry&gt;
+&lt;/feed&gt;</tt></pre>
+<h3 id="known-issues">Known Issues</h3>
+<ul>
+<li><tt>xml:base</tt> and <tt>xml:lang</tt> are not supported, either on reading or writing. You can add these attributes manually to the output document for writing, but for reading the parser will not understand them and relative URLs will not be resolved.</li>
+<li>Elements outside the <tt>atom:</tt> namespace, such as <tt>feedburner:</tt>, will repeatedly declare their prefix mapping in the element itself instead of in the root element, leading to a large amount of redundant verbosity.</li>
+<li>Dealing with extension elements and attributes is a bit painful as you must manipulate the SXML directly.</li></ul>
+<h3 id="about-this-egg">About this egg</h3>
+<h4 id="author">Author</h4>
+<p><a href="http://3e8.org" class="external">Jim Ursetto</a></p>
+<h4 id="version-history">Version history</h4>
+<dl>
+<dt>0.1.1</dt>
+<dd>Use default namespace for atom and xhtml</dd>
+<dt>0.1</dt>
+<dd>Initial release</dd></dl>
+<p>Experimental code may be available via `git clone git://3e8.org/atom.git`.</p>
+<h4 id="license">License</h4>
+<p>BSD.</p></div></body></html>
