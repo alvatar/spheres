@@ -1,6 +1,6 @@
 ;;!!! JSON reader and writer
 
-(define-library (spheres/fileformat json)
+(define-library (spheres/dataformat json)
   (export json-decode
           json-encode
           json-read

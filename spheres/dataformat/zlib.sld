@@ -4,7 +4,7 @@
 ;; Copyright (c) 2006 by Manuel Serrano, All Rights Reserved.
 ;; Copyright (c) 2006-2012 by Marc Feeley, All Rights Reserved.
 
-(define-library (spheres/fileformat zlib)
+(define-library (spheres/dataformat zlib)
   (export gzip-genport
           deflate-genport
           gzip-u8vector
