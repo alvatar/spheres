@@ -40,6 +40,7 @@
     (spheres/dataenc bignum)
     (spheres/dataenc ieee-754)
     (spheres/dataenc integer)
+    (spheres/dataformat csv)
     (spheres/dataformat json)
     (spheres/dataformat tar)
     (spheres/dataformat zlib)
