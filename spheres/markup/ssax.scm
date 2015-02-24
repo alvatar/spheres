@@ -388,9 +388,12 @@
 (define xml-string->sxml-read-to-idx/all-data (make-parameter #f))
 
 ;;!  The main routine
-(define (xml-string->sxml xml-string
-                          #!optional (namespace-prefix-assig '()) preserve-whitespace-only-node-values on-need-more-data (operation 'parse)
-                          (namespaces-already-defined '()))
+(define* (xml-string->sxml xml-string
+                           (namespace-prefix-assig '())
+                           (preserve-whitespace-only-node-values #f)
+                           (on-need-more-data #f)
+                           (operation 'parse)
+                           (namespaces-already-defined '()))
   ;; SRFI 13 cut
   (define (string-index s criterion #!optional (start 0) end)
     (let ((end (or end (string-length s))))
@@ -654,11 +657,13 @@
         `(##vector-ref ,port 4))
       (error (with-output-to-string
                "" (lambda ()
-                    (display (string-append "Error " (port-name (car args)) " at position "
-                                            (input-port-byte-position (car args)) "\n"
-                                            " at character no. " current-xml-string-pos)
-                             (current-error-port))
-                    (apply (lambda (x) (display x (current-output-port))) (cdr args))
+                    (if (port? (car args))
+                        (begin
+                          (display (string-append "Error " (port-name (car args)) " at position "
+                                                  (input-port-byte-position (car args)) "\n"
+                                                  " at character no. " current-xml-string-pos)
+                                   (current-error-port))
+                          (apply (lambda (x) (display x (current-output-port))) (cdr args))))
                     (for-each (lambda (x) (display x (current-output-port))) `(": " ,args  "\n"))))))
     (define ssax:warn
       (lambda args
@@ -1981,8 +1986,8 @@
                                     (cdr attr)) accum))
                            '() attributes)))
                      (call-with-current-continuation
-                      (lambda (new-level-k)  ; how to parse next
-                        ((car seed)     ; return the result
+                      (lambda (new-level-k) ; how to parse next
+                        ((car seed)         ; return the result
                          (let ((elem-content
                                         ; A promise to continue parsing
                                 (call-with-current-continuation ; where to put the result
@@ -2075,7 +2080,7 @@
                (list                    ; form initial seed
                 result-k                ; put the result
                 (lambda (seed) ; dummy top-level parser state that produces '()
-                  ((car seed)        ; where to put the result nodeset
+                  ((car seed)  ; where to put the result nodeset
                    '()))
                 '()
                 ;; level for the document element4
@@ -2282,18 +2287,18 @@
                                   )))))
                     (call-with-values
                         (lambda () (if elems
-                                  (cond
-                                   ((assoc tag-head elems)
-                                    =>
-                                    (lambda (decl-elem)
-                                      (values
-                                       (if empty-el-tag? 'EMPTY-TAG (cadr decl-elem))
-                                       (caddr decl-elem))))
-                                   (else
-                                    (parser-error
-                                     "[elementvalid] broken, no decl for "
-                                     tag-head)))
-                                  (values (if empty-el-tag? 'EMPTY-TAG 'ANY) #f)))
+                                       (cond
+                                        ((assoc tag-head elems)
+                                         =>
+                                         (lambda (decl-elem)
+                                           (values
+                                            (if empty-el-tag? 'EMPTY-TAG (cadr decl-elem))
+                                            (caddr decl-elem))))
+                                        (else
+                                         (parser-error
+                                          "[elementvalid] broken, no decl for "
+                                          tag-head)))
+                                       (values (if empty-el-tag? 'EMPTY-TAG 'ANY) #f)))
                       (lambda (elem-content decl-attrs)
                         (let ((merged-attrs
                                (if decl-attrs
