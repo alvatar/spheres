@@ -53,6 +53,7 @@
     (spheres/gambit/ffi types)
     (spheres/io base)
     (spheres/io binary)
+    (spheres/io genport)
     (spheres/io file)
     (spheres/io shared-structure)
     (spheres/markup atom)
