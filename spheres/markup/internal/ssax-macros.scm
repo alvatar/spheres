@@ -16,7 +16,7 @@
               (if default
                   `((else (,default port target seed)))
                   '((else
-                     (xlink:warn port "Skipping PI: " target "\n")
+                     (xlink:ssax-warn port "Skipping PI: " target "\n")
                      (xlink:skip-pi port)
                      seed))))
              ((eq? '*DEFAULT* (caar pi-handlers))
@@ -170,9 +170,9 @@
          lambda
          (port docname systemid internal-subset? seed)
          (when internal-subset?
-               (xlink:warn port "Internal DTD subset is not currently handled ")
+               (xlink:ssax-warn port "Internal DTD subset is not currently handled ")
                (xlink:skip-internal-dtd port))
-         (xlink:warn
+         (xlink:ssax-warn
           port
           "DOCTYPE DECL "
           docname

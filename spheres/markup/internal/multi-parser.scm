@@ -345,10 +345,10 @@
                  (lambda (namespaces)
                    (lambda (port docname systemid internal-subset? seed)
                      (when internal-subset?
-                           (xlink:warn port
+                           (xlink:ssax-warn port
                                        "Internal DTD subset is not currently handled ")
                            (xlink:skip-internal-dtd port))
-                     (xlink:warn port "DOCTYPE DECL " docname " "
+                     (xlink:ssax-warn port "DOCTYPE DECL " docname " "
                                  systemid " found and skipped")
                      (values #f '() namespaces seed)))
                  (cond

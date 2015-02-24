@@ -15,7 +15,19 @@
               (cons head (recur (cdr lst)))
               (recur (cdr lst)))))))
 
-(define xlink:warn
+(define xlink:ssax-parser-error
+  (lambda args
+    (define-macro (port-name port)
+      `(##vector-ref ,port 4))
+    (if (port? (car args))
+        (error
+         (string-append "\nError: " (port-name (car args))
+                        " at position " (input-port-byte-position (car args)) "\n"
+                        ;; (apply cerr (cdr args)))
+                        (cdr args)))
+        (error "Error in error handler :-) " args))))
+
+(define xlink:ssax-warn
   (lambda args
     (define-macro (port-name port)
       `(##vector-ref ,port 4))
@@ -99,7 +111,7 @@
        ((eof-object? c)
         (if (memq '*eof* break-chars)
     	    (substring buffer 0 i)      ; was EOF expected?
-    	    (xlink:parser-error port "EOF while reading a token " comment)))
+    	    (xlink:ssax-parser-error port "EOF while reading a token " comment)))
        (else
         (if (>= i curr-buf-len)   ; make space for i-th char in buffer
     	    (begin                ; -> grow the buffer by the quantum
@@ -205,7 +217,7 @@
 (define* (xlink:assert-curr-char expected-chars comment (port (current-input-port)))
   (let ((c (read-char port)))
     (if (memq c expected-chars) c
-        (xlink:parser-error port "Wrong character " c
+        (xlink:ssax-parser-error port "Wrong character " c
                             " (0x" (if (eof-object? c) "*eof*"
                                        (number->string (char->integer c) 16)) ") "
                             comment ". " expected-chars " expected"))))
@@ -242,7 +254,7 @@
 (define (xlink:read-NCName port)
   (let ((first-char (peek-char port)))
     (or (xlink:ncname-starting-char? first-char)
-        (xlink:parser-error port "XMLNS [4] for '" first-char "'")))
+        (xlink:ssax-parser-error port "XMLNS [4] for '" first-char "'")))
   (string->symbol
    (xlink:next-token-of
     (lambda (c)
@@ -287,7 +299,7 @@
     (define (skip-comment port)
       (xlink:assert-curr-char '(#\-) "XML [15], second dash" port)
       (if (not (xlink:find-string-from-port? "-->" port))
-          (xlink:parser-error port "XML [15], no -->"))
+          (xlink:ssax-parser-error port "XML [15], no -->"))
       (xlink:make-xml-token 'COMMENT #f))
     (define (read-cdata port)
       (define (read-string n port)
@@ -321,7 +333,7 @@
 
 (define (xlink:skip-pi port)
   (if (not (xlink:find-string-from-port? "?>" port))
-      (xlink:parser-error port "Failed to find ?> terminating the PI")))
+      (xlink:ssax-parser-error port "Failed to find ?> terminating the PI")))
 
 (define (xlink:read-pi-body-as-string port)
   (define (cons* a1 a2 . rest)
@@ -338,7 +350,7 @@
 
 (define (xlink:skip-internal-dtd port)
   (if (not (xlink:find-string-from-port? "]>" port))
-      (xlink:parser-error
+      (xlink:ssax-parser-error
        port
        "Failed to find ]> terminating the internal DTD subset")))
 
@@ -407,7 +419,7 @@
     (read-char port)
     (if (integer? char-code)
         (ucscode->char char-code)
-        (xlink:parser-error port "[wf-Legalchar] broken for '" name "'"))))
+        (xlink:ssax-parser-error port "[wf-Legalchar] broken for '" name "'"))))
 
 (define xlink:predefined-parsed-entities
   `((,(string->symbol "amp") . "&")
@@ -439,11 +451,11 @@
             (begin0
              (content-handler port new-entities seed)
              (close-input-port port))))
-         (else (xlink:parser-error port "[norecursion] broken for " name))))))
+         (else (xlink:ssax-parser-error port "[norecursion] broken for " name))))))
    ((assq name xlink:predefined-parsed-entities)
     =>
     (lambda (decl-entity) (str-handler (cdr decl-entity) "" seed)))
-   (else (xlink:parser-error port "[wf-entdeclared] broken for " name))))
+   (else (xlink:ssax-parser-error port "[wf-entdeclared] broken for " name))))
 
 (define (xlink:make-empty-attlist) '())
 
@@ -499,7 +511,7 @@
              port
              entities
              (read-named-entity port entities new-fragments)))))
-         (else (xlink:parser-error port "[CleanAttrVals] broken")))))
+         (else (xlink:ssax-parser-error port "[CleanAttrVals] broken")))))
     (define (read-named-entity port entities fragments)
       (define (cons* a1 a2 . rest)
         (if (null? rest)
@@ -534,7 +546,7 @@
                        name
                        (string-concatenate-reverse/shared
                         (read-attrib-value delimiter port entities '()))))
-                     (xlink:parser-error
+                     (xlink:ssax-parser-error
                       port
                       "[uniqattspec] broken for "
                       name))))))))))
@@ -547,7 +559,7 @@
       ((assq (car unres-name) namespaces) => cadr)
       ((eq? (car unres-name) xlink:Prefix-XML) xlink:Prefix-XML)
       (else
-       (xlink:parser-error
+       (xlink:ssax-parser-error
         port
         "[nsc-NSDeclared] broken; prefix "
         (car unres-name))))
@@ -574,7 +586,7 @@
             (lambda () (apply values decl-attr))
           (lambda (attr-name content-type use-type default-value)
             (and (eq? use-type 'REQUIRED)
-                 (xlink:parser-error port "[RequiredAttr] broken for" attr-name))
+                 (xlink:ssax-parser-error port "[RequiredAttr] broken for" attr-name))
             (if default-value
                 (cons (cons attr-name default-value) result)
                 result))))
@@ -595,7 +607,7 @@
                        (if (or (eq? xmlns (car attr))
                                (and (pair? (car attr)) (eq? xmlns (caar attr))))
                            (loop attr-others decl-attrs (cons attr result))
-                           (xlink:parser-error port "[ValueType] broken for " attr)))
+                           (xlink:ssax-parser-error port "[ValueType] broken for " attr)))
                       ((>)
                        (loop attlist other-decls (add-default-decl decl-attr result)))
                       (else
@@ -605,21 +617,21 @@
                            (cond
                             ((eq? use-type 'FIXED)
                              (or (equal? (cdr attr) default-value)
-                                 (xlink:parser-error
+                                 (xlink:ssax-parser-error
                                   port
                                   "[FixedAttr] broken for "
                                   attr-name)))
                             ((eq? content-type 'CDATA) #t)
                             ((pair? content-type)
                              (or (member (cdr attr) content-type)
-                                 (xlink:parser-error
+                                 (xlink:ssax-parser-error
                                   port
                                   "[enum] broken for "
                                   attr-name
                                   "="
                                   (cdr attr))))
                             (else
-                             (xlink:warn
+                             (xlink:ssax-warn
                               port
                               "declared content type "
                               content-type
@@ -628,7 +640,7 @@
                                  (cons attr result)))))))))))))
     (define (add-ns port prefix uri-str namespaces)
       (and (equal? "" uri-str)
-           (xlink:parser-error port "[dt-NSName] broken for " prefix))
+           (xlink:ssax-parser-error port "[dt-NSName] broken for " prefix))
       (let ((uri-symbol (xlink:uri-string->symbol uri-str)))
         (let loop ((nss namespaces))
           (cond
@@ -679,7 +691,7 @@
                                 (if empty-el-tag? 'EMPTY-TAG (cadr decl-elem))
                                 (caddr decl-elem))))
                             (else
-                             (xlink:parser-error
+                             (xlink:ssax-parser-error
                               port
                               "[elementvalid] broken, no decl for "
                               tag-head)))
@@ -708,7 +720,7 @@
                             (xlink:resolve-name port (car name-value)
                                                 namespaces #f)
                             (cdr name-value)))
-                          (xlink:parser-error
+                          (xlink:ssax-parser-error
                            port
                            "[uniqattspec] after NS expansion broken for "
                            name-value)))
@@ -724,7 +736,7 @@
       (do ((i arg (-- i)))
       	  ((<= i 0) #f)
         (if (eof-object? (read-char port))
-      	    (xlink:parser-error port "Unexpected EOF while skipping "
+      	    (xlink:ssax-parser-error port "Unexpected EOF while skipping "
                                 arg " characters"))))
      (else                             ; skip until break-chars (=arg)
       (let loop ((c (read-char port)))
@@ -732,7 +744,7 @@
          ((memv c arg) c)
          ((eof-object? c)
           (if (memv '*eof* arg) c
-              (xlink:parser-error port "Unexpected EOF while skipping until " arg)))
+              (xlink:ssax-parser-error port "Unexpected EOF while skipping until " arg)))
          (else (loop (read-char port))))))))
   (let ((discriminator (xlink:read-NCName port)))
     (xlink:assert-curr-char xlink:S-chars "space after SYSTEM or PUBLIC" port)
@@ -752,7 +764,7 @@
           (read-char port)
           systemid))
        (else
-        (xlink:parser-error
+        (xlink:ssax-parser-error
          port
          "XML [75], "
          discriminator
@@ -763,14 +775,14 @@
     (cond
      ((eof-object? c) c)
      ((not (char=? c #\<))
-      (xlink:parser-error port "XML [22], char '" c "' unexpected"))
+      (xlink:ssax-parser-error port "XML [22], char '" c "' unexpected"))
      (else
       (let ((token (xlink:read-markup-token port)))
         (case (xlink:xml-token-kind token)
           ((COMMENT) (loop (xlink:skip-S port)))
           ((PI DECL START) token)
           (else
-           (xlink:parser-error
+           (xlink:ssax-parser-error
             port
             "XML [22], unexpected token of kind "
             (xlink:xml-token-kind token)))))))))
@@ -970,11 +982,11 @@
               DOCTYPE
               (lambda (port docname systemid internal-subset? seed)
                 (when internal-subset?
-                      (xlink:warn
+                      (xlink:ssax-warn
                        port
                        "Internal DTD subset is not currently handled ")
                       (xlink:skip-internal-dtd port))
-                (xlink:warn
+                (xlink:ssax-warn
                  port
                  "DOCTYPE DECL "
                  docname
