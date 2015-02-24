@@ -33,7 +33,7 @@
   (import (spheres/core condition)
           (spheres/algorithm list)
           (spheres/structure hash-table)
-          (spheres/string char-set))
+          (spheres/string char-iset))
 
   ;; Syntactic sugar.
   ;; Note: this macro has been renamed
@@ -42,5 +42,4 @@
       ((rx sre ...)
        (regexp `(: sre ...)))))
 
-  (include "char-sets/boundary.scm")
   (include "regexp.scm"))
