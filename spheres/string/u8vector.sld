@@ -1,4 +1,4 @@
-(define-library (spheres/string u8)
+(define-library (spheres/string u8vector)
   (export hex-char->integer
           utf8-u8vector->string
           string->utf8-u8vector
@@ -15,4 +15,4 @@
           hex-string->u8vector
           u8vector-normalize-eol:s)
   
-  (include "u8.scm"))
+  (include "u8vector.scm"))
