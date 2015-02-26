@@ -81,6 +81,7 @@
     (spheres/net repl-server)
     (spheres/net uri)
     (spheres/net url)
+    (spheres/net uuid)
     (spheres/object prototype)
     (spheres/object record)
     (spheres/object type-class)
