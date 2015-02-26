@@ -95,6 +95,7 @@
     (spheres/os ios/ios)
     (spheres/os linux/error-codes)
     (spheres/os localization)
+    (spheres/parser earley)
     (spheres/parser simple)
     (spheres/parser silex)
     (spheres/streams derived)
