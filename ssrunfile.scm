@@ -78,6 +78,7 @@
     (spheres/math prime)
     (spheres/math vect2)
     (spheres/net mime)
+    (spheres/net repl-server)
     (spheres/net url)
     (spheres/object prototype)
     (spheres/object record)
