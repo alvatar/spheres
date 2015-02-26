@@ -95,6 +95,7 @@
     (spheres/os ios/ios)
     (spheres/os linux/error-codes)
     (spheres/os localization)
+    (spheres/parser simple)
     (spheres/parser silex)
     (spheres/streams derived)
     (spheres/streams primitive)
@@ -123,7 +124,6 @@
     (spheres/util profile)
     (spheres/util quickcheck)
     (spheres/util test)))
-
 (define features
   '(((spheres/core let-multiple) only-macros)
     ((spheres/core match) only-macros)
