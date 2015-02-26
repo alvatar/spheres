@@ -1,0 +1,274 @@
+<html lang="en">
+<head>
+<title>silex tables - Libraries for Vicare Scheme</title>
+<meta http-equiv="Content-Type" content="text/html">
+<meta name="description" content="Libraries for Vicare Scheme">
+<meta name="generator" content="makeinfo 4.13">
+<link title="Top" rel="start" href="index.html#Top">
+<link rel="up" href="silex.html#silex" title="silex">
+<link rel="prev" href="silex-example.html#silex-example" title="silex example">
+<link rel="next" href="silex-input.html#silex-input" title="silex input">
+<link href="http://www.gnu.org/software/texinfo/" rel="generator-home" title="Texinfo Homepage">
+<!--
+This document describes the libraries distributed along with version
+0.3d7 of Vicare Scheme, an R6RS compliant native
+compiler for the Scheme language.
+
+Copyright (C) 2010-2013 by Marco Maggi.
+
+Copyright (C) 2006-2010 by Abdulaziz Ghuloum.
+
+The documentation of IrRegex is Copyright (C) 2005-2012 Alex
+Shinn.  All rights reserved.
+
+The documentation of Pregexp is Copyright (C) 1999-2005 Dorai
+Sitaram.  All rights reserved.
+
+The documentation of the library `(vicare formations)' is derived
+from the documentation of Guile.  Copyright (C) 1996-2005,
+2009-2013 Free Software Foundation.
+
+The documentation of the libraries `(vicare parser-tools silex
+---)' are derived form the documentation of SILex.  Copyright
+(C) 2001, 2009 Danny Dube'.
+
+     This program is free software: you can redistribute it and/or
+     modify it under the terms of the GNU General Public License
+     version 3 as published by the Free Software Foundation.
+
+     This program is distributed in the hope that it will be useful, but
+     WITHOUT ANY WARRANTY; without even the implied warranty of
+     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+     General Public License for more details.
+
+     You should have received a copy of the GNU General Public License
+     along with this program.  If not, see
+     `http://www.gnu.org/licenses/'.
+
+Trademarks used herein are the property of their respective owners.-->
+<meta http-equiv="Content-Style-Type" content="text/css">
+<style type="text/css"><!--
+  pre.display { font-family:inherit }
+  pre.format  { font-family:inherit }
+  pre.smalldisplay { font-family:inherit; font-size:smaller }
+  pre.smallformat  { font-family:inherit; font-size:smaller }
+  pre.smallexample { font-size:smaller }
+  pre.smalllisp    { font-size:smaller }
+  span.sc    { font-variant:small-caps }
+  span.roman { font-family:serif; font-weight:normal; } 
+  span.sansserif { font-family:sans-serif; font-weight:normal; } 
+--></style>
+</head>
+<body>
+<div class="node">
+<a name="silex-tables"></a>
+<p>
+Next:&nbsp;<a rel="next" accesskey="n" href="silex-input.html#silex-input">silex input</a>,
+Previous:&nbsp;<a rel="previous" accesskey="p" href="silex-example.html#silex-example">silex example</a>,
+Up:&nbsp;<a rel="up" accesskey="u" href="silex.html#silex">silex</a>
+<hr>
+</div>
+
+<h3 class="section">36.2 Creating lexer tables</h3>
+
+<p>The following bindings are exported by the <code>(vicare parser-tools
+silex)</code> library.
+
+<div class="defun">
+&mdash; Syntax: <b>lex</b><var> ?clause <small class="dots">...</small><a name="index-lex-5155"></a></var><br>
+<blockquote><p>Build a new lexer table from a lexer specification, which can be: loaded
+from a file, read from a textual input port, acquired from a Scheme
+string; <a href="silex-syntax.html#silex-syntax">Syntax of the specification</a>.
+
+        <p>The output is the lexer's <dfn>table</dfn>, a Scheme vector representing the
+lexer automaton; it can be: saved to a file, written to a port,
+evaluated using the library <code>(rnrs eval (6))</code> and returned as value.
+
+        <p>The behaviour of this function is configured with the given
+<var>?clause</var> arguments; see below for the list of supported options.
+
+        <p>The table's code must be evaluated in an environment with the following
+libraries:
+
+     <pre class="example">          (rnrs)
+          (vicare parser-tools silex input-system)
+          (vicare system $fx)
+</pre>
+        </blockquote></div>
+
+<div class="defun">
+&mdash; Auxiliary Syntax: <b>input-string:</b><var> ?spec-str<a name="index-input_002dstring_003a-5156"></a></var><br>
+<blockquote><p>Instruct <code>lex</code> to build the lexer tables from the specification in
+the given Scheme string.  This clause is mutually exclusive with
+<code>input-file:</code> and <code>input-port:</code>. 
+</p></blockquote></div>
+
+<div class="defun">
+&mdash; Auxiliary Syntax: <b>input-port:</b><var> ?port<a name="index-input_002dport_003a-5157"></a></var><br>
+<blockquote><p>Instruct <code>lex</code> to build the lexer tables from the specification
+read from the given textual input port.  This clause is mutually
+exclusive with <code>input-string:</code> and <code>input-file:</code>. 
+</p></blockquote></div>
+
+<div class="defun">
+&mdash; Auxiliary Syntax: <b>input-file:</b><var> ?pathname<a name="index-input_002dfile_003a-5158"></a></var><br>
+<blockquote><p>Instruct <code>lex</code> to build the lexer tables from the specification in
+the selected file.  <var>?pathname</var> must be an expression evaluating to
+a string representing an existent file pathname.  This clause is
+mutually exclusive with <code>input-string:</code> and <code>input-port:</code>. 
+</p></blockquote></div>
+
+<div class="defun">
+&mdash; Auxiliary Syntax: <b>library-spec:</b><var> ?library-name<a name="index-library_002dspec_003a-5159"></a></var><br>
+<blockquote><p>Instruct <code>lex</code> to build the output as a proper Scheme library. 
+This means a Scheme string is built, representing a <code>library</code> form. 
+The string may contain Scheme comments.  When this clause is not used
+the output is the raw table vector or a <code>define</code> form.
+
+        <p>The argument <var>library-name</var> must represent a valid library name; the
+following formats are accepted:
+
+          <ul>
+<li>A string, including the parentheses.  Example:
+
+          <pre class="example">               (library-spec: "(calc-lexer)")
+               ; -&gt; (library (calc-lexer) ---)
+</pre>
+          <li>A symbol, which will be converted to string and to which parentheses
+will be added.  Example:
+
+          <pre class="example">               (library-spec: 'calc-lexer)
+               ; -&gt; (library (calc-lexer) ---)
+</pre>
+          <li>A list of values, which will be simply converted to string.  Example:
+
+          <pre class="example">               (library-spec: '(calc-lexer))
+               ; -&gt; (library (calc-lexer) ---)
+</pre>
+          </ul>
+
+        <p>It is mandatory to use the clause <code>table-name:</code> along with
+<code>library-spec:</code>. 
+</p></blockquote></div>
+
+<div class="defun">
+&mdash; Auxiliary Syntax: <b>library-language:</b><var> ?lang<a name="index-library_002dlanguage_003a-5160"></a></var><br>
+<blockquote><p>Select <var>?lang</var> as language to use for the library; the language is
+the first import specification after <code>import</code> in the <code>library</code>
+form.  By default the language is <code>(rnrs)</code>. 
+</p></blockquote></div>
+
+<div class="defun">
+&mdash; Auxiliary Syntax: <b>library-imports:</b><var> ?import-list<a name="index-library_002dimports_003a-5161"></a></var><br>
+<blockquote><p>Select a list of libraries which must be imported when using the
+generated lexer.  <var>?import-list</var> must be a list of library
+specifications; for example, if we want to include the <code>(vicare
+language-extensions sentinels)</code> and <code>(vicare language-extensions
+variables)</code> libraries we do:
+
+     <pre class="example">          (library-imports:
+             '((vicare language-extensions sentinels)
+               (vicare language-extensions variables)))
+</pre>
+        <p>If the lexer table is written to a proper Scheme library:
+<var>?import-list</var> is added to the import specification of the generated
+library.  If the lexer table is directly evaluated: <var>?import-list</var> is
+added to the environment which is handed to <code>eval</code>.
+
+        <p>This clause is ignored when the selected output is neither a library,
+nor an evaluated form. 
+</p></blockquote></div>
+
+<div class="defun">
+&mdash; Auxiliary Syntax: <b>table-name:</b><var> ?name<a name="index-table_002dname_003a-5162"></a></var><br>
+<blockquote><p>Instruct <code>lex</code> to output a <code>define</code> form defining a binding
+between <var>?name</var> and the table vector.  <var>?name</var> can be a string or
+symbol, and it must represent a valid identifier.
+
+        <p>When this clause is used along with <code>library-spec:</code>, the
+<code>library</code> form will export the identifier <var>?name</var>. 
+</p></blockquote></div>
+
+<div class="defun">
+&mdash; Auxiliary Syntax: <b>output-value:</b><var> #t<a name="index-output_002dvalue_003a-5163"></a></var><br>
+&mdash; Auxiliary Syntax: <b>output-value:</b><var> #f<a name="index-output_002dvalue_003a-5164"></a></var><br>
+<blockquote><p>When the argument is <code>#t</code>, instruct <code>lex</code> to evaluate the vector
+table using the <code>(rnrs eval (6))</code> library and to return the result,
+which is then directly usable.
+
+        <p>The list of libraries selected by <code>library-imports:</code> is added to
+the environment used for the evaluation.  By default, the environment
+always includes <code>(rnrs)</code>, and also <code>(vicare parser-tools
+silex lexer)</code> when the selected lexer format is <code>code</code>.
+
+        <p>This clause is mutually exclusive with <code>table-name:</code>,
+<code>output-file:</code> and <code>output-port:</code>. 
+</p></blockquote></div>
+
+<div class="defun">
+&mdash; Auxiliary Syntax: <b>output-port:</b><var> ?port<a name="index-output_002dport_003a-5165"></a></var><br>
+<blockquote><p>Instruct <code>lex</code> to write the output as string in the given textual
+output port.
+
+        <p>This clause is mutually exclusive with <code>output-value:</code> and
+<code>output-file:</code>. 
+</p></blockquote></div>
+
+<div class="defun">
+&mdash; Auxiliary Syntax: <b>output-file:</b><var> ?pathname<a name="index-output_002dfile_003a-5166"></a></var><br>
+<blockquote><p>Instruct <code>lex</code> to save the output in a file with given pathname;
+this is especially useful when the output is a proper <code>library</code> or
+<code>define</code> form.  <var>?pathname</var> must be an expression evaluating to
+a string representing the file pathname.
+
+        <p>This clause is mutually exclusive with <code>output-value:</code> and
+<code>output-port:</code>. 
+</p></blockquote></div>
+
+<div class="defun">
+&mdash; Auxiliary Syntax: <b>lexer-format:</b><var> ?format<a name="index-lexer_002dformat_003a-5167"></a></var><br>
+<blockquote><p>Instruct <code>lex</code> about the format of the lexer table.  <var>?format</var>
+can be one among the following symbols: <code>decision-tree</code>,
+&lsquo;<samp><span class="samp">code</span></samp>&rsquo;, &lsquo;<samp><span class="samp">portable</span></samp>&rsquo;; the default is &lsquo;<samp><span class="samp">decision-tree</span></samp>&rsquo;. 
+<a href="silex-format.html#silex-format">Tables output format</a>
+</p></blockquote></div>
+
+<div class="defun">
+&mdash; Auxiliary Syntax: <b>pretty-print:</b><var> #t<a name="index-pretty_002dprint_003a-5168"></a></var><br>
+&mdash; Auxiliary Syntax: <b>pretty-print:</b><var> #f<a name="index-pretty_002dprint_003a-5169"></a></var><br>
+<blockquote><p>Instruct <code>lex</code> to pretty&ndash;print the contents of the table. 
+Normally, the table is displayed as a compact mass of characters fitting
+in about 75 columns.  This clause is useful only for a developer
+of <code>(vicare parser-tools silex)</code>.  The Scheme code generated with
+the &lsquo;<samp><span class="samp">code</span></samp>&rsquo; clause is always pretty&ndash;printed, the others are not by
+default. 
+</p></blockquote></div>
+
+<div class="defun">
+&mdash; Auxiliary Syntax: <b>counters:</b><var> ?which-ones<a name="index-counters_003a-5170"></a></var><br>
+<blockquote><p>Instruct <code>lex</code> about which counters will be available to the lexer;
+counters are managed by the input system, and can be used by the lexer. 
+The following values for <var>?which-ones</var> are available:
+
+          <dl>
+<dt><code>all</code><dd>Expect all the counters to be available from the input system:
+<code>yyline</code>, <code>yycolumn</code>, <code>yyoffset</code>.
+
+          <br><dt><code>line</code><dd>Expect only the counter <code>yyline</code> to be available from the input
+system.
+
+          <br><dt><code>none</code><dd>Expect no counter to be available. 
+</dl>
+
+     <p class="noindent">&lsquo;<samp><span class="samp">line</span></samp>&rsquo; is the default.
+
+        <p>Notice that the same <code>counters:</code> clause must be given to
+<code>lex</code> and to <code>make-IS</code>, a mismatch will result in undefined
+behaviour.  This is because an input system is independent from a lexer
+table, and it is more efficient to build tables for a specific set of
+counters rather than to configure them at run time. 
+</p></blockquote></div>
+
+<!-- page -->
+   </body></html>
+

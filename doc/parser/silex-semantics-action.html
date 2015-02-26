@@ -1,0 +1,178 @@
+<html lang="en">
+<head>
+<title>silex semantics action - Libraries for Vicare Scheme</title>
+<meta http-equiv="Content-Type" content="text/html">
+<meta name="description" content="Libraries for Vicare Scheme">
+<meta name="generator" content="makeinfo 4.13">
+<link title="Top" rel="start" href="index.html#Top">
+<link rel="up" href="silex-semantics.html#silex-semantics" title="silex semantics">
+<link rel="next" href="silex-semantics-rules.html#silex-semantics-rules" title="silex semantics rules">
+<link href="http://www.gnu.org/software/texinfo/" rel="generator-home" title="Texinfo Homepage">
+<!--
+This document describes the libraries distributed along with version
+0.3d7 of Vicare Scheme, an R6RS compliant native
+compiler for the Scheme language.
+
+Copyright (C) 2010-2013 by Marco Maggi.
+
+Copyright (C) 2006-2010 by Abdulaziz Ghuloum.
+
+The documentation of IrRegex is Copyright (C) 2005-2012 Alex
+Shinn.  All rights reserved.
+
+The documentation of Pregexp is Copyright (C) 1999-2005 Dorai
+Sitaram.  All rights reserved.
+
+The documentation of the library `(vicare formations)' is derived
+from the documentation of Guile.  Copyright (C) 1996-2005,
+2009-2013 Free Software Foundation.
+
+The documentation of the libraries `(vicare parser-tools silex
+---)' are derived form the documentation of SILex.  Copyright
+(C) 2001, 2009 Danny Dube'.
+
+     This program is free software: you can redistribute it and/or
+     modify it under the terms of the GNU General Public License
+     version 3 as published by the Free Software Foundation.
+
+     This program is distributed in the hope that it will be useful, but
+     WITHOUT ANY WARRANTY; without even the implied warranty of
+     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+     General Public License for more details.
+
+     You should have received a copy of the GNU General Public License
+     along with this program.  If not, see
+     `http://www.gnu.org/licenses/'.
+
+Trademarks used herein are the property of their respective owners.-->
+<meta http-equiv="Content-Style-Type" content="text/css">
+<style type="text/css"><!--
+  pre.display { font-family:inherit }
+  pre.format  { font-family:inherit }
+  pre.smalldisplay { font-family:inherit; font-size:smaller }
+  pre.smallformat  { font-family:inherit; font-size:smaller }
+  pre.smallexample { font-size:smaller }
+  pre.smalllisp    { font-size:smaller }
+  span.sc    { font-variant:small-caps }
+  span.roman { font-family:serif; font-weight:normal; } 
+  span.sansserif { font-family:sans-serif; font-weight:normal; } 
+--></style>
+</head>
+<body>
+<div class="node">
+<a name="silex-semantics-action"></a>
+<p>
+Next:&nbsp;<a rel="next" accesskey="n" href="silex-semantics-rules.html#silex-semantics-rules">silex semantics rules</a>,
+Up:&nbsp;<a rel="up" accesskey="u" href="silex-semantics.html#silex-semantics">silex semantics</a>
+<hr>
+</div>
+
+<h4 class="subsection">36.6.1 Evaluation of the actions</h4>
+
+<p><a name="index-yycontinue-5188"></a><a name="index-yygetc-5189"></a><a name="index-yyungetc-5190"></a><a name="index-yytext-5191"></a><a name="index-yyline-5192"></a><a name="index-yycolumn-5193"></a><a name="index-yyoffset-5194"></a>
+
+   <p>The action of a rule is evaluated when the corresponding pattern is
+matched.  The result of its evaluation is the result that the lexical
+analyser returns to its caller.
+
+   <p>We can think of an action like this: it is a form which is placed in the
+body of a <code>lambda</code> function, which in turn is invoked when a token
+matching the regular expression is found.  So the following
+specification:
+
+<pre class="example">     decint          [0-9]+
+     
+     %%
+     
+     {decint}        (string-&gt;number yytext)
+</pre>
+   <p class="noindent">will cause the following code to be put in the generated lexer tables:
+
+<pre class="example">     (lambda (yytext)
+       (string-&gt;number yytext))
+</pre>
+   <p class="noindent">arguments in the formals of the <code>lambda</code> are local bindings we can
+use in our actions.  There are a few local bindings that are accessible
+by the action when it is evaluated: <code>yycontinue</code>, <code>yygetc</code>,
+<code>yyungetc</code>, <code>yytext</code>, <code>yyline</code>, <code>yycolumn</code> and
+<code>yyoffset</code>.
+
+<div class="defun">
+&mdash; Binding: <b>yycontinue</b><var><a name="index-yycontinue-5195"></a></var><br>
+<blockquote><p>Contains the lexical analysis function itself.  Use <code>(yycontinue)</code>
+to ask for the next token.  Typically, the action associated with a
+pattern that matches white space is a call to <code>yycontinue</code>; it has
+the effect of skipping the white space. 
+</p></blockquote></div>
+
+<div class="defun">
+&mdash; Binding: <b>yygetc</b><var><a name="index-yygetc-5196"></a></var><br>
+&mdash; Binding: <b>yyungetc</b><var><a name="index-yyungetc-5197"></a></var><br>
+<blockquote><p>Contain functions to get and unget characters from the input of the
+analyser.  They take no argument.  <code>yygetc</code> returns a character, or
+the &lsquo;<samp><span class="samp">(eof-object)</span></samp>&rsquo; value if the end&ndash;of&ndash;input is reached.
+
+        <p>They should be used to read characters instead of accessing directly the
+input port because the analyser may have read more characters in order
+to have a look&ndash;ahead.
+
+        <p>If we get more characters than we unget: those characters are skipped by
+the lexer function at the next invocation.  If we want to perform a
+lookahead without loosing characters, we must unget all the characters
+we have got.
+
+        <p>It is incorrect to try to unget more characters than has been gotten
+since <em>the parsing of the last token</em>.  If such an attempt is made,
+<code>yyungetc</code> silently refuses. 
+</p></blockquote></div>
+
+<div class="defun">
+&mdash; Binding: <b>yytext</b><var><a name="index-yytext-5198"></a></var><br>
+<blockquote><p>Bound to a string containing the lexeme.  This string is guaranteed not
+to be mutated.  The string is created only if the action <em>seems</em> to
+need it.  The action is considered to need the lexeme when &lsquo;<samp><span class="samp">yytext</span></samp>&rsquo;
+appears somewhere in the text of the action. 
+</p></blockquote></div>
+
+<div class="defun">
+&mdash; Binding: <b>yyline</b><var><a name="index-yyline-5199"></a></var><br>
+&mdash; Binding: <b>yycolumn</b><var><a name="index-yycolumn-5200"></a></var><br>
+&mdash; Binding: <b>yyoffset</b><var><a name="index-yyoffset-5201"></a></var><br>
+<blockquote><p>Indicate the position in the input at the beginning of the lexeme. 
+<code>yyline</code> is the number of the line; the first line is numbered
+1.  <code>yycolumn</code> is the number of the column; the first column
+numbered 1.
+
+        <p>It is important to mention that characters such as the tabulation
+generate a variable length output when they are printed.  So it would be
+more accurate to say that <code>yycolumn</code> is the index of the first
+character of the lexeme, starting at the beginning of the line.
+
+        <p><code>yyoffset</code> indicates the distance from the beginning of the input;
+the first lexeme has offset 0.
+
+        <p>The three bindings may not all be existent depending on options given to
+the function <code>lex</code> when generating the tables. 
+</p></blockquote></div>
+
+   <p>There is a default action that is provided for a rule when its action is
+omitted.
+
+     <ul>
+<li>If the pattern is &lsquo;<samp><span class="samp">&lt;&lt;EOF&gt;&gt;</span></samp>&rsquo;, the default action returns the
+end&ndash;of&ndash;file object, &lsquo;<samp><span class="samp">(eof-object)</span></samp>&rsquo;.
+
+     <li>If the pattern is &lsquo;<samp><span class="samp">&lt;&lt;ERROR&gt;&gt;</span></samp>&rsquo;, the default action raises an
+assertion violation.  Notice that the error message of this assertion
+cannot hold the line and column numbers, because this default action
+must be usable by lexers that do not use such counters, too.
+
+     <li>The default action for the other patterns is to call the analyser again. 
+</ul>
+
+   <p>It is clearer (and normally more useful) to specify explicitly the
+action associated with each rule.
+
+<!-- page -->
+   </body></html>
+

@@ -1,0 +1,216 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<title>silex - The Chicken Scheme wiki</title>
+<meta http-equiv="Content-Style-Type" content="text/css" />
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+<link rel="stylesheet" type="text/css" href="/chicken.css" /></head>
+<body>
+<div id="menu">
+<ul>
+<li><a href="/" class="internal">Wiki</a></li>
+<li><a href="http://code.call-cc.org/" class="external">Download</a></li>
+<li><a href="/manual/index" class="internal">Manual</a></li>
+<li><a href="/eggs" class="internal">Eggs</a></li>
+<li><a href="http://api.call-cc.org/doc/" class="external">API</a></li>
+<li><a href="http://tests.call-cc.org/" class="external">Tests</a></li>
+<li><a href="http://bugs.call-cc.org/" class="external">Bugs</a></li></ul></div>
+<ul id="page-specific-links">
+<li><a href="?action=show">show</a></li>
+<li><a href="?action=edit" rel="nofollow">edit</a></li>
+<li><a href="?action=history">history</a></li></ul>
+<div id="content">
+<ul class="tags">
+<li>egg</li></ul>
+<h2 id="silex">silex</h2>
+<div id="toc">
+<ol>
+<li><a href="#silex">silex</a>
+<ol>
+<li><a href="#description">Description</a></li>
+<li><a href="#author">Author</a></li>
+<li><a href="#overview">Overview</a></li>
+<li><a href="#syntax-of-the-specification-file">Syntax of the specification file</a>
+<ol>
+<li><a href="#macro-definitions-part">Macro definitions part</a></li>
+<li><a href="#rules-part">Rules part</a></li>
+<li><a href="#regular-expressions">Regular expressions</a></li></ol></li>
+<li><a href="#an-example-of-a-specification-file">An example of a specification file</a></li>
+<li><a href="#semantics-of-the-specification-file">Semantics of the specification file</a>
+<ol>
+<li><a href="#evaluation-of-the-actions">Evaluation of the actions</a></li>
+<li><a href="#matching-the-rules">Matching the rules</a></li></ol></li>
+<li><a href="#license">License</a></li></ol></li></ol></div>
+<h3 id="description">Description</h3>
+<p>A lexer generator.</p>
+<h3 id="author">Author</h3>
+<p>Danny Dub&amp;eacute;</p>
+<h3 id="overview">Overview</h3>
+<p><tt>SILex</tt> is a lexical analyser generator similar to the Lex and Flex programs, but for Scheme. <i>SILex</i> stands for <i>Scheme Implementation of Lex</i>.</p>
+<p><tt>SILex</tt> has many similarities with the C programs, but has many differences, too. The syntax of the specification files for <tt>SILex</tt> is close to that of Lex and Flex. Of course, the actions must be written in Scheme and not in C. The set of regular expressions is mostly the same. An important difference is relative to the multiple start states in the C analysers.  <tt>SILex</tt> replaces them by allowing multiple analysers to take their input from the same source. Different inputs can be analysed at the same time, possibly with different instances of one or more lexical analysers. The analysers are created dynamically.</p>
+<p><tt>SILex</tt> provides many other features. The designer of a lexical analyser can specify the actions to be taken when the end of file is reached or when an error occurs. The analyser can keep track of the position in the input in terms of the number of the line, column and offset. An analyser can take its input from an input port, a string or a function. <tt>SILex</tt> is portable; it does not depend on a particular character set. It can generate analysers that are portable, too. Finally, the table encoding the behavior of the analyser can be compiled to Scheme code. The fastest lexical analysers can be produced this way.</p>
+<h3 id="syntax-of-the-specification-file">Syntax of the specification file</h3>
+<p>A specification file for a lexical analyser contains two parts: the macro definitions part and the rules part. The two parts are separated by the mark <tt>%%</tt>. The first part is used to define macros; that is, to give names to some regular expressions. The second part is used to indicate the regular expressions with which the input will have to match and the actions associated with each expression.</p>
+<p>Comments can be inserted any place where white space is allowed and is considered as white space itself. The syntax of the comments is the same as in Scheme. That is, it begins with a semicolon <tt>;</tt> and extends up to the end of a line. The semicolon is a valid token in many languages, so you should take care not to comment out an entire line when you write a regular expression matching a semicolon.</p>
+<p>The syntax of each part is presented, except for the regular expressions, which are described apart. A small example follows.</p>
+<h4 id="macro-definitions-part">Macro definitions part</h4>
+<p>The first part of a specification file contains zero or more macro definitions. A definition consists of a name and a regular expression, separated by white space. It looks better when each definition is written on a separate line.</p>
+<p>The syntax for a macro name is that of a Scheme symbol. The case of the letters is not significant. For example, <tt>abcd</tt>, <tt>+</tt>, <tt>...</tt>, <tt>Digit</tt> and <tt>digit</tt> are all valid macro names; the last two being the same. You cannot write two macro definitions with the same name.</p>
+<p>The defined macro can be referenced in regular expressions using the syntax <tt>{name</tt>} (see section [Regular expressions]). The scope of a macro definition includes the remaining definitions and the rules part of the file. It is analogous to the <tt>let*</tt> in Scheme, where the macro definitions correspond to the bindings and the rules part correspond to the body.</p>
+<p>End the macro definitions part with <tt>%%</tt>.</p>
+<h4 id="rules-part">Rules part</h4>
+<p>The rules part contains the rules up to the end of the specification file. Each rule is a pattern optionally followed by an action. The pattern is a regular expression. The action, if there is one, is formed of one or more Scheme expressions.</p>
+<p>The actions can span over several lines. To distinguish between the remaining of the current action and the start of a new rule, <tt>SILex</tt> checks the indentation. A new rule must start at the beginning of the line. That is, the action starts right after the pattern and contains all the following lines that start with white space.</p>
+<p><tt>SILex</tt> does not parse the actions. It simply captures the text up to the start of the next rule. So a syntax error in an action is not detected by <tt>SILex</tt>.</p>
+<p>Nevertheless, <tt>SILex</tt> is able to detect that an action has been omitted. In that case, a default action is supplied</p>
+<h4 id="regular-expressions">Regular expressions</h4>
+<p>We first describe the atomic regular expressions. Then, we show how to build more complex regular expressions from simpler ones. Finally, the markers are introduced.</p>
+<p>The following constructs are regular expressions:</p>
+<dl>
+<dt><tt>c</tt></dt>
+<dd>Ordinary character. It is a regular expression that matches the character <tt>c</tt> itself. c cannot be one of '.', '&quot;', '-', '&quot;', '[', '--', '?', '+', '*', '(', ')', '^', '$', ';' or any white space.</dd>
+<dt><tt>.</tt></dt>
+<dd>Wild card. It matches any character except the newline character.</dd>
+<dt><tt>\n</tt> </dt>
+<dt><tt>\integer</tt></dt>
+<dt><tt>\c</tt></dt>
+<dd>Backslash. The backslash is used for two things: protect a character from special meaning; generating non-printable characters. The expression <tt>\n</tt> matches the newline character. The expression <tt>\integer</tt> matches the character that has number <tt>integer</tt> (in the sense of <tt>char-&gt;integer</tt>). <tt>integer</tt> must be a valid character number on the implementation that you use. It may be more than 3 digits long and even negative. The expression <tt>\c</tt> matches the character <tt>c</tt> if <tt>c</tt> is not <tt>\n</tt>, '-' nor a digit.</dd>
+<dt><tt>{name</tt>}</dt>
+<dd>Macro reference. This expression matches the same lexemes as those matched by the regular expression named name. You can imagine that the reference is replaced by the text of the named expression. However, it works as if parentheses had been added to protect the substituting expression.</dd>
+<dt>&quot;some text&quot;</dt>
+<dd>String. A string matches a lexeme identical to its contents. In a string, the only special characters are quotation marks. </dd>
+<dt><tt>[list of characters]</tt></dt>
+<dt><tt>[]list of characters]</tt></dt>
+<dt><tt>[-list of characters]</tt></dt>
+<dt><tt>[^list of characters]</tt></dt>
+<dd>Character class. The expression matches one of the enumerated characters.  For example, the expression <tt>[abc]</tt> matches one of 'a', 'b' and 'c'. You can list a range of characters by writing the first character, the '-' and the last character. For example, <tt>[A-Za-z]</tt> matches one letter (if the letters are ordered and contiguous in the character set used by your implementation). The special characters in a class are ']', which closes the class, '-', which denotes a range of character, and '&quot;', which keeps its usual meaning. There is an exception with the first character in a class. If the first character is ']' or '-', it loses its special meaning. If the first character is '^', the expression matches one character if it is not enumerated in list of characters.</dd></dl>
+<p>Suppose <tt>r</tt> and <tt>s</tt> are regular expressions. Then the following expressions can be built:</p>
+<dl>
+<dt><tt>r|s</tt></dt>
+<dd>Union. This regular expression matches a lexeme if the lexeme is matched by <tt>r</tt> or by <tt>s</tt>.</dd>
+<dt><tt>rs</tt></dt>
+<dd>Concatenation. This expression matches a lexeme if the lexeme can be written as the concatenation of a lexeme matched by <tt>r</tt> and a lexeme matched by <tt>s</tt>.</dd>
+<dt><tt>r?</tt></dt>
+<dd>Optional expression. A lexeme matches this expression if it is the empty lexeme or if it matches <tt>r</tt>.</dd>
+<dt><tt>r+</tt></dt>
+<dd>Positive closure. This expression matches a lexeme that can be written as the concatenation of one or more lexemes, where each of those matches {Pr}}.</dd>
+<dt><tt>r*</tt></dt>
+<dd>Kleene closure. A lexeme is matched by this expression if it can be written as the concatenation of zero or more lexemes, where each of those matches <tt>r</tt>.</dd>
+<dt><tt>r{i</tt>}</dt>
+<dt><tt>r{i,</tt>}</dt>
+<dt><tt>r{i,j</tt>}</dt>
+<dd>Power or repetition of an expression. These expressions allow the 'repetition' of a regular expression a certain number of times. <tt>i</tt> and <tt>j</tt> must be positive integers and <tt>j</tt> must be greater or equal to <tt>i</tt>. The first form repeats the expression <tt>r</tt> exactly <tt>i</tt> times. The second form repeats <tt>r</tt> at least <tt>i</tt> times. The last form repeats <tt>r</tt> at least <tt>i</tt> times and at most <tt>j</tt> times. You should avoid using large numbers (more than 10), because the finite automaton for <tt>r</tt> is copied once for each repetition. The tables of the analyser may quickly become very large. You should note that the syntax of these expressions does not conflict with the syntax of the macro reference.</dd>
+<dt><tt>(r)</tt></dt>
+<dd>Parentheses. This expression matches the same lexemes as <tt>r</tt>. It is used to override the precedence of the operators.</dd></dl>
+<p>The building operators are listed in order of increasing precedence. The <tt>?, +, *</tt> and repetition operators have the same precedence.</p>
+<p>The remaining 'expressions' would better be called markers. They all match the empty lexeme but require certain conditions to be respected in the input. They cannot be used in all regular expressions. Suppose that <tt>r</tt> is a regular expression without markers.</p>
+<dl>
+<dt><tt>^r</tt></dt>
+<dt><tt>r$</tt></dt>
+<dd>Beginning and end of line. These markers require that the lexeme is found at the beginning and at the end of the line, respectively. The markers lose their special meaning if they are not placed at their end of the regular expression or if they are used in the first part of the specification file. In those cases, they are treated as regular characters. </dd>
+<dt><tt>&lt;&lt;EOF&gt;&gt;</tt></dt>
+<dd>End of file. This marker is matched only when the input is at the end of file. The marker must be used alone in its pattern, and only in the second part of the file. There can be at most one rule with this particular pattern.</dd>
+<dt><tt>&lt;&lt;ERROR&gt;&gt;</tt></dt>
+<dd>Error. This marker is matched only when there is a parsing error. It can be used under the same conditions as <tt>&lt;&lt;EOF&gt;&gt;</tt>. </dd></dl>
+<p>White space ends the regular expressions. In order to include white space in a regular expression, it must be protected by a backslash or placed in a string</p>
+<h3 id="an-example-of-a-specification-file">An example of a specification file</h3>
+<p>Here is an example of a <tt>SILex</tt> specification file. The file is syntactically correct from the <tt>SILex</tt> point of view. However, many common mistakes are shown. The file is not a useful one.</p>
+<pre><tt>; This is a syntactically correct but silly file.
+
+partial   hel
+complete  {partial}lo ; Backward macro ref. only
+digit     [0-9]
+letter    [a-zA-Z]
+
+%%
+-?{digit}+ (cons 'integer yytext) ; yytext contains
+                                  ; the lexeme
+-?{digit}+\.{digit}+[eE][-+]?{digit}+
+
+   (cons ; A long action
+    'float
+    yytext)
+
+; (list 'semicolon) ; Probably a mistake
+
+begin )list 'begin( ; No error detected here
+
+end                 ; The action is optional
+
+\73 (list 'bell-3)    ; It does not match the char. # 7 followed by `3'
+\0073 (list 'bell-3)  ; Neither does it
+(\7)3 (list 'bell-3)  ; This does it
+
+&quot;*()+|{}[].? are ordinary but \&quot; and \\ are special&quot;
+
+[^\n] (list 'char)               ; Same thing as `.'
+
+({letter}|_)({letter|_|{digit})* ; A C identifier
+[][]                             ; One of the square brackets
+ 
+Repe(ti){2}on (list 'repetition)
+^{letter}+: (cons 'label yytext) ; A label placed at the
+                                 ; beginning of the line
+$^                               ; No special meaning
+&lt;&lt;EOF&gt;&gt; (list 'eof)    ; Detection of the end of file
+&lt;&lt;ERROR&gt;&gt; (my-error)   ; Error handling</tt></pre>
+<h3 id="semantics-of-the-specification-file">Semantics of the specification file</h3>
+<p>An important part of the semantics of a specification file is described with the syntax of the regular expressions. The remainder is presented here. We begin with the role of the actions. Information on the matching method follows.</p>
+<h4 id="evaluation-of-the-actions">Evaluation of the actions</h4>
+<p>The action of a rule is evaluated when the corresponding pattern is matched. The result of its evaluation is the result that the lexical analyser returns to its caller.</p>
+<p>There are a few local variables that are accessible by the action when it is evaluated.  Those are <tt>yycontinue</tt>, <tt>yygetc</tt>, <tt>yyungetc</tt>, <tt>yytext</tt>, <tt>yyline</tt>, <tt>yycolumn</tt> and <tt>yyoffset</tt>. Each one is described here:</p>
+<dl>
+<dt><tt>yycontinue</tt></dt>
+<dd>This variable contains the lexical analysis function itself. Use <tt>(yycontinue)</tt> to ask for the next token. Typically, the action associated with a pattern that matches white space is a call to <tt>yycontinue</tt>; it has the effect of skipping the white space.</dd>
+<dt><tt>yygetc</tt></dt>
+<dt><tt>yyungetc</tt></dt>
+<dd>These variables contain functions to get and unget characters from the input of the analyser. They take no argument. yygetc returns a character or the symbol 'eof' if the end of file is reached. They should be used to read characters instead of accessing directly the input port because the analyser may have read more characters in order to have a look-ahead. It is incorrect to try to unget more characters than has been gotten since the parsing of the last token. If such an attempt is made, <tt>yyungetc</tt> silently refuses. </dd>
+<dt><tt>yytext</tt></dt>
+<dd>This variable is bound to a string containing the lexeme. This string is guaranteed not to be mutated. The string is created only if the action 'seems' to need it. The action is considered to need the lexeme when <tt>yytext</tt> appears somewhere in the text of the action.</dd>
+<dt><tt>yyline</tt></dt>
+<dt><tt>yycolumn</tt></dt>
+<dt><tt>yyoffset</tt></dt>
+<dd>These variables indicate the position in the input at the beginning of the lexeme.  <tt>yyline</tt> is the number of the line; the first line is the line 1. <tt>yycolumn</tt> is the number of the column; the first column is the column 1. It is important to mention that characters such as the tabulation generate a variable length output when they are printed. So it would be more accurate to say that <tt>yycolumn</tt> is the number of the first character of the lexeme, starting at the beginning of the line. <tt>yyoffset</tt> indicates the distance from the beginning of the input; the first lexeme has offset 0. The three variables may not all be existant depending on the kind of counting you want the analyser to do for you.</dd></dl>
+<p>There is a default action that is provided for a rule when its action is omitted. If the pattern is <tt>&lt;&lt;EOF&gt;&gt;</tt>, the default action returns the object '(0)'. If the pattern is <tt>&lt;&lt;ERROR&gt;&gt;</tt>, the default action displays an error message and returns the symbol 'error'.  The default action for the other patterns is to call the analyser again. It is clearer (and normally more useful) to specify explicitly the action associated with each rule.</p>
+<h4 id="matching-the-rules">Matching the rules</h4>
+<p>Each time the analyser is asked to return a token, it tries to match a prefix of the input with a pattern. There may be more than one possible match; when it is the case, we say there is a conflict. For example, suppose we have those regular expressions:</p>
+<pre><tt>begin
+[a-z]*</tt></pre>
+<p>and the input is <tt>beginning1 . . . </tt>. We have a match with the first expression and we have many different matches with the second. To resolve such a conflict, the longest match is chosen. So the chosen match is the one between the lexeme <tt>beginning</tt> and the second expression.</p>
+<p>Suppose we have the same regular expressions but the input is <tt>begin+ . . . </tt>. We have two longest match. This conflict is resolved by choosing the first pattern that allows a longest match. So the chosen match is between the lexeme <tt>begin</tt> and the first pattern.</p>
+<p>The analyser generated by <tt>SILex</tt> allows the empty lexeme to be matched if there is no longer match. However, you should take care not to call the analyser again without consuming at least one character of the input. It would cause an infinite loop.</p>
+<p>The pattern <tt>&lt;&lt;EOF&gt;&gt;</tt> is matched when the analyser is called and the input is at end of file. In this situation, the marker is matched even if there is a pattern that matches the empty lexeme. The analyser can be called again and again and the <tt>&lt;&lt;EOF&gt;&gt;</tt> pattern will be matched each time, causing its corresponding action to be evaluated each time, too.</p>
+<p>The pattern <tt>&lt;&lt;ERROR&gt;&gt;</tt> is matched when the input is not at end of file and no other match is possible. Depending on the action associated with this pattern, your program may choose to stop or choose to try to recover from the error. To recover from the error, your program has to read some characters from the input before it can call the analyser again.</p>
+<p>All lexical analysers generated by <tt>SILex</tt> are interactive. That is, they read as few characters as possible to get the longest match. This is a useful property when the input is coming from a terminal. A lexical analyser is normally based on a finite automaton; it is the case for the analysers generated by <tt>SILex</tt>. A non-interactive analyser always needs an extra character to provoke an invalid transition in the automaton. The longest match is detected this way. With an interactive analyser, an extra character is not required when it is impossible to obtain a longer match.</p>
+<p>A lexical analyser generated by <tt>SILex</tt> does not impose any a priori limit on the size of the lexemes. The internal buffer is extended each time it is necessary.</p>
+<h3 id="license">License</h3>
+<pre><tt>Copyright (C) 1997 Danny &lt;nowiki&gt;Dub&amp;eacute;, Universit&amp;eacute; de Montr&amp;eacute;al.&lt;/nowiki&gt;
+All rights reserved.
+
+Redistribution and use in source and binary forms, with or without
+modification, are permitted provided that the following conditions
+are met:
+
+ Redistributions of source code must retain the above copyright
+   notice, this list of conditions and the following disclaimer.
+
+ Redistributions in binary form must reproduce the above copyright
+   notice, this list of conditions and the following disclaimer in
+   the documentation and/or other materials provided with the
+   distribution.
+
+ Neither the name of the author nor the names of its contributors may
+   be used to endorse or promote products derived from this software
+   without specific prior written permission.
+ 
+THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+&quot;AS IS&quot; AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
+LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
+A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT
+HOLDERS OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT,
+INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING,
+BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS
+OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND
+ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR
+TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE
+USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH
+DAMAGE.  </tt></pre></div></body></html>

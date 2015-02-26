@@ -1,0 +1,3 @@
+#!/bin/sh
+
+gsi -f "$0.scm" -e "(autoffi \"$1\")"

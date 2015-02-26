@@ -1,0 +1,241 @@
+<html lang="en">
+<head>
+<title>silex input - Libraries for Vicare Scheme</title>
+<meta http-equiv="Content-Type" content="text/html">
+<meta name="description" content="Libraries for Vicare Scheme">
+<meta name="generator" content="makeinfo 4.13">
+<link title="Top" rel="start" href="index.html#Top">
+<link rel="up" href="silex.html#silex" title="silex">
+<link rel="prev" href="silex-tables.html#silex-tables" title="silex tables">
+<link rel="next" href="silex-lexer.html#silex-lexer" title="silex lexer">
+<link href="http://www.gnu.org/software/texinfo/" rel="generator-home" title="Texinfo Homepage">
+<!--
+This document describes the libraries distributed along with version
+0.3d7 of Vicare Scheme, an R6RS compliant native
+compiler for the Scheme language.
+
+Copyright (C) 2010-2013 by Marco Maggi.
+
+Copyright (C) 2006-2010 by Abdulaziz Ghuloum.
+
+The documentation of IrRegex is Copyright (C) 2005-2012 Alex
+Shinn.  All rights reserved.
+
+The documentation of Pregexp is Copyright (C) 1999-2005 Dorai
+Sitaram.  All rights reserved.
+
+The documentation of the library `(vicare formations)' is derived
+from the documentation of Guile.  Copyright (C) 1996-2005,
+2009-2013 Free Software Foundation.
+
+The documentation of the libraries `(vicare parser-tools silex
+---)' are derived form the documentation of SILex.  Copyright
+(C) 2001, 2009 Danny Dube'.
+
+     This program is free software: you can redistribute it and/or
+     modify it under the terms of the GNU General Public License
+     version 3 as published by the Free Software Foundation.
+
+     This program is distributed in the hope that it will be useful, but
+     WITHOUT ANY WARRANTY; without even the implied warranty of
+     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+     General Public License for more details.
+
+     You should have received a copy of the GNU General Public License
+     along with this program.  If not, see
+     `http://www.gnu.org/licenses/'.
+
+Trademarks used herein are the property of their respective owners.-->
+<meta http-equiv="Content-Style-Type" content="text/css">
+<style type="text/css"><!--
+  pre.display { font-family:inherit }
+  pre.format  { font-family:inherit }
+  pre.smalldisplay { font-family:inherit; font-size:smaller }
+  pre.smallformat  { font-family:inherit; font-size:smaller }
+  pre.smallexample { font-size:smaller }
+  pre.smalllisp    { font-size:smaller }
+  span.sc    { font-variant:small-caps }
+  span.roman { font-family:serif; font-weight:normal; } 
+  span.sansserif { font-family:sans-serif; font-weight:normal; } 
+--></style>
+</head>
+<body>
+<div class="node">
+<a name="silex-input"></a>
+<p>
+Next:&nbsp;<a rel="next" accesskey="n" href="silex-lexer.html#silex-lexer">silex lexer</a>,
+Previous:&nbsp;<a rel="previous" accesskey="p" href="silex-tables.html#silex-tables">silex tables</a>,
+Up:&nbsp;<a rel="up" accesskey="u" href="silex.html#silex">silex</a>
+<hr>
+</div>
+
+<h3 class="section">36.3 Input systems</h3>
+
+<p>An <dfn>input system</dfn> provides the buffering, the line counting and
+similar low level services.  The following bindings are exported by the
+library <code>(vicare parser-tools silex input-system)</code> and reexported
+by the library <code>(vicare parser-tools silex lexer)</code>.
+
+<div class="defun">
+&mdash; Syntax: <b>make-IS</b><var> ?clauses <small class="dots">...</small><a name="index-make_002dIS-5171"></a></var><br>
+<blockquote><p>Build and return a new input system.  The behaviour of this function is
+configured with the given <var>?clauses</var>; see below for the list of
+supported options.
+
+        <p>Input characters can come from a string, a port or the return value of a
+procedure.  When an input port is used by an input system, the program
+should avoid reading characters directly from the port.  This is because
+the input system may have needed a look&ndash;ahead to do the analysis of the
+preceding token.  The program would not find what it expects on the
+port.  The input system provides safe functions to get characters from
+the input. 
+</p></blockquote></div>
+
+<div class="defun">
+&mdash; Auxiliary Syntax: <b>string:</b><var> ?string<a name="index-string_003a-5172"></a></var><br>
+<blockquote><p>Instruct <code>make-IS</code> to build an input system that will take
+characters from the supplied string.  When the input system is
+initialized with a string, it takes a copy of it.  This way, eventual
+mutations of the string do not affect the analysis.
+
+        <p>This clause is mutually exclusive with <code>port:</code> and
+<code>procedure:</code>. 
+</p></blockquote></div>
+
+<div class="defun">
+&mdash; Auxiliary Syntax: <b>port:</b><var> ?port<a name="index-port_003a-5173"></a></var><br>
+<blockquote><p>Instruct <code>make-IS</code> to build an input system that will read
+characters from the supplied textual input port.  The input system never
+closes itself the port it has received, this task is left to the
+program.
+
+        <p>This clause is mutually exclusive with <code>string:</code> and
+<code>procedure:</code>. 
+</p></blockquote></div>
+
+<div class="defun">
+&mdash; Auxiliary Syntax: <b>procedure:</b><var> ?proc<a name="index-procedure_003a-5174"></a></var><br>
+<blockquote><p>Instruct <code>make-IS</code> to build an input system that will read
+characters invoking the supplied procedure.
+
+        <p>The use of a function as character source allows the input system to
+parse any character stream, no matter how it is obtained.  For example,
+the characters may come from the decompression or decryption of a huge
+file, the task being done lazily in order to save space.
+
+        <p>The function must take no argument and return a character each time it
+is called.  When the end of file (or its logical equivalent) is reached,
+the function must return an object that is not a character (for example,
+the symbol &lsquo;<samp><span class="samp">eof</span></samp>&rsquo;).  After the function has returned an end of file
+indicator, it is not called again.
+
+        <p>This clause is mutually exclusive with <code>string:</code> and
+<code>port:</code>. 
+</p></blockquote></div>
+
+<div class="defun">
+&mdash; Auxiliary Syntax: <b>counters:</b><var> ?which-ones<a name="index-counters_003a-5175"></a></var><br>
+<blockquote><p>Instruct <code>make-IS</code> about which counters to make available to the
+lexer; counters are managed by the input system, and can be used by the
+lexer.  The following values for <var>?which-ones</var> are available:
+
+          <dl>
+<dt><code>all</code><dd>Make available all the counters: <code>yyline</code>, <code>yycolumn</code>,
+<code>yyoffset</code>.
+
+          <br><dt><code>line</code><dd>Make avilable only the counter <code>yyline</code>.  Accessing any of the
+bindings <code>yycolumn</code>, <code>yyoffset</code> will raise an unbound
+identifier error.
+
+          <br><dt><code>none</code><dd>Make available no counter.  Accessing any of the bindings:
+<code>yyline</code>, <code>yycolumn</code>, <code>yyoffset</code> will raise an unbound
+identifier error. 
+</dl>
+
+     <p class="noindent">&lsquo;<samp><span class="samp">line</span></samp>&rsquo; is the default.  The more counters the input system
+maintains, the more it is slowed down.
+
+        <p>Notice that the same <code>counters:</code> option must be given to
+<code>lex</code> and to <code>make-IS</code>, a mismatch will result in undefined
+behaviour.  This is because an input system is independent from a lexer
+table, and it is more efficient to build tables for a specific set of
+counters rather than to configure them at run time.
+
+     <pre class="example">          (import (vicare)
+            (prefix (vicare parser-tools silex)       lex.)
+            (prefix (vicare parser-tools silex lexer) lex.))
+          
+          ;;Build table with no knowledge of the input system.
+          ;;
+          (define table
+            (lex.lex (lex.input-string: "...")
+                     (les.output-value: #t)
+                     (lex.counters:     'line))) ;!!!
+          
+          ;;Build input system with no knowledge of the table.
+          ;;
+          (define IS
+            (lex.make-IS (lex.string: "1+2+3")
+                         (lex.counters: 'all)))  ;!!!
+          
+          ;;Build lexer using the table and the input system.
+          ;;Error!!!
+          ;;
+          (define lexer
+            (lex.make-lexer table IS))
+</pre>
+        </blockquote></div>
+
+<div class="defun">
+&mdash; Function: <b>lexer-input-system?</b><var> obj<a name="index-lexer_002dinput_002dsystem_003f-5176"></a></var><br>
+<blockquote><p>Return <code>#t</code> if <var>obj</var> is an input system object, otherwise return
+<code>#f</code>. 
+</p></blockquote></div>
+
+<div class="defun">
+&mdash; Function: <b>lexer-get-func-line</b><var> input-system<a name="index-lexer_002dget_002dfunc_002dline-5177"></a></var><br>
+<blockquote><p>Return a closure which, when invoked with no arguments, will return the
+current line number in <var>input-system</var>. 
+</p></blockquote></div>
+
+<div class="defun">
+&mdash; Function: <b>lexer-get-func-column</b><var> input-system<a name="index-lexer_002dget_002dfunc_002dcolumn-5178"></a></var><br>
+<blockquote><p>Return a closure which, when invoked with no arguments, will return the
+current column number in <var>input-system</var>. 
+</p></blockquote></div>
+
+<div class="defun">
+&mdash; Function: <b>lexer-get-func-offset</b><var> input-system<a name="index-lexer_002dget_002dfunc_002doffset-5179"></a></var><br>
+<blockquote><p>Return a closure which, when invoked with no arguments, will return the
+current offset in <var>input-system</var>. 
+</p></blockquote></div>
+
+<div class="defun">
+&mdash; Function: <b>lexer-get-func-getc</b><var> input-system<a name="index-lexer_002dget_002dfunc_002dgetc-5180"></a></var><br>
+<blockquote><p>Return a closure which, when invoked with no arguments, will return the
+next character from <var>input-system</var>.  The closure allows client code
+to perform a lookahead.
+
+        <p>The returned character is not forgotten by the lexer, this function just
+increments by 1 a pointer into the internal buffer.  Multiple
+invocations of this function will return the sequence of characters
+about to be analysed by the lexer.  When there are no more characters,
+the return value is the <acronym>EOF</acronym> object.
+
+        <p>The returned characters are <strong>skipped</strong> by the lexer, unless we put
+them back with the closure returned by <code>lexer-get-func-ungetc</code>. 
+</p></blockquote></div>
+
+<div class="defun">
+&mdash; Function: <b>lexer-get-func-ungetc</b><var> input-system<a name="index-lexer_002dget_002dfunc_002dungetc-5181"></a></var><br>
+<blockquote><p>Return a closure which, when invoked with no arguments, will decrement a
+pointer into the buffer of <var>input-system</var>.  This function puts back
+a character previously read by a closure returned by
+<code>lexer-get-func-getc</code>.
+
+        <p>It is not possible to replace characters in the input system. 
+</p></blockquote></div>
+
+<!-- page -->
+   </body></html>
+

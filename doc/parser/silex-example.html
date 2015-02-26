@@ -1,0 +1,192 @@
+<html lang="en">
+<head>
+<title>silex example - Libraries for Vicare Scheme</title>
+<meta http-equiv="Content-Type" content="text/html">
+<meta name="description" content="Libraries for Vicare Scheme">
+<meta name="generator" content="makeinfo 4.13">
+<link title="Top" rel="start" href="index.html#Top">
+<link rel="up" href="silex.html#silex" title="silex">
+<link rel="next" href="silex-tables.html#silex-tables" title="silex tables">
+<link href="http://www.gnu.org/software/texinfo/" rel="generator-home" title="Texinfo Homepage">
+<!--
+This document describes the libraries distributed along with version
+0.3d7 of Vicare Scheme, an R6RS compliant native
+compiler for the Scheme language.
+
+Copyright (C) 2010-2013 by Marco Maggi.
+
+Copyright (C) 2006-2010 by Abdulaziz Ghuloum.
+
+The documentation of IrRegex is Copyright (C) 2005-2012 Alex
+Shinn.  All rights reserved.
+
+The documentation of Pregexp is Copyright (C) 1999-2005 Dorai
+Sitaram.  All rights reserved.
+
+The documentation of the library `(vicare formations)' is derived
+from the documentation of Guile.  Copyright (C) 1996-2005,
+2009-2013 Free Software Foundation.
+
+The documentation of the libraries `(vicare parser-tools silex
+---)' are derived form the documentation of SILex.  Copyright
+(C) 2001, 2009 Danny Dube'.
+
+     This program is free software: you can redistribute it and/or
+     modify it under the terms of the GNU General Public License
+     version 3 as published by the Free Software Foundation.
+
+     This program is distributed in the hope that it will be useful, but
+     WITHOUT ANY WARRANTY; without even the implied warranty of
+     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+     General Public License for more details.
+
+     You should have received a copy of the GNU General Public License
+     along with this program.  If not, see
+     `http://www.gnu.org/licenses/'.
+
+Trademarks used herein are the property of their respective owners.-->
+<meta http-equiv="Content-Style-Type" content="text/css">
+<style type="text/css"><!--
+  pre.display { font-family:inherit }
+  pre.format  { font-family:inherit }
+  pre.smalldisplay { font-family:inherit; font-size:smaller }
+  pre.smallformat  { font-family:inherit; font-size:smaller }
+  pre.smallexample { font-size:smaller }
+  pre.smalllisp    { font-size:smaller }
+  span.sc    { font-variant:small-caps }
+  span.roman { font-family:serif; font-weight:normal; } 
+  span.sansserif { font-family:sans-serif; font-weight:normal; } 
+--></style>
+</head>
+<body>
+<div class="node">
+<a name="silex-example"></a>
+<p>
+Next:&nbsp;<a rel="next" accesskey="n" href="silex-tables.html#silex-tables">silex tables</a>,
+Up:&nbsp;<a rel="up" accesskey="u" href="silex.html#silex">silex</a>
+<hr>
+</div>
+
+<h3 class="section">36.1 A lexer example for a calculator</h3>
+
+<p>The following is a lexer specification file that can be used to tokenise
+a mathematical expression.
+
+<pre class="smallexample">     blanks          [ \9\10\13]+
+     
+     decint          [0-9]+
+     binint          #[bB][01]+
+     octint          #[oO][0-7]+
+     hexint          #[xX][0-9A-Fa-f]+
+     integer         {decint}|{binint}|{octint}|{hexint}
+     
+     exponent        ([eE][+\-]?[0-9]+)
+     truereal        [0-9]+\.|[0-9]*\.[0-9]+{exponent}?|[0-9]+{exponent}
+     real            {truereal}|{integer}
+     
+     imag            ({decint}|{real})i
+     
+     nan             \-nan\.0|\+nan\.0|nan\.0
+     pinf            \+inf\.0|inf\.0
+     minf            \-inf\.0
+     
+     initial         [a-zA-Z_]
+     subsequent      {initial}|[0-9\.!$&amp;:&lt;=&gt;?~\-]
+     symbol          {initial}{subsequent}*
+     
+     operator        &lt;=|&gt;=|//|[\+\-*/%\^&lt;&gt;=]
+     
+     comma           ,
+     
+     oparen          \(
+     cparen          \)
+     
+     %%
+     {blanks}        ;; skip blanks, tabs and newlines
+     {imag}          (string-&gt;number (string-append "+" yytext))
+     {real}          (string-&gt;number yytext)
+     {nan}           +nan.0
+     {pinf}          +inf.0
+     {minf}          -inf.0
+     {operator}      (case (string-&gt;symbol yytext)
+                         ((+) '+)
+                         ((-) '-)
+                         ((*) '*)
+                         ((/) '/)
+                         ((%) 'mod)
+                         ((^) 'expt)
+                         ((//) 'div)
+                         ((=) '=)
+                         ((&lt;) '&lt;)
+                         ((&gt;) '&gt;)
+                         ((&lt;=) '&lt;=)
+                         ((&gt;=) '&gt;=))
+     {symbol}        (string-&gt;symbol yytext)
+     {comma}         'cons
+     
+     {oparen}        #\(
+     {cparen}        #\)
+     
+     &lt;&lt;EOF&gt;&gt;         (eof-object)
+     &lt;&lt;ERROR&gt;&gt;       (assertion-violation #f "invalid lexer token")
+</pre>
+   <p>Let's say the file is called <samp><span class="file">calc.l</span></samp>, then the table for this
+lexer can be created with one of the following forms (and other forms
+not described here):
+
+<pre class="example">     (import (vicare)
+       (prefix (vicare parser-tools silex)       lex.)
+       (prefix (vicare parser-tools silex lexer) lex.))
+     
+     ;;Generate a proper Scheme library called "(calc)",
+     ;;containing the table definition, and save it in the
+     ;;file "calc-lib.sls".  Use the default table format.
+     ;;The library exports the table bound to "calc-table".
+     ;;
+     (lex.lex (lex.input-file:   "calc.l")
+              (lex.output-file:  "calc-lib.sls")
+              (lex.library-spec: "(calc)")
+              (lex.table-name:   'calc-table))
+     
+     ;;Generate a standalone DEFINE form that binds the
+     ;;lexer table to the symbol "calc-table" and save it
+     ;;in the file "calc-def.sls".  Use the Scheme code
+     ;;table format.
+     ;;
+     (lex.lex (lex.input-file:   "calc.l")
+              (lex.output-file:  "calc-def.sls")
+              (lex.lexer-format: 'code)
+              (lex.table-name:   'calc-table))
+     
+     ;;Generate the lexer table, evaluate it and return it
+     ;;as value immediately usable.  Use the Scheme code
+     ;;table format.
+     ;;
+     (define calc-table
+       (lex.lex (lex.input-file:   "calc.l")
+                (lex.output-value: #t)
+                (lex.lexer-format: 'code)))
+</pre>
+   <p>Once we have created the lexer table, let's say bound to
+&lsquo;<samp><span class="samp">calc-table</span></samp>&rsquo;, we can use it as follows; we take advantage of the
+fact that: when the input reaches the end, the lexer closure returns the
+&lsquo;<samp><span class="samp">(eof-object)</span></samp>&rsquo; value.
+
+<pre class="example">     (define (tokenize table string)
+       (let* ((IS    (lex.make-IS (lex.string: string)))
+              (lexer (lex.make-lexer table IS))
+         (do ((token (lexer) (lexer))
+              (out   '()))
+             ((eof-object? token)
+              (reverse out))
+           (set-cons! out token)))))
+     
+     (tokenize calc-table "1*(2/3)")
+     &rArr; (1 * #\( 2 / 3 #\))
+     
+     (tokenize calc-table "fun(1+a, sin(2), 3, 4)")
+     &rArr; (fun #\( 1 + a cons sin #\( 2 #\) cons 3 cons 4 #\))
+</pre>
+   <!-- page -->
+   </body></html>
+

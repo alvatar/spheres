@@ -1,0 +1,111 @@
+<html lang="en">
+<head>
+<title>silex - Libraries for Vicare Scheme</title>
+<meta http-equiv="Content-Type" content="text/html">
+<meta name="description" content="Libraries for Vicare Scheme">
+<meta name="generator" content="makeinfo 4.13">
+<link title="Top" rel="start" href="index.html#Top">
+<link rel="prev" href="formations.html#formations" title="formations">
+<link rel="next" href="parser_002dtools.html#parser_002dtools" title="parser-tools">
+<link href="http://www.gnu.org/software/texinfo/" rel="generator-home" title="Texinfo Homepage">
+<!--
+This document describes the libraries distributed along with version
+0.3d7 of Vicare Scheme, an R6RS compliant native
+compiler for the Scheme language.
+
+Copyright (C) 2010-2013 by Marco Maggi.
+
+Copyright (C) 2006-2010 by Abdulaziz Ghuloum.
+
+The documentation of IrRegex is Copyright (C) 2005-2012 Alex
+Shinn.  All rights reserved.
+
+The documentation of Pregexp is Copyright (C) 1999-2005 Dorai
+Sitaram.  All rights reserved.
+
+The documentation of the library `(vicare formations)' is derived
+from the documentation of Guile.  Copyright (C) 1996-2005,
+2009-2013 Free Software Foundation.
+
+The documentation of the libraries `(vicare parser-tools silex
+---)' are derived form the documentation of SILex.  Copyright
+(C) 2001, 2009 Danny Dube'.
+
+     This program is free software: you can redistribute it and/or
+     modify it under the terms of the GNU General Public License
+     version 3 as published by the Free Software Foundation.
+
+     This program is distributed in the hope that it will be useful, but
+     WITHOUT ANY WARRANTY; without even the implied warranty of
+     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+     General Public License for more details.
+
+     You should have received a copy of the GNU General Public License
+     along with this program.  If not, see
+     `http://www.gnu.org/licenses/'.
+
+Trademarks used herein are the property of their respective owners.-->
+<meta http-equiv="Content-Style-Type" content="text/css">
+<style type="text/css"><!--
+  pre.display { font-family:inherit }
+  pre.format  { font-family:inherit }
+  pre.smalldisplay { font-family:inherit; font-size:smaller }
+  pre.smallformat  { font-family:inherit; font-size:smaller }
+  pre.smallexample { font-size:smaller }
+  pre.smalllisp    { font-size:smaller }
+  span.sc    { font-variant:small-caps }
+  span.roman { font-family:serif; font-weight:normal; } 
+  span.sansserif { font-family:sans-serif; font-weight:normal; } 
+--></style>
+</head>
+<body>
+<div class="node">
+<a name="silex"></a>
+<p>
+Next:&nbsp;<a rel="next" accesskey="n" href="parser_002dtools.html#parser_002dtools">parser-tools</a>,
+Previous:&nbsp;<a rel="previous" accesskey="p" href="formations.html#formations">formations</a>,
+Up:&nbsp;<a rel="up" accesskey="u" href="index.html#Top">Top</a>
+<hr>
+</div>
+
+<h2 class="chapter">36 A lexical analyser generator</h2>
+
+<p><a name="index-g_t_0040library_007bvicare-parser_002dtools-silex_007d_002c-library-5151"></a><a name="index-Library-_0040library_007bvicare-parser_002dtools-silex_007d-5152"></a><a name="index-g_t_0040library_007bvicare-parser_002dtools-silex-lexer_007d_002c-library-5153"></a><a name="index-Library-_0040library_007bvicare-parser_002dtools-silex-lexer_007d-5154"></a>
+
+   <p>The library <code>(vicare parser-tools silex)</code> generates a lexical
+analyser table from a Lex&ndash;like specification file.  The library
+<code>(vicare parser-tools silex lexer)</code> generates a Scheme lexical
+analyser using a supplied table.  It is suggested to import these
+libraries with the &lsquo;<samp><span class="samp">lex.</span></samp>&rsquo; prefix, as in:
+
+<pre class="example">     (import (vicare)
+       (prefix (vicare parser-tools silex)       lex.)
+       (prefix (vicare parser-tools silex lexer) lex.))
+</pre>
+   <blockquote>
+&ldquo;SILex&rdquo; stands for &ldquo;Scheme Implementation of Lex&rdquo;.  The library is a
+port to <acronym>R6RS</acronym> Scheme of SILex version 1.0 by Danny Dube'.  The
+original code is available at (<acronym>URL</acronym> last verified Oct 8, 2013):
+
+<div align="center"><a href="http://www.iro.umontreal.ca/~dube/">http://www.iro.umontreal.ca/~dube/</a></div>
+   </blockquote>
+
+   <p>The library <code>(vicare parser-tools silex utilities)</code> implements
+convenience facilities to use SILex.  It is suggested to use SILex with
+the facilities of the libraries in the hierarchey <code>(nausicaa
+parser-tools ---)</code>, <a href="../nausicaa/lexical_002dtokens.html#lexical_002dtokens">Describing lexical tokens</a>.
+
+<ul class="menu">
+<li><a accesskey="1" href="silex-example.html#silex-example">silex example</a>:                A lexer example for a calculator. 
+<li><a accesskey="2" href="silex-tables.html#silex-tables">silex tables</a>:                 Creating lexer tables. 
+<li><a accesskey="3" href="silex-input.html#silex-input">silex input</a>:                  Input systems. 
+<li><a accesskey="4" href="silex-lexer.html#silex-lexer">silex lexer</a>:                  Building and using lexical analysers. 
+<li><a accesskey="5" href="silex-syntax.html#silex-syntax">silex syntax</a>:                 Syntax of the specification. 
+<li><a accesskey="6" href="silex-semantics.html#silex-semantics">silex semantics</a>:              Semantics of the specification file. 
+<li><a accesskey="7" href="silex-format.html#silex-format">silex format</a>:                 Tables output format. 
+<li><a accesskey="8" href="silex-utilities.html#silex-utilities">silex utilities</a>:              Utility functions. 
+</ul>
+
+<!-- page -->
+   </body></html>
+
