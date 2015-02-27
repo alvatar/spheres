@@ -1,9 +1,9 @@
-;;; Advanced Encryption Standard (AES) symmetric key block cipher.
-;;; Marc Feeley
-;;; License: lgpl/v2.1
-;;; Modifications:
-;;; Added optimize/debug declarations 2014, Alvaro Castro-Castilla
-;;; Macros ported to rsc-macro-transformer 2014, Alvaro Castro-Castilla
+;;!!! Advanced Encryption Standard (AES) symmetric key block cipher.
+;; Marc Feeley
+;; License: lgpl/v2.1
+;; Modifications:
+;; Added optimize/debug declarations 2014, Alvaro Castro-Castilla
+;; Macros ported to rsc-macro-transformer 2014, Alvaro Castro-Castilla
 
 ;; All operations are performed on 16 bit unsigned integers.
 ;; Homogeneous vectors of 16 bit unsigned integers are used to store

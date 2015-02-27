@@ -58,6 +58,7 @@
     (spheres/io genport)
     (spheres/io file)
     (spheres/io shared-structure)
+    (spheres/io ttyui)
     (spheres/markup atom)
     (spheres/markup html)
     (spheres/markup html-doctype)

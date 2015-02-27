@@ -1,4 +1,4 @@
-;;!! UUID generation RFC 4122 Version 4
+;;!!! UUID generation RFC 4122 Version 4
 
 (define make-uuid
   (let* ((rs (make-random-source))
