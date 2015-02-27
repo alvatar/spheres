@@ -362,29 +362,45 @@
                                           directory: where
                                           stdout-redirection: #f))))))
 
+;;! Returns #t if the library needs recompilation
+(define^ (%library-updated? lib)
+  (define (newer-than? filename1)
+    (lambda (filename2)
+      (or (not (file-exists? filename1))
+          (> (time->seconds (file-last-modification-time filename2))
+             (time->seconds (file-last-modification-time filename1))))))
+  (let ((newer-file? (newer-than? (%library-object-path lib))))
+    (let recur ((includes (map (lambda (incl) (string-append
+                                          (%find-library-path lib) (cadr incl)))
+                               (%library-read-syntax&find-includes lib #f))))
+      (cond ((null? includes) #f)
+            ((newer-file? (car includes)) #t)
+            (else (recur (cdr includes)))))))
+
 ;;! Include and load all library files and dependencies
 (define^ %load-library
   (let ((loaded-libs '()))
-    (lambda (lib #!key compile only-syntax force (verbose #t))
+    (lambda (lib #!key compile only-syntax force (silent #f))
       (define (load* file)
         (parameterize
          ((current-directory (path-directory file)))
          (let ((load-result (load file)))
-           (if verbose
+           (if (not silent)
                (println (string-append "loading: " load-result))))))
       (let recur ((lib lib))
         (for-each recur (%library-imports lib))
         (if (or force (not (member lib loaded-libs)))
             (let ((lib-path-root (%find-library-path-root lib))
                   (lib-path (%find-library-path lib)))
-              (if compile (%call-task lib-path-root 'compile lib))
+              (if (and compile (%library-updated? lib))
+                  (%call-task lib-path-root 'compile lib))
               (let ((sld-file (%find-library-sld lib))
                     (obj-file (%find-library-object lib))
                     (scm-file (%find-library-scm lib)))
                 (set! loaded-libs (cons lib loaded-libs))
                 (if sld-file
                     (begin
-                      (if verbose (println "including: " (path-expand sld-file)))
+                      (if (not silent) (println "including: " (path-expand sld-file)))
                       (let ((eval&get-includes (%library-read-syntax&find-includes lib #t)))
                         (if (not only-syntax)
                             (if obj-file
@@ -396,5 +412,5 @@
                     ;; Default procedure file is only loaded if there is no *.sld
                     (if (and (or obj-file scm-file)
                              (not only-syntax))
-                        (begin (if verbose (println "loading: " (or obj-file scm-file)))
+                        (begin (if (not silent) (println "loading: " (or obj-file scm-file)))
                                (load (or obj-file scm-file))))))))))))
