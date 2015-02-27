@@ -1,9 +1,10 @@
-;;; Copyright (c) 2006-2007 by Marc Feeley, All Rights Reserved.
-;;; license: lgpl/v2.1
-;;; Modifications:
-;;; Copyright (c) 2014 by Álvaro Castor-Castilla, All Rights Reserved.
-;;; Provides procedures to encrypt, decrypt, sign and verify messages
-;;; using the RSA public-key cryptosystem.
+;;!!! Provides procedures to encrypt, decrypt, sign and verify messages
+;; using the RSA public-key cryptosystem.
+;; .author Marc Feeley, 2006-2007
+;; .author Alvaro Castro-Castilla
+;; .license: lgpl/v2.1
+;;
+;; Copyright (c) 2006-2007 by Marc Feeley, All Rights Reserved.
 
 
 (cond-expand

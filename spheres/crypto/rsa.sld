@@ -1,3 +1,11 @@
+;;!!! Provides procedures to encrypt, decrypt, sign and verify messages
+;; using the RSA public-key cryptosystem.
+;; .author Marc Feeley, 2006-2007
+;; .author Alvaro Castro-Castilla
+;; .license: lgpl/v2.1
+;;
+;; Copyright (c) 2006-2007 by Marc Feeley, All Rights Reserved.
+
 (define-library (spheres/crypto rsa)
   (export make-rsa-key-pair
           public-rsa-key
@@ -15,9 +23,9 @@
           PBKDF1
           PBKDF2)
   (import (spheres/algorithm u8vector)
-          (spheres/codec bignum)
-          (spheres/codec base64)
-          (spheres/crypto digest)
-          (spheres/string u8))
-  
+          (spheres/string u8vector)
+          (spheres/dataenc bignum)
+          (spheres/dataenc base64)
+          (spheres/crypto digest))
+
   (include "rsa.scm"))

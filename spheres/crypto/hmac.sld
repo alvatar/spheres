@@ -11,7 +11,7 @@
           hmac-sha-224
           hmac-sha-256)
   (import (spheres/algorithm u8vector)
-          (spheres/string u8)
+          (spheres/string u8vector)
           (spheres/crypto digest))
 
   (include "hmac.scm"))
