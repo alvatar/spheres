@@ -297,7 +297,8 @@
           (let ((head (car l)))
             (if (f head) (cons head (filter f (cdr l)))
                 (filter f (cdr l)))))))
-  (let* ((file-sexps (with-input-from-file (%find-library-sld lib) read))
+  (let* ((lib-path (%find-library-path lib))
+         (file-sexps (with-input-from-file (%find-library-sld lib) read))
          (define-library-args (cdr file-sexps))
          (syntax-defines (filter (lambda (sexp) (let ((head-sexp (car sexp)))
                                              (or (eq? head-sexp 'define-syntax)
@@ -318,7 +319,11 @@
                    (if eval? (eval head))
                    (recur (cdr sexps)))
                   ((include)
-                   (set! found-includes (cons head found-includes))
+                   (let* ((incl (string-append lib-path (cadr head))))
+                     (if (file-exists? incl)
+                         (set! found-includes (cons incl found-includes))
+                         (error (string-append (object->string head) " in library "
+                                               (object->string lib) " not found"))))
                    (recur (cdr sexps)))
                   ((begin ##begin)
                    (recur (cdr head))
@@ -369,13 +374,16 @@
       (or (not (file-exists? filename1))
           (> (time->seconds (file-last-modification-time filename2))
              (time->seconds (file-last-modification-time filename1))))))
-  (let ((newer-file? (newer-than? (%library-object-path lib))))
-    (let recur ((includes (map (lambda (incl) (string-append
-                                          (%find-library-path lib) (cadr incl)))
-                               (%library-read-syntax&find-includes lib #f))))
-      (cond ((null? includes) #f)
-            ((newer-file? (car includes)) #t)
-            (else (recur (cdr includes)))))))
+  (let* ((sld-file (%find-library-sld lib))
+         (obj-file (%library-object-path lib))
+         (updated-file? (newer-than? obj-file)))
+    (if sld-file
+        (and (file-exists? obj-file)
+             (or (updated-file? sld-file)
+                 (let recur ((includes (%library-read-syntax&find-includes lib #f)))
+                   (cond ((null? includes) #f)
+                         ((updated-file? (car includes)) #t)
+                         (else (recur (cdr includes))))))))))
 
 ;;! Include and load all library files and dependencies
 (define^ %load-library
@@ -405,10 +413,7 @@
                         (if (not only-syntax)
                             (if obj-file
                                 (load* obj-file)
-                                (for-each (lambda (f)
-                                            (load* (path-strip-extension
-                                                    (string-append lib-path (cadr f)))))
-                                          eval&get-includes)))))
+                                (for-each (lambda (f) (load* (path-strip-extension f))) eval&get-includes)))))
                     ;; Default procedure file is only loaded if there is no *.sld
                     (if (and (or obj-file scm-file)
                              (not only-syntax))
