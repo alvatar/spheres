@@ -378,12 +378,11 @@
          (obj-file (%library-object-path lib))
          (updated-file? (newer-than? obj-file)))
     (if sld-file
-        (and (file-exists? obj-file)
-             (or (updated-file? sld-file)
-                 (let recur ((includes (%library-read-syntax&find-includes lib #f)))
-                   (cond ((null? includes) #f)
-                         ((updated-file? (car includes)) #t)
-                         (else (recur (cdr includes))))))))))
+        (or (updated-file? sld-file)
+            (let recur ((includes (%library-read-syntax&find-includes lib #f)))
+              (cond ((null? includes) #f)
+                    ((updated-file? (car includes)) #t)
+                    (else (recur (cdr includes)))))))))
 
 ;;! Include and load all library files and dependencies
 (define^ %load-library

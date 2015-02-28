@@ -98,7 +98,7 @@
    (current-time)))
 
 (define (formatted-current-time)
-  (date->string (curent-date)))
+  (time->string (current-time)))
 
 ;; ----------------------------------------------------------------------------
 ;; Datatypes

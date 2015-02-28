@@ -77,7 +77,7 @@
            recv))
 
   (import (spheres/net uuid)
-          (spheres/os date-time))
+          (spheres/os date-format))
 
   ;; Clause manipulation
   ;;
