@@ -1,3 +1,10 @@
+(%load-library '(spheres/util test) silent: #t)
+
+(%load-library '(spheres/structure red-black-tree))
+
+(test-begin "Red-Black Tree")
+
+
 (define (make-my-rbtree color parent left leftmost)
   (vector color parent left leftmost))
 
@@ -53,43 +60,43 @@
 (define n2 (my-node-create 2))
 (define n3 (my-node-create 3))
 
-(expect* (equal? #t (my-empty? t)))
-(expect* (equal? #f (my-singleton? t)))
+(test-assert "Empty (0 elem)" (my-empty? t))
+
+(test-assert "Not singleton (0 elem)" (not (my-singleton? t)))
 
 (my-insert! t n2)
 
-(expect* (equal? #f (my-empty? t)))
-(expect* (equal? #t (my-singleton? t)))
-(expect* (equal? n2 (my-leftmost t)))
+(test-assert "Not empty (1 elem)" (not (my-empty? t)))
+(test-assert "Singleton (1 elem)" (my-singleton? t))
+(test-equal n2 (my-leftmost t))
 
 (my-insert! t n1)
 
-(expect* (equal? #f (my-empty? t)))
-(expect* (equal? #f (my-singleton? t)))
-(expect* (equal? n1 (my-leftmost t)))
+(test-assert "Not empty (2 elem)" (not (my-empty? t)))
+(test-assert "Not singeleton (2 elem)" (not (my-singleton? t)))
+(test-equal "Leftmost (2 elem)" n1 (my-leftmost t))
 
 (my-insert! t n3)
 
-(expect* (equal? #f (my-empty? t)))
-(expect* (equal? #f (my-singleton? t)))
-(expect* (equal? n1 (my-leftmost t)))
+(test-assert "Not empty (3 elem)" (not (my-empty? t)))
+(test-assert "Not singleton (3 elem)" (not (my-singleton? t)))
+(test-equal "Leftmost (3 elem)" n1 (my-leftmost t))
 
 (my-remove! n1)
 
-(expect* (equal? #f (my-empty? t)))
-(expect* (equal? #f (my-singleton? t)))
-(expect* (equal? n2 (my-leftmost t)))
+(test-assert "Not empty (removed elem)" (not (my-empty? t)))
+(test-assert "Not singleton (removed elem)" (not (my-singleton? t)))
+(test-equal "Leftmost (removed elem)" n2 (my-leftmost t))
 
 (my-remove! n2)
 
-(expect* (equal? #f (my-empty? t)))
-(expect* (equal? #t (my-singleton? t)))
-(expect* (equal? n3 (my-leftmost t)))
+(test-assert "Not empty (removed elem 2)" (not (my-empty? t)))
+(test-assert "Singleton (removed elem 2)" (my-singleton? t))
+(test-equal "Leftmost (removed elem 2)" n3 (my-leftmost t))
 
 (my-remove! n3)
-
-(expect* (equal? #t (my-empty? t)))
-(expect* (equal? #f (my-singleton? t)))
+(test-assert "Empty (removed elem 3)" (my-empty? t))
+(test-assert "Not singleton (removed elem 3)" (not (my-singleton? t)))
 
 ;; implement a sorting function with a priority queue:
 
@@ -105,6 +112,8 @@
             (my-remove! smallest)
             (loop (cons value result)))))))
 
-(expect* (equal? '(12 11 10 9 8 7 6 5 4 3 2 1)
-                 (my-sort '(5 12 8 1 9 10 3 2 7 6 4 11))))
+(test-equal "Sort implemented with Red-Black Tree"
+            (my-sort '(5 12 8 1 9 10 3 2 7 6 4 11))
+            '(12 11 10 9 8 7 6 5 4 3 2 1))
 
+(test-end)
