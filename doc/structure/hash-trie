@@ -1,0 +1,173 @@
+;; Documentation
+
+;; Except where this is obviously not the case (HASH-TABLE/FOLD, for
+;; example), every procedure here runs in constant expected time under
+;; the assumption of a good key hash function, ignoring the time taken
+;; by garbage collection and the time taken by the key hash function
+;; and the key equality predicate of the relevant hash trie type.
+;; When searching in a hash trie, the key equality predicate is
+;; applied to only as many keys extra as share a common hash value
+;; with the key whose association is sought.  Thus in a hash trie with
+;; no collisions, every search involves at most one invocation of the
+;; key hash function, and at most one invocation of the key equality
+;; predicate.
+;;
+;;   (MAKE-HASH-TRIE-TYPE <key=?> <key-hash>) -> hash-trie-type
+;;
+;;     Constructor for hash trie types.  <Key=?> must be a key
+;;     equality predicate, a procedure of two arguments that returns
+;;     true to indicate that they are equal and false to indicate that
+;;     they are not, and that behaves transitively, symmetrically, and
+;;     reflexively.  <Key-hash> must be a key hash function that
+;;     preserves the key equality predicate, i.e. for keys A and B, it
+;;     must be that if (<key=?> A B), then (= (<key-hash> A)
+;;     (<key-hash> B)).
+;;
+;;   (HASH-TRIE-TYPE? <object>) -> boolean
+;;
+;;     Disjoint type predicate for hash trie types.
+;;
+;;   (HASH-TRIE-TYPE/KEY-EQUALITY-PREDICATE <hash-trie-type>)
+;;       -> key-equality-predicate
+;;   (HASH-TRIE-TYPE/KEY-HASH-FUNCTION <hash-trie-type>)
+;;       -> key-hash-function
+;;
+;;      Accessors for the key equality predicates and key hash
+;;      functions of hash trie types.
+;;
+;;   (MAKE-HASH-TRIE <hash-trie-type>) -> hash-trie
+;;
+;;     Hash trie constructor.
+;;
+;;   (HASH-TRIE/TYPE <hash-trie>) -> hash-trie-type
+;;
+;;     Returns the hash trie type of <hash-trie>.
+;;
+;;   (HASH-TRIE/COUNT <hash-trie>) -> exact, nonnegative integer
+;;
+;;     Returns the number of associations in <hash-trie>.
+;;
+;;   (HASH-TRIE/EMPTY? <hash-trie>) -> boolean
+;;
+;;     Returns true if <hash-trie> has no associations, or false if it
+;;     has any.
+
+;;   (HASH-TRIE/SEARCH <hash-trie> <key> <if-found> <if-not-found>)
+;;
+;;     Searches for an association for <key> in <hash-trie>.  If there
+;;     is one, tail-calls <if-found> with one argument, the datum
+;;     associated with key.  If not, tail-calls <if-not-found> with
+;;     zero arguments.
+;;
+;;   (HASH-TRIE/LOOKUP <hash-trie> <key> <default>) -> datum or <default>
+;;
+;;     Searches for an association for <key> in <hash-trie>.  If there
+;;     is one, returns its associated datum; otherwise returns
+;;     <default>.
+;;
+;;   (HASH-TRIE/MEMBER? <hash-trie> <key>) -> boolean
+;;
+;;     Returns true if <hash-trie> has an association for <key>, or
+;;     false if not.
+;;
+;;   (HASH-TRIE/UPDATE <hash-trie> <key> <if-found> <if-not-found>)
+;;
+;;     Searches for an association for <key> in <hash-trie>.  If there
+;;     is one, tail-calls <if-found> with three arguments:
+;;
+;;     . the associated datum,
+;;
+;;     . a procedure (REPLACE <datum>) that returns a new hash trie
+;;       with all the associations in <hash-trie>, but with <datum>
+;;       substituted for the datum associated with <key>; and
+;;
+;;     . a procedure (DELETE) that returns a new hash trie with all
+;;       the associations in <hash-trie> excluding the association for
+;;       <key>.
+;;
+;;     If there is no such association, tail-calls <if-not-found> with
+;;     one argument, a procedure (INSERT <datum>) that returns a new
+;;     hash trie with all the associations in <hash-trie> as well as
+;;     an association of <datum> with <key>.
+;;
+;;   (HASH-TRIE/INSERT <hash-trie> <key> <datum>) -> hash-trie
+;;
+;;     Returns a hash trie with all the associations in <hash-trie>,
+;;     but associating <datum> with <key>, whether <hash-trie> had an
+;;     association for <key> or not.
+;;
+;;   (HASH-TRIE/MODIFY <hash-trie> <key> <default> <modifier>) -> hash-trie
+;;
+;;     Returns a hash trie with all the associations in <hash-trie>,
+;;     but associating (<modifier> D) with <key> if <hash-trie>
+;;     associated a datum D with <key>, or associating (<modifier>
+;;     <default>) with <key> if <hash-trie> had no association for
+;;     <key>.
+;;
+;;   (HASH-TRIE/INTERN <hash-trie> <key> <generator>) -> [datum hash-trie]
+;;
+;;     If <hash-trie> has an association for <key>, returns its
+;;     associated datum and <hash-trie>.  Otherwise, calls
+;;     (<generator> <key>) to obtain a datum D, and returns D and a
+;;     hash trie with all the associations in <hash-trie> as well as
+;;     an association of D with <key>.
+;;
+;;   (HASH-TRIE/DELETE <hash-trie> <key>) -> hash-trie
+;;
+;;     Returns a hash trie with all the associations in <hash-trie>,
+;;     excluding its association, if any, for <key>.
+
+;;   (HASH-TRIE/FOLD <hash-trie> <initial-value> <combinator>) -> value
+;;
+;;     Folds <hash-trie> by <combinator>, starting with an initial
+;;     value V of <initial-value> and updating it for each association
+;;     of a datum D with a key K, in no particular order, by
+;;     (<combinator> K D V).
+;;
+;;   (HASH-TRIE->ALIST <hash-trie>) -> alist
+;;   (HASH-TRIE/KEY-LIST <hash-trie>) -> alist
+;;   (HASH-TRIE/DATUM-LIST <hash-trie>) -> alist
+;;
+;;     HASH-TRIE->ALIST returns a list of pairs, in no particular
+;;     order, corresponding with the associations in <hash-trie>, with
+;;     keys in the cars and associated data in the respective cdrs.
+;;     HASH-TRIE/KEY-LIST returns a list of all the keys in
+;;     <hash-trie>, in no particular order.  HASH-TRIE/DATUM-LIST
+;;     returns a list of all the data in <hash-trie>, in no particular
+;;     order.
+;;
+;;   (ALIST->HASH-TRIE <alist> <hash-trie-type>) -> hash-trie
+;;
+;;     Returns a hash trie of the given type with the associations
+;;     listed in <alist>, taking keys from the cars and corresponding
+;;     data from the respective cdrs.
+;;
+;;   (STRING-HASH <string>) -> hash
+;;   (SYMBOL-HASH <symbol>) -> hash
+;;   (EXACT-INTEGER-HASH <exact-integer>) -> hash
+;;   (REAL-NUMBER-HASH <real-number>) -> hash
+;;   (COMPLEX-NUMBER-HASH <complex-number>) -> hash
+;;
+;;     Hash functions for various types of data.  EXACT-INTEGER-HASH,
+;;     REAL-NUMBER-HASH, and COMPLEX-NUMBER-HASH all agree where their
+;;     domains coincide.  The current implementations of these hash
+;;     functions are all based on the FNV (Fowler-Noll-Vo) family of
+;;     hash functions, tweaked slightly so that it is more likely to
+;;     fit into the range of fixnums (small exact integers that can be
+;;     represented immediately) for most Scheme systems on 32-bit
+;;     machines.
+;;
+;;   HASH-TRIE-TYPE:STRING
+;;   HASH-TRIE-TYPE:SYMBOL
+;;   HASH-TRIE-TYPE:EXACT-INTEGER
+;;   HASH-TRIE-TYPE:REAL-NUMBER
+;;   HASH-TRIE-TYPE:COMPLEX-NUMBER
+;;
+;;     Hash trie types for the above hash functions, with appropriate
+;;     key equality predicates: STRING=? for strings, EQ? for symbols,
+;;     and = for the numeric types.
+;;
+;; Commented at the bottom of the file are procedures to map between
+;; hash tries and streams of pairs, which can be used to implement a
+;; foof-loop <http://mumble.net/~campbell/scheme/foof-loop.txt>
+;; iterator, also commented at the bottom of the file.
