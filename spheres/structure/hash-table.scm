@@ -22,7 +22,7 @@
 ;;   (gcht  unprintable:)
 ;;   (init  unprintable:))
 
-;; Minimal hash table declaration, since define-type is still problematic in 
+;; Minimal hash table declaration, since define-type is still problematic in
 
 (define ##table-type (##structure-type (make-table)))
 (define-macro (macro-table-flags obj)
@@ -129,7 +129,7 @@
 
 ;;!! Reflection
 
-(define (hash-table-equivalence-function hash-table) 
+(define (hash-table-equivalence-function hash-table)
   (macro-table-test hash-table))
 
 (define (hash-table-hash-function hash-table)
@@ -144,17 +144,17 @@
 (define (hash-table-ref hash-table key . rest)
   (let ((thunk (if (pair? rest) (car rest) #f)))
     (##table-access hash-table key
-                    (lambda (table key gcht probe2 default-value) 
+                    (lambda (table key gcht probe2 default-value)
                       (macro-gc-hash-table-val-ref gcht probe2))
                     (lambda (table key gcht probe2 deleted2 default-value)
                       (if default-value (default-value)
-                          (##raise-unbound-table-key-exception hash-table-ref table key))) thunk))) 
+                          (##raise-unbound-table-key-exception hash-table-ref table key))) thunk)))
 
-(define (hash-table-ref/default hash-table key default) 
+(define (hash-table-ref/default hash-table key default)
   (table-ref hash-table key default))
 
 (define (hash-table-set! hash-table key value)
-  (cond 
+  (cond
    ((not (hash-table? hash-table)) (assertion-violation 'hash-table-set! "First argument must be a hash-table" hash-table))
    ((hash-table-mutable? hash-table) (table-set! hash-table key value))))
 
@@ -177,7 +177,7 @@
          (lambda (table key gcht probe2 deleted2 val)
            ;; key was not found (search ended at position "probe2" and the
            ;; first deleted entry encountered is at position "deleted2")
-           (if val 
+           (if val
                (if deleted2
                    (let ((count (##fixnum.+ (macro-gc-hash-table-count gcht) 1)))
                      (macro-gc-hash-table-count-set! gcht count)
@@ -223,9 +223,9 @@
 
 (define hash-table->alist table->list)
 (define hash-table-copy table-copy)
-		
+
 (define (hash-table-merge! hash-table-1 hash-table-2)
-  (if (hash-table-mutable? hash-table-1) 
+  (if (hash-table-mutable? hash-table-1)
       (table-merge! hash-table-1 hash-table-2 #t)
       (table-merge hash-table-1 hash-table-2 #t)))
 
@@ -458,7 +458,7 @@
 ;;    (hash-table-entries hash-table)))
 ;;
 ;; (define (hash-table-fold hash-table f acc)
-;;   (hash-table-walk hash-table 
+;;   (hash-table-walk hash-table
 ;;                    (lambda (key value) (set! acc (f key value acc))))
 ;;   acc)
 ;;

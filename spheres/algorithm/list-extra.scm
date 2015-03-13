@@ -68,7 +68,6 @@
       (begin
         (let ((x (car ls))
               (d (cdr ls)))
-          (check-pair 'shift! d)
           (set-car! ls (car d))
           (set-cdr! ls (cdr d))
           x))))
