@@ -247,17 +247,18 @@
   (let* ((lib-path (%find-library-path lib))
          (file-sexps (with-input-from-file (%find-library-sld lib) read))
          (define-library-args (cdr file-sexps))
+         (expanded-cond-features (%expand-cond-features define-library-args))
          (syntax-defines (filter (lambda (sexp) (let ((head-sexp (car sexp)))
                                              (or (eq? head-sexp 'define-syntax)
                                                  (eq? head-sexp 'define-macro)
                                                  (eq? head-sexp '##begin)
                                                  (eq? head-sexp 'begin))))
-                                 (%expand-cond-features define-library-args)))
+                                 expanded-cond-features))
          (syntax-definitions (make-table))
-         (found-exports '())
          (found-imports '())
+         (found-exports '())
          (found-includes '()))
-    (let recur ((sexps (%expand-cond-features define-library-args)))
+    (let recur ((sexps expanded-cond-features))
       (or (null? sexps)
           (let ((head (car sexps)))
             (if (and (pair? head) (not (null? head)))
@@ -340,41 +341,37 @@
                        ,@non-macro-exports)))))
 
 ;; Create all necessary namespace definitions for a library
-(define^ (%library-make-prelude lib #!optional imports)
-  (let ((imports (or imports
-                     (receive (imports _ __ ___)
-                              (%library-read-syntax lib)
-                              imports))))
-   `(##begin
-      ,(%library-make-namespace-form lib '() '() allow-empty?: #t)
-      (##include "~~/lib/gambit#.scm")
-      (##namespace ("" $make-environment
-                    $sc-put-cte
-                    $syntax-dispatch
-                    bound-identifier=?
-                    datum->syntax
-                    environment?
-                    free-identifier=?
-                    generate-temporaries
-                    identifier?
-                    interaction-environment
-                    literal-identifier=?
-                    syntax-error
-                    syntax->datum
-                    syntax->list
-                    syntax->vector
-                    $load-module
-                    $update-module
-                    $include-file-hook
-                    $generate-id
-                    syntax-case-debug))
-      ,@(map
-         (lambda (import-lib)
-           (receive (_ exports __ macro-defs) (%library-read-syntax import-lib)
-                    (%library-make-namespace-form import-lib exports macro-defs)))
-         imports)
-      (##namespace ("" %load-library
-                    %library-loaded-libraries)))))
+(define^ (%library-make-prelude lib #!optional (imports (%library-imports lib)))
+  `(##begin
+     ,(%library-make-namespace-form lib '() '() allow-empty?: #t)
+     (##include "~~/lib/gambit#.scm")
+     (##namespace ("" $make-environment
+                   $sc-put-cte
+                   $syntax-dispatch
+                   bound-identifier=?
+                   datum->syntax
+                   environment?
+                   free-identifier=?
+                   generate-temporaries
+                   identifier?
+                   interaction-environment
+                   literal-identifier=?
+                   syntax-error
+                   syntax->datum
+                   syntax->list
+                   syntax->vector
+                   $load-module
+                   $update-module
+                   $include-file-hook
+                   $generate-id
+                   syntax-case-debug))
+     (##namespace ("" %load-library
+                   %library-loaded-libraries))
+     ,@(map
+        (lambda (import-lib)
+          (receive (_ exports __ macro-defs) (%library-read-syntax import-lib)
+                   (%library-make-namespace-form import-lib exports macro-defs)))
+        imports)))
 
 ;;! Hash table containing info about loaded libraries
 (define^ %library-loaded-libraries (make-table))

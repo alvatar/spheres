@@ -12,8 +12,6 @@
           rec
           cond
           case
-          lambda*
-          define*
           ++!
           ++
           --!
@@ -55,10 +53,6 @@
           type-of
           coerce
           ->integer)
-  (cond-expand
-   (gambit
-    (import (gambit)))
-   (else))
 
   ;;------------------------------------------------------------------------------
   ;;!! R5RS standard Macros
