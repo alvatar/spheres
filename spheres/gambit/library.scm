@@ -393,8 +393,6 @@
   (let ((loaded-libs '()))
     (lambda (root-lib #!key compile only-syntax force (silent #f))
       (let recur ((lib root-lib))
-        (define (eval/pp f) (pp f) (eval f))
-
         (define (make-namespace-form lib exports macro-defs #!key (allow-empty? #f))
           (let ((non-macro-exports
                  (filter (lambda (i) (not (table-ref macro-defs i #f)))
@@ -408,45 +406,50 @@
                                  "#")
                                ,@non-macro-exports)))))
         (define (with-namespaces imports thunk)
-          (eval/pp `(##begin
-                      ,@(map
-                    (lambda (import-lib)
-                      (receive (_ exports __ macro-defs) (%library-read-syntax import-lib)
-                                           (make-namespace-form import-lib exports macro-defs)))
-                    imports)
-                 ,(make-namespace-form lib '() '() allow-empty?: #t)
-                 (##include "~~/lib/gambit#.scm")
-                 (##namespace ("" $make-environment
-                               $sc-put-cte
-                               $syntax-dispatch
-                               bound-identifier=?
-                               datum->syntax
-                               environment?
-                               free-identifier=?
-                               generate-temporaries
-                               identifier?
-                               interaction-environment
-                               literal-identifier=?
-                               syntax-error
-                               syntax->datum
-                               syntax->list
-                               syntax->vector
-                               $load-module
-                               $update-module
-                               $include-file-hook
-                               $generate-id
-                               syntax-case-debug))
-                 (##namespace ("" %load-library))
-                 ))
-          (thunk)
-          ;;(eval/pp '(##namespace ("")))
-          (newline))
+          (eval `(##begin
+                   ,@(map
+                      (lambda (import-lib)
+                        (receive (_ exports __ macro-defs) (%library-read-syntax import-lib)
+                                 (make-namespace-form import-lib exports macro-defs)))
+                      imports)
+                   ,(make-namespace-form lib '() '() allow-empty?: #t)
+                   (##include "~~/lib/gambit#.scm")
+                   (##namespace ("" $make-environment
+                                 $sc-put-cte
+                                 $syntax-dispatch
+                                 bound-identifier=?
+                                 datum->syntax
+                                 environment?
+                                 free-identifier=?
+                                 generate-temporaries
+                                 identifier?
+                                 interaction-environment
+                                 literal-identifier=?
+                                 syntax-error
+                                 syntax->datum
+                                 syntax->list
+                                 syntax->vector
+                                 $load-module
+                                 $update-module
+                                 $include-file-hook
+                                 $generate-id
+                                 syntax-case-debug))
+                   (##namespace ("" %load-library))))
+          (thunk))
         (define (load* file)
           (parameterize
            ((current-directory (path-directory file)))
-           ;; TODO: inform of scm or o
-           (if (not silent) (println "loading: " file))
-           (load file)))
+           (let ((file (if (string=? (path-extension file) "")
+                           (let recur ((n 1))
+                             (let ((fullname (string-append file ".o" (number->string n))))
+                               (if (file-exists? fullname)
+                                   (recur (+ n 1))
+                                   (if (> n 1)
+                                       (string-append file ".o" (number->string (- n 1)))
+                                       (string-append file ".scm")))))
+                           file)))
+            (if (not silent) (println "loading: " file))
+            (load file))))
         (for-each recur (%library-imports lib))
         (if (or force (not (member lib loaded-libs)))
             (let ((lib-path-root (%find-library-path-root lib))
