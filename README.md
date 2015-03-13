@@ -1,4 +1,4 @@
-# [SchemeSpheres](http://www.schemespheres.org)
+# [Spheres](http://www.schemespheres.org)
 
 _A set of tools and libraries for real-life Scheme. Multiplatform and mobile._
 
@@ -9,9 +9,9 @@ _A set of tools and libraries for real-life Scheme. Multiplatform and mobile._
 
 1. Copy the .gambcini file to your HOME directory. This is Gambit's initialization file.
 2. (optional) Copy the _spheres/_ directory into your Gambit's installation library directory (i.e. /usr/local/Gambit/lib)
-3. Update all .gambcini paths to where your SchemeSpheres files are located (either Gambit's library directory, if you copied the files there, or any other path where you choose to leave SchemeSpheres' files).
+3. Update all .gambcini paths to where your Spheres files are located (either Gambit's library directory, if you copied the files there, or any other path where you choose to leave Spheres' files).
 
-Currently, SchemeSpheres requires the [Gambit Scheme compiler](http://schemespheres.org). Some libraries in SchemeSpheres are already compatible with r7rs implementations such as Chibi.
+Currently, Spheres requires the [Gambit Scheme compiler](http://schemespheres.org). Some libraries in Spheres are already compatible with r7rs implementations such as Chibi.
 
 
 ## Basic usage
@@ -20,12 +20,18 @@ To load and include all necessary files for a library within the REPL, use:
 
     (load '(spheres/core base))
 
-SchemeSpheres also brings automated compilation and __multiplatform/mobile__ build scripts. In order to make this functionality available, you need to install [Ssrun](https://github.com/fourthbit/ssrun). Once you do this, you can download the [project template](https://github.com/fourthbit/sphere-project) if you want to create a project based on SchemeSpheres.
+Spheres also brings automated compilation and __multiplatform/mobile__ build scripts. In order to make this functionality available, you need to install [Ssrun](https://github.com/fourthbit/ssrun). Once you do this, you can download the [project template](https://github.com/fourthbit/sphere-project) if you want to create a project based on Spheres. Additionally, with _Ssrun_, you can call the compilation tasks within the REPL using the lower-leve form _%load-library_:
+
+    (%load-library '(spheres/core base) compile: #t)
 
 
 ## Notes
 
-SchemeSpheres supports _syntax-rules_ and _define-macro_ syntax, and it loads/evaluates all necessary code for library availability. However, it doesn't handle the name hiding of the export/import syntax. This will be implemented by Gambit any time soon.
+Spheres supports _syntax-rules_ and _define-macro_ syntax. The implementation is a R7RS Library Syntax subset. Current support is practical:
+
+* Macro systems supported: _syntax-rules_ and _define-macro_. Also syntax-case is supported, but not used.
+* Procedures in each library are within their own namespace (imports/exports are handled).
+* Not supported from R7RS: _except_, _only_, _rename_, _include-ci_, _include-library-declarations_. Syntax is always in the global namespace (imports/exports and not handled).
 
 
 ## Contribute
