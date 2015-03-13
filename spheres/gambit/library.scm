@@ -388,97 +388,112 @@
                     ((updated-file? (car includes)) #t)
                     (else (recur (cdr includes)))))))))
 
+;; Builds a ##namespace form for the library
+(define (%library-make-namespace-form lib exports macro-defs #!key (allow-empty? #f))
+  (let ((non-macro-exports
+         (filter (lambda (i) (not (table-ref macro-defs i #f)))
+                 exports)))
+    (if (and (not allow-empty?) (null? non-macro-exports))
+        #!void
+        `(##namespace (,(string-append
+                         (symbol->string (car lib))
+                         "#"
+                         (symbol->string (cadr lib))
+                         "#")
+                       ,@non-macro-exports)))))
+
+;; Runs the thunk within a proper namespace definition
+(define (%library-with-namespaces lib imports thunk)
+  ;;(define (eval/pp f) (pp f) (eval f))
+  (eval `(##begin
+           ,(%library-make-namespace-form lib '() '() allow-empty?: #t)
+           (##include "~~/lib/gambit#.scm")
+           (##namespace ("" $make-environment
+                         $sc-put-cte
+                         $syntax-dispatch
+                         bound-identifier=?
+                         datum->syntax
+                         environment?
+                         free-identifier=?
+                         generate-temporaries
+                         identifier?
+                         interaction-environment
+                         literal-identifier=?
+                         syntax-error
+                         syntax->datum
+                         syntax->list
+                         syntax->vector
+                         $load-module
+                         $update-module
+                         $include-file-hook
+                         $generate-id
+                         syntax-case-debug))
+           ,@(map
+              (lambda (import-lib)
+                (receive (_ exports __ macro-defs) (%library-read-syntax import-lib)
+                         (%library-make-namespace-form import-lib exports macro-defs)))
+              imports)
+           (##namespace ("" %load-library
+                         %library-loaded-libraries))))
+  (thunk))
+
+(define %library-loaded-libraries (make-table))
+
 ;;! Include and load all library files and dependencies
-(define^ %load-library
-  (let ((loaded-libs '()))
-    (lambda (root-lib #!key compile only-syntax force (silent #f))
-      (let recur ((lib root-lib))
-        (define (make-namespace-form lib exports macro-defs #!key (allow-empty? #f))
-          (let ((non-macro-exports
-                 (filter (lambda (i) (not (table-ref macro-defs i #f)))
-                         exports)))
-            (if (and (not allow-empty?) (null? non-macro-exports))
-                #!void
-                `(##namespace (,(string-append
-                                 (symbol->string (car lib))
-                                 "#"
-                                 (symbol->string (cadr lib))
-                                 "#")
-                               ,@non-macro-exports)))))
-        (define (with-namespaces imports thunk)
-          (eval `(##begin
-                   ,@(map
-                      (lambda (import-lib)
-                        (receive (_ exports __ macro-defs) (%library-read-syntax import-lib)
-                                 (make-namespace-form import-lib exports macro-defs)))
-                      imports)
-                   ,(make-namespace-form lib '() '() allow-empty?: #t)
-                   (##include "~~/lib/gambit#.scm")
-                   (##namespace ("" $make-environment
-                                 $sc-put-cte
-                                 $syntax-dispatch
-                                 bound-identifier=?
-                                 datum->syntax
-                                 environment?
-                                 free-identifier=?
-                                 generate-temporaries
-                                 identifier?
-                                 interaction-environment
-                                 literal-identifier=?
-                                 syntax-error
-                                 syntax->datum
-                                 syntax->list
-                                 syntax->vector
-                                 $load-module
-                                 $update-module
-                                 $include-file-hook
-                                 $generate-id
-                                 syntax-case-debug))
-                   (##namespace ("" %load-library))))
-          (thunk))
-        (define (load* file)
-          (parameterize
-           ((current-directory (path-directory file)))
-           (let ((file (if (string=? (path-extension file) "")
-                           (let recur ((n 1))
-                             (let ((fullname (string-append file ".o" (number->string n))))
-                               (if (file-exists? fullname)
-                                   (recur (+ n 1))
-                                   (if (> n 1)
-                                       (string-append file ".o" (number->string (- n 1)))
-                                       (string-append file ".scm")))))
-                           file)))
-            (if (not silent) (println "loading: " file))
-            (load file))))
-        (for-each recur (%library-imports lib))
-        (if (or force (not (member lib loaded-libs)))
-            (let ((lib-path-root (%find-library-path-root lib))
-                  (lib-path (%find-library-path lib))
-                  (library-updated? (%library-updated? lib)))
-              (if (and compile library-updated?)
-                  (%call-task lib-path-root 'compile lib))
-              (let ((sld-file (%find-library-sld lib))
-                    (obj-file (%find-library-object lib))
-                    (scm-file (%find-library-scm lib)))
-                (set! loaded-libs (cons lib loaded-libs))
-                ;; If an R7RS library
-                (if sld-file
-                    (begin
-                      (if (not silent) (println "including: " (path-expand sld-file)))
-                      (receive (imports exports includes macro-defs) (%library-read-syntax lib #t)
-                               (if (not only-syntax)
-                                   (if (and obj-file (not (%library-updated? lib)))
-                                       (with-namespaces
-                                        imports
-                                        (lambda () (load* obj-file)))
-                                       (with-namespaces
-                                        imports
-                                        (lambda () (for-each (lambda (f) (load* (path-strip-extension f)))
-                                                        includes)))))))
-                    ;; Default procedure file is only loaded if there is no *.sld
-                    (if (and (or obj-file scm-file)
-                             (not only-syntax))
-                        (load* (or obj-file scm-file))))))
-            ;; If already loaded, just set the namespace
-            (receive (_ exports __ macro-defs) (%library-read-syntax lib)
-                     (eval (make-namespace-form lib exports macro-defs))))))))
+(define^ (%load-library root-lib #!key compile only-syntax force (silent #f))
+  (let recur ((lib root-lib))
+    (define (load* file)
+      (parameterize
+       ((current-directory (path-directory file)))
+       (let ((file (if (string=? (path-extension file) "")
+                       (let recur ((n 1))
+                         (let ((fullname (string-append file ".o" (number->string n))))
+                           (if (file-exists? fullname)
+                               (recur (+ n 1))
+                               (if (> n 1)
+                                   (string-append file ".o" (number->string (- n 1)))
+                                   (string-append file ".scm")))))
+                       file)))
+         (if (not silent) (println "loading: " file))
+         (load file))))
+    ;; The recursive loading procedure
+    (for-each recur (%library-imports lib))
+    (if (or force (not (table-ref %library-loaded-libraries lib #f)))
+        (let ((lib-path-root (%find-library-path-root lib))
+              (lib-path (%find-library-path lib))
+              (library-updated? (%library-updated? lib)))
+          (if (and compile library-updated?)
+              (%call-task lib-path-root 'compile lib))
+          (let ((sld-file (%find-library-sld lib))
+                (obj-file (%find-library-object lib))
+                (scm-file (%find-library-scm lib)))
+            (table-set! %library-loaded-libraries lib 'auto)
+            ;; If an R7RS library
+            (if sld-file
+                (begin
+                  (if (not silent) (println "including: " (path-expand sld-file)))
+                  (receive (imports exports includes macro-defs) (%library-read-syntax lib #t)
+                           (if (not only-syntax)
+                               (if (and obj-file (not (%library-updated? lib)))
+                                   (%library-with-namespaces
+                                    lib
+                                    imports
+                                    (lambda () (load* obj-file)))
+                                   (%library-with-namespaces
+                                    lib
+                                    imports
+                                    (lambda () (for-each (lambda (f) (load* (path-strip-extension f)))
+                                                    includes)))))))
+                ;; Default procedure file is only loaded if there is no *.sld
+                (if (and (or obj-file scm-file)
+                         (not only-syntax))
+                    (load* (or obj-file scm-file))))))))
+  (table-set! %library-loaded-libraries root-lib 'user)
+  (eval '(##namespace ("")))
+  (table-for-each
+   (lambda (lib v)
+     (if (eq? v 'user)
+         (begin
+           (receive (_ exports __ macro-defs) (%library-read-syntax lib)
+                    (eval (%library-make-namespace-form lib exports macro-defs))))))
+   %library-loaded-libraries))
