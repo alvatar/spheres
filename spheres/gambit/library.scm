@@ -55,6 +55,15 @@
 ;;------------------------------------------------------------------------------
 ;;!! R7RS libraries
 
+(define^ (filter pred lst)
+  (define (foldr func end lst)
+    (if (null? lst)
+        end
+        (func (car lst) (foldr func end (cdr lst)))))
+  (foldr (lambda (x y) (if (pred x) (cons x y) y))
+         '()
+         lst))
+
 (define^ %library-paths '())
 
 (define^ (%add-library-path! path)
@@ -168,14 +177,6 @@
 
 (define^ %library-declaration
   (let ((library-declarations (make-table)))
-    (define (foldr func end lst)
-      (if (null? lst)
-          end
-          (func (car lst) (foldr func end (cdr lst)))))
-    (define (filter pred lst)
-      (foldr (lambda (x y) (if (pred x) (cons x y) y))
-             '()
-             lst))
     (lambda (lib)
       (let ((lib-decl (table-ref library-declarations lib #f)))
         (or lib-decl
@@ -289,14 +290,8 @@
           (set! import-seq (cons lib import-seq)))
       (cdr import-seq))))
 
-;;! Expand cond-expand-features and eval syntax definitions
-(define^ (%library-read-syntax&find-includes lib eval?)
-  (define (filter f l)
-    (let recur ((l l))
-      (if (null? l) '()
-          (let ((head (car l)))
-            (if (f head) (cons head (filter f (cdr l)))
-                (filter f (cdr l)))))))
+;;! Expand cond-expand-features and eval syntax definitions, return imports, exports, includes
+(define^ (%library-read-syntax lib #!optional (eval? #f))
   (let* ((lib-path (%find-library-path lib))
          (file-sexps (with-input-from-file (%find-library-sld lib) read))
          (define-library-args (cdr file-sexps))
@@ -306,31 +301,39 @@
                                                  (eq? head-sexp '##begin)
                                                  (eq? head-sexp 'begin))))
                                  (%expand-cond-features define-library-args)))
+         (syntax-definitions (make-table))
+         (found-exports '())
+         (found-imports '())
          (found-includes '()))
     (let recur ((sexps (%expand-cond-features define-library-args)))
       (or (null? sexps)
           (let ((head (car sexps)))
             (if (and (pair? head) (not (null? head)))
-                (case (car head)
-                  ((define-syntax)
-                   (if eval? (eval head))
-                   (recur (cdr sexps)))
-                  ((define-macro)
-                   (if eval? (eval head))
-                   (recur (cdr sexps)))
-                  ((include)
-                   (let* ((incl (string-append lib-path (cadr head))))
-                     (if (file-exists? incl)
-                         (set! found-includes (cons incl found-includes))
-                         (error (string-append (object->string head) " in library "
-                                               (object->string lib) " not found"))))
-                   (recur (cdr sexps)))
-                  ((begin ##begin)
-                   (recur (cdr head))
-                   (recur (cdr sexps)))
-                  (else
-                   (recur (cdr sexps))))))))
-    (reverse found-includes)))
+                (begin (case (car head)
+                         ((import)
+                          (set! found-imports (append (cdr head) found-imports)))
+                         ((export)
+                          (set! found-exports (append (cdr head) found-exports)))
+                         ((include)
+                          (let* ((incl (string-append lib-path (cadr head))))
+                            (if (file-exists? incl)
+                                (set! found-includes (cons incl found-includes))
+                                (error (string-append (object->string head) " in library "
+                                                      (object->string lib) " not found")))))
+                         ((define-syntax)
+                          (table-set! syntax-definitions (cadr head) (list 'define-syntax))
+                          (if eval? (eval head)))
+                         ((define-macro)
+                          (table-set! syntax-definitions (caadr head) (list 'define-macro))
+                          (if eval? (eval head)))
+                         ((begin ##begin)
+                          (recur (cdr head))))
+                       (recur (cdr sexps)))))))
+    (values
+     (reverse found-imports)
+     (reverse found-exports)
+     (reverse found-includes)
+     syntax-definitions)))
 
 ;;! Call
 (define^ %call-task
@@ -379,7 +382,8 @@
          (updated-file? (newer-than? obj-file)))
     (if sld-file
         (or (updated-file? sld-file)
-            (let recur ((includes (%library-read-syntax&find-includes lib #f)))
+            (let recur ((includes (receive (_ __ includes ___) (%library-read-syntax lib)
+                                           includes)))
               (cond ((null? includes) #f)
                     ((updated-file? (car includes)) #t)
                     (else (recur (cdr includes)))))))))
@@ -387,14 +391,62 @@
 ;;! Include and load all library files and dependencies
 (define^ %load-library
   (let ((loaded-libs '()))
-    (lambda (lib #!key compile only-syntax force (silent #f))
-      (define (load* file)
-        (parameterize
-         ((current-directory (path-directory file)))
-         (let ((load-result (load file)))
-           (if (not silent)
-               (println (string-append "loading: " load-result))))))
-      (let recur ((lib lib))
+    (lambda (root-lib #!key compile only-syntax force (silent #f))
+      (let recur ((lib root-lib))
+        (define (eval/pp f) (pp f) (eval f))
+
+        (define (make-namespace-form lib exports macro-defs #!key (allow-empty? #f))
+          (let ((non-macro-exports
+                 (filter (lambda (i) (not (table-ref macro-defs i #f)))
+                         exports)))
+            (if (and (not allow-empty?) (null? non-macro-exports))
+                #!void
+                `(##namespace (,(string-append
+                                 (symbol->string (car lib))
+                                 "#"
+                                 (symbol->string (cadr lib))
+                                 "#")
+                               ,@non-macro-exports)))))
+        (define (with-namespaces imports thunk)
+          (eval/pp `(##begin
+                      ,@(map
+                    (lambda (import-lib)
+                      (receive (_ exports __ macro-defs) (%library-read-syntax import-lib)
+                                           (make-namespace-form import-lib exports macro-defs)))
+                    imports)
+                 ,(make-namespace-form lib '() '() allow-empty?: #t)
+                 (##include "~~/lib/gambit#.scm")
+                 (##namespace ("" $make-environment
+                               $sc-put-cte
+                               $syntax-dispatch
+                               bound-identifier=?
+                               datum->syntax
+                               environment?
+                               free-identifier=?
+                               generate-temporaries
+                               identifier?
+                               interaction-environment
+                               literal-identifier=?
+                               syntax-error
+                               syntax->datum
+                               syntax->list
+                               syntax->vector
+                               $load-module
+                               $update-module
+                               $include-file-hook
+                               $generate-id
+                               syntax-case-debug))
+                 (##namespace ("" %load-library))
+                 ))
+          (thunk)
+          ;;(eval/pp '(##namespace ("")))
+          (newline))
+        (define (load* file)
+          (parameterize
+           ((current-directory (path-directory file)))
+           ;; TODO: inform of scm or o
+           (if (not silent) (println "loading: " file))
+           (load file)))
         (for-each recur (%library-imports lib))
         (if (or force (not (member lib loaded-libs)))
             (let ((lib-path-root (%find-library-path-root lib))
@@ -406,16 +458,24 @@
                     (obj-file (%find-library-object lib))
                     (scm-file (%find-library-scm lib)))
                 (set! loaded-libs (cons lib loaded-libs))
+                ;; If an R7RS library
                 (if sld-file
                     (begin
                       (if (not silent) (println "including: " (path-expand sld-file)))
-                      (let ((eval&get-includes (%library-read-syntax&find-includes lib #t)))
-                        (if (not only-syntax)
-                            (if (and obj-file (not (%library-updated? lib)))
-                                (load* obj-file)
-                                (for-each (lambda (f) (load* (path-strip-extension f))) eval&get-includes)))))
+                      (receive (imports exports includes macro-defs) (%library-read-syntax lib #t)
+                               (if (not only-syntax)
+                                   (if (and obj-file (not (%library-updated? lib)))
+                                       (with-namespaces
+                                        imports
+                                        (lambda () (load* obj-file)))
+                                       (with-namespaces
+                                        imports
+                                        (lambda () (for-each (lambda (f) (load* (path-strip-extension f)))
+                                                        includes)))))))
                     ;; Default procedure file is only loaded if there is no *.sld
                     (if (and (or obj-file scm-file)
                              (not only-syntax))
-                        (begin (if (not silent) (println "loading: " (or obj-file scm-file)))
-                               (load* (or obj-file scm-file))))))))))))
+                        (load* (or obj-file scm-file))))))
+            ;; If already loaded, just set the namespace
+            (receive (_ exports __ macro-defs) (%library-read-syntax lib)
+                     (eval (make-namespace-form lib exports macro-defs))))))))
