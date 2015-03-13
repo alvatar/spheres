@@ -242,56 +242,8 @@
           ((not (pair? form)) form)
           (else (cons (recur (car form)) (recur (cdr form)))))))
 
-;;! Get imports of the library
-(define^ (%library-imports lib)
-  (define (flatten-tag tag lst)
-    (let recur ((lst (if (and (not (null? lst)) (eq? (car lst) tag)) (cdr lst) lst)))
-      (cond
-       ((null? lst) '())
-       ((and (pair? (car lst)) (eq? tag (caar lst)))
-        (append (recur (cdar lst)) (recur (cdr lst))))
-       ((pair? (car lst))
-        (cons (recur (car lst)) (recur (cdr lst))))
-       (else (cons (car lst) (recur (cdr lst)))))))
-  (let ((expand-wildcards
-         (lambda (deps)
-           (define map*
-             (lambda (f l)
-               (cond ((null? l) '())
-                     ((not (pair? l)) (f l))
-                     (else (cons (map* f (car l)) (map* f (cdr l)))))))
-           (map* (lambda (e)
-                   (if (eq? e '=)
-                       (string->keyword (symbol->string sphere))
-                       e))
-                 deps)))
-        (remove-gambit-library
-         (lambda (deps)
-           (let recur ((deps deps))
-             (cond ((null? deps) '())
-                   ((equal? '(gambit) (car deps))
-                    (recur (cdr deps)))
-                   (else
-                    (cons (car deps) (recur (cdr deps)))))))))
-    (let* ((decl (%library-declaration lib))
-           (deps-pair (and decl (assq 'import decl))))
-      (if deps-pair
-          (remove-gambit-library
-           (expand-wildcards
-            (flatten-tag '##begin
-                         (%expand-cond-features (cdr deps-pair)))))
-          '()))))
-
-(define^ %library-imports-all
-  (let ((import-seq '()))
-    (lambda (lib)
-      (for-each %library-imports-all (%library-imports lib))
-      (or (member lib import-seq)
-          (set! import-seq (cons lib import-seq)))
-      (cdr import-seq))))
-
-;;! Expand cond-expand-features and eval syntax definitions, return imports, exports, includes
-(define^ (%library-read-syntax lib #!optional (eval? #f))
+;;! Expand cond-expand-features and eval syntax definitions, return imports, exports, includes, macro name definitions
+(define^ (%library-read-syntax lib #!key (eval? #f))
   (let* ((lib-path (%find-library-path lib))
          (file-sexps (with-input-from-file (%find-library-sld lib) read))
          (define-library-args (cdr file-sexps))
@@ -335,6 +287,98 @@
      (reverse found-includes)
      syntax-definitions)))
 
+;;! Get only the imports
+(define^ (%library-imports lib)
+  (receive (imports _ __ ___) (%library-read-syntax lib) imports))
+
+;;! Get only the exports
+(define^ (%library-exports lib)
+  (receive (_ exports __ ___) (%library-read-syntax lib) exports))
+
+;;! Get only the includes
+(define^ (%library-includes lib)
+  (receive (_ __ includes ___) (%library-read-syntax lib) includes))
+
+;; Get the full tree of imports as a flattened list
+(define^ %library-imports-all
+  (let ((import-seq '()))
+    (lambda (lib)
+      (for-each %library-imports-all (%library-imports lib))
+      (or (member lib import-seq)
+          (set! import-seq (cons lib import-seq)))
+      (cdr import-seq))))
+
+;;! Returns #t if the library needs recompilation
+(define^ (%library-updated? lib)
+  (define (newer-than? filename1)
+    (lambda (filename2)
+      (or (not (file-exists? filename1))
+          (> (time->seconds (file-last-modification-time filename2))
+             (time->seconds (file-last-modification-time filename1))))))
+  (let* ((sld-file (%find-library-sld lib))
+         (obj-file (%library-object-path lib))
+         (updated-file? (newer-than? obj-file)))
+    (if sld-file
+        (or (updated-file? sld-file)
+            (let recur ((includes (%library-includes lib)))
+              (cond ((null? includes) #f)
+                    ((updated-file? (car includes)) #t)
+                    (else (recur (cdr includes)))))))))
+
+;; Builds a ##namespace form for the library
+(define^ (%library-make-namespace-form lib exports macro-defs #!key (allow-empty? #f))
+  (let ((non-macro-exports
+         (filter (lambda (i) (not (table-ref macro-defs i #f)))
+                 exports)))
+    (if (and (not allow-empty?) (null? non-macro-exports))
+        #!void
+        `(##namespace (,(string-append
+                         (symbol->string (car lib))
+                         "#"
+                         (symbol->string (cadr lib))
+                         "#")
+                       ,@non-macro-exports)))))
+
+;; Create all necessary namespace definitions for a library
+(define^ (%library-make-prelude lib #!optional imports)
+  (let ((imports (or imports
+                     (receive (imports _ __ ___)
+                              (%library-read-syntax lib)
+                              imports))))
+   `(##begin
+      ,(%library-make-namespace-form lib '() '() allow-empty?: #t)
+      (##include "~~/lib/gambit#.scm")
+      (##namespace ("" $make-environment
+                    $sc-put-cte
+                    $syntax-dispatch
+                    bound-identifier=?
+                    datum->syntax
+                    environment?
+                    free-identifier=?
+                    generate-temporaries
+                    identifier?
+                    interaction-environment
+                    literal-identifier=?
+                    syntax-error
+                    syntax->datum
+                    syntax->list
+                    syntax->vector
+                    $load-module
+                    $update-module
+                    $include-file-hook
+                    $generate-id
+                    syntax-case-debug))
+      ,@(map
+         (lambda (import-lib)
+           (receive (_ exports __ macro-defs) (%library-read-syntax import-lib)
+                    (%library-make-namespace-form import-lib exports macro-defs)))
+         imports)
+      (##namespace ("" %load-library
+                    %library-loaded-libraries)))))
+
+;;! Hash table containing info about loaded libraries
+(define^ %library-loaded-libraries (make-table))
+
 ;;! Call
 (define^ %call-task
   (lambda (where task . arguments)
@@ -370,73 +414,6 @@
                                           directory: where
                                           stdout-redirection: #f))))))
 
-;;! Returns #t if the library needs recompilation
-(define^ (%library-updated? lib)
-  (define (newer-than? filename1)
-    (lambda (filename2)
-      (or (not (file-exists? filename1))
-          (> (time->seconds (file-last-modification-time filename2))
-             (time->seconds (file-last-modification-time filename1))))))
-  (let* ((sld-file (%find-library-sld lib))
-         (obj-file (%library-object-path lib))
-         (updated-file? (newer-than? obj-file)))
-    (if sld-file
-        (or (updated-file? sld-file)
-            (let recur ((includes (receive (_ __ includes ___) (%library-read-syntax lib)
-                                           includes)))
-              (cond ((null? includes) #f)
-                    ((updated-file? (car includes)) #t)
-                    (else (recur (cdr includes)))))))))
-
-;; Builds a ##namespace form for the library
-(define (%library-make-namespace-form lib exports macro-defs #!key (allow-empty? #f))
-  (let ((non-macro-exports
-         (filter (lambda (i) (not (table-ref macro-defs i #f)))
-                 exports)))
-    (if (and (not allow-empty?) (null? non-macro-exports))
-        #!void
-        `(##namespace (,(string-append
-                         (symbol->string (car lib))
-                         "#"
-                         (symbol->string (cadr lib))
-                         "#")
-                       ,@non-macro-exports)))))
-
-;; Runs the thunk within a proper namespace definition
-(define (%library-make-prelude lib imports)
-  `(##begin
-     ,(%library-make-namespace-form lib '() '() allow-empty?: #t)
-     (##include "~~/lib/gambit#.scm")
-     (##namespace ("" $make-environment
-                   $sc-put-cte
-                   $syntax-dispatch
-                   bound-identifier=?
-                   datum->syntax
-                   environment?
-                   free-identifier=?
-                   generate-temporaries
-                   identifier?
-                   interaction-environment
-                   literal-identifier=?
-                   syntax-error
-                   syntax->datum
-                   syntax->list
-                   syntax->vector
-                   $load-module
-                   $update-module
-                   $include-file-hook
-                   $generate-id
-                   syntax-case-debug))
-     ,@(map
-        (lambda (import-lib)
-          (receive (_ exports __ macro-defs) (%library-read-syntax import-lib)
-                   (%library-make-namespace-form import-lib exports macro-defs)))
-        imports)
-     (##namespace ("" %load-library
-                   %library-loaded-libraries))))
-
-(define %library-loaded-libraries (make-table))
-
 ;;! Include and load all library files and dependencies
 (define^ (%load-library root-lib #!key compile only-syntax force silent)
   (let recur ((lib root-lib))
@@ -470,7 +447,9 @@
             (if sld-file
                 (begin
                   (if (not silent) (println "including: " (path-expand sld-file)))
-                  (receive (imports exports includes macro-defs) (%library-read-syntax lib #t)
+                  ;; Read and eval the syntax
+                  (receive (imports exports includes macro-defs)
+                           (%library-read-syntax lib eval?: #t)
                            (if (not only-syntax)
                                (if (and obj-file (not (%library-updated? lib)))
                                    (begin (eval (%library-make-prelude
