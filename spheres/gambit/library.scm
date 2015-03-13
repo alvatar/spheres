@@ -403,44 +403,42 @@
                        ,@non-macro-exports)))))
 
 ;; Runs the thunk within a proper namespace definition
-(define (%library-with-namespaces lib imports thunk)
-  ;;(define (eval/pp f) (pp f) (eval f))
-  (eval `(##begin
-           ,(%library-make-namespace-form lib '() '() allow-empty?: #t)
-           (##include "~~/lib/gambit#.scm")
-           (##namespace ("" $make-environment
-                         $sc-put-cte
-                         $syntax-dispatch
-                         bound-identifier=?
-                         datum->syntax
-                         environment?
-                         free-identifier=?
-                         generate-temporaries
-                         identifier?
-                         interaction-environment
-                         literal-identifier=?
-                         syntax-error
-                         syntax->datum
-                         syntax->list
-                         syntax->vector
-                         $load-module
-                         $update-module
-                         $include-file-hook
-                         $generate-id
-                         syntax-case-debug))
-           ,@(map
-              (lambda (import-lib)
-                (receive (_ exports __ macro-defs) (%library-read-syntax import-lib)
-                         (%library-make-namespace-form import-lib exports macro-defs)))
-              imports)
-           (##namespace ("" %load-library
-                         %library-loaded-libraries))))
-  (thunk))
+(define (%library-make-prelude lib imports)
+  `(##begin
+     ,(%library-make-namespace-form lib '() '() allow-empty?: #t)
+     (##include "~~/lib/gambit#.scm")
+     (##namespace ("" $make-environment
+                   $sc-put-cte
+                   $syntax-dispatch
+                   bound-identifier=?
+                   datum->syntax
+                   environment?
+                   free-identifier=?
+                   generate-temporaries
+                   identifier?
+                   interaction-environment
+                   literal-identifier=?
+                   syntax-error
+                   syntax->datum
+                   syntax->list
+                   syntax->vector
+                   $load-module
+                   $update-module
+                   $include-file-hook
+                   $generate-id
+                   syntax-case-debug))
+     ,@(map
+        (lambda (import-lib)
+          (receive (_ exports __ macro-defs) (%library-read-syntax import-lib)
+                   (%library-make-namespace-form import-lib exports macro-defs)))
+        imports)
+     (##namespace ("" %load-library
+                   %library-loaded-libraries))))
 
 (define %library-loaded-libraries (make-table))
 
 ;;! Include and load all library files and dependencies
-(define^ (%load-library root-lib #!key compile only-syntax force (silent #f))
+(define^ (%load-library root-lib #!key compile only-syntax force silent)
   (let recur ((lib root-lib))
     (define (load* file)
       (parameterize
@@ -475,25 +473,27 @@
                   (receive (imports exports includes macro-defs) (%library-read-syntax lib #t)
                            (if (not only-syntax)
                                (if (and obj-file (not (%library-updated? lib)))
-                                   (%library-with-namespaces
-                                    lib
-                                    imports
-                                    (lambda () (load* obj-file)))
-                                   (%library-with-namespaces
-                                    lib
-                                    imports
-                                    (lambda () (for-each (lambda (f) (load* (path-strip-extension f)))
-                                                    includes)))))))
+                                   (begin (eval (%library-make-prelude
+                                                 lib
+                                                 imports))
+                                          (load* obj-file))
+                                   (begin (eval (%library-make-prelude
+                                                 lib
+                                                 imports))
+                                          (for-each (lambda (f) (load* (path-strip-extension f)))
+                                                    includes))))))
                 ;; Default procedure file is only loaded if there is no *.sld
                 (if (and (or obj-file scm-file)
                          (not only-syntax))
                     (load* (or obj-file scm-file))))))))
-  (table-set! %library-loaded-libraries root-lib 'user)
-  (eval '(##namespace ("")))
-  (table-for-each
-   (lambda (lib v)
-     (if (eq? v 'user)
-         (begin
-           (receive (_ exports __ macro-defs) (%library-read-syntax lib)
-                    (eval (%library-make-namespace-form lib exports macro-defs))))))
-   %library-loaded-libraries))
+  (if (not only-syntax)
+      (begin
+        (table-set! %library-loaded-libraries root-lib 'user)
+        (eval '(##namespace ("")))
+        (table-for-each
+         (lambda (lib v)
+           (if (eq? v 'user)
+               (begin
+                 (receive (_ exports __ macro-defs) (%library-read-syntax lib)
+                          (eval (%library-make-namespace-form lib exports macro-defs))))))
+         %library-loaded-libraries))))
