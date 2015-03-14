@@ -17,7 +17,7 @@
 
 (define-type tar-rec
   id: tar-rec-1e4c3b06-1a6f-4765-9d77-c1093d1c15ee
-  ;;implementer: implement-type-tar-rec
+  implementer: implement-type-tar-rec
   name
   mode
   uid
@@ -33,7 +33,7 @@
   ctime
   content)
 
-;;(implement-type-tar-rec)
+(implement-type-tar-rec)
 
 ;;;============================================================================
 

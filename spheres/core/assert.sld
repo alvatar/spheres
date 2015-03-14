@@ -29,7 +29,7 @@
                (println (string-append "Predicate: " (object->string '?pred)))
                (println (string-append "Reason: " ?reason))
                (error "Failed argument check in" '?caller)))))))
-  
+
   (define-syntax assert
     (syntax-rules ()
       ((assert _expr . _others)
@@ -47,16 +47,16 @@
                 (k!reverse () (#\newline . rev-prologue) (k!id !)))
                ((_ rev-prologue (x . rest) prefix)
                 (symbol?? x
-                          (write-report* (x ": " 'x (string #\newline) . rev-prologue) 
+                          (write-report* (x ": " 'x (string #\newline) . rev-prologue)
                                          rest (string #\newline))
                           (write-report* (x prefix . rev-prologue) rest "")))))
             ;; return the list of all unique "interesting"
             ;; variables in the expr. Variables that are certain
             ;; to be bound to procedures are not interesting.
-            (vars-of 
+            (vars-of
              (syntax-rules (!)
                ((_ vars (op . args) (k-head ! . k-args))
-                (id-memv?? op 
+                (id-memv?? op
                            (quote let let* letrec let*-values lambda cond quasiquote
                                   case define do assert)
                            (k-head vars . k-args) ; won't go inside
@@ -90,7 +90,7 @@
                ((_ exprs)
                 (or exprs
                     (begin (vars-of () exprs
-                                    (write-report ! 
+                                    (write-report !
                                                   ("failed assertion: " 'exprs #\newline "bindings")))
                            (error "assertion failure"))))
                ((_ exprs others)

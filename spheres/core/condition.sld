@@ -19,7 +19,7 @@
           check-condition-type-field-alist
           &condition)
   (import (spheres/algorithm list))
-  
+
   ;; Provided by Gambit natively:
   ;; with-exception-handler
   ;; raise
@@ -63,7 +63,7 @@
        (begin result1 result2 ...))
       ((_ reraise (test => result))
        (let ((temp test))
-         (if temp 
+         (if temp
              (result temp)
              reraise)))
       ((_ reraise (test => result) clause1 clause2 ...)

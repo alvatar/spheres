@@ -121,15 +121,16 @@
   port)
 
 ;; tags
+(define-type tag
+  id: efa4f5f8-c74c-465b-af93-720d44a08374
+  (uuid init: #f))
+
 ;; FIXME: hack due to syntax-case expander bug
 ;; (define-type tag
 ;;   id: efa4f5f8-c74c-465b-af93-720d44a08374
-;;   (uuid init: #f))
-(define-type tag
-  id: efa4f5f8-c74c-465b-af93-720d44a08374
-  constructor: make-tag/uuid
-  uuid)
-(define (make-tag) (make-tag/uuid #f))
+;;   constructor: make-tag/uuid
+;;   uuid)
+;; (define (make-tag) (make-tag/uuid #f))
 
 ;; * Test whether 'obj' is a pid.
 (define (pid? obj)
@@ -142,41 +143,12 @@
   reason
   object)
 
+
 ;; ----------------------------------------------------------------------------
 ;; process manipulation primitives
 
 ;;! Get the pid of the current process.
 (define self current-thread)
-
-;; Base exception handler for Termite processes.
-(define (base-exception-handler e)
-  (continuation-capture
-   (lambda (k)
-     (let ((log-crash
-            (lambda (e)
-              (termite-log
-               'error
-               (list
-                (call-with-output-string ""
-                                         (lambda (port)
-                                           (display-exception-in-context e k port))))))))
-       (cond
-        ;; Propagated Termite exception?
-        ((termite-exception? e)
-         (if (not (eq? (termite-exception-reason e) 'normal))
-             (log-crash (termite-exception-object e)))
-         (for-each
-          (lambda (pid) (! pid e))
-          (process-links (self)))
-         (halt!))
-        ;; Gambit exception in the current process
-        (else
-         (log-crash e)
-         (for-each
-          (lambda (pid)
-            (! pid (make-termite-exception (self) 'failure e)))
-          (process-links (self)))
-         (halt!)))))))
 
 ;;! Start a new process executing the code in 'thunk'.
 (define (spawn thunk #!key (links '()) (name 'anonymous))
@@ -383,35 +355,6 @@
                     (! from (list tag (thunk)))))
     (recv
      ((,tag reply) reply))))
-
-
-;;-------------------------------------------------------------------------------
-;;!! Links and exception handling
-
-;; Default callback for received exceptions.
-(define (handle-exception-message event)
-  (raise event))
-
-;;! Link another process 'pid' /to/ the current one: any exception
-;; not being caught by the remote process and making it crash will be
-;; propagated to the current process.
-(define (inbound-link pid)
-  (! linker (list 'link pid (self))))
-
-;;! Link the current process /to/ another process 'pid': any
-;; exception not being caught by the current process will be
-;; propagated to the remote process.
-(define (outbound-link pid)
-  (let* ((links (process-links (self))))
-    (if (not (memq pid links))
-        (process-links-set! (self) (cons pid links)))))
-
-;;! Link bidirectionally the current process with another process
-;; 'pid': any exception not being caught in any of the two processes
-;; will be propagated to the other one.
-(define (full-link pid)
-  (inbound-link  pid)
-  (outbound-link pid))
 
 
 ;;-------------------------------------------------------------------------------
@@ -1287,7 +1230,24 @@
      (proxy
       (remote-spawn-link node (lambda () (k #t)))))))
 
+;;!! Ping
 
+(define ping-server
+  (spawn
+   (lambda ()
+     (let loop ()
+       (recv
+        ((from tag 'ping)
+         (! from (list tag 'pong)))
+        (msg (termite-debug "ping-server ignored message" msg)))
+       (loop)))
+   name: 'termite-ping-server))
+
+(define (ping node #!optional (timeout 1.0))
+  (!? (remote-service 'ping-server node) 'ping timeout 'no-reply))
+
+
+;; ----------------------------------------------------------------------------
 ;;!! A logging facility for Termite
 
 ;; (Ideally, this should be included with the services, but the
@@ -1353,19 +1313,64 @@
                                "_termite.log")
     logger))
 
-(define ping-server
-  (spawn
-   (lambda ()
-     (let loop ()
-       (recv
-        ((from tag 'ping)
-         (! from (list tag 'pong)))
-        (msg (termite-debug "ping-server ignored message" msg)))
-       (loop)))
-   name: 'termite-ping-server))
 
-(define (ping node #!optional (timeout 1.0))
-  (!? (remote-service 'ping-server node) 'ping timeout 'no-reply))
+;;-------------------------------------------------------------------------------
+;;!! Links and exception handling
+
+;; Base exception handler for Termite processes.
+(define (base-exception-handler e)
+  (continuation-capture
+   (lambda (k)
+     (let ((log-crash
+            (lambda (e)
+              (termite-log
+               'error
+               (list
+                (call-with-output-string ""
+                                         (lambda (port)
+                                           (display-exception-in-context e k port))))))))
+       (cond
+        ;; Propagated Termite exception?
+        ((termite-exception? e)
+         (if (not (eq? (termite-exception-reason e) 'normal))
+             (log-crash (termite-exception-object e)))
+         (for-each
+          (lambda (pid) (! pid e))
+          (process-links (self)))
+         (halt!))
+        ;; Gambit exception in the current process
+        (else
+         (log-crash e)
+         (for-each
+          (lambda (pid)
+            (! pid (make-termite-exception (self) 'failure e)))
+          (process-links (self)))
+         (halt!)))))))
+
+;; Default callback for received exceptions.
+(define (handle-exception-message event)
+  (raise event))
+
+;;! Link another process 'pid' /to/ the current one: any exception
+;; not being caught by the remote process and making it crash will be
+;; propagated to the current process.
+(define (inbound-link pid)
+  (! linker (list 'link pid (self))))
+
+;;! Link the current process /to/ another process 'pid': any
+;; exception not being caught by the current process will be
+;; propagated to the remote process.
+(define (outbound-link pid)
+  (let* ((links (process-links (self))))
+    (if (not (memq pid links))
+        (process-links-set! (self) (cons pid links)))))
+
+;;! Link bidirectionally the current process with another process
+;; 'pid': any exception not being caught in any of the two processes
+;; will be propagated to the other one.
+(define (full-link pid)
+  (inbound-link  pid)
+  (outbound-link pid))
 
 
 ;;-------------------------------------------------------------------------------

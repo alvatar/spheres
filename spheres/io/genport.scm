@@ -17,12 +17,12 @@
 
 (define-type genport
   id: genport-94bfbdf4-4132-40e4-9d0a-35b34c28819a
-;;  implementer: implement-type-genport
+  implementer: implement-type-genport
   end
   read
   write)
 
-;;(implement-type-genport)
+(implement-type-genport)
 
 ;;;============================================================================
 

@@ -1,6 +1,9 @@
 (define-library (spheres/crypto digest)
-  (export digest-u8vector
+  (export close-digest
+          open-digest
+          digest-u8vector
           digest-sub8vector
+          digest-update-subu8vector
           digest-ansi-string
           digest-ansi-substring
           digest-string

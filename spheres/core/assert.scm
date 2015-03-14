@@ -2,7 +2,7 @@
 ;; .author Álvaro Castro Castilla
 
 ;; Typed assertions:
-;; 
+;;
 ;; (define-type condition extender: define-type-of-condition)
 ;; (define-type-of-condition compound (contitions read-only:))
 ;; (define-type-of-condition serious extender: define-type-of-serious)
@@ -13,20 +13,20 @@
 ;; (define-type-of-condition irritants constructor: make-irritants-condition (irritants read-only:))
 ;; (define condition
 ;;   (lambda conditions
-;;     (make-compound (apply append (map simple-conditions conditions))))) 
+;;     (make-compound (apply append (map simple-conditions conditions)))))
 ;; (define simple-conditions
 ;;   (lambda (condition)
 ;;     (cond
 ;;      ((compound? condition) (compound-conditions condition))
 ;;      (else (list condition)))))
 ;; (define (assertion-violation who message . irritants)
-;;   (raise 
+;;   (raise
 ;;     (if who
-;;     (condition (make-who-condition who) 
-;;         (make-message-condition message) 
+;;     (condition (make-who-condition who)
+;;         (make-message-condition message)
 ;;         (make-irritants-condition irritants)
 ;;         (make-assertion-violation))
-;;     (condition (make-message-condition message) 
+;;     (condition (make-message-condition message)
 ;;         (make-irritants-condition irritants)
 ;;         (make-assertion-violation)))))
 
