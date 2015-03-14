@@ -39,17 +39,390 @@
 ;; Low-level macros
 
 ;;! DEFINE-MACRO in terms of syntax-case
-(define-syntax (define-macro x)
-  (syntax-case x ()
-    ((_ (name . args) . body)
-     #'(define-macro name (lambda args . body)))
-    ((_ name transformer)
-     #'(define-syntax (name y)
-         (syntax-case y ()
-           ((k . args)
-            (datum->syntax
-             #'k
-             (apply transformer (syntax->datum #'args)))))))))
+;; PSyntax already includes this definition internally
+;; (define-syntax (define-macro x)
+;;   (syntax-case x ()
+;;     ((_ (name . args) . body)
+;;      #'(define-macro name (lambda args . body)))
+;;     ((_ name transformer)
+;;      #'(define-syntax (name y)
+;;          (syntax-case y ()
+;;            ((k . args)
+;;             (datum->syntax
+;;              #'k
+;;              (apply transformer (syntax->datum #'args)))))))))
+
+;;! Type generation macros, adapted to work with PSyntax. The code is
+;; taken from _nonstd.scm in Gambit, and the only modification required was
+;; renaming ##define-macro to define-macro
+(define (%%define-type-expand
+         form-name
+         super-type-static
+         super-type-dynamic-expr
+         args)
+  (define (generate
+           name
+           flags
+           id
+           extender
+           constructor
+           constant-constructor
+           predicate
+           implementer
+           type-exhibitor
+           prefix
+           fields
+           total-fields)
+    (define (generate-fields)
+      (let loop ((lst1 (##reverse fields))
+                 (lst2 '()))
+        (if (##pair? lst1)
+            (let* ((field
+                    (##car lst1))
+                   (descr
+                    (##cdr field))
+                   (field-name
+                    (##vector-ref descr 0))
+                   (options
+                    (##vector-ref descr 4))
+                   (attributes
+                    (##vector-ref descr 5))
+                   (init
+                    (cond ((##assq 'init: attributes)
+                           =>
+                           (lambda (x) (##constant-expression-value (##cdr x))))
+                          (else
+                           #f))))
+              (loop (##cdr lst1)
+                    (##cons field-name
+                            (##cons options
+                                    (##cons init
+                                            lst2)))))
+            (##list->vector lst2))))
+    (define (all-fields->rev-field-alist all-fields)
+      (let loop ((i 1)
+                 (lst all-fields)
+                 (rev-field-alist '()))
+        (if (##pair? lst)
+            (let* ((field-name
+                    (##car lst))
+                   (rest1
+                    (##cdr lst))
+                   (options
+                    (##car rest1))
+                   (rest2
+                    (##cdr rest1))
+                   (val
+                    (##car rest2))
+                   (rest3
+                    (##cdr rest2)))
+              (loop (##fx+ i 1)
+                    rest3
+                    (##cons (##cons field-name
+                                    (##vector i
+                                              options
+                                              val
+                                              (generate-parameter i)))
+                            rev-field-alist)))
+            rev-field-alist)))
+    (define (generate-parameter i)
+      (##string->symbol
+       (##string-append "p"
+                        (##number->string i 10))))
+    (define (generate-parameters rev-field-alist)
+      (if (##pair? constructor)
+          (##map (lambda (field-name)
+                   (let ((x (##assq field-name rev-field-alist)))
+                     (##vector-ref (##cdr x) 3)))
+                 (##cdr constructor))
+          (let loop ((lst rev-field-alist)
+                     (parameters '()))
+            (if (##pair? lst)
+                (let ((x (##car lst)))
+                  (loop (##cdr lst)
+                        (let* ((options
+                                (##vector-ref (##cdr x) 1))
+                               (has-init?
+                                (##not (##fx= (##fxand options 8)
+                                              0))))
+                          (if has-init?
+                              parameters
+                              (##cons (##vector-ref (##cdr x) 3)
+                                      parameters)))))
+                parameters))))
+    (define (generate-initializations field-alist parameters in-macro?)
+      (##map (lambda (x)
+               (let* ((field-index (##vector-ref (##cdr x) 0))
+                      (options (##vector-ref (##cdr x) 1))
+                      (val (##vector-ref (##cdr x) 2))
+                      (parameter (##vector-ref (##cdr x) 3)))
+                 (if (##memq parameter parameters)
+                     parameter
+                     (make-quote
+                      (if in-macro?
+                          (make-quote val)
+                          val)))))
+             field-alist))
+    (define (make-quote x)
+      (##list 'quote x))
+    (let* ((macros?
+            (##not (##fx= (##fxand flags 4) 0)))
+           (generative?
+            (##not id))
+           (augmented-id-str
+            (##string-append
+             "##type-"
+             (##number->string total-fields 10)
+             "-"
+             (##symbol->string (if generative? name id))))
+           (type-fields
+            (generate-fields))
+           (type-static
+            (##structure
+             ##type-type
+             (if generative?
+                 (##make-uninterned-symbol augmented-id-str)
+                 (##string->symbol augmented-id-str))
+             name
+             flags
+             super-type-static
+             type-fields))
+           (type-expression
+            (if generative?
+                (##string->symbol augmented-id-str)
+                `',type-static))
+           (type-id-expression
+            (if generative?
+                `(let ()
+                   (##declare (extended-bindings) (not safe))
+                   (##type-id ,type-expression))
+                `',(##type-id type-static)))
+           (all-fields
+            (##type-all-fields type-static))
+           (rev-field-alist
+            (all-fields->rev-field-alist all-fields))
+           (field-alist
+            (##reverse rev-field-alist))
+           (parameters
+            (generate-parameters rev-field-alist)))
+      (define (generate-getter-and-setter field tail)
+        (let* ((descr
+                (##cdr field))
+               (field-name
+                (##vector-ref descr 0))
+               (field-index
+                (##vector-ref descr 1))
+               (getter
+                (##vector-ref descr 2))
+               (setter
+                (##vector-ref descr 3))
+               (getter-def
+                (if getter
+                    (let ((getter-name
+                           (if (##eq? getter #t)
+                               (##symbol-append prefix
+                                                name
+                                                '-
+                                                field-name)
+                               getter))
+                          (getter-method
+                           (if extender
+                               '##structure-ref
+                               '##direct-structure-ref)))
+                      (if macros?
+                          `((define-macro (,getter-name obj)
+                              (##list '(let ()
+                                         (##declare (extended-bindings))
+                                         ,getter-method)
+                                      obj
+                                      ,field-index
+                                      ',type-expression
+                                      #f)))
+                          `((define (,getter-name obj)
+                              ((let ()
+                                 (##declare (extended-bindings))
+                                 ,getter-method)
+                               obj
+                               ,field-index
+                               ,type-expression
+                               ,getter-name)))))
+                    `()))
+               (setter-def
+                (if setter
+                    (let ((setter-name
+                           (if (##eq? setter #t)
+                               (##symbol-append prefix
+                                                name
+                                                '-
+                                                field-name
+                                                '-set!)
+                               setter))
+                          (setter-method
+                           (if extender
+                               '##structure-set!
+                               '##direct-structure-set!)))
+                      (if macros?
+                          `((define-macro (,setter-name obj val)
+                              (##list '(let ()
+                                         (##declare (extended-bindings))
+                                         ,setter-method)
+                                      obj
+                                      val
+                                      ,field-index
+                                      ',type-expression
+                                      #f)))
+                          `((define (,setter-name obj val)
+                              ((let ()
+                                 (##declare (extended-bindings))
+                                 ,setter-method)
+                               obj
+                               val
+                               ,field-index
+                               ,type-expression
+                               ,setter-name)))))
+                    `())))
+          (##append getter-def (##append setter-def tail))))
+      (define (generate-structure-type-definition)
+        `(define ,type-expression
+           ((let ()
+              (##declare (extended-bindings))
+              ##structure)
+            ##type-type
+            ((let ()
+               (##declare (extended-bindings))
+               ##make-uninterned-symbol)
+             ,augmented-id-str)
+            ',name
+            ',(##type-flags type-static)
+            ,super-type-dynamic-expr
+            ',(##type-fields type-static))))
+      (define (generate-constructor-predicate-getters-setters)
+        `(,@(if type-exhibitor
+                (if macros?
+                    `((define-macro (,type-exhibitor)
+                        ',type-expression))
+                    `((define (,type-exhibitor)
+                        ,type-expression)))
+                '())
+          ,@(if constructor
+                (let ((constructor-name
+                       (if (##pair? constructor)
+                           (##car constructor)
+                           constructor)))
+                  (if macros?
+                      `((define-macro (,constructor-name ,@parameters)
+                          (##list '(let ()
+                                     (##declare (extended-bindings))
+                                     ##structure)
+                                  ',type-expression
+                                  ,@(generate-initializations
+                                     field-alist
+                                     parameters
+                                     #t))))
+                      `((define (,constructor-name ,@parameters)
+                          (##declare (extended-bindings))
+                          (##structure
+                           ,type-expression
+                           ,@(generate-initializations
+                              field-alist
+                              parameters
+                              #f))))))
+                '())
+          ,@(if constant-constructor
+                `((define-macro (,constant-constructor ,@parameters)
+                    (##define-type-construct-constant
+                      ',constant-constructor
+                      ,type-expression
+                      ,@(generate-initializations
+                         field-alist
+                         parameters
+                         #t))))
+                '())
+          ,@(if predicate
+                (if macros?
+                    `((define-macro (,predicate obj)
+                        ,(if extender
+                             ``(let ((obj ,,'obj))
+                                 (##declare (extended-bindings))
+                                 (and (##structure? obj)
+                                      (let ((t0 (##structure-type obj))
+                                            (type-id ,',type-id-expression))
+                                        (or (##eq? (##type-id t0) type-id)
+                                            (let ((t1 (##type-super t0)))
+                                              (and t1
+                                                   (or (##eq? (##type-id t1) type-id)
+                                                       (##structure-instance-of? obj type-id))))))))
+                             ``((let ()
+                                  (##declare (extended-bindings))
+                                  ##structure-direct-instance-of?)
+                                ,,'obj
+                                ,',type-id-expression))))
+                    `((define (,predicate obj)
+                        (##declare (extended-bindings))
+                        ,(if extender
+                             `(##structure-instance-of?
+                               obj
+                               ,type-id-expression)
+                             `(##structure-direct-instance-of?
+                               obj
+                               ,type-id-expression)))))
+                '())
+          ,@(let loop ((lst1 (##reverse fields))
+                       (lst2 '()))
+              (if (##pair? lst1)
+                  (loop (##cdr lst1)
+                        (generate-getter-and-setter (##car lst1) lst2))
+                  lst2))))
+      (define (generate-definitions)
+        (if generative?
+            (##cons (generate-structure-type-definition)
+                    (generate-constructor-predicate-getters-setters))
+            (generate-constructor-predicate-getters-setters)))
+      `(begin
+         ,@(if extender
+               (##list `(define-macro (,extender . args)
+                          (##define-type-expand
+                            ',extender
+                            ',type-static
+                            ',type-expression
+                            args)))
+               '())
+         ,@(if implementer
+               (if macros?
+                   (##cons `(define-macro (,implementer)
+                              ',(if generative?
+                                    (generate-structure-type-definition)
+                                    '(begin)))
+                           (generate-constructor-predicate-getters-setters))
+                   (##list `(define-macro (,implementer)
+                              ',(##cons 'begin
+                                        (generate-definitions)))))
+               (generate-definitions)))))
+  (let ((expansion
+         (##define-type-parser
+           form-name
+           super-type-static
+           args
+           generate)))
+    (if ##define-type-expansion-show?
+        (pp expansion ##stdout-port))
+    expansion))
+
+;;! define-type macro
+(define-macro (define-type . args)
+  (%%define-type-expand 'define-type #f #f args))
+
+;;! define-structure macro
+(define-macro (define-structure . args)
+  (%%define-type-expand 'define-structure #f #f args))
+
+;;! define-record-type macro
+(define-macro (define-record-type name constructor predicate . fields)
+  `(define-type ,name
+     constructor: ,constructor
+     predicate: ,predicate
+     ,@fields))
+
 
 ;;! SRFI-0: Feature-based conditional expansion construct
 ;; .author Álvaro Castro-Castilla (Adapted to dynamically add new features)
