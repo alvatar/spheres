@@ -1,6 +1,6 @@
 ;;!!! SRFI-69: Basic hash tables
 ;; .author Arthur T Smyles. Implemented based on Gambit's tables
-;; .author Álvaro Castro-Castilla, 2014 - Ported to SchemeSpheres
+;; .author Álvaro Castro-Castilla, 2014-2015
 
 (define-library (spheres/structure hash-table)
   (export make-hash-table
@@ -27,5 +27,6 @@
           string-hash
           string-ci-hash
           hash-by-identity)
+  (import (spheres/core assert))
 
   (include "hash-table.scm"))

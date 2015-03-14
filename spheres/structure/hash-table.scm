@@ -1,62 +1,62 @@
 ;;!!! SRFI-69: Basic hash tables
 ;; .author Arthur T Smyles. Implemented based on Gambit's tables
-;; .author Álvaro Castro-Castilla, 2014 - Ported to SchemeSpheres
+;; .author Álvaro Castro-Castilla, 2014-2015
 ;;
 ;; This SRFI is provided for supporting modules that require this API.
 ;; Implementation is based upon Gambit's tables, which are more powerful. They are
 ;; actually the same type, thus being compatible.
 
-;; XXX: This is the proper way of declaring Gambit's tables
-;; (define-type table
-;;   id: 5917e472-85e5-11d9-a2c0-00039301ba52
-;;   type-exhibitor: macro-type-table
-;;   constructor: macro-make-table
-;;   implementer: implement-type-table
-;;   opaque:
-;;   macros:
-;;   prefix: macro-
-;;   (flags unprintable:)
-;;   (test  unprintable:)
-;;   (hash  unprintable:)
-;;   (loads unprintable:)
-;;   (gcht  unprintable:)
-;;   (init  unprintable:))
 
-;; Minimal hash table declaration, since define-type is still problematic in
+(define-type table
+  id: 5917e472-85e5-11d9-a2c0-00039301ba52
+  type-exhibitor: macro-type-table
+  constructor: macro-make-table
+  implementer: implement-type-table
+  opaque:
+  macros:
+  prefix: macro-
+  (flags unprintable:)
+  (test  unprintable:)
+  (hash  unprintable:)
+  (loads unprintable:)
+  (gcht  unprintable:)
+  (init  unprintable:))
 
-(define ##table-type (##structure-type (make-table)))
-(define-macro (macro-table-flags obj)
-  (##list '(let () (##declare (extended-bindings)) ##direct-structure-ref)
-          obj
-          1
-          '##table-type
-          #f))
-(define-macro (macro-table-flags-set! obj val)
-  (##list '(let () (##declare (extended-bindings)) ##direct-structure-set!)
-          obj
-          val
-          1
-          '##table-type
-          #f))
-(define-macro (macro-table-gcht-set! obj val)
-  (##list '(let () (##declare (extended-bindings)) ##direct-structure-set!)
-          obj
-          val
-          5
-          '##table-type
-          #f))
-(define-macro (macro-table-hash obj)
-  (##list '(let () (##declare (extended-bindings)) ##direct-structure-ref)
-          obj
-          3
-          '##table-type
-          #f))
-(define-macro (macro-table-test obj)
-  (##list '(let () (##declare (extended-bindings)) ##direct-structure-ref)
-          obj
-          2
-          '##table-type
-          #f))
+;; Manual hash table declaration, in case define-type fails to expand
+
+;; (define ##table-type (##structure-type (make-table)))
+;; (define-macro (macro-table-flags obj)
+;;   (##list '(let () (##declare (extended-bindings)) ##direct-structure-ref)
+;;           obj
+;;           1
+;;           '##table-type
+;;           #f))
+;; (define-macro (macro-table-flags-set! obj val)
+;;   (##list '(let () (##declare (extended-bindings)) ##direct-structure-set!)
+;;           obj
+;;           val
+;;           1
+;;           '##table-type
+;;           #f))
+;; (define-macro (macro-table-gcht-set! obj val)
+;;   (##list '(let () (##declare (extended-bindings)) ##direct-structure-set!)
+;;           obj
+;;           val
+;;           5
+;;           '##table-type
+;;           #f))
+;; (define-macro (macro-table-hash obj)
+;;   (##list '(let () (##declare (extended-bindings)) ##direct-structure-ref)
+;;           obj
+;;           3
+;;           '##table-type
+;;           #f))
+;; (define-macro (macro-table-test obj)
+;;   (##list '(let () (##declare (extended-bindings)) ##direct-structure-ref)
+;;           obj
+;;           2
+;;           '##table-type
+;;           #f))
 
 ;;;;
 
