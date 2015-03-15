@@ -9,6 +9,9 @@
           prototype:shallow-clone-method
           prototype:deep-clone
           prototype:deep-clone-method
+          prototype:make-setter-getter
+          make-prototype-object
+          prototype:make-dispatch-table
           string<<
           $
           <<

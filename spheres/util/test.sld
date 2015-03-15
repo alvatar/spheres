@@ -81,7 +81,12 @@
    test-on-bad-end-name-simple
    test-on-final-simple
    test-on-test-end-simple
-   test-on-final-simple)
+   test-on-final-simple
+   %test-begin
+   %test-end
+   %test-on-test-begin
+   %test-on-test-end
+   %test-report-result)
 
   (import (spheres/core condition))
 

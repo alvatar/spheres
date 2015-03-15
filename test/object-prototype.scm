@@ -1,6 +1,6 @@
-(%load-library '(spheres/util test))
+(load-here (spheres/util test))
 
-(%load-library '(spheres/object prototype))
+(load-here (spheres/object prototype))
 
 (test-begin "Prototype-based object system")
 

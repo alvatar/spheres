@@ -1,6 +1,6 @@
-(%load-library '(spheres/util test))
+(load-here (spheres/util test))
 
-(%load-library '(spheres/algorithm list-extra))
+(load-here (spheres/algorithm list-extra))
 
 (test-begin "list-extra" 46)
 
