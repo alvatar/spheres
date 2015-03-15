@@ -827,13 +827,17 @@
   (define (make-group num-els lst)
     (let recur-group ((lst lst)
                       (k num-els))
-      (if (or (zero? k) (null? lst))
-          (values '() lst)
-          (receive (g tail)
-                   (recur-group (cdr lst)
-                                (- k 1))
-                   (values (cons (car lst) g)
-                           tail)))))
+      (if k
+          (if (or (zero? k) (null? lst))
+              (values '() lst)
+              (receive (g tail)
+                       (recur-group (cdr lst) (- k 1))
+                       (values (cons (car lst) g) tail)))
+          (if (null? lst)
+              (values '() lst)
+              (receive (g tail)
+                       (recur-group (cdr lst) #f)
+                       (values (cons (car lst) g) tail))))))
   (if (integer? n/s)
       (let recur ((tail lst))
         (receive (group rest)
@@ -853,7 +857,7 @@
                            (recur rest
                                   (let ((size-list-tail (cdr size-list)))
                                     (if (null? size-list-tail)
-                                        (list +inf.0)
+                                        (list #f)
                                         size-list-tail)))))))))
 
 ;; Group a list of elements by some key attribute.
@@ -882,7 +886,7 @@
                 (table-set! bags head (cons head tref))
                 (table-set! bags head (list head)))
             (recur (cdr lst)))))
-    (cdrs (table->list bags))))  
+    (cdrs (table->list bags))))
 
 ;;! partition a list depending on predicate satisfaction, effectively extending
 ;; the SRFI-1 |partition| procedure
