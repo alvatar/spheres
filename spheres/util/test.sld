@@ -82,9 +82,9 @@
    test-on-final-simple
    test-on-test-end-simple
    test-on-final-simple)
-  
+
   (import (spheres/core condition))
-  
+
   ;; internal
   (define-syntax %test-evaluate-with-catch
     (syntax-rules ()
@@ -247,7 +247,7 @@
       (let ((r (test-runner-get)))
         (test-result-alist! r '())
         (%test-error r #t expr)))))
-  
+
   ;;! test-with-runner
   (define-syntax test-with-runner
     (syntax-rules ()
@@ -295,5 +295,5 @@
          (%test-runner-fail-list! runner
                                   (cons (test-match-all (%test-as-specifier pred)  ...)
                                         (%test-runner-fail-list runner)))))))
-  
+
   (include "test.scm"))

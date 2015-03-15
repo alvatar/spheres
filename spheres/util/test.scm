@@ -21,13 +21,24 @@
 ;; CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 ;; SOFTWARE.
 
-(define-syntax %test-record-define
-  (syntax-rules ()
-    ((%test-record-define alloc runner? (name index setter getter) ...)
-     (define-record-type test-runner
-       (alloc)
-       runner?
-       (name setter getter) ...))))
+;; (define-syntax %test-record-define
+;;   (syntax-rules ()
+;;     ((%test-record-define alloc runner? (name index setter getter) ...)
+;;      (define-record-type test-runner
+;;        (alloc)
+;;        runner?
+;;        (name setter getter) ...))))
+
+;; Ported to define-macro, so it expands properly the define-record-type macro
+(define-macro (%test-record-define  alloc runner? . args)
+  `(define-record-type test-runner
+     (,alloc)
+     ,runner?
+     ,@(let recur ((args args))
+         (if (null? args)
+             '()
+             (cons `(,(caar args) ,(caddar args) ,(cadddr (car args)))
+                   (recur (cdr args)))))))
 
 (%test-record-define
  %test-runner-alloc test-runner?
