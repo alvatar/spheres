@@ -16,13 +16,13 @@ Spheres requires the [Gambit Scheme compiler](http://gambitscheme.org). However,
 
 ## Basic usage
 
-To load and include all necessary files for a library within the REPL, use:
+To load and include all necessary files for a library within the REPL, the _load_ form is extended:
 
-    (load '(spheres/core base))
+    (load (spheres/core base))
 
 Spheres also brings automated compilation and __multiplatform/mobile__ build scripts. In order to make this functionality available, you need to install [Ssrun](https://github.com/fourthbit/ssrun). Once you do this, you can download the [project template](https://github.com/fourthbit/sphere-project) if you want to create a project based on Spheres. Additionally, with _Ssrun_, you can call the compilation tasks within the REPL using the lower-level form _%load-library_:
 
-    (%load-library '(spheres/core base) compile: #t)
+    (load (spheres/core base) compile: #t)
 
 
 ## Notes

@@ -332,46 +332,45 @@
          (filter (lambda (i) (not (table-ref macro-defs i #f)))
                  exports)))
     (if (and (not allow-empty?) (null? non-macro-exports))
-        #!void
-        `(##namespace (,(string-append
-                         (symbol->string (car lib))
-                         "#"
-                         (symbol->string (cadr lib))
-                         "#")
-                       ,@non-macro-exports)))))
+        '()
+        `((##namespace (,(string-append
+                          (symbol->string (car lib))
+                          "#"
+                          (symbol->string (cadr lib))
+                          "#")
+                        ,@non-macro-exports))))))
 
 ;; Create all necessary namespace definitions for a library
 (define^ (%library-make-prelude lib #!optional (imports (%library-imports lib)))
-  `(##begin
-     ,(%library-make-namespace-form lib '() '() allow-empty?: #t)
-     (##include "~~/lib/gambit#.scm")
-     (##namespace ("" $make-environment
-                   $sc-put-cte
-                   $syntax-dispatch
-                   bound-identifier=?
-                   datum->syntax
-                   environment?
-                   free-identifier=?
-                   generate-temporaries
-                   identifier?
-                   interaction-environment
-                   literal-identifier=?
-                   syntax-error
-                   syntax->datum
-                   syntax->list
-                   syntax->vector
-                   $load-module
-                   $update-module
-                   $include-file-hook
-                   $generate-id
-                   syntax-case-debug))
-     (##namespace ("" %load-library
-                   %library-loaded-libraries))
-     ,@(map
-        (lambda (import-lib)
-          (receive (_ exports __ macro-defs) (%library-read-syntax import-lib)
-                   (%library-make-namespace-form import-lib exports macro-defs)))
-        imports)))
+  `(,@(%library-make-namespace-form lib '() '() allow-empty?: #t)
+    (##include "~~/lib/gambit#.scm")
+    (##namespace ("" $make-environment
+                  $sc-put-cte
+                  $syntax-dispatch
+                  bound-identifier=?
+                  datum->syntax
+                  environment?
+                  free-identifier=?
+                  generate-temporaries
+                  identifier?
+                  interaction-environment
+                  literal-identifier=?
+                  syntax-error
+                  syntax->datum
+                  syntax->list
+                  syntax->vector
+                  $load-module
+                  $update-module
+                  $include-file-hook
+                  $generate-id
+                  syntax-case-debug))
+    (##namespace ("" %load-library
+                  %library-loaded-libraries))
+    ,@(apply append (map
+                     (lambda (import-lib)
+                       (receive (_ exports __ macro-defs) (%library-read-syntax import-lib)
+                                (%library-make-namespace-form import-lib exports macro-defs)))
+                     imports))))
 
 ;;! Hash table containing info about loaded libraries
 (define^ %library-loaded-libraries (make-table))
@@ -411,8 +410,13 @@
                                           directory: where
                                           stdout-redirection: #f))))))
 
-;;! Include and load all library files and dependencies
-(define^ (%load-library root-lib #!key compile only-syntax force silent)
+;;! Include and load all library files and dependencies.
+;; Returns generated expansion-time code
+(define^ (%load-library root-lib #!key compile only-syntax force silent emit? (eval? #t))
+  (define output-code '())
+  (define (emit-and-eval-code! code)
+    (if eval? (for-each eval code))
+    (if emit? (set! output-code (append output-code code))))
   (let recur ((lib root-lib))
     (define (load* file)
       (parameterize
@@ -427,7 +431,7 @@
                                    (string-append file ".scm")))))
                        file)))
          (if (not silent) (println "loading: " file))
-         (load file))))
+         (emit-and-eval-code! `((load ,file))))))
     ;; The recursive loading procedure
     (for-each recur (%library-imports lib))
     (if (or force (not (table-ref %library-loaded-libraries lib #f)))
@@ -449,13 +453,15 @@
                            (%library-read-syntax lib eval?: #t)
                            (if (not only-syntax)
                                (if (and obj-file (not (%library-updated? lib)))
-                                   (begin (eval (%library-make-prelude
-                                                 lib
-                                                 imports))
+                                   (begin (emit-and-eval-code!
+                                           (%library-make-prelude
+                                            lib
+                                            imports))
                                           (load* obj-file))
-                                   (begin (eval (%library-make-prelude
-                                                 lib
-                                                 imports))
+                                   (begin (emit-and-eval-code!
+                                           (%library-make-prelude
+                                            lib
+                                            imports))
                                           (for-each (lambda (f) (load* (path-strip-extension f)))
                                                     includes))))))
                 ;; Default procedure file is only loaded if there is no *.sld
@@ -465,11 +471,13 @@
   (if (not only-syntax)
       (begin
         (table-set! %library-loaded-libraries root-lib 'user)
-        (eval '(##namespace ("")))
+        (emit-and-eval-code! '((##namespace (""))))
         (table-for-each
          (lambda (lib v)
            (if (eq? v 'user)
-               (begin
-                 (receive (_ exports __ macro-defs) (%library-read-syntax lib)
-                          (eval (%library-make-namespace-form lib exports macro-defs))))))
-         %library-loaded-libraries))))
+               (receive (_ exports __ macro-defs) (%library-read-syntax lib)
+                        (emit-and-eval-code!
+                         (%library-make-namespace-form lib exports macro-defs)))))
+         %library-loaded-libraries)))
+  (if #f (pp (cons '##begin output-code)))
+  (cons '##begin output-code))

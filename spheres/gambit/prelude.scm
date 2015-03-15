@@ -5,35 +5,31 @@
 ;;------------------------------------------------------------------------------
 ;; Overriding INCLUDE
 
-(define^ (expander:include file)
-  (for-each eval (with-input-from-file file read-all)))
+(define-macro (include ?file)
+  (let ((forms (with-input-from-file ?file read-all)))
+    ;; Force expand-time evaluation of loaded libraries
+    (for-each
+     (lambda (f)
+       (if (pair? f)
+           (case (car f)
+             ((%load-library load)
+              (if (null? (cdr f)) (error "Wrong load or %load-library syntax"))
+              (eval (apply %load-library (cdr f)))))))
+     forms)
+    `(begin ,@forms)))
 
-(eval '(define-macro (include ?file)
-         (let ((forms (with-input-from-file ?file read-all)))
-           ;; Force expand-time evaluation of loaded libraries
-           (for-each
-            (lambda (f)
-              (if (pair? f)
-                  (case (car f)
-                    ((%load-library load)
-                     (eval f)))))
-            forms)
-           `(begin ,@forms))))
+(define-macro load
+  (lambda (file . extra)
+    (cond ((not (string? file))
+           (apply %load-library file extra)
+           #!void)
+          ((string=? ".scm" (path-extension file))
+           `(##load ,file (lambda (_ __) #f) #t #t #f))
+          ((string=? ".sld" (path-extension file))
+           (apply %load-library (cadar (with-input-from-file file read-all)) extra))
+          (else
+           `(##load ,file (lambda (_ __) #f) #t #t #f)))))
 
-(define load-procedures load)
-
-(define load
-  (let ((gambit-load load))
-    (lambda (file)
-      (cond ((not (string? file))
-             (%load-library file))
-            ((string=? ".scm" (path-extension file))
-             (expander:include file)
-             (path-expand file))
-            ((string=? ".sld" (path-extension file))
-             (%load-library (cadar (with-input-from-file file read-all))))
-            (else
-             (gambit-load file))))))
 
 ;;------------------------------------------------------------------------------
 ;; Low-level macros
@@ -418,11 +414,9 @@
 
 ;;! define-record-type macro
 (define-macro (define-record-type name constructor predicate . fields)
-  `(define-type ,name
-     constructor: ,constructor
-     predicate: ,predicate
-     ,@fields))
-
+  (%%define-type-expand 'define-type #f #f `(,name constructor: ,constructor
+                                                   predicate: ,predicate
+                                                   ,@fields)))
 
 ;;! SRFI-0: Feature-based conditional expansion construct
 ;; .author Álvaro Castro-Castilla (Adapted to dynamically add new features)
