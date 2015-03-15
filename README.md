@@ -20,6 +20,8 @@ To load and include all necessary files for a library within the REPL, the _load
 
     (load (spheres/core base))
 
+If you want to load libraries _within_ a script, you need to use the form _load-here_ instead.
+
 Spheres also brings automated compilation and __multiplatform/mobile__ build scripts. In order to make this functionality available, you need to install [Ssrun](https://github.com/fourthbit/ssrun). Once you do this, you can download the [project template](https://github.com/fourthbit/sphere-project) if you want to create a project based on Spheres. Additionally, with _Ssrun_, you can call the compilation tasks within the REPL using the lower-level form _%load-library_:
 
     (load (spheres/core base) compile: #t)

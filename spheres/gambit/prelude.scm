@@ -30,6 +30,14 @@
           (else
            `(##load ,file (lambda (_ __) #f) #t #t #f)))))
 
+(define-macro (load-here lib)
+  (let ((output (%load-library lib emit?: #t eval?: #f)))
+    (cons '##begin
+          (map (lambda (x) (if (eq? (car x) 'load)
+                          (cons 'include (cdr x))
+                          x))
+               (cdr output)))))
+
 
 ;;------------------------------------------------------------------------------
 ;; Low-level macros

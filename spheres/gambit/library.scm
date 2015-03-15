@@ -452,16 +452,12 @@
                   (receive (imports exports includes macro-defs)
                            (%library-read-syntax lib eval?: #t)
                            (if (not only-syntax)
-                               (if (and obj-file (not (%library-updated? lib)))
-                                   (begin (emit-and-eval-code!
+                               (begin (emit-and-eval-code!
                                            (%library-make-prelude
                                             lib
                                             imports))
-                                          (load* obj-file))
-                                   (begin (emit-and-eval-code!
-                                           (%library-make-prelude
-                                            lib
-                                            imports))
+                                      (if (and obj-file (not (%library-updated? lib)))
+                                          (load* obj-file)
                                           (for-each (lambda (f) (load* (path-strip-extension f)))
                                                     includes))))))
                 ;; Default procedure file is only loaded if there is no *.sld
