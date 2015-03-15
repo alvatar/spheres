@@ -1,6 +1,6 @@
-(load-here (spheres/util test))
+(load (spheres/util test) compile: #t)
 
-(load-here (spheres/algorithm list-extra))
+(load (spheres/algorithm list-extra) compile: #t)
 
 (test-begin "list-extra" 46)
 

@@ -1,4 +1,4 @@
-(%load-library '(spheres/util test))
+(load (spheres/util test))
 
 ;;-------------------------------------------------------------------------------
 ;; Multiple-instance tests
@@ -31,7 +31,7 @@
                                          (list "-e" code-string))
                           stdout-redirection: #f)))))
 
-(spawn-gambit '((%load-library '(spheres/concurrency termite))
+(spawn-gambit '((load (spheres/concurrency termite))
                 (define node1 (make-node "localhost" 3001))
                 (define node2 (make-node "localhost" 3002))
                 (node-init node2)
@@ -41,7 +41,7 @@
 (thread-sleep! 1)
 
 ;; Node 1
-(%load-library '(spheres/concurrency termite))
+(load (spheres/concurrency termite))
 
 (define node1 (make-node "localhost" 3001))
 (define node2 (make-node "localhost" 3002))

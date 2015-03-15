@@ -21,22 +21,22 @@
 (define-macro load
   (lambda (file . extra)
     (cond ((not (string? file))
-           (apply %load-library file extra)
-           #!void)
+           (let ((output (apply %load-library file extra)))
+             ;;(pp output)
+             (cons '##begin
+                   (map (lambda (x)
+                          (if (eq? (car x) 'load)
+                              (if (string=? ".scm" (path-extension (cadr x)))
+                                  (cons 'include (cdr x))
+                                  (begin (##load (cadr x) (lambda (_ __) #f) #t #t #f) #!void))
+                              x))
+                        (cdr output)))))
           ((string=? ".scm" (path-extension file))
            `(##load ,file (lambda (_ __) #f) #t #t #f))
           ((string=? ".sld" (path-extension file))
            (apply %load-library (cadar (with-input-from-file file read-all)) extra))
           (else
            `(##load ,file (lambda (_ __) #f) #t #t #f)))))
-
-(define-macro (load-here lib)
-  (let ((output (%load-library lib emit?: #t eval?: #f)))
-    (cons '##begin
-          (map (lambda (x) (if (eq? (car x) 'load)
-                          (cons 'include (cdr x))
-                          x))
-               (cdr output)))))
 
 
 ;;------------------------------------------------------------------------------

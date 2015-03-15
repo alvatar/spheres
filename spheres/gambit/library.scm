@@ -412,11 +412,9 @@
 
 ;;! Include and load all library files and dependencies.
 ;; Returns generated expansion-time code
-(define^ (%load-library root-lib #!key compile only-syntax force silent emit? (eval? #t))
+(define^ (%load-library root-lib #!key compile only-syntax force (silent #t))
   (define output-code '())
-  (define (emit-and-eval-code! code)
-    (if eval? (for-each eval code))
-    (if emit? (set! output-code (append output-code code))))
+  (define (emit-code! code) (set! output-code (append output-code code)))
   (let recur ((lib root-lib))
     (define (load* file)
       (parameterize
@@ -431,7 +429,7 @@
                                    (string-append file ".scm")))))
                        file)))
          (if (not silent) (println "loading: " file))
-         (emit-and-eval-code! `((load ,file))))))
+         (emit-code! `((load ,file))))))
     ;; The recursive loading procedure
     (for-each recur (%library-imports lib))
     (if (or force (not (table-ref %library-loaded-libraries lib #f)))
@@ -452,10 +450,10 @@
                   (receive (imports exports includes macro-defs)
                            (%library-read-syntax lib eval?: #t)
                            (if (not only-syntax)
-                               (begin (emit-and-eval-code!
-                                           (%library-make-prelude
-                                            lib
-                                            imports))
+                               (begin (emit-code!
+                                       (%library-make-prelude
+                                        lib
+                                        imports))
                                       (if (and obj-file (not (%library-updated? lib)))
                                           (load* obj-file)
                                           (for-each (lambda (f) (load* (path-strip-extension f)))
@@ -467,12 +465,12 @@
   (if (not only-syntax)
       (begin
         (table-set! %library-loaded-libraries root-lib 'user)
-        (emit-and-eval-code! '((##namespace (""))))
+        (emit-code! '((##namespace (""))))
         (table-for-each
          (lambda (lib v)
            (if (eq? v 'user)
                (receive (_ exports __ macro-defs) (%library-read-syntax lib)
-                        (emit-and-eval-code!
+                        (emit-code!
                          (%library-make-namespace-form lib exports macro-defs)))))
          %library-loaded-libraries)))
   (if #f (pp (cons '##begin output-code)))
