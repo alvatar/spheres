@@ -1,6 +1,6 @@
-(load-here (spheres/util test))
+(load (spheres/util test))
 
-(load-here (spheres/object prototype))
+(load (spheres/object prototype))
 
 (test-begin "Prototype-based object system")
 
