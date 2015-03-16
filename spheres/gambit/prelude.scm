@@ -19,9 +19,16 @@
     `(begin ,@forms)))
 
 (define-macro load
-  (lambda (file . extra)
-    (cond ((not (string? file))
-           (let ((output (apply %load-library file extra)))
+  (lambda (file-or-library . extra)
+    (cond ((string? file-or-library)
+           (cond ((string=? ".scm" (path-extension file-or-library))
+                  (list 'include file-or-library))
+                 ((string=? ".sld" (path-extension file-or-library))
+                  (apply %load-library (cadar (with-input-from-file file-or-library read-all)) extra))
+                 (else
+                  `(##load ,file-or-library (lambda (_ __) #f) #t #t #f))))
+          ((%library? file-or-library)
+           (let ((output (apply %load-library file-or-library extra)))
              (cons '##begin
                    (map (lambda (x)
                           (if (eq? (car x) 'load)
@@ -30,12 +37,9 @@
                                   `(##load ,(cadr x) (lambda (_ __) #f) #t #t #f))
                               x))
                         (cdr output)))))
-          ((string=? ".scm" (path-extension file))
-           (list 'include file))
-          ((string=? ".sld" (path-extension file))
-           (apply %load-library (cadar (with-input-from-file file read-all)) extra))
           (else
-           `(##load ,file (lambda (_ __) #f) #t #t #f)))))
+           (error "load -- library or file required: " file-or-library)
+           #!void))))
 
 
 ;;------------------------------------------------------------------------------
