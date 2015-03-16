@@ -1,0 +1,15 @@
+(define-macro (test-true expr . rest)
+  `(or ,expr
+       (begin (newline)
+              (println "FAILED: " ',rest)
+              (write ',expr)
+              (println " should be TRUE but isn't!")
+              (error 'test-true-failure))))
+
+(define-macro (test-false expr . rest)
+  `(or (not ,expr)
+       (begin (newline)
+              (println "FAILED: " ',rest)
+              (write ',expr)
+              (println " should be FALSE but isn't!")
+              (error 'test-true-failure))))

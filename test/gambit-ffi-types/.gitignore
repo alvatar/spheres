@@ -1,0 +1,9 @@
+*.swp
+*.swo
+*.c
+*.o
+TODO.txt
+console
+integration-test
+test-scheme-object-size-in-words
+
