@@ -7,9 +7,10 @@ _A set of tools and libraries for real-life Scheme. Multiplatform and mobile._
 
 ## Installation
 
-1. Copy the .gambcini file to your HOME directory. This is Gambit's initialization file.
-2. (optional) Copy the _spheres/_ directory into your Gambit's installation library directory (i.e. /usr/local/Gambit/lib)
-3. Update all .gambcini paths to where your Spheres files are located (either Gambit's library directory, if you copied the files there, or any other path where you choose to leave Spheres' files).
+1. Compile the syntax expander: go to /spheres/gambit/scsc and run ./compile
+2. Copy the .gambcini file to your HOME directory. This is Gambit's initialization file.
+3. (optional) Copy the _spheres/_ directory into your Gambit's installation library directory (i.e. /usr/local/Gambit/lib)
+4. Update all .gambcini paths to where your Spheres files are located (either Gambit's library directory, if you copied the files there, or any other path where you choose to leave Spheres' files).
 
 Spheres requires the [Gambit Scheme compiler](http://gambitscheme.org). However, some libraries in Spheres are already compatible with r7rs implementations such as Chibi.
 
