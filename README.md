@@ -21,7 +21,7 @@ In order to make a library available within the REPL, the extended _load_ form i
 
     (load (spheres/core base))
 
-Spheres also brings automated compilation and __multiplatform/mobile__ build scripts. In order to make this functionality available, you need to install [Ssrun](https://github.com/fourthbit/ssrun). Once you do this, you can download the [project template](https://github.com/fourthbit/sphere-project) if you want to create a project based on Spheres. Additionally, with _Ssrun_, you can call the compilation tasks within the REPL using the lower-level form _%load-library_:
+Spheres also brings automated compilation and __multiplatform/mobile__ build scripts. In order to make this functionality available, you need to install [Ssrun](https://github.com/fourthbit/ssrun). Once you do this, you can download the [project template](https://github.com/fourthbit/sphere-project) if you want to create a project based on Spheres. Additionally, with _Ssrun_, you can call the compilation tasks within the REPL:
 
     (load (spheres/core base) compile: #t)
 
