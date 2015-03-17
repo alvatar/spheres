@@ -1,6 +1,6 @@
 ;;!!! Number constraints for Kanren
 
-(define-library (spheres/logic/kanren numbers)
+(define-library (spheres/logic kanren-numbers)
   (export build-num
           zeroo
           poso
@@ -24,4 +24,4 @@
 
   (import (spheres/logic kanren))
 
-  (include "numbers.scm"))
+  (include "kanren-numbers.scm"))
