@@ -12,9 +12,9 @@
      (lambda (f)
        (if (pair? f)
            (case (car f)
-             ((%load-library load)
-              (if (null? (cdr f)) (error "Wrong load or %load-library syntax"))
-              (eval (apply %load-library (cdr f)))))))
+             ((load)
+              (if (null? (cdr f)) (error "Wrong load syntax"))
+              `(load ,(cdr f))))))
      forms)
     `(begin ,@forms)))
 
