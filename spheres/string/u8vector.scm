@@ -139,7 +139,7 @@
                                  1)))))))
     ;; It could be that we get a negative length because the string was very short and ended
     ;; with only the first 1-2 bytes of a 2-3 byte multibyte UTF-8 character.
-    (check-arg (lambda (len) (fx< len 0)) len 'utf-u8vector->string "The input u8vector is not proper UTF-8.")
+    (check-arg (lambda (len) (fx> len 0)) len 'utf-u8vector->string "The input u8vector is not proper UTF-8.")
     ;; (print "output string length = " len " (u8vector length=" u8v-len ")\n")
     ;; Compiled with (declare (safe))
     (let ((s (make-string len)))
