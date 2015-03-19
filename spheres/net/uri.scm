@@ -1,5 +1,8 @@
-;;
-;; URI parsing module
+;;!!! URI parsing
+;; .author Marc Feeley, 2005-2007
+;; .author PerEckerdal, 2008-2009
+;; .author Mikael More, 2012-2013
+;; .author Alvaro Castro-Castilla, 2015
 ;;
 ;; Written by Marc Feeley for http-server, made to a separate module and refactored by Per Eckerdal,
 ;; and improved on by Mikael More.
@@ -107,19 +110,11 @@
 ;;
 
 
-(declare (standard-bindings)
-         (extended-bindings)
-         (block)
-         (fixnum)
-         ; (not safe) would not be advisable, for absolute safety.
-         )
 
-;; Some nonstandard web servers require urlencoding to be done in another char encoding than
-;; UTF-8, which is the commonly accepted standard all across the Internet. Therefore
-;; we leave it configurable to the caller to choose 'UTF-8 or 'ISO-8859-1 encoding here.
-(define uri-query-string:use-char-encoding-in-urlencoding (make-parameter 'UTF-8))
-
-(define uri:use-char-encoding-in-urldecoding (make-parameter 'UTF-8))
+(declare
+  (standard-bindings)
+  (extended-bindings)
+  (block))
 
 (define-type uri
   id: 62788556-c247-11d9-9598-00039301ba52
@@ -133,25 +128,25 @@
   fragment)
 
 (define (make-uri scheme userinfo host port path query fragment)
-  (if (not (and (or (not scheme)
-                    (string? scheme))
-                (or (not userinfo)
-                    (string? userinfo))
-                (or (not host)
-                    (string? host))
-                (or (not port)
-                    (integer? port))
-                (or (not path)
-                    (string? path))
-                (or (not query)
-                    (string? query) ;; I'm not sure that query should be
-                    ;; allowed to be a string.
-                    (null? query)
-                    (pair? query))
-                (or (not fragment)
-                    (string? fragment))))
+  (if (not
+       (and (or (not scheme)
+                (string? scheme))
+            (or (not userinfo)
+                (string? userinfo))
+            (or (not host)
+                (string? host))
+            (or (not port)
+                (integer? port))
+            (or (not path)
+                (string? path))
+            (or (not query)
+                (string? query) ;; I'm not sure that query should be
+                ;; allowed to be a string.
+                (null? query)
+                (pair? query))
+            (or (not fragment)
+                (string? fragment))))
       (error "Invalid argument"))
-
   (make-uri/internal scheme
                      userinfo
                      host
@@ -163,98 +158,101 @@
 (define (clone-uri uri)
   (make-uri (uri-scheme uri)
             (uri-userinfo uri)
-            (uri-host     uri)
-            (uri-port     uri)
-            (uri-path     uri)
-            (uri-query    uri)
+            (uri-host uri)
+            (uri-port uri)
+            (uri-path uri)
+            (uri-query uri)
             (uri-fragment uri)))
 
 (define (uri-scheme-set uri scheme)
   (make-uri scheme
             (uri-userinfo uri)
-            (uri-host     uri)
-            (uri-port     uri)
-            (uri-path     uri)
-            (uri-query    uri)
+            (uri-host uri)
+            (uri-port uri)
+            (uri-path uri)
+            (uri-query uri)
             (uri-fragment uri)))
 
 (define (uri-userinfo-set uri userinfo)
-  (make-uri (uri-scheme   uri)
+  (make-uri (uri-scheme uri)
             userinfo
-            (uri-host     uri)
-            (uri-port     uri)
-            (uri-path     uri)
-            (uri-query    uri)
+            (uri-host uri)
+            (uri-port uri)
+            (uri-path uri)
+            (uri-query uri)
             (uri-fragment uri)))
 
 (define (uri-host-set uri host)
-  (make-uri (uri-scheme   uri)
+  (make-uri (uri-scheme uri)
             (uri-userinfo uri)
             host
-            (uri-port     uri)
-            (uri-path     uri)
-            (uri-query    uri)
+            (uri-port uri)
+            (uri-path uri)
+            (uri-query uri)
             (uri-fragment uri)))
 
 (define (uri-port-set uri port)
-  (make-uri (uri-scheme   uri)
+  (make-uri (uri-scheme uri)
             (uri-userinfo uri)
-            (uri-host     uri)
+            (uri-host uri)
             port
-            (uri-path     uri)
-            (uri-query    uri)
+            (uri-path uri)
+            (uri-query uri)
             (uri-fragment uri)))
 
 (define (uri-path-set uri path)
-  (make-uri (uri-scheme   uri)
+  (make-uri (uri-scheme uri)
             (uri-userinfo uri)
-            (uri-host     uri)
-            (uri-port     uri)
+            (uri-host uri)
+            (uri-port uri)
             path
-            (uri-query    uri)
+            (uri-query uri)
             (uri-fragment uri)))
 
 (define (uri-query-set uri query)
-  (make-uri (uri-scheme   uri)
+  (make-uri (uri-scheme uri)
             (uri-userinfo uri)
-            (uri-host     uri)
-            (uri-port     uri)
-            (uri-path     uri)
+            (uri-host uri)
+            (uri-port uri)
+            (uri-path uri)
             query
             (uri-fragment uri)))
 
 (define (uri-fragment-set uri fragment)
-  (make-uri (uri-scheme   uri)
+  (make-uri (uri-scheme uri)
             (uri-userinfo uri)
-            (uri-host     uri)
-            (uri-port     uri)
-            (uri-path     uri)
-            (uri-query    uri)
+            (uri-host uri)
+            (uri-port uri)
+            (uri-path uri)
+            (uri-query uri)
             fragment))
 
 ;; This is an internal utility method
 (define (uri-authority-set! uri authority)
-  (uri-userinfo-set! uri (and authority (car   authority)))
-  (uri-host-set!     uri (and authority (cadr  authority)))
-  (uri-port-set!     uri (and authority (caddr authority))))
+  (uri-userinfo-set! uri (and authority (car authority)))
+  (uri-host-set! uri (and authority (cadr authority)))
+  (uri-port-set! uri (and authority (caddr authority))))
 
 (define (uri-authority uri)
   (and (uri-host uri)
        (list (uri-userinfo uri)
-             (uri-host     uri)
-             (uri-port     uri))))
+             (uri-host uri)
+             (uri-port uri))))
 
 (define (uri-authority-set uri authority)
   (make-uri (uri-scheme uri)
-            (and authority (car   authority))
-            (and authority (cadr  authority))
+            (and authority (car authority))
+            (and authority (cadr authority))
             (and authority (caddr authority))
-            (uri-path     uri)
-            (uri-query    uri)
+            (uri-path uri)
+            (uri-query uri)
             (uri-fragment uri)))
 
-;; See the definition of |uri-query-string:use-char-encoding-in-urlencoding| above for
-;; charset encoding options.
+;; Some nonstandard web servers require urlencoding to be done in another char encoding than
+;; UTF-8, which is the commonly accepted standard all across the Internet.
+(define uri-query-string:use-char-encoding-in-urlencoding (make-parameter 'UTF-8))
+(define uri-query-string:use-char-encoding-in-urldecoding (make-parameter 'UTF-8))
+
 (define (uri-query-string uri)
   (let ((urlencode (case (uri-query-string:use-char-encoding-in-urlencoding)
                      ((UTF-8     ) urlencode)
@@ -268,7 +266,7 @@
           (lambda ()
             (cond
              ((string? q)
-                                        ; (display "?")
+              ;; (display "?")
               (display q))
              ((pair? q)
               (let ((first #t))
@@ -359,8 +357,7 @@
                         (+ j 1)))))
           result))))
 
-;; Because of the funny way length is defined here (see comments above |extract-escaped| for this),
-;; instead of just doing this work by a |urledecode| call, we produce an u8vector with the bytes
+;; Instead of just doing this work by a |urledecode| call, we produce an u8vector with the bytes
 ;; to decode here, and then run |utf8-u8vector->string| on it.
 (define (extract-escaped/UTF-8 str start n)
   (let ((result (make-u8vector n)))
@@ -375,10 +372,10 @@
                          (loop (+ i 3)
                                (+ j 1)))))
                 (begin
-                  (u8vector-set! result j (char->integer (if (char=? c #\+) #\space c)))
+                  (u8vector-set! result j
+                                 (char->integer (if (char=? c #\+) #\space c)))
                   (loop (+ i 1)
                         (+ j 1)))))
-
           ;; result now contains the u8vector with the extracted bytes, so let's UTF8-decode them.
           (utf8-u8vector->string result)))))
 
@@ -390,10 +387,10 @@
 ;;     for ISO-8859-1 encoding indeed this is valuable info as this is how many result bytes we should return here,
 ;;     but, for UTF-8 it carries little sense as it might be fewer than that as well.
 (define (extract-escaped str start n)
-  (case (uri:use-char-encoding-in-urldecoding)
+  (case (uri-query-string:use-char-encoding-in-urldecoding)
     ('UTF-8      (extract-escaped/UTF-8      str start n))
     ('ISO-8859-1 (extract-escaped/ISO-8859-1 str start n))
-    (else (error "Unknown charset for uri-decoding" (uri:use-char-encoding-in-urldecoding)))))
+    (else (error "Unknown charset for uri-decoding" (uri-query-string:use-char-encoding-in-urldecoding)))))
 
 (define (parse-uri str start end decode? cont #!optional (strict #t))
   (let ((uri (make-uri #f #f #f #f "" '() #f)))
@@ -412,18 +409,18 @@
           (substring str i j)))
     ;; Extracts the "scheme" part and is a hub for the rest of processing.
     (define (state0 i j n)
-                                        ; (dbg "State0 executed with i \"" i "\" j \"" j "\" n \"" n "\".")
+      ;; (dbg "State0 executed with i \"" i "\" j \"" j "\" n \"" n "\".")
       (if (< j end)
           (let ((c (string-ref str j)))
-                                        ; (dbg "state0 processes char " c)
+            ;; (dbg "state0 processes char " c)
             (cond ((char=? c #\:)
                    (if (= n 0)
                        (state2 j (+ j 1) 1) ; the ":" is in the "path" part
                        (let ((scheme (extract-string i j n)))
                          (and scheme
-                                        ; As to help internal convention, we keep URI schemes to always be downcase.
-                                        ; This is SRFI 13's down-case that supports ASCII chars only. This is fine as
-                                        ; all standardized URI schemes use those characters only.
+                              ;; As to help internal convention, we keep URI schemes to always be downcase.
+                              ;; This is SRFI 13's down-case that supports ASCII chars only. This is fine as
+                              ;; all standardized URI schemes use those characters only.
                               (let ((scheme (string-downcase scheme)))
                                 (uri-scheme-set! uri scheme)
                                         ; (dbg "state0 concluded uri-scheme to " scheme)
@@ -509,11 +506,12 @@
                                              j
                                              (- j port-absolute-begin))))))
                (authority (list userinfo host port)))
-          ;; (dbg "state1 concluded authority to " authority)
-          ;; (and authority (begin - No need, authority is always set here. The original code contained this though.
+                                        ; (dbg "state1 concluded authority to " authority)
+                                        ; (and authority (begin - No need, authority is always set here. The original code contained this though.
           (uri-authority-set! uri authority)
           (fun new-i new-j new-n)))
-      ;; (dbg "State1 executed with i \"" i "\" j \"" j "\" n \"" n "\".")
+
+                                        ; (dbg "State1 executed with i \"" i "\" j \"" j "\" n \"" n "\".")
       (if (< j end)
           (let ((c (string-ref str j)))
             (cond ((char=? c #\/)
@@ -932,18 +930,13 @@
   (uri-join (string->uri base)
             (string->uri ref)))
 
-;; Please see the "Special urlencoding of URI path" comments section for more info.
+;; See the "Special urlencoding of URI path" comments section for more info.
 (define (urlencode-uripath str)
-  (utf8-u8vector->string
-   (with-output-to-u8vector
-    '()
-    (lambda ()
-      ;; Urlencoder for any ASCII printable character except #\space #\% #\? .
-      ((write-urlencoded-u8vector-lambda
-        (and (fx<= 33 b 126) ; Anywhere between #\! (as to exclude #\space which is 32) and 126, the last printable character
-             ;; = (char->integer #\%)
-             (not (eq? b 37))
-             ;; = (char->integer #\?)
-             (not (eq? b 63))))
-       (string->utf8-u8vector str))))))
-
+  (utf8-u8vector->string (with-output-to-u8vector
+                          '()
+                          (lambda () ( ;; Urlencoder for any ASCII printable character except #\space #\% #\? .
+                                 (write-urlencoded-u8vector-lambda
+                                  (and (fx<= 33 b 126) ; Anywhere between #\! (as to exclude #\space which is 32) and 126, the last printable character
+                                       (not (eq? b 37)) ; = (char->integer #\%)
+                                       (not (eq? b 63)))) ; = (char->integer #\?)
+                                 (string->utf8-u8vector str))))))

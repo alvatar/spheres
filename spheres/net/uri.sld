@@ -1,6 +1,7 @@
-;;!!! URI handling
-;; .author Marc Feeley, 2005-2008
-;; .author Marco Benelli, 2010-2011
+;;!!! URI parsing
+;; .author Marc Feeley, 2005-2007
+;; .author PerEckerdal, 2008-2009
+;; .author Mikael More, 2012-2013
 ;; .author Alvaro Castro-Castilla, 2015
 
 (define-library (spheres/net uri)
