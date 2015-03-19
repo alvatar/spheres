@@ -48,7 +48,7 @@
                 (if (eq? chr from) to chr))
               str))
 
-(define (string-split chr str #!optional (sparse #f))
+(define* (string-split-char chr str (sparse #f))
   (let* ((curr-str '())
          (result '())
          (new-str (lambda ()
@@ -66,12 +66,11 @@
     (reverse result)))
 
 ;; returns a pair.
-(define (string-split-at-first at-char
-                               s
-                               #!optional
-                               (not-found
-                                (lambda ()
-                                  (error "String parameter didn't contain char."))))
+(define* (string-split-at-first at-char
+                                s
+                                (not-found
+                                 (lambda ()
+                                   (error "String parameter didn't contain char."))))
   (let ((pos (string-index s at-char)))
     (if (not pos)
         (not-found)
@@ -193,7 +192,7 @@
         (substring str 0 (- len-str len-suffix))
         if-no-suffix)))
 
-(define (string-pluralize str #!optional (num 0))
+(define* (string-pluralize str (num 0))
   (if (= num 1)
       str
       (string-extra#with-symbol str

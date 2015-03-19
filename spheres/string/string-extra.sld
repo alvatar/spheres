@@ -1,10 +1,16 @@
+;;!!! Extra string utilities
+;; .author Per Eckerdal
+;; .author Mikael More
+;; .author Marc Feeley
+;; .author Alvaro Castro-Castilla
+
 (define-library (spheres/string string-extra)
   (export string-remove-prefix
           string-remove-suffix
           char->string
           string-strip
           string-replace-char
-          string-split
+          string-split-char
           string-split-at-first
           string-split-at-first-nice
           string-name-split
@@ -23,11 +29,6 @@
           string-invert
           string-uninvert
           dumps)
-
-
-;; (import (srfi strings
-;;               lists)
-;;         ../misc/u8v)
 
   (import (spheres/string string)
           (spheres/string u8vector)
