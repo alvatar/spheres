@@ -546,14 +546,6 @@
       ((_ item ls)
        (set! ls (cons item ls)))))
 
-  ;;! string-null?
-  ;; Equivalent low-level macro:
-  ;; (##define-macro (string-null? str) `(zero? (string-length ,str)))
-  (define-syntax string-null?
-    (syntax-rules ()
-      ((_ str)
-       (zero? (string-length str)))))
-
   ;;! Pretty-print for values, returning values too
   ;; Equivalent low-level macro:
   ;; (##define-macro (pv form)
