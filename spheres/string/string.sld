@@ -5,7 +5,6 @@
 
 (define-library (spheres/string string)
   (export
-
    ;; SRFI-13
    string-map
    string-map!
@@ -80,7 +79,6 @@
    string-join
    string-tokenize
    string-replace
-
    ;; Extra procedures
    string-remove-prefix
    string-remove-suffix)
