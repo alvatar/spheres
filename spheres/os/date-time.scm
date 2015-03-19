@@ -309,7 +309,7 @@
     ((eq? clock-type time-monotonic) (tm:current-time-monotonic))
     ((eq? clock-type time-thread) (tm:current-time-thread))
     ((eq? clock-type time-process) (tm:current-time-process))
-    (else (tm:time-error 'tm:current-time 'invalid-clock-type clock-type))))
+    (else (tm:time-error 'current-time 'invalid-clock-type clock-type))))
 
 ;; -- time resolution
 ;; this is the resolution of the clock in nanoseconds.
@@ -902,10 +902,10 @@
   (julian-day->time-monotonic (+ jdn 4800001/2)))
 
 (define (current-julian-day)
-  (time-utc->julian-day (tm:current-time time-utc)))
+  (time-utc->julian-day (current-time time-utc)))
 
 (define (current-modified-julian-day)
-  (time-utc->modified-julian-day (tm:current-time time-utc)))
+  (time-utc->modified-julian-day (current-time time-utc)))
 
 ;; returns a string rep. of number N, of minimum LENGTH,
 ;; padded with character PAD-WITH. If PAD-WITH if #f,
