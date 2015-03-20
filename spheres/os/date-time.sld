@@ -2,10 +2,8 @@
 ;; .author Marco Benelli, 2009-2011
 ;; .author Alvaro Castro-Castilla, 2015. Minor modifications
 
-(define-library (spheres/os time)
+(define-library (spheres/os date-time)
   (export
-   ;; Make native Gambit procedure with name clash available
-   ##current-time
    ;; Constants
    time-duration
    time-monotonic
@@ -17,7 +15,8 @@
    current-date
    current-julian-day
    current-modified-julian-day
-   current-time
+   ;; This overrides Gambit's current-time, which can be accessed through ##curren-time
+   current-time*
    time-resolution
    ;; Time object and accessors
    make-time

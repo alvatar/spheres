@@ -12,8 +12,8 @@
 ;;
 ;; NOTES:
 ;;
-;; 1. `current-time' clash with gambit's built-in, so Gambit's has been renamed
-;;    to ##current-time
+;; 1. `current-time' clash with gambit's built-in, so it has been renamed to
+;;    current-time*
 ;; 2. actually, process-time and thread-time are the same thing
 ;;
 ;;
@@ -44,6 +44,7 @@
 ;; INFORMATION HEREIN WILL NOT INFRINGE ANY RIGHTS OR ANY IMPLIED WARRANTIES OF
 ;; MERCHANTABILITY OR FITNESS FOR A PARTICULAR PURPOSE.
 ;; ----------------------------------------------------------------------------
+
 
 ;; Get the timezone offset.
 ;;
@@ -299,17 +300,14 @@
 (define (tm:current-time-process)
   (tm:current-time-ms-time time-process current-process-milliseconds))
 
-;; Make native Gambit procedure with name clash available
-(define ##current-time current-time)
-
-(define* (current-time (clock-type 'time-utc))
+(define* (current-time* (clock-type 'time-utc))
   (cond
-    ((eq? clock-type time-tai) (tm:current-time-tai))
-    ((eq? clock-type time-utc) (tm:current-time-utc))
-    ((eq? clock-type time-monotonic) (tm:current-time-monotonic))
-    ((eq? clock-type time-thread) (tm:current-time-thread))
-    ((eq? clock-type time-process) (tm:current-time-process))
-    (else (tm:time-error 'current-time 'invalid-clock-type clock-type))))
+   ((eq? clock-type time-tai) (tm:current-time-tai))
+   ((eq? clock-type time-utc) (tm:current-time-utc))
+   ((eq? clock-type time-monotonic) (tm:current-time-monotonic))
+   ((eq? clock-type time-thread) (tm:current-time-thread))
+   ((eq? clock-type time-process) (tm:current-time-process))
+   (else (tm:time-error 'current-time 'invalid-clock-type clock-type))))
 
 ;; -- time resolution
 ;; this is the resolution of the clock in nanoseconds.
