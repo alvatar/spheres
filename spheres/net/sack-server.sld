@@ -14,8 +14,8 @@
           (spheres/string u8vector)
           (spheres/structure token-table)
           (spheres/os date-format)
-          (spheres/net uri)
-          (spheres/net http-util)
+          (spheres/net/sack uri)
+          (spheres/net/sack http-util)
           (spheres/net/sack io-primitives))
 
   (include "sack-server.scm"))

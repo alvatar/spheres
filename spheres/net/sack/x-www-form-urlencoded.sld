@@ -4,7 +4,7 @@
 ;; .author Mikael More, 2010-2012
 ;; .author Alvaro Castro-Castilla, 2015
 
-(define-library (spheres/net x-www-form-urlencoded)
+(define-library (spheres/net/sack x-www-form-urlencoded)
   (export urlencode
           urlencode-ISO8859
           write-urlencoded

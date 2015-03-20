@@ -4,7 +4,7 @@
 ;; .author Mikael More, 2012-2013
 ;; .author Alvaro Castro-Castilla, 2015
 
-(define-library (spheres/net uri)
+(define-library (spheres/net/sack uri)
   (export make-uri
           clone-uri
           uri?
@@ -40,6 +40,6 @@
           urlencode-uripath)
   (import (spheres/string string) ;; string-index-right string-downcase
           (spheres/string u8vector) ;; utf8-u8vector->string string->utf8-u8vector
-          (spheres/net x-www-form-urlencoded))
+          (spheres/net/sack x-www-form-urlencoded))
 
   (include "uri.scm"))

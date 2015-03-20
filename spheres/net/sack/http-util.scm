@@ -11,6 +11,9 @@
          (fixnum))
 
 
+(define (date->rfc1123 d)
+  (date->string d "~a, ~d ~b ~Y ~T GMT"))
+
 (define console-output-port (current-output-port))
 
 (define crlf-s "\r\n")
@@ -359,3 +362,5 @@
                 (and current-digit ; #f current digit means reading error, means return.
                      (+ (loop (cdr lst) (* multiple 16))
                         (* multiple current-digit))))))))))
+
+

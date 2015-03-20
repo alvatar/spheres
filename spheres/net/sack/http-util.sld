@@ -1,5 +1,6 @@
-(define-library (spheres/net http-util)
-  (export crlf-s
+(define-library (spheres/net/sack http-util)
+  (export date->rfc1123
+          crlf-s
           headers-join
           http-status-code
           header-key->string
@@ -14,11 +15,11 @@
           read-content-chars
           chunked-coding-read-hex)
 
-  (import (spheres/algorithm list)
+  (import (spheres/os date-time)
           (spheres/string string)
           (spheres/string string-extra)
           (spheres/string u8vector)
-          (spheres/net x-www-form-urlencoded)
+          (spheres/net/sack x-www-form-urlencoded)
           (spheres/net/sack io-primitives))
 
   (define-macro (http-util#chunk-return-value->u8v&u8v-length chunk . code)
