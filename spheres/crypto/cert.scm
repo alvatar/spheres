@@ -204,7 +204,7 @@
      (base64-string->u8vector str)))))
 
 (define (base64-cert? str)
-  (string-remove-prefix str "Y2Vyd"))
+  (string-remove-prefix str "Y2Vyd" #f))
 
 (define (write-publ-certs cert-alist filename)
   (let ((u8vect (cert-alist->u8vector cert-alist)))

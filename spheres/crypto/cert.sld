@@ -39,12 +39,15 @@
           list-certificates)
 
   (import (spheres/algorithm list)
+          (spheres/string string) ;; string-index
+          (spheres/string string-extra)
+          (spheres/string u8vector)
           (spheres/crypto digest)
           (spheres/crypto rsa)
           (spheres/crypto io)
           (spheres/dataenc base64)
           (spheres/dataenc bignum)
           (spheres/io genport)
-          (spheres/string string))
+          (spheres/io ttyui))
 
   (include "cert.scm"))
