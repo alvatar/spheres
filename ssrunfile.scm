@@ -90,6 +90,7 @@
     (spheres/math vect2)
     (spheres/net http-util)
     (spheres/net mime)
+    (spheres/net mime-types)
     (spheres/net repl-server)
     (spheres/net sack-server)
     (spheres/net/sack io-primitives)

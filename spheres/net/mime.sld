@@ -25,7 +25,8 @@
 ;;   RFC 2822 - Internet Message Format
 
 (define-library (spheres/net mime)
-  (export mime-format-header
+  (export mime-generate-boundary ; We use this one in Content-ID generation in other modules so important to export.
+          mime-format-header ; This list of exports is to be revised, some may not make sense to export. TODO
           mime-parse-header
           mime-encode-x-www-form-urlencoded
           mime-decode-x-www-form-urlencoded
@@ -38,8 +39,11 @@
           mime-encode
           mime-decode
           mime-string->content-type
-          mime-eol-str)
+          mime-eol-str
+          content-type-header-value-to-string
+          mime-text-default-content-type)
   (import (spheres/algorithm u8vector)
-          (spheres/string u8vector))
+          (spheres/string u8vector)
+          (spheres/dataenc base64))
 
   (include "mime.scm"))
