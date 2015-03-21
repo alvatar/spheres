@@ -543,7 +543,7 @@
                            positional-reqs/opts
                            named
                            lst)
-                (error "syntax error in formal parameter list"))))
+                (error "syntax error in formal parameter list: " formals))))
       (define (parse-end positional-before-named?
                          positional-reqs/opts
                          named
@@ -558,9 +558,9 @@
                 (keys
                  (map car named)))
             (cond ((duplicates? vars)
-                   (error "duplicate variable in formal parameter list"))
+                   (error "duplicate variable in formal parameter list: " formals))
                   ((duplicates? keys)
-                   (error "duplicate keyword in formal parameter list"))
+                   (error "duplicate keyword in formal parameter list: " formals))
                   (else
                    (list positional-before-named?
                          positional-reqs
