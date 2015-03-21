@@ -301,8 +301,9 @@
      (display-crlf port "Set-Cookie: " (cookie-to-http val)))
    tbl))
 
-;; Not needed, as we have the 1970 timestamp set on value = #f or/and expires = 'delete .
-;; (define date-in-the-past (make-date 0 0 0 0 1 1 1990 0))
+;; ** Not needed, as we have the 1970 timestamp set on value = #f or/and expires = 'delete .**
+;; (but required in cookie-id-base-session-store!)
+(define date-in-the-past (make-date 0 0 0 0 1 1 1990 0))
                                         ;
 ;; This is the unoptimized version of |cookies->|. If you have a sack app that reads
 ;; and sets cookies on every invocation, this implementation is mariginally faster.

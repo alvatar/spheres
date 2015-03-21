@@ -32,7 +32,8 @@
    ;; Deserializes string in the raw form provided in the Cookie: header in HTTP requests to a list of cookie objects.
    cookie-parse-to-list
    ;; Takes a cookie object and serializes it to the format output in Set-Cookie: HTTP response headers.
-   cookie-to-http)
+   cookie-to-http
+   date-in-the-past)
 
   (import (spheres/os date-time)
           (spheres/string string)
