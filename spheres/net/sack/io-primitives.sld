@@ -6,7 +6,8 @@
           io-primitives-read-u8
           io-primitives-read-line-until-crlf
           io-primitives#with-io-primitives
-          with-standard-primitives)
+          with-standard-primitives
+          make-standard-primitives)
 
   (define-macro (io-primitives-read-subu8vector v)
     `(vector-ref ,v 0))
