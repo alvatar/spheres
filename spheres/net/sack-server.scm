@@ -706,7 +706,7 @@
                                   d))
                             )))
          (headers
-          (lambda (name #!optional only-first?)
+          (lambda* (name (only-first? #f))
             (if (procedure? name)
                 (for-each (lambda (pair)
                             (name (car pair) (cdr pair)))
