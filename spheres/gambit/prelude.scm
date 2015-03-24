@@ -5,7 +5,10 @@
 ;;------------------------------------------------------------------------------
 ;; Overriding INCLUDE
 
+(define ##show-loaded/included-files #f)
+
 (define-macro (include ?file)
+  (if ##show-loaded/included-files (println "include: " ?file))
   (let ((forms (with-input-from-file ?file read-all)))
     ;; Force expand-time evaluation of loaded libraries
     (for-each
@@ -26,6 +29,7 @@
                  ((string=? ".sld" (path-extension file-or-library))
                   (apply %load-library (cadar (with-input-from-file file-or-library read-all)) extra))
                  (else
+                  (if ##show-loaded/included-files (println "load: " file-or-library))
                   `(##load ,file-or-library (lambda (_ __) #f) #t #t #f))))
           ((%library? file-or-library)
            (let ((output (apply %load-library file-or-library extra)))
@@ -34,7 +38,10 @@
                           (if (eq? (car x) 'load)
                               (if (string=? ".scm" (path-extension (cadr x)))
                                   (cons 'include (cdr x))
-                                  `(##load ,(cadr x) (lambda (_ __) #f) #t #t #f))
+                                  (begin
+                                    (if ##show-loaded/included-files
+                                        (println "load: " (object->string file-or-library)))
+                                    `(##load ,(cadr x) (lambda (_ __) #f) #t #t #f)))
                               x))
                         (cdr output)))))
           (else
