@@ -3,47 +3,64 @@
 
 
 ;;------------------------------------------------------------------------------
-;; Overriding INCLUDE
+;; Overriding INCLUDE and LOAD
 
-(define ##show-loaded/included-files #f)
+(define ##show-loaded/included-files #t)
 
-(define-macro (include ?file)
-  (if ##show-loaded/included-files (println "include: " ?file))
-  (let ((forms (with-input-from-file ?file read-all)))
-    ;; Force expand-time evaluation of loaded libraries
-    (for-each
-     (lambda (f)
-       (if (pair? f)
-           (case (car f)
-             ((load)
-              (if (null? (cdr f)) (error "Wrong load syntax"))
-              `(load ,(cdr f))))))
-     forms)
-    `(begin ,@forms)))
+(define-macro (include file-or-library)
+  (let ((file (cond ((string? file-or-library)
+                     (if ##show-loaded/included-files
+                         (println "include: " file-or-library))
+                     file-or-library)
+                    ((%library? file-or-library)
+                     (if ##show-loaded/included-files
+                         (println "include: " (object->string file-or-library)))
+                     (%find-library-scm file-or-library))
+                    (else
+                     (error "include -- library or file required: " file-or-library)))))
+    (or (file-exists? file)
+        (error "include -- file not found: " file))
+    (let ((forms (with-input-from-file file read-all)))
+      ;; Force expand-time evaluation of loaded libraries
+      (for-each
+       (lambda (f)
+         (if (pair? f)
+             (case (car f)
+               ((load)
+                (if (null? (cdr f)) (error "Wrong load syntax"))
+                `(load ,(cdr f))))))
+       forms)
+      `(begin ,@forms))))
 
 (define-macro load
   (lambda (file-or-library . extra)
     (cond ((string? file-or-library)
-           (cond ((string=? ".scm" (path-extension file-or-library))
-                  (list 'include file-or-library))
-                 ((string=? ".sld" (path-extension file-or-library))
-                  (apply %load-library (cadar (with-input-from-file file-or-library read-all)) extra))
-                 (else
-                  (if ##show-loaded/included-files (println "load: " file-or-library))
-                  `(##load ,file-or-library (lambda (_ __) #f) #t #t #f))))
+           (parameterize
+            ((current-directory (path-directory file-or-library)))
+            (cond ((string=? ".scm" (path-extension file-or-library))
+                   (list 'include file-or-library))
+                  ((string=? ".sld" (path-extension file-or-library))
+                   (apply %load-library
+                          (cadar (with-input-from-file file-or-library read-all))
+                          extra))
+                  (else
+                   (if ##show-loaded/included-files (println "load: " file-or-library))
+                   `(##load ,file-or-library (lambda (_ __) #f) #t #t #f)))))
           ((%library? file-or-library)
-           (let ((output (apply %load-library file-or-library extra)))
-             (cons '##begin
-                   (map (lambda (x)
-                          (if (eq? (car x) 'load)
-                              (if (string=? ".scm" (path-extension (cadr x)))
-                                  (cons 'include (cdr x))
-                                  (begin
-                                    (if ##show-loaded/included-files
-                                        (println "load: " (object->string file-or-library)))
-                                    `(##load ,(cadr x) (lambda (_ __) #f) #t #t #f)))
-                              x))
-                        (cdr output)))))
+           (parameterize
+            ((current-directory (%find-library-path file-or-library)))
+            (let ((output (apply %load-library file-or-library extra)))
+              (cons '##begin
+                    (map (lambda (x)
+                           (if (eq? (car x) 'load)
+                               (if (string=? ".scm" (path-extension (cadr x)))
+                                   (cons 'include (cdr x))
+                                   (begin
+                                     (if ##show-loaded/included-files
+                                         (println "load: " (object->string file-or-library)))
+                                     `(##load ,(cadr x) (lambda (_ __) #f) #t #t #f)))
+                               x))
+                         (cdr output))))))
           (else
            (error "load -- library or file required: " file-or-library)
            #!void))))

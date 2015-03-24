@@ -24,6 +24,6 @@
            (debug-source)
            (debug-environments))
   (println "-- environment: debug -- preloaded libraries: (spheres/core meta) (spheres/core assert)")
-  (load (spheres/core assert) silent: #t))
+  (load (spheres/core assert)))
  ;; Null Environment
  (else #!void))
