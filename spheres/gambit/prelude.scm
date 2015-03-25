@@ -5,7 +5,7 @@
 ;;------------------------------------------------------------------------------
 ;; Overriding INCLUDE and LOAD
 
-(define ##show-loaded/included-files #t)
+(define ##show-loaded/included-files #f)
 
 (define-macro (include file-or-library)
   (let ((file (cond ((string? file-or-library)
@@ -40,6 +40,8 @@
             (cond ((string=? ".scm" (path-extension file-or-library))
                    (list 'include file-or-library))
                   ((string=? ".sld" (path-extension file-or-library))
+                   (or (file-exists? file-or-library)
+                       (error "load -- file not found: " file-or-library))
                    (apply %load-library
                           (cadar (with-input-from-file file-or-library read-all))
                           extra))
