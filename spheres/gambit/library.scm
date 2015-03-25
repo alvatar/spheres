@@ -55,7 +55,7 @@
 ;;------------------------------------------------------------------------------
 ;;!! R7RS libraries
 
-(define^ (filter pred lst)
+(define^ (%library:filter pred lst)
   (define (foldr func end lst)
     (if (null? lst)
         end
@@ -189,7 +189,7 @@
               (and full-definition
                    (let ((declaration (cons
                                        (cadr full-definition) ;; add the library name
-                                       (filter
+                                       (%library:filter
                                         (lambda (expr) (or (eq? (car expr) 'import)
                                                       (eq? (car expr) 'export)
                                                       (eq? (car expr) 'rename)
@@ -254,12 +254,13 @@
         (let* ((file-sexps (with-input-from-file lib-sld read))
                (define-library-args (cdr file-sexps))
                (expanded-cond-features (%expand-cond-features define-library-args))
-               (syntax-defines (filter (lambda (sexp) (let ((head-sexp (car sexp)))
-                                                   (or (eq? head-sexp 'define-syntax)
-                                                       (eq? head-sexp 'define-macro)
-                                                       (eq? head-sexp '##begin)
-                                                       (eq? head-sexp 'begin))))
-                                       expanded-cond-features))
+               (syntax-defines (%library:filter
+                                (lambda (sexp) (let ((head-sexp (car sexp)))
+                                            (or (eq? head-sexp 'define-syntax)
+                                                (eq? head-sexp 'define-macro)
+                                                (eq? head-sexp '##begin)
+                                                (eq? head-sexp 'begin))))
+                                expanded-cond-features))
                (syntax-definitions (make-table))
                (found-imports '())
                (found-exports '())
@@ -337,8 +338,8 @@
 ;; Builds a ##namespace form for the library
 (define^ (%library-make-namespace-form lib exports macro-defs #!key (allow-empty? #f))
   (let ((non-macro-exports
-         (filter (lambda (i) (not (table-ref macro-defs i #f)))
-                 exports)))
+         (%library:filter (lambda (i) (not (table-ref macro-defs i #f)))
+                          exports)))
     (if (and (not allow-empty?) (null? non-macro-exports))
         '()
         `((##namespace (,(string-append
