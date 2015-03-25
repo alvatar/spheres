@@ -73,8 +73,16 @@
                        (path-strip-trailing-directory-separator path)
                        "/")))))
 
+;;! Throw a library parse error
+(define^ (%library-error-parse lib)
+  (error "Error parsing library declaration: " lib))
+
+;;! Throw a library not found error
+(define^ (%library-error-not-found lib)
+  (error "Library not found: " lib))
+
 (define^ (%find-library lib)
-  (if (not (%library? lib)) (%library-error lib))
+  (if (not (%library? lib)) (%library-error-parse lib))
   (let ((package (symbol->string (car lib)))
         (module (and (= (length lib) 2) (cadr lib))))
     (let* ((lib-relative (string-append package "/" (symbol->string module)))
@@ -94,13 +102,9 @@
                            ,(string-append option-system ".sld") ;; Third option
                            ,(string-append option-system ".scm")))) ;; Fourth option
         (let find ((l try-options))
-          (cond ((null? l) (error "Library not found -" lib))
+          (cond ((null? l) (%library-error-not-found lib))
                 ((file-exists? (car l)) (car l))
                 (else (find (cdr l)))))))))
-
-;;! Throw a library format error
-(define^ (%library-error lib)
-  (error "Error parsing library declaration: " lib))
 
 ;;! Library format check
 ;; It's a list of 1 or 2 elements
