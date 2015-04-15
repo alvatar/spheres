@@ -353,7 +353,7 @@
 (define^ (%library-make-prelude lib #!optional (imports (%library-imports lib)))
   (if (%find-library-sld lib)
       `(,@(%library-make-namespace-form lib '() '() allow-empty?: #t)
-        (##include "~~/lib/gambit#.scm")
+        (##include "~~lib/gambit#.scm")
         (##namespace ("" $make-environment
                       $sc-put-cte
                       $syntax-dispatch
