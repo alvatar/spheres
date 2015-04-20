@@ -52,7 +52,7 @@
          (syntax (begin
                    (define type-dtor
                      (##structure ##type-type
-                                  (##make-uninterned-symbol type-dtor-string)
+                                  (##string->uninterned-symbol type-dtor-string)
                                   'name
                                   8
                                   #f
