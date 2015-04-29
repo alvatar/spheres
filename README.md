@@ -1,5 +1,7 @@
 # [Spheres](http://www.schemespheres.org)
 
+[![Join the chat at https://gitter.im/fourthbit/spheres](https://badges.gitter.im/Join%20Chat.svg)](https://gitter.im/fourthbit/spheres?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
+
 _A set of tools and libraries for real-life Scheme. Multiplatform and mobile._
 
 [Visit the project web page](http://www.schemespheres.org).
