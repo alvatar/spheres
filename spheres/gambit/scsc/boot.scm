@@ -15,7 +15,7 @@
  '(include "syntax-case-prelude.scm"))
 
 (define psyntaxpp
-  "psyntax.pp")
+  "psyntax-gambit.pp")
 
 (define psyntaxss
   "psyntax.ss")

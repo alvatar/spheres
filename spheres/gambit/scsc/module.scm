@@ -130,7 +130,7 @@
                (cons-module-file-mids!
                 (lambda (id b top-token)
                   (set! module-file-mids
-                        (cons (syntax->datum id) module-file-mids)))))
+                        (cons (syntax-object->datum id) module-file-mids)))))
           (and (module-file? file)
                (parameterize (($sc-put-cte cons-module-file-mids!))
                  (let ((load-module $load-module))
@@ -145,7 +145,7 @@
                    (set! $load-module load-module))))
           module-file-mids))
 
-      (let ((mid (syntax->datum mid)))
+      (let ((mid (syntax-object->datum mid)))
         (if (memq mid module-file-mids)
             (let reload ((load-time (time->seconds (current-time))))
               (begin-change-time-analysis! mid file path)
@@ -188,7 +188,7 @@
                       'unknown
                       (raise e)))
            (lambda ()
-             (let ((update! (table-ref mid->update! (syntax->datum mid))))
+             (let ((update! (table-ref mid->update! (syntax-object->datum mid))))
                (update!)
                'success)))))
   

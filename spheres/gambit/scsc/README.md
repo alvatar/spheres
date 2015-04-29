@@ -175,34 +175,6 @@ The scsc provides complete support for DSSSL lambda formals;
 i.e. those that include one or more of `#!optional`, `#!keyword`, or
 `#!rest` variables.
 
-gambit/struct
-----------------
-
-The scsc provides support for native gambit structure syntax in the
-`gambit/struct` module:
-
-```scheme
-> (import gambit/struct)
-> (define-structure point x y)
-> (make-point 1 2)
-#<point #2 x: 1 y: 2>
-> (point-x #2)
-1
-> (point-y #2)
-2
-> (point? #2)
-#t
-> (point? 1)
-#f
-> (set-point-x! #2 4)
-> #2
-#<point #2 x: 4 y: 2>
-> (set-point-y! #2 5)
-> #2
-#<point #2 x: 4 y: 5>
->
-```
-
 Roadmap
 -------
 

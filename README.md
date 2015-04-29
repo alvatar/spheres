@@ -7,7 +7,7 @@ _A set of tools and libraries for real-life Scheme. Multiplatform and mobile._
 
 ## Installation
 
-1. Compile the syntax expander: go to /spheres/gambit/scsc and run ./compile
+1. Compile the syntax expander: go to /spheres/gambit and run ./compile-scsc.sh
 2. Copy the .gambcini file to your HOME directory. This is Gambit's initialization file.
 3. (optional) Copy the _spheres/_ directory into your Gambit's installation library directory (i.e. /usr/local/Gambit/lib)
 4. Update all .gambcini paths to where your Spheres files are located (either Gambit's library directory, if you copied the files there, or any other path where you choose to leave Spheres' files).

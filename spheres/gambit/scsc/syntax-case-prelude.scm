@@ -1,6 +1,6 @@
 ;;;============================================================================
 
-;;; File: "syntax-case.scm", Time-stamp: <2014-03-21 22:26:28 matthastie>
+;;; File: "syntax-case.scm", Time-stamp: <2013-09-17 09:08:23 feeley>
 
 ;;; Copyright (c) 1998-2008 by Marc Feeley, All Rights Reserved.
 

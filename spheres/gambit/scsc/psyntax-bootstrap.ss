@@ -528,10 +528,33 @@
 
 (define-structure (syntax
                    id: 2D9C624D-3630-42AF-884C-FD82C537B2D7
-                   predicate: syntax?
+                   predicate: bs-syntax?
                    constant-constructor: #f
-                   (expression syntax-expression)
-                   (wrap syntax-wrap)))
+                   (expression bs-syntax-expression)
+                   (wrap bs-syntax-wrap)))
+
+(begin
+  (define (syntax? obj)
+    (or (bs-syntax? obj)
+        (let ((obj (if (annotation? obj)
+                       (annotation-stripped obj)
+                       obj)))
+          (and (vector? obj)
+               (eq? (vector-ref obj 0) 'syntax)))))
+  (define (syntax-expression obj)
+    (if (bs-syntax? obj)
+        (bs-syntax-expression obj)
+        (let ((obj (if (annotation? obj)
+                       (annotation-stripped obj)
+                       obj)))
+          (vector-ref obj 1))))
+  (define (syntax-wrap obj)
+    (if (bs-syntax? obj)
+        (bs-syntax-wrap obj)
+        (let ((obj (if (annotation? obj)
+                       (annotation-stripped obj)
+                       obj)))
+          (vector-ref obj 2)))))
 
 ;;; hooks to nonportable run-time helpers
 (begin
@@ -1118,18 +1141,115 @@
 
 (define-structure (ribcage 
                    id: 0E54356E-1759-409D-AB3F-0E5AD9E68939
-                   predicate: ribcage?
+                   predicate: bs-ribcage?
                    constant-constructor: #f
-                   (symnames ribcage-symnames set-ribcage-symnames!)
-                   (marks ribcage-marks set-ribcage-marks!)
-                   (labels ribcage-labels set-ribcage-labels!)))
+                   (symnames bs-ribcage-symnames set-bs-ribcage-symnames!)
+                   (marks bs-ribcage-marks set-bs-ribcage-marks!)
+                   (labels bs-ribcage-labels set-bs-ribcage-labels!)))
+(begin
+  (define (ribcage? obj)
+    (or (bs-ribcage? obj)
+        (let ((obj (if (annotation? obj)
+                       (annotation-stripped obj)
+                       obj)))
+          (and (vector? obj)
+               (eq? (vector-ref obj 0) 'ribcage)))))
+
+  (define (ribcage-symnames obj)
+    (if (bs-ribcage? obj)
+        (bs-ribcage-symnames obj)
+        (let ((obj (if (annotation? obj)
+                       (annotation-stripped obj)
+                       obj)))
+          (vector-ref obj 1))))
+  
+  (define (set-ribcage-symnames! obj val)
+    (if (bs-ribcage? obj)
+        (set-bs-ribcage-symnames! obj val)
+        (let ((obj (if (annotation? obj)
+                       (annotation-stripped obj)
+                       obj)))
+          (vector-set! obj 1 val))))
+
+  (define (ribcage-marks obj)
+    (if (bs-ribcage? obj)
+        (bs-ribcage-marks obj)
+        (let ((obj (if (annotation? obj)
+                       (annotation-stripped obj)
+                       obj)))
+          (vector-ref obj 2))))
+
+  (define (set-ribcage-marks! obj val)
+    (if (bs-ribcage? obj)
+        (set-bs-ribcage-marks! obj val)
+        (let ((obj (if (annotation? obj)
+                       (annotation-stripped obj)
+                       obj)))
+          (vector-set! obj 2 val))))
+
+  (define (ribcage-labels obj)
+    (if (bs-ribcage? obj)
+        (bs-ribcage-labels obj)
+        (let ((obj (if (annotation? obj)
+                       (annotation-stripped obj)
+                       obj)))
+          (vector-ref obj 3))))
+
+  (define (set-ribcage-labels! obj val)
+    (if (bs-ribcage? obj)
+        (set-bs-ribcage-labels! obj val)
+        (let ((obj (if (annotation? obj)
+                       (annotation-stripped obj)
+                       obj)))
+          (vector-set! obj 3 val)))))
 
 (define-structure (top-ribcage
                    id: E14B1CA5-AADF-4FF2-9EAA-70CCC11E5A91
-                   predicate: top-ribcage?
+                   predicate: bs-top-ribcage?
                    constant-constructor: #f
-                   (key top-ribcage-key set-top-ribcage-key!)
-                   (mutable? top-ribcage-mutable? set-top-ribcage-mutable?!)))
+                   (key bs-top-ribcage-key set-bs-top-ribcage-key!)
+                   (mutable? bs-top-ribcage-mutable? set-bs-top-ribcage-mutable?!)))
+
+(begin
+  (define (top-ribcage? obj)
+    (or (bs-top-ribcage? obj)
+        (let ((obj (if (annotation? obj)
+                       (annotation-stripped obj)
+                       obj)))
+          (and (vector? obj)
+               (eq? (vector-ref obj 0) 'top-ribcage)))))
+  
+  (define (top-ribcage-key obj)
+    (if (bs-top-ribcage? obj)
+        (bs-top-ribcage-key obj)
+        (let ((obj (if (annotation? obj)
+                       (annotation-stripped obj)
+                       obj)))
+          (vector-ref obj 1))))
+
+  (define (set-top-ribcage-key! obj val)
+    (if (bs-top-ribcage? obj)
+        (set-bs-top-ribcage-key! obj val)
+        (let ((obj (if (annotation? obj)
+                       (annotation-stripped obj)
+                       obj)))
+          (vector-set! obj 1 val))))
+
+  (define (top-ribcage-mutable? obj)
+    (if (bs-top-ribcage? obj)
+        (bs-top-ribcage-mutable? obj)
+        (let ((obj (if (annotation? obj)
+                       (annotation-stripped obj)
+                       obj)))
+          (vector-ref obj 2))))
+  
+  (define (set-top-ribcage-mutable?! obj val)
+    (if (bs-top-ribcage? obj)
+        (set-bs-top-ribcage-mutable?! obj val)
+        (let ((obj (if (annotation? obj)
+                       (annotation-stripped obj)
+                       obj)))
+          (vector-set! obj 2 val)))))
 
 (define-structure (import-interface interface new-marks))
 (define-structure (env top-ribcage wrap))
