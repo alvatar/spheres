@@ -70,4 +70,4 @@
 ;;! double
 (c-define-sizeof double)
 (c-define-array double
-                scheme-vector: f32)
+                scheme-vector: f64)
