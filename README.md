@@ -12,7 +12,11 @@ _A set of tools and libraries for real-life Scheme. Multiplatform and mobile._
 3. (optional) Copy the _spheres/_ directory into your Gambit's installation library directory (i.e. /usr/local/Gambit/lib)
 4. Update all .gambcini paths to where your Spheres files are located (either Gambit's library directory, if you copied the files there, or any other path where you choose to leave Spheres' files).
 
-Spheres requires the [Gambit Scheme compiler](http://gambitscheme.org). However, some libraries in Spheres are already compatible with r7rs implementations such as Chibi.
+### Scheme implementation requirements
+
+[![Gambit Version](http://img.shields.io/badge/Gambit version -4.7.5-blue.svg)](http://gambitscheme.org)
+
+Some libraries in Spheres are already compatible with r7rs implementations such as Chibi, but only Gambit is actively supported.
 
 
 ## Basic usage
