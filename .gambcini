@@ -1,17 +1,37 @@
 ;; SchemeSpheres configuration file for Gambit
+;; For setup, you need to update 1) and 2)
+
+;; -- 1) ADD THE DIRECTORY WHERE YOU HAVE THE ROOT /spheres
+(define %%spheres-dir
+  (let ((choose-first-exists
+	 (lambda (paths)
+	   (let recur ((paths paths))
+	     (cond ((null? paths) (error "Provided root directories do not exist"))
+		   ((file-exists? (car paths))
+		    (car paths))
+		   (else (recur (cdr paths))))))))
+    (choose-first-exists
+     '("~/spheres/"
+       "~/Dropbox/projects/spheres/"))))
 
 ;; Define and load syntax-case expander
-(define %%syntax-case-file "~/Dropbox/projects/spheres/spheres/gambit/syntax-case.o1")
+(define %%syntax-case-file (string-append
+			    %%spheres-dir
+			    "spheres/gambit/syntax-case.o1"))
 (load %%syntax-case-file)
-
 ;; Eval Gambit prelude for SchemeSpheres
-(for-each eval (with-input-from-file "~/Dropbox/projects/spheres/spheres/gambit/prelude.scm" read-all))
+(for-each eval (with-input-from-file
+		   (string-append %%spheres-dir "spheres/gambit/prelude.scm")
+		 read-all))
 
 ;; Gambit lightweight library support
-(include "~/Dropbox/projects/spheres/spheres/gambit/library.scm")
-;; Add custom directory for library paths
-(%add-library-path! "/Users/Alvaro/Dropbox/projects/spheres/")
+(parameterize ((current-directory %%spheres-dir)) (include "spheres/gambit/library.scm"))
+
+;; -- 2) ADD LIBRARY PATHS
+(%add-library-path! %%spheres-dir)
 
 ;; Environment
 (eval '(add-cond-expand-feature! debug))
-(eval '(include "~/Dropbox/projects/spheres/spheres/gambit/environments.scm"))
+(eval `(include ,(string-append %%spheres-dir "spheres/gambit/environments.scm")))
+
+(println "Spheres v10")
