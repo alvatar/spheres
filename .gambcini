@@ -1,8 +1,16 @@
 ;; SchemeSpheres configuration file for Gambit
 ;; For setup, you need to update 1) and 2)
 
-;; -- 1) ADD THE DIRECTORY WHERE YOU HAVE THE ROOT /spheres
-(define %%spheres-dir
+;; -- 1) ADD THE DIRECTORY THE ROOT /spheres, AND PATHS WHERE YOU HAVE THE LIBRARIES
+(define %%spheres-root-search-paths
+  '("~/spheres/"
+    "~/Dropbox/projects/spheres/"))
+(define %%spheres-library-paths
+  '("~/spheres/"
+    "~/Dropbox/projects/spheres/"))
+
+;; Find the Spheres root dir among the given search paths
+(define %%spheres-root-dir
   (let ((choose-first-exists
 	 (lambda (paths)
 	   (let recur ((paths paths))
@@ -10,28 +18,23 @@
 		   ((file-exists? (car paths))
 		    (car paths))
 		   (else (recur (cdr paths))))))))
-    (choose-first-exists
-     '("~/spheres/"
-       "~/Dropbox/projects/spheres/"))))
-
-;; Define and load syntax-case expander
-(define %%syntax-case-file (string-append
-			    %%spheres-dir
-			    "spheres/gambit/syntax-case.o1"))
-(load %%syntax-case-file)
-;; Eval Gambit prelude for SchemeSpheres
-(for-each eval (with-input-from-file
-		   (string-append %%spheres-dir "spheres/gambit/prelude.scm")
-		 read-all))
+    (choose-first-exists %%spheres-root-search-paths)))
 
 ;; Gambit lightweight library support
-(parameterize ((current-directory %%spheres-dir)) (include "spheres/gambit/library.scm"))
+(for-each eval (with-input-from-file
+                   (string-append %%spheres-root-dir "spheres/gambit/library.scm")
+		 read-all))
 
-;; -- 2) ADD LIBRARY PATHS
-(%add-library-path! %%spheres-dir)
+;; Load syntax-case expander
+(load (string-append %%spheres-root-dir "spheres/gambit/syntax-case.o1"))
 
-;; Environment
+;; Eval Gambit prelude for SchemeSpheres
+(for-each eval (with-input-from-file
+		   (string-append %%spheres-root-dir "spheres/gambit/prelude.scm")
+		 read-all))
+
+(for-each %add-library-path! %%spheres-library-paths)
+
+;; -- 2) SET UP AN ENVIRONMENT
 (eval '(add-cond-expand-feature! debug))
-(eval `(include ,(string-append %%spheres-dir "spheres/gambit/environments.scm")))
-
-(println "Spheres v10")
+(eval `(include ,(string-append %%spheres-root-dir "spheres/gambit/environments.scm")))

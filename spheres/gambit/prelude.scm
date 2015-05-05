@@ -7,7 +7,14 @@
 
 (define ##show-loaded/included-files #f)
 
+;; Provide any of this options:
+;; - a file path
+;; - a library definition
+;; - a procedure that one run yields a file path
 (define-macro (include file-or-library)
+  ;; Allow building paths as a result of a procedure
+  (if (procedure? file-or-library)
+      (set! file-or-library (file-or-library)))
   (let ((file (cond ((string? file-or-library)
                      (if ##show-loaded/included-files
                          (println "include: " file-or-library))
@@ -20,17 +27,19 @@
                      (error "include -- library or file required: " file-or-library)))))
     (or (file-exists? file)
         (error "include -- file not found: " file))
-    (let ((forms (with-input-from-file file read-all)))
-      ;; Force expand-time evaluation of loaded libraries
-      (for-each
-       (lambda (f)
-         (if (pair? f)
-             (case (car f)
-               ((load)
-                (if (null? (cdr f)) (error "Wrong load syntax"))
-                `(load ,(cdr f))))))
-       forms)
-      `(begin ,@forms))))
+    (parameterize
+     ((current-directory (path-directory file)))
+     (let ((forms (with-input-from-file (path-strip-directory file) read-all)))
+       ;; Force expand-time evaluation of loaded libraries
+       (for-each
+        (lambda (f)
+          (if (pair? f)
+              (case (car f)
+                ((load)
+                 (if (null? (cdr f)) (error "Wrong load syntax"))
+                 `(load ,(cdr f))))))
+        forms)
+       `(begin ,@forms)))))
 
 (define-macro load
   (lambda (file-or-library . extra)
