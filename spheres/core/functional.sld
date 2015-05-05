@@ -29,7 +29,6 @@
           ;; memoization
           memoize/key-gen
           memoize)
-  (import (gambit))
 
   ;;------------------------------------------------------------------------------
   ;;! SRFI-26 Notation for Specializing Parameters without Currying
