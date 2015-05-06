@@ -14,6 +14,7 @@ install:
   - export PATH="$PATH:/usr/local/Gambit-C/bin/"
   - sudo PATH="$PATH:/usr/local/Gambit-C/bin/" ./install.sh
   - cd ..
+  - wget https://raw.githubusercontent.com/fourthbit/spheres/master/.gambcini
 
 script:
   - ssrun
