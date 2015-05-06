@@ -3,7 +3,6 @@
 _A set of tools and libraries for real-life Scheme. Multiplatform and mobile._
 
 [![Join the chat at https://gitter.im/fourthbit/spheres](https://badges.gitter.im/Join%20Chat.svg)](https://gitter.im/fourthbit/spheres?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
-[![Build Status](https://travis-ci.org/fourthbit/spheres.svg?branch=master)](https://travis-ci.org/fourthbit/spheres)
 
 
 ## Installation
@@ -16,6 +15,7 @@ _A set of tools and libraries for real-life Scheme. Multiplatform and mobile._
 ### Scheme implementation requirements
 
 [![Gambit Version](http://img.shields.io/badge/Gambit version -4.7.5-blue.svg)](http://gambitscheme.org)
+[![Build Status](https://travis-ci.org/fourthbit/spheres.svg?branch=master)](https://travis-ci.org/fourthbit/spheres)
 
 Some libraries in Spheres are already compatible with r7rs implementations such as Chibi, but only Gambit is actively supported.
 
