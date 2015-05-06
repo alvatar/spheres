@@ -3,6 +3,7 @@
 _A set of tools and libraries for real-life Scheme. Multiplatform and mobile._
 
 [![Join the chat at https://gitter.im/fourthbit/spheres](https://badges.gitter.im/Join%20Chat.svg)](https://gitter.im/fourthbit/spheres?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
+[![Build Status](https://travis-ci.org/fourthbit/spheres.svg?branch=master)](https://travis-ci.org/fourthbit/spheres)
 
 
 ## Installation
