@@ -18,5 +18,5 @@
           string-split
           string-concatenate
           string-join)
-  (import (gambit))
+
   (include "minimal.scm"))

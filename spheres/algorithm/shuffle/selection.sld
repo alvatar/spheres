@@ -6,4 +6,4 @@
   (export selection-shuffle-list
           selection-shuffle-list!)
 
-  (incliude "selection.scm"))
+  (include "selection.scm"))

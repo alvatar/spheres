@@ -4,4 +4,4 @@
 (define-library (spheres/algorithm/random pick)
   (export random-pick)
     
-  (include "random-pick.scm"))
+  (include "pick.scm"))

@@ -20,4 +20,6 @@
        (define ?name
          (lambda (?args)
            (%%accum-time '?name
-                         (lambda () . ?body))))))))
+                         (lambda () . ?body)))))))
+
+  (include "profile.scm"))

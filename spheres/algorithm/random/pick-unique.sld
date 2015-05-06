@@ -5,4 +5,4 @@
   (export random-pick-unique)
   (import (spheres/algorithm list))
   
-  (include "random-pick-unique.scm"))
+  (include "pick-unique.scm"))

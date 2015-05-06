@@ -63,8 +63,7 @@
           compare-by=/<
           compare-by=/>
           debug-compare)
-  (import (gambit)
-          (spheres/core base))
+  (import (spheres/core base))
 
   ;;! 3-sided conditional
   (define-syntax if3

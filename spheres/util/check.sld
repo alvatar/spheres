@@ -26,7 +26,7 @@
              (if (>= check:mode 1)
                  (check:proc-ec
                   (let ((cases 0))
-                    (let ((w (first-ec 
+                    (let ((w (first-ec
                               #f
                               qualifiers
                               (:let equal-pred equal)
@@ -42,9 +42,9 @@
                                     cases))))
                       (if w
                           (cons #f w)
-                          (list #t 
-                                '(check-ec qualifiers 
-                                           expr (=> equal) 
+                          (list #t
+                                '(check-ec qualifiers
+                                           expr (=> equal)
                                            expected (arg ...))
                                 (if #f #f)
                                 (if #f #f)
@@ -71,4 +71,6 @@
         ((check-ec (nested q1 ...) q etc ...)
          (check-ec (nested q1 ... q) etc ...))
         ((check-ec q1 q2             etc ...)
-         (check-ec (nested q1 q2)    etc ...))))))
+         (check-ec (nested q1 q2)    etc ...)))))
+
+  (include "check.scm"))

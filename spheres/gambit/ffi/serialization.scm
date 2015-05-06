@@ -10,7 +10,8 @@
 
 ;;------------------------------------------------------------------------------
 
-(include "macros.scm")
+(include "c-define-base-macros#.scm")
+(include "c-define-reader#.scm")
 
 ;;!! C Types: readers/writers
 ;;
