@@ -3,11 +3,13 @@
 
 ;; -- 1) ADD THE DIRECTORY THE ROOT /spheres, AND PATHS WHERE YOU HAVE THE LIBRARIES
 (define %%spheres-root-search-paths
-  '("~/spheres/"
-    "~/Dropbox/projects/spheres/"))
+  `("~/spheres"
+    "~/Dropbox/projects/spheres"
+    ,(with-exception-handler (lambda (e) "~~") (lambda () (getenv "TRAVIS_BUILD_DIR")))))
 (define %%spheres-library-paths
-  '("~/spheres/"
-    "~/Dropbox/projects/spheres/"))
+  `("~/spheres"
+    "~/Dropbox/projects/spheres"
+    ,(with-exception-handler (lambda (e) "~~") (lambda () (getenv "TRAVIS_BUILD_DIR")))))
 
 ;; Find the Spheres root dir among the given search paths
 (define %%spheres-root-dir
@@ -22,19 +24,19 @@
 
 ;; Gambit lightweight library support
 (for-each eval (with-input-from-file
-                   (string-append %%spheres-root-dir "spheres/gambit/library.scm")
+                   (string-append %%spheres-root-dir "/spheres/gambit/library.scm")
 		 read-all))
 
 ;; Load syntax-case expander
-(load (string-append %%spheres-root-dir "spheres/gambit/syntax-case.o1"))
+(load (string-append %%spheres-root-dir "/spheres/gambit/syntax-case.o1"))
 
 ;; Eval Gambit prelude for SchemeSpheres
 (for-each eval (with-input-from-file
-		   (string-append %%spheres-root-dir "spheres/gambit/prelude.scm")
+		   (string-append %%spheres-root-dir "/spheres/gambit/prelude.scm")
 		 read-all))
 
 (for-each %add-library-path! %%spheres-library-paths)
 
 ;; -- 2) SET UP AN ENVIRONMENT
 (eval '(add-cond-expand-feature! debug))
-(eval `(include ,(string-append %%spheres-root-dir "spheres/gambit/environments.scm")))
+(eval `(include ,(string-append %%spheres-root-dir "/spheres/gambit/environments.scm")))

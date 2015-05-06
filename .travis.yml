@@ -11,12 +11,15 @@ install:
   - cd ..
   - git clone https://github.com/fourthbit/ssrun.git
   - cd ssrun
-  - export PATH="$PATH:/usr/local/Gambit-C/bin/"
   - sudo PATH="$PATH:/usr/local/Gambit-C/bin/" ./install.sh
   - cd ..
-  - wget https://raw.githubusercontent.com/fourthbit/spheres/master/.gambcini
+  - wget https://raw.githubusercontent.com/fourthbit/spheres/master/.gambcini -O ~/.gambcini
 
 script:
+  - export PATH="$PATH:/usr/local/Gambit-C/bin/"
+  - cd spheres/gambit
+  - ./compile-scsc.sh
+  - cd ../..
   - ssrun
 
 notifications:
