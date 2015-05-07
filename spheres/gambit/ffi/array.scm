@@ -13,7 +13,7 @@
 (include "c-define-base-macros#.scm")
 (include "c-define-type#.scm")
 (include "c-define-array#.scm")
-(include "types.scm")
+(include "types#.scm")
 
 ;;! C arrays
 
