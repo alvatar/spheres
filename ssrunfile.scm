@@ -138,6 +138,7 @@
     (spheres/structure avl-tree)
     (spheres/structure bb-tree)
     (spheres/structure bit-vector)
+    (spheres/structure circular-vector)
     (spheres/structure fifo)
     (spheres/structure hash-table)
     (spheres/structure hash-trie)
