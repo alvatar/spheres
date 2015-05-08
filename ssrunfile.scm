@@ -72,7 +72,7 @@
     (spheres/markup html-doctype)
     (spheres/markup html-escape)
     (spheres/markup stx)
-    (spheres/markup ssax)
+    (spheres/markup sxml-parser)
     (spheres/markup sxml-serializer)
     (spheres/markup sxml-tools)
     (spheres/markup sxml-tree-transform)
