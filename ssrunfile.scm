@@ -149,6 +149,7 @@
     (spheres/structure/multi-dimensional-array tter)
     (spheres/structure red-black-tree)
     (spheres/structure token-table)
+    (spheres/structure treap)
     (spheres/structure vlist)
     (spheres/structure zipper)
     (spheres/util check)
