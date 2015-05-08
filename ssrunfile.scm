@@ -24,6 +24,7 @@
     (spheres/algorithm sort-merge)
     (spheres/algorithm u8vector)
     (spheres/algorithm vector)
+    (spheres/concurrency mailbox)
     (spheres/concurrency termite)
     (spheres/core assert)
     (spheres/core base)
