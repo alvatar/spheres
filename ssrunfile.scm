@@ -150,6 +150,7 @@
     (spheres/structure/multi-dimensional-array tter)
     (spheres/structure red-black-tree)
     (spheres/structure sparse-vector)
+    (spheres/structure suffix-tree)
     (spheres/structure token-table)
     (spheres/structure treap)
     (spheres/structure vlist)
