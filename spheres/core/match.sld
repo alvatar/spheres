@@ -1,7 +1,11 @@
 ;;!!! Portable hygienic pattern matcher
 ;; .author Alex Shinn.
+;; .author Alvaro Castro-Castilla, 2015
+;;
 ;; This code is written by Alex Shinn and placed in the
 ;; Public Domain.  All warranties are disclaimed.
+;;
+;; Modifications for Gambit by Alvaro Castro-Castilla.
 
 ;;> @example-import[(srfi 9)]
 
@@ -210,6 +214,7 @@
 ;; performance can be found at
 ;;   http://synthcode.com/scheme/match-cond-expand.scm
 ;;
+;; 2015/05/09 - structure introspection in Gambit
 ;; 2012/12/26 - wrapping match-let&co body in lexical closure
 ;; 2012/11/28 - fixing typo s/vetor/vector in largely unused set! code
 ;; 2012/05/23 - fixing combinatorial explosion of code in certain or patterns
@@ -230,9 +235,17 @@
 ;; 2006/12/24 - bugfixes
 ;; 2006/12/01 - non-linear patterns, shared variables in OR, get!/set!
 
+;; Important note for Gambit: structures that want to use type matching need
+;; to define a type-exhibitor. Example:
+;;
+;; (define-record-type foo
+;;   type-exhibitor: foo
+;;   x
+;;   y)
+
 (define-library (spheres/core match)
   (export match)
-  
+
   ;; force compile-time syntax errors with useful messages
   (define-syntax match-syntax-error
     (syntax-rules ()
@@ -273,7 +286,7 @@
       ;; anonymous failure continuation, give it a dummy name
       ((match-next v g+s (pat . body) . rest)
        (match-next v g+s (pat (=> failure) . body) . rest))))
-  
+
 
   ;; First checks for ellipsis patterns, otherwise passes on to
   ;; MATCH-TWO.
@@ -349,9 +362,19 @@
            (match-one v (p ___) g+s sk fk i)
            fk))
       ((match-two v ($ rec p ...) g+s sk fk i)
-       (if (is-a? v rec)
-           (match-record-refs v rec 0 (p ...) g+s sk fk i)
-           fk))
+       (cond-expand
+        (gambit
+         (if (let ()
+               (##declare (extended-bindings))
+               (##structure-direct-instance-of? v (##type-id (rec))))
+             (match-record-refs v rec 0 (p ...) g+s sk fk i)
+             fk))
+        (gauche
+         (if (is-a? v rec)
+             (match-record-refs v rec 0 (p ...) g+s sk fk i)
+             fk))
+        (else
+         (error "Not implemented"))))
       ((match-two v (p . q) g+s sk fk i)
        (if (pair? v)
            (let ((w (car v)) (x (cdr v)))
@@ -644,14 +667,33 @@
                           (match-drop-ids (loop (+ j 1) (cons id id-ls) ...))
                           fk i)))))))
 
-  (define-syntax match-record-refs
-    (syntax-rules ()
-      ((_ v rec n (p . q) g+s sk fk i)
-       (let ((w (slot-ref rec v n)))
-         (match-one w p ((slot-ref rec v n) (slot-set! rec v n))
-                    (match-record-refs v rec (+ n 1) q g+s sk fk) fk i)))
-      ((_ v rec n () g+s (sk ...) fk i)
-       (sk ... i))))
+  (cond-expand
+   (gambit
+    (define-syntax match-record-refs
+      (syntax-rules ()
+        ((_ v rec n (p . q) g+s sk fk i)
+         (let ((w ((let ()
+                     (##declare (extended-bindings))
+                     ##direct-structure-ref)
+                   v
+                   (fx+ n 1)
+                   (rec)
+                   #f)))
+           (match-one w p ((slot-ref rec v n) (slot-set! rec v n))
+                      (match-record-refs v rec (+ n 1) q g+s sk fk) fk i)))
+        ((_ v rec n () g+s (sk ...) fk i)
+         (sk ... i)))))
+   (gauche
+    (define-syntax match-record-refs
+      (syntax-rules ()
+        ((_ v rec n (p . q) g+s sk fk i)
+         (let ((w (slot-ref rec v n)))
+           (match-one w p ((slot-ref rec v n) (slot-set! rec v n))
+                      (match-record-refs v rec (+ n 1) q g+s sk fk) fk i)))
+        ((_ v rec n () g+s (sk ...) fk i)
+         (sk ... i)))))
+   (else
+    (error "Not implemented")))
 
   ;; Extract all identifiers in a pattern.  A little more complicated
   ;; than just looking for symbols, we need to ignore special keywords
@@ -791,7 +833,7 @@
         let (v ... (tmp expr)) (p ... (#(a ...) tmp)) rest . body))
       ((_ let (v ...) (p ...) ((a expr) . rest) . body)
        (match-let/helper let (v ... (a expr)) (p ...) rest . body))))
-  
+
   (define-syntax match-named-let
     (syntax-rules ()
       ((_ loop ((pat expr var) ...) () . body)
