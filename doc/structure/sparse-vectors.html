@@ -1,0 +1,90 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<title>sparse-vectors - The Chicken Scheme wiki</title>
+<meta http-equiv="Content-Style-Type" content="text/css" />
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+<link rel="stylesheet" type="text/css" href="/chicken.css" /></head>
+<body>
+<div id="menu">
+<ul>
+<li><a href="/" class="internal">Wiki</a></li>
+<li><a href="http://code.call-cc.org/" class="external">Download</a></li>
+<li><a href="/manual/index" class="internal">Manual</a></li>
+<li><a href="/eggs" class="internal">Eggs</a></li>
+<li><a href="http://api.call-cc.org/doc/" class="external">API</a></li>
+<li><a href="http://tests.call-cc.org/" class="external">Tests</a></li>
+<li><a href="http://bugs.call-cc.org/" class="external">Bugs</a></li></ul></div>
+<div id="search">
+<form action="/search">
+<div><label>free text<input type="text" name="text" /></label><label>identifier<input type="text" name="ident" /></label><input type="submit" value="search" /><a href="/search-help">search help</a></div></form></div>
+<ul id="page-specific-links">
+<li><a href="?action=show">show</a></li>
+<li><a href="?action=edit" rel="nofollow">edit</a></li>
+<li><a href="?action=history">history</a></li></ul>
+<div id="content">
+<ul class="tags">
+<li>egg</li></ul>
+<div id="toc">
+<ol>
+<li><a href="#sparse-vectors">sparse-vectors</a>
+<ol>
+<li><a href="#introduction">Introduction</a></li>
+<li><a href="#usage">Usage</a></li>
+<li><a href="#api">API</a></li>
+<li><a href="#authors">Authors</a></li>
+<li><a href="#license">License</a></li>
+<li><a href="#version-history">Version history</a></li></ol></li></ol></div>
+<h2 id="sparse-vectors">sparse-vectors</h2>
+<h3 id="introduction">Introduction</h3>
+<p>Sparse vectors are vectors that grow as large as they need to. That is, they can be indexed by arbitrarily large nonnegative integers. The implementation allows for arbitrarily large gaps by arranging the entries in a tree.</p>
+<h3 id="usage">Usage</h3>
+<pre><tt>(require-extension sparse-vectors)</tt></pre>
+<p>If you have the <a href="http://wiki.call-cc.org/eggref/4/numbers" class="external">numbers</a> extension installed then this extension will be built with an additional variant that supports bignum indices:</p>
+<pre><tt>(require-extension big-sparse-vectors)</tt></pre>
+<h3 id="api">API</h3><span class="definition procedure"><em>[procedure]</em> <tt> (make-sparse-vector [DEFAULT])</tt>
+<br /></span><span class="definition procedure"><em>[procedure]</em> <tt> (sparse-vector? x)</tt>
+<br /></span><span class="definition procedure"><em>[procedure]</em> <tt> (sparse-vector-ref sparse-vector k)</tt>
+<br /></span><span class="definition procedure"><em>[procedure]</em> <tt> (sparse-vector-set! sparse-vector k value)</tt>
+<br /></span><span class="definition procedure"><em>[procedure]</em> <tt> (sparse-vector-&gt;list sparse-vector)</tt>
+<br /></span>
+<p><tt>make-sparse-vector</tt>, <tt>sparse-vector-ref</tt> and <tt>sparse-vector-set!</tt> are analogous to <tt>make-vector</tt>, <tt>vector-ref</tt> and <tt>vector-set!</tt>, except that the indices passed to <tt>sparse-vector-ref</tt> and <tt>sparse-vector-set!</tt> can be arbitrarily large.</p>
+<p>The optional <tt>DEFAULT</tt> argument to the <tt>make-sparse-vector</tt> procedure specifies the default value for indices whose elements have not been set. If the element at index <tt>i</tt> has not been set, <tt>(sparse-vector-ref i)</tt> returns <tt>DEFAULT</tt> or #f, if <tt>DEFAULT</tt> was not specified when creating the vector.</p>
+<p><tt>sparse-vector-&gt;list</tt> is for debugging: It returns a list of the consecutive elements in a sparse vector from 0 to the highest element that has been set. Note that the list will also include all the #f elements for the unset elements.</p>
+<p><tt>(set! (sparse-vector-ref sparse-vector index) value)</tt> is supported.</p>
+<h3 id="authors">Authors</h3>
+<p>Richard Kelsey and Jonathan Rees, ported to CHICKEN by <a href="/users/ivan-raikov" class="internal">/users/ivan-raikov</a>.</p>
+<h3 id="license">License</h3>
+<pre><tt>Copyright (c) 1993-2006 Richard Kelsey and Jonathan Rees
+All rights reserved.
+
+Redistribution and use in source and binary forms, with or without
+modification, are permitted provided that the following conditions
+are met:
+1. Redistributions of source code must retain the above copyright
+   notice, this list of conditions and the following disclaimer.
+2. Redistributions in binary form must reproduce the above copyright
+   notice, this list of conditions and the following disclaimer in the
+   documentation and/or other materials provided with the distribution.
+3. The name of the authors may not be used to endorse or promote products
+   derived from this software without specific prior written permission.
+
+THIS SOFTWARE IS PROVIDED BY THE AUTHORS ``AS IS'' AND ANY EXPRESS OR
+IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES
+OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED.
+IN NO EVENT SHALL THE AUTHORS BE LIABLE FOR ANY DIRECT, INDIRECT,
+INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT
+NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
+DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
+THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+(INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF
+THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.</tt></pre>
+<h3 id="version-history">Version history</h3>
+<dl>
+<dt>0.4</dt>
+<dd>Fixed installation-script problems, added tests (thanks to Jim Pryor)</dd>
+<dt>0.3</dt>
+<dd>Ported to Chicken 4</dd>
+<dt>0.2</dt>
+<dd>Added functionality to support default values other than #f</dd>
+<dt>0.1</dt>
+<dd>Initial release</dd></dl></div></body></html>
