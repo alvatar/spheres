@@ -1,5 +1,9 @@
+;;!!! SRFI-64
+;; .author Per Bothner. Copyright (c) 2005, 2006, 2007, 2012, 2013 Per Bothner
+;; .author Alvaro Castro-Castilla, 2012-2015
+;;
 ;; Copyright (c) 2005, 2006, 2007, 2012 Per Bothner
-;; Modified for Scheme Spheres by Álvaro Castro-Castilla, Copyright (c) 2012
+;; Modified for SchemeSpheres by Alvaro Castro-Castilla, Copyright (c) 2012-2015
 ;;
 ;; Permission is hereby granted, free of charge, to any person
 ;; obtaining a copy of this software and associated documentation
@@ -436,6 +440,7 @@
 ;;    (kawa
 ;;     (define (%test-syntax-file form)
 ;;       (syntax-source form))))
+
 (define (%test-source-line2 form) '())
 
 (define (%test-on-test-begin r)

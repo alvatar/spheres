@@ -110,11 +110,11 @@
             '(3 4 5))
 
 ;; TODO
-;; (test-error "(match (list 1 2)
-;;                    ((a b c ..1) c))"
-;;             #t
-;;             (match (list 1 2)
-;;                    ((a b c ..1) c)))
+(test-error "(match (list 1 2)
+                   ((a b c ..1) c))"
+            #t
+            (match (list 1 2)
+                   ((a b c ..1) c)))
 
 (test-equal "(match (list 1 2 3)
                    ((a b c ..1) c))"

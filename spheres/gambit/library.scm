@@ -480,7 +480,11 @@
         (emit-code! '((##namespace (""))))
         (table-for-each
          (lambda (lib v)
-           (if (eq? v 'user)
+           ;; Only libraries loaded by the user should be visible. Unfortunately,
+           ;; libraries that expand into code used by other libraries don't work
+           ;; this way. To solve this, we need to implement a full syntactic tower.
+           ;; To make visible only the libraries loaded by the user: (eq? v 'user)
+           (if (or (eq? v 'auto) (eq? v 'user))
                (receive (_ exports __ macro-defs) (%library-read-syntax lib)
                         (emit-code!
                          (%library-make-namespace-form lib exports macro-defs)))))

@@ -1,4 +1,5 @@
-;;!! SRFI-34 Exception Handling for Programs
+;;!!! SRFI-34 and SRFI-35 Exception Handling for Programs, Conditions
+;; .author Richard Kelsey, Michael Sperber, 2002
 ;; Copyright (C) Richard Kelsey, Michael Sperber (2002). All Rights Reserved.
 
 (define-library (spheres/core condition)
@@ -6,6 +7,7 @@
           define-condition-type
           condition
           make-condition-type
+          condition-type?
           condition-subtype?
           condition-type-field-supertypep
           make-condition
