@@ -1,0 +1,142 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<title>lru-cache - The Chicken Scheme wiki</title>
+<meta http-equiv="Content-Style-Type" content="text/css" />
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+<link rel="stylesheet" type="text/css" href="/chicken.css" /></head>
+<body>
+<div id="menu">
+<ul>
+<li><a href="/" class="internal">Wiki</a></li>
+<li><a href="http://code.call-cc.org/" class="external">Download</a></li>
+<li><a href="/manual/index" class="internal">Manual</a></li>
+<li><a href="/eggs" class="internal">Eggs</a></li>
+<li><a href="http://api.call-cc.org/doc/" class="external">API</a></li>
+<li><a href="http://tests.call-cc.org/" class="external">Tests</a></li>
+<li><a href="http://bugs.call-cc.org/" class="external">Bugs</a></li></ul></div>
+<div id="search">
+<form action="/search">
+<div><label>free text<input type="text" name="text" /></label><label>identifier<input type="text" name="ident" /></label><input type="submit" value="search" /><a href="/search-help">search help</a></div></form></div>
+<ul id="page-specific-links">
+<li><a href="?action=show">show</a></li>
+<li><a href="?action=edit" rel="nofollow">edit</a></li>
+<li><a href="?action=history">history</a></li></ul>
+<div id="content">
+<h2 id="lru-cache">lru-cache</h2>
+<p><b>lru-cache</b> implements an LRU cache of N elements.  It uses a hash table for fast lookup and a doubly-linked list to maintain LRU ordering.  As the hash table associates keys with list nodes, items may be reordered without traversing the list.</p>
+<div id="toc">
+<ol>
+<li><a href="#lru-cache">lru-cache</a>
+<ol>
+<li><a href="#interface">Interface</a>
+<ol>
+<li><a href="#make-lru-cache">make-lru-cache</a></li>
+<li><a href="#lru-cache-ref">lru-cache-ref</a></li>
+<li><a href="#lru-cache-set">lru-cache-set!</a></li>
+<li><a href="#lru-cache-delete">lru-cache-delete!</a></li>
+<li><a href="#lru-cache-flush">lru-cache-flush!</a></li>
+<li><a href="#lru-cache-walk">lru-cache-walk</a></li>
+<li><a href="#lru-cache-fold">lru-cache-fold</a></li>
+<li><a href="#lru-cache-size">lru-cache-size</a></li>
+<li><a href="#lru-cache-capacity">lru-cache-capacity</a></li></ol></li>
+<li><a href="#example">Example</a></li>
+<li><a href="#author">Author</a></li>
+<li><a href="#version-history">Version history</a></li>
+<li><a href="#license">License</a></li></ol></li></ol></div>
+<h3 id="interface">Interface</h3>
+<h4 id="make-lru-cache">make-lru-cache</h4><span class="definition procedure"><em>[procedure]</em> <tt>(make-lru-cache capacity equal? [deleter])</tt>
+<br /></span>
+<p>Create an LRU cache capable of holding <tt>capacity</tt> items.  <tt>equal?</tt> is the item equality procedure and is passed directly to the hash table, as in <tt>(make-hash-table equal?)</tt>.  <tt>deleter</tt> is an optional procedure of two arguments <tt>(key value)</tt> which will be invoked whenever an item is deleted, flushed or simply falls off the cache.</p>
+<p>If <tt>capacity</tt> is zero, the cache is disabled.  Attempts to read items will return <tt>#f</tt>, and writing them will silently fail.</p>
+<h4 id="lru-cache-ref">lru-cache-ref</h4><span class="definition procedure"><em>[procedure]</em> <tt>(lru-cache-ref cache key)</tt>
+<br /></span>
+<p>Looks up the item matching <tt>key</tt> and returns the associated value, or <tt>#f</tt> if no such item exists.</p>
+<p>If the item is not the most-recently used, it is marked as MRU (in other words, moved to the head of the list).</p>
+<p>If the item is the most-recently used, the LRU list structure is not modified, and consequently the item is returned a bit faster.</p>
+<h4 id="lru-cache-set">lru-cache-set!</h4><span class="definition procedure"><em>[procedure]</em> <tt>(lru-cache-set! cache key val)</tt>
+<br /></span>
+<p>Add an item into the cache which associates <tt>key</tt> with <tt>val</tt>, or if an item matching <tt>key</tt> already exists, updates the item to the new <tt>val</tt>.  If the key did not exist, the item is marked as the most-recently used.  If the key did exist, the LRU ordering behavior is undefined; currently -- and don't take this for granted -- the LRU order is not updated.</p>
+<p>If adding this item causes the cache to exceed its capacity, the least-recently used item is deleted, and consequently the deleter (if provided) is invoked.  If the deleter throws an exception, the item remains in the cache, and the new item is not added.</p>
+<h4 id="lru-cache-delete">lru-cache-delete!</h4><span class="definition procedure"><em>[procedure]</em> <tt>(lru-cache-delete! cache key)</tt>
+<br /></span>
+<p>Deletes the item matching <tt>key</tt> from <tt>cache</tt>.  If no corresponding item exists, the procedure silently fails.  The deleter, if provided, will be invoked for this item.</p>
+<p>Note: if the deleter throws an exception, the item is <i>not</i> deleted from the cache.</p>
+<h4 id="lru-cache-flush">lru-cache-flush!</h4><span class="definition procedure"><em>[procedure]</em> <tt>(lru-cache-flush! cache)</tt>
+<br /></span>
+<p>Delete all items in <tt>cache</tt>. The deleter procedure (if provided to <tt>make-lru-cache</tt>) is invoked for each item as the item list is traversed from head to tail.  If an error occurs in the deleter, the offending item will be left at the head of the cache.</p>
+<h4 id="lru-cache-walk">lru-cache-walk</h4><span class="definition procedure"><em>[procedure]</em> <tt>(lru-cache-walk cache proc)</tt>
+<br /></span>
+<p>Call <tt>(proc key value)</tt> for each item in the cache, returning an unspecified value.  Items are traversed from MRU to LRU.</p>
+<h4 id="lru-cache-fold">lru-cache-fold</h4><span class="definition procedure"><em>[procedure]</em> <tt>(lru-cache-fold cache kons knil)</tt>
+<br /></span>
+<p>Iterate over the items in the cache in order from MRU to LRU.  <tt>kons</tt> is called with three arguments: <tt>k</tt>, the item's key; <tt>v</tt>, the item's value; and <tt>s</tt>, the current state.  The initial state is set to <tt>knil</tt>, and the return value from the call to <tt>kons</tt> is passed as the next state value to <tt>kons</tt>.</p>
+<p>For example, to build a list of <tt>(key . value)</tt> pairs in <tt>cache</tt> from LRU to MRU, execute:</p>
+<pre><tt>(lru-cache-fold cache (lambda (k v s) (cons (cons k v) s)) '())</tt></pre>
+<h4 id="lru-cache-size">lru-cache-size</h4><span class="definition procedure"><em>[procedure]</em> <tt>(lru-cache-size cache)</tt>
+<br /></span>
+<p>Returns the number of items currently in the cache.</p>
+<h4 id="lru-cache-capacity">lru-cache-capacity</h4><span class="definition procedure"><em>[procedure]</em> <tt>(lru-cache-capacity cache)</tt>
+<br /></span>
+<p>Returns the capacity of the cache in items.</p>
+<h3 id="example">Example</h3>
+<pre><tt>(use lru-cache)
+(define C (make-lru-cache 4 string=?
+                          (lambda (k v) (printf &quot;deleting (~S ~S)\n&quot; k v))))
+(lru-cache-set! C &quot;a&quot; 1) ; a
+(lru-cache-set! C &quot;b&quot; 2) ; b a
+(lru-cache-set! C &quot;c&quot; 3) ; c b a
+(lru-cache-set! C &quot;d&quot; 4) ; d c b a
+(lru-cache-walk C print)
+;; d4
+;; c3
+;; b2
+;; a1
+(lru-cache-set! C &quot;e&quot; 5) ; e d c b
+;; deleting (a 1)
+(lru-cache-ref C &quot;b&quot;)    ; 2, b e d c
+(lru-cache-ref C &quot;d&quot;)    ; 4, d b e c
+(lru-cache-walk C print)
+;; d4
+;; b2
+;; e5
+;; c3
+(lru-cache-delete! C &quot;e&quot;) ; d b c
+;; deleting (&quot;e&quot; 5)
+(lru-cache-set! C &quot;a&quot; 6) ; a d b c
+(lru-cache-flush! C)
+;; deleting (&quot;a&quot; 6)
+;; deleting (&quot;d&quot; 4)
+;; deleting (&quot;b&quot; 2)
+;; deleting (&quot;c&quot; 3)
+(lru-cache-walk C print)</tt></pre>
+<h3 id="author">Author</h3>
+<p><a href="http://3e8.org/zb" class="external">Jim Ursetto</a></p>
+<h3 id="version-history">Version history</h3>
+<ul>
+<li>0.5 (2009-03-23): Initial release </li></ul>
+<h3 id="license">License</h3>
+<pre><tt>Copyright (c) 2009 Jim Ursetto.  All rights reserved.
+
+Redistribution and use in source and binary forms, with or without
+modification, are permitted provided that the following conditions are met:
+
+ Redistributions of source code must retain the above copyright notice,
+  this list of conditions and the following disclaimer.
+ Redistributions in binary form must reproduce the above copyright notice,
+  this list of conditions and the following disclaimer in the documentation
+  and/or other materials provided with the distribution.
+ Neither the name of the author nor the names of its contributors 
+  may be used to endorse or promote products derived from this software 
+  without specific prior written permission.
+
+THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS &quot;AS IS&quot;
+AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO,
+THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR
+PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDERS OR
+CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL,
+EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO,
+PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR
+PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF
+LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING
+NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
+SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.</tt></pre></div></body></html>
