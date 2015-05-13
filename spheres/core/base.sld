@@ -52,7 +52,8 @@
           equal?+
           type-of
           coerce
-          ->integer)
+          ->integer
+          procedure-arity)
 
   ;;------------------------------------------------------------------------------
   ;;!! R5RS standard Macros
