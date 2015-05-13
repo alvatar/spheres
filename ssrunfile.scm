@@ -22,6 +22,7 @@
     (spheres/algorithm/shuffle merge)
     (spheres/algorithm/shuffle selection)
     (spheres/algorithm sort-merge)
+    (spheres/algorithm tree)
     (spheres/algorithm u8vector)
     (spheres/algorithm vector)
     (spheres/concurrency mailbox)
