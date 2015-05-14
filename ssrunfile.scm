@@ -144,7 +144,6 @@
     (spheres/structure hash-table)
     (spheres/structure hash-trie)
     (spheres/structure integer-set)
-    (spheres/structure queue)
     (spheres/structure lru-cache)
     (spheres/structure multi-dimensional-array)
     (spheres/structure/multi-dimensional-array ctor)
