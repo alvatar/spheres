@@ -7,18 +7,19 @@ _A set of tools and libraries for real-life Scheme. Multiplatform and mobile._
 
 ## Installation
 
-1. Compile the syntax expander: go to /spheres/gambit and run ./compile-scsc.sh
-2. Copy the .gambcini file to your HOME directory. This is Gambit's initialization file.
-3. (optional) Copy the _spheres/_ directory into your Gambit's installation library directory (i.e. /usr/local/Gambit/lib)
-4. Update all .gambcini paths to where your Spheres files are located (either Gambit's library directory, if you copied the files there, or any other path where you choose to leave Spheres' files).
+The libraries are implemented in R7RS style. Support and installation depends on the Scheme implementation used. SchemeSpheres is mainly developed for Gambit, but nothing stops other implementations to use and adapt these libraries.
 
-### Scheme implementation requirements
+### Installation for Gambit Scheme
 
 [![Gambit Version](http://img.shields.io/badge/Gambit version -4.7.6-blue.svg)](http://gambitscheme.org)
 [![Build Status](https://travis-ci.org/fourthbit/spheres.svg?branch=master)](https://travis-ci.org/fourthbit/spheres)
 
-Some libraries in Spheres are already compatible with r7rs implementations such as Chibi, but only Gambit is actively supported.
+In order to use these libraries, we need to provide Gambit with _R7RS libraries_ and _syntax-rules_ support. See below for current limitations. The following process will set up Gambit for use with SchemeSpheres:
 
+1. Compile the syntax expander: go to /spheres/gambit and run ./compile-scsc.sh
+2. Copy the .gambcini file to your _HOME_ directory. This is Gambit's initialization file.
+3. (optional) Copy the _spheres/_ directory into your Gambit's installation library directory (i.e. /usr/local/Gambit/lib)
+4. Update all .gambcini paths to where your Spheres files are located (either Gambit's library directory, if you copied the files there, or any other path where you choose to leave Spheres' files).
 
 ## Basic usage
 
@@ -33,7 +34,7 @@ Spheres also brings automated compilation and __multiplatform/mobile__ build scr
 
 ## Notes
 
-Spheres supports _syntax-rules_ and _define-macro_ syntax. The implementation is an R7RS Library Syntax subset. Current support is practical:
+Spheres supports _syntax-rules_ and _define-macro_ syntax. While Gambit will natively support R7RS in the future, at the moment we provide asubset of the functionality for practical usage:
 
 * Macro systems supported: _syntax-rules_ and _define-macro_ (_syntax-case_ is also supported, but not used).
 * Procedures in each library are within their own namespace (imports/exports are handled).
