@@ -14,7 +14,7 @@ _A set of tools and libraries for real-life Scheme. Multiplatform and mobile._
 
 ### Scheme implementation requirements
 
-[![Gambit Version](http://img.shields.io/badge/Gambit version -4.7.5-blue.svg)](http://gambitscheme.org)
+[![Gambit Version](http://img.shields.io/badge/Gambit version -4.7.6-blue.svg)](http://gambitscheme.org)
 [![Build Status](https://travis-ci.org/fourthbit/spheres.svg?branch=master)](https://travis-ci.org/fourthbit/spheres)
 
 Some libraries in Spheres are already compatible with r7rs implementations such as Chibi, but only Gambit is actively supported.
