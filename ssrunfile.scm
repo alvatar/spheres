@@ -25,6 +25,7 @@
     (spheres/algorithm tree)
     (spheres/algorithm u8vector)
     (spheres/algorithm vector)
+    (spheres/concurrency channel)
     (spheres/concurrency mailbox)
     (spheres/concurrency termite)
     (spheres/core assert)
