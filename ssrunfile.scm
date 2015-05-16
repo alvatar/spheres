@@ -150,6 +150,7 @@
     (spheres/structure/multi-dimensional-array ctor)
     (spheres/structure/multi-dimensional-array mbda)
     (spheres/structure/multi-dimensional-array tter)
+    (spheres/structure random-access-list)
     (spheres/structure red-black-tree)
     (spheres/structure rope)
     (spheres/structure skip-list)

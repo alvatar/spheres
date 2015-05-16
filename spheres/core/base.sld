@@ -369,7 +369,7 @@
   (define-syntax ++!
     (syntax-rules ()
       ((_ x)
-       (set! x (+ 1 x)))))
+       (set! x (fx+ 1 x)))))
 
   ;;! Read-only increment
   ;; Equivalent low-level macro:
@@ -377,7 +377,7 @@
   (define-syntax ++
     (syntax-rules ()
       ((_ x)
-       (+ 1 x))))
+       (fx+ 1 x))))
 
   ;;! Mutable decrement
   ;; Equivalent low-level macro:
@@ -385,7 +385,7 @@
   (define-syntax --!
     (syntax-rules ()
       ((_ x)
-       (set! x (- x 1)))))
+       (set! x (fx- x 1)))))
 
   ;;! Read-only decrement
   ;; Equivalent low-level macro:
@@ -393,7 +393,7 @@
   (define-syntax --
     (syntax-rules ()
       ((_ x)
-       (- x 1))))
+       (fx- x 1))))
 
   ;;! Hygienic anaphoric if
   ;; Equivalent low-level macro:

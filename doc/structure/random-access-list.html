@@ -1,0 +1,461 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<title>Random-access-lists - The Chicken Scheme wiki</title>
+<meta http-equiv="Content-Style-Type" content="text/css" />
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+<link rel="stylesheet" type="text/css" href="/chicken.css" /></head>
+<body>
+<div id="menu">
+<ul>
+<li><a href="/" class="internal">Wiki</a></li>
+<li><a href="http://code.call-cc.org/" class="external">Download</a></li>
+<li><a href="/manual/index" class="internal">Manual</a></li>
+<li><a href="/eggs" class="internal">Eggs</a></li>
+<li><a href="http://api.call-cc.org/doc/" class="external">API</a></li>
+<li><a href="http://tests.call-cc.org/" class="external">Tests</a></li>
+<li><a href="http://bugs.call-cc.org/" class="external">Bugs</a></li></ul></div>
+<div id="search">
+<form action="/search">
+<div><label>free text<input type="text" name="text" /></label><label>identifier<input type="text" name="ident" /></label><input type="submit" value="search" /><a href="/search-help">search help</a></div></form></div>
+<ul id="page-specific-links">
+<li><a href="?action=show">show</a></li>
+<li><a href="?action=edit" rel="nofollow">edit</a></li>
+<li><a href="?action=history">history</a></li></ul>
+<div id="content">
+<ul class="tags">
+<li>egg</li></ul>
+<div id="toc">
+<ol>
+<li><a href="#random-access-lists">Random-access-lists</a>
+<ol>
+<li><a href="#documentation">Documentation</a>
+<ol>
+<li><a href="#random-access-lists">random-access-lists</a></li>
+<li><a href="#make-ral">make-ral</a></li>
+<li><a href="#ral-list">ral-&gt;list</a></li>
+<li><a href="#ral-add">ral-add!</a></li>
+<li><a href="#ral-add-left">ral-add-left!</a></li>
+<li><a href="#ral-clear">ral-clear!</a></li>
+<li><a href="#ral-count">ral-count</a></li>
+<li><a href="#ral-cursor-jump">ral-cursor-jump</a></li>
+<li><a href="#ral-cursor-next">ral-cursor-next</a></li>
+<li><a href="#ral-eq">ral-eq?</a></li>
+<li><a href="#ral-eql">ral-eql?</a></li>
+<li><a href="#ral-equal">ral-equal?</a></li>
+<li><a href="#ral-eqv">ral-eqv?</a></li>
+<li><a href="#ral-filter">ral-filter</a></li>
+<li><a href="#ral-for-each">ral-for-each</a></li>
+<li><a href="#ral-from-upto">ral-from-upto</a></li>
+<li><a href="#ral-height">ral-height</a></li>
+<li><a href="#ral-insert">ral-insert!</a></li>
+<li><a href="#ral-item">ral-item?</a></li>
+<li><a href="#ral-join">ral-join</a></li>
+<li><a href="#ral-level">ral-level</a></li>
+<li><a href="#ral-map">ral-map</a></li>
+<li><a href="#ral-max-height">ral-max-height</a></li>
+<li><a href="#ral-node">ral-node?</a></li>
+<li><a href="#ral-null">ral-null?</a></li>
+<li><a href="#ral-place">ral-place</a></li>
+<li><a href="#ral-place-next">ral-place-next</a></li>
+<li><a href="#ral-print">ral-print</a></li>
+<li><a href="#ral-ref">ral-ref</a></li>
+<li><a href="#ral-remove">ral-remove!</a></li>
+<li><a href="#ral-restructure">ral-restructure</a></li>
+<li><a href="#ral-set">ral-set!</a></li>
+<li><a href="#ral-split">ral-split</a></li>
+<li><a href="#ral-start">ral-start</a></li>
+<li><a href="#ral-width">ral-width</a></li>
+<li><a href="#ral">ral?</a></li></ol></li>
+<li><a href="#examples">Examples</a></li></ol></li>
+<li><a href="#requirements">Requirements</a></li>
+<li><a href="#last-update">Last update</a></li>
+<li><a href="#author">Author</a></li>
+<li><a href="#license">License</a></li>
+<li><a href="#version-history">Version History</a></li></ol></div>
+<h2 id="random-access-lists">Random-access-lists</h2>
+<p>Random-access-lists combine the advantages of vectors (fast access) and linked-lists (fast insertions). They can be implemented on the basis of skiplists.</p>
+<p>Whereas an ordinary skiplist-node consists of an item and a vector of next nodes, whose length is computed randomly in such a way, that the number of nodes with length n are in the average one half of the number of nodes with length (- n 1), a random-access-list-node must have an additional vector of same length containing the jumps, i.e. numbers indicating how far the node is moved when following the next nodes at a given level. Following a node at level n describes a fast lane across the random-access-list, where the jumps at level n are in the average twice as long as the jumps at the level below.</p>
+<p>In our implementation of random-access-lists we store a vector of nodes, called cursors, and a vector of positions, called places, which are updated along the movement accross the list. Moving cursors and places to a given position, pos, works as follows: One starts at the highest level and follows the next link at that level adding the jump at that level to the place at that level until the latter is less than pos but a further movement at that level would be greater or equal pos. Then one saves cursor and place and restarts the same movement process at the level below, starting with the values saved in the level above. Eventually one reaches level 0 and stops at a place one less than pos. The stored cursors can than be used to insert or remove an item, as well as getting or setting pos' item. Note, that in the latter case we only need to step down until a level where the next place is equal to pos. Since this cursor and place movement is O(log n), so are all the fundamental random-access-list operations, insert!, remove!, ref and set!</p>
+<p>The other supplied operators like map, filter split and join work only at a fixed level, whence are ordinary linked list operators, which perform as O(n).</p>
+<p>Some additional remarks are in order.</p>
+<p>We described the process with a width of two, i.e. increasing the level of movement doubles the jumps of next nodes in the average.  A higher value than two for the width is possible as well, trading performance against space.</p>
+<p>We said nothing about the maximal length of the nodes, i.e. of the maximal height of the random-access-list. Our default is 10, but this can be changed in the constructor. This should be appropriate in most cases. But note, that the highest actual, i.e. computed, node height might be smaller, so it must be updated in the list, so that the cursor knows where to start.</p>
+<h3 id="documentation">Documentation</h3>
+<p>In this implementation random-access-lists are implemented in the Design by Contract style, i.e. using the dbc module. A corollary of this is, that the documentation is included in one of the two modules in form of a procedure with the module's name. Apart from this documentation procedure the two modules, %random-access-lists and random-access-lists, have the same interface.  The first module contains the raw implementations of the procedures, the second imports the first with prefix % and wraps those prefixed routines with contracts.</p>
+<h4 id="random-access-lists">random-access-lists</h4><span class="definition procedure"><em>[procedure]</em> <tt>(random-access-lists [symbol|string])</tt>
+<br /></span>
+<p>returns all available routines of the module when called without an argument. When called with one of these routines as a symbol, returns its contract. When called with a string, writes a file with name of string containing rudimentary wiki documentation.</p>
+<h4 id="make-ral">make-ral</h4><span class="definition procedure"><em>[procedure]</em> <tt>(make-ral item? . args)</tt>
+<br /></span>
+<pre><tt class="highlight scheme-language"><i><span class="symbol">function</span></i> <span class="paren1">(<span class="default">result</span>)</span>
+requires <span class="paren1">(<span class="default">and <span class="paren2">(<span class="default"><span class="paren3">(<span class="default">list-of? <span class="paren4">(<span class="default"><i><span class="symbol">lambda</span></i> <span class="paren5">(<span class="default">arg</span>)</span> <span class="paren5">(<span class="default">and <span class="paren6">(<span class="default">fixnum? arg</span>)</span> <span class="paren6">(<span class="default">fx&gt; arg 1</span>)</span></span>)</span></span>)</span></span>)</span> args</span>)</span>
+              <span class="paren2">(<span class="default">procedure? item?</span>)</span> <span class="string">&quot;(item? item)&quot;</span></span>)</span>
+ensures  <span class="paren1">(<span class="default">ral? result</span>)</span></tt></pre>
+<h4 id="ral-list">ral-&gt;list</h4><span class="definition procedure"><em>[procedure]</em> <tt>(ral-&gt;list ls)</tt>
+<br /></span><span class="definition procedure"><em>[procedure]</em> <tt>(ral-&gt;list ls level)</tt>
+<br /></span>
+<pre><tt class="highlight scheme-language"><i><span class="symbol">function</span></i> <span class="paren1">(<span class="default">result</span>)</span>
+requires <span class="paren1">(<span class="default">and <span class="paren2">(<span class="default">ral? ls</span>)</span> <span class="paren2">(<span class="default">fixnum? level</span>)</span>
+              <span class="paren2">(<span class="default">fx&lt;= 0 level</span>)</span> <span class="paren2">(<span class="default">fx&lt; level <span class="paren3">(<span class="default">ral-height ls</span>)</span></span>)</span></span>)</span>
+         <span class="comment">; default (fx= level 0)
+</span>ensures  <span class="paren1">(<span class="default"><span class="paren2">(<span class="default">list-of? <span class="paren3">(<span class="default">ral-item? ls</span>)</span></span>)</span> result</span>)</span></tt></pre>
+<h4 id="ral-add">ral-add!</h4><span class="definition procedure"><em>[procedure]</em> <tt>(ral-add! ls item . items)</tt>
+<br /></span>
+<pre><tt class="highlight scheme-language">command <span class="paren1">(<span class="default"><span class="paren2">(<span class="default">oldcount newcount <span class="paren3">(<span class="default"><i><span class="symbol">lambda</span></i> <span class="paren4">(<span class="default">ls item . items</span>)</span> <span class="paren4">(<span class="default">ral-count ls</span>)</span></span>)</span></span>)</span></span>)</span>
+requires <span class="paren1">(<span class="default">and <span class="paren2">(<span class="default">ral? ls</span>)</span> <span class="paren2">(<span class="default"><span class="paren3">(<span class="default">ral-item? ls</span>)</span> item</span>)</span>
+              <span class="paren2">(<span class="default"><span class="paren3">(<span class="default">list-of? <span class="paren4">(<span class="default">ral-item? ls</span>)</span></span>)</span> items</span>)</span></span>)</span>
+ensures  <span class="paren1">(<span class="default">fx= newcount <span class="paren2">(<span class="default">fx+ <span class="paren3">(<span class="default">length <span class="paren4">(<span class="default">cons item items</span>)</span></span>)</span> oldcount</span>)</span></span>)</span></tt></pre>
+<h4 id="ral-add-left">ral-add-left!</h4><span class="definition procedure"><em>[procedure]</em> <tt>(ral-add-left! ls item . items)</tt>
+<br /></span>
+<pre><tt class="highlight scheme-language">command <span class="paren1">(<span class="default"><span class="paren2">(<span class="default">oldcount newcount <span class="paren3">(<span class="default"><i><span class="symbol">lambda</span></i> <span class="paren4">(<span class="default">ls item . items</span>)</span> <span class="paren4">(<span class="default">ral-count ls</span>)</span></span>)</span></span>)</span></span>)</span>
+requires <span class="paren1">(<span class="default">and <span class="paren2">(<span class="default">ral? ls</span>)</span> <span class="paren2">(<span class="default"><span class="paren3">(<span class="default">ral-item? ls</span>)</span> item</span>)</span>
+              <span class="paren2">(<span class="default"><span class="paren3">(<span class="default">list-of? <span class="paren4">(<span class="default">ral-item? ls</span>)</span></span>)</span> items</span>)</span></span>)</span>
+ensures  <span class="paren1">(<span class="default">fx= newcount <span class="paren2">(<span class="default">fx+ <span class="paren3">(<span class="default">length <span class="paren4">(<span class="default">cons item items</span>)</span></span>)</span> oldcount</span>)</span></span>)</span></tt></pre>
+<h4 id="ral-clear">ral-clear!</h4><span class="definition procedure"><em>[procedure]</em> <tt>(ral-clear! ls)</tt>
+<br /></span>
+<pre><tt class="highlight scheme-language">command <span class="paren1">(<span class="default"><span class="paren2">(<span class="default">oldcount newcount ral-count</span>)</span> <span class="paren2">(<span class="default">oldheight newheight ral-height</span>)</span></span>)</span>
+requires <span class="paren1">(<span class="default">ral? ls</span>)</span>
+ensures  <span class="paren1">(<span class="default">and <span class="paren2">(<span class="default">fx= 0 newcount</span>)</span> <span class="paren2">(<span class="default">fx= 1 newheight</span>)</span></span>)</span></tt></pre>
+<h4 id="ral-count">ral-count</h4><span class="definition procedure"><em>[procedure]</em> <tt>(ral-count ls)</tt>
+<br /></span>
+<pre><tt class="highlight scheme-language"><i><span class="symbol">function</span></i> <span class="paren1">(<span class="default">result</span>)</span>
+requires <span class="paren1">(<span class="default">ral? ls</span>)</span>
+ensures  <span class="paren1">(<span class="default">and <span class="paren2">(<span class="default">fixnum? result</span>)</span> <span class="paren2">(<span class="default">fx&gt;= result 0</span>)</span></span>)</span></tt></pre>
+<h4 id="ral-cursor-jump">ral-cursor-jump</h4><span class="definition procedure"><em>[procedure]</em> <tt>(ral-cursor-jump ls k)</tt>
+<br /></span>
+<pre><tt class="highlight scheme-language"><i><span class="symbol">function</span></i> <span class="paren1">(<span class="default">result</span>)</span>
+requires <span class="paren1">(<span class="default">and <span class="paren2">(<span class="default">ral? ls</span>)</span> <span class="paren2">(<span class="default">fixnum? k</span>)</span>
+              <span class="paren2">(<span class="default">fx&gt;= k 0</span>)</span> <span class="paren2">(<span class="default">fx&lt; k <span class="paren3">(<span class="default">ral-height ls</span>)</span></span>)</span></span>)</span>
+ensures  <span class="paren1">(<span class="default">and <span class="paren2">(<span class="default">fixnum? result</span>)</span>
+              <span class="paren2">(<span class="default">fx&gt; result 0</span>)</span> <span class="paren2">(<span class="default">fx&lt;= result <span class="paren3">(<span class="default">ral-count ls</span>)</span></span>)</span></span>)</span></tt></pre>
+<h4 id="ral-cursor-next">ral-cursor-next</h4><span class="definition procedure"><em>[procedure]</em> <tt>(ral-cursor-next ls k)</tt>
+<br /></span>
+<pre><tt class="highlight scheme-language"><i><span class="symbol">function</span></i> <span class="paren1">(<span class="default">result</span>)</span>
+requires <span class="paren1">(<span class="default">and <span class="paren2">(<span class="default">ral? ls</span>)</span> <span class="paren2">(<span class="default">fixnum? k</span>)</span>
+              <span class="paren2">(<span class="default">fx&gt;= k 0</span>)</span> <span class="paren2">(<span class="default">fx&lt; k <span class="paren3">(<span class="default">ral-height ls</span>)</span></span>)</span></span>)</span>
+ensures  <span class="paren1">(<span class="default">or <span class="paren2">(<span class="default">null? result</span>)</span> <span class="paren2">(<span class="default">ral-node? result</span>)</span></span>)</span></tt></pre>
+<h4 id="ral-eq">ral-eq?</h4><span class="definition procedure"><em>[procedure]</em> <tt>(ral-eq? ls0 ls1)</tt>
+<br /></span>
+<pre><tt class="highlight scheme-language"><i><span class="symbol">function</span></i> <span class="paren1">(<span class="default">result</span>)</span>
+requires <span class="paren1">(<span class="default">and <span class="paren2">(<span class="default">ral? ls0</span>)</span> <span class="paren2">(<span class="default">ral? ls1</span>)</span></span>)</span>
+ensures  <span class="paren1">(<span class="default">boolean? result</span>)</span></tt></pre>
+<h4 id="ral-eql">ral-eql?</h4><span class="definition procedure"><em>[procedure]</em> <tt>(ral-eql? eql? ls0 ls1)</tt>
+<br /></span>
+<pre><tt class="highlight scheme-language"><i><span class="symbol">function</span></i> <span class="paren1">(<span class="default">result</span>)</span>
+requires <span class="paren1">(<span class="default">and <span class="paren2">(<span class="default">procedure? eql?</span>)</span> <span class="string">&quot;(eql? item0 item1)&quot;</span>
+              <span class="paren2">(<span class="default">ral? ls0</span>)</span> <span class="paren2">(<span class="default">ral? ls1</span>)</span></span>)</span>
+ensures  <span class="paren1">(<span class="default">boolean? result</span>)</span></tt></pre>
+<h4 id="ral-equal">ral-equal?</h4><span class="definition procedure"><em>[procedure]</em> <tt>(ral-equal? ls0 ls1)</tt>
+<br /></span>
+<pre><tt class="highlight scheme-language"><i><span class="symbol">function</span></i> <span class="paren1">(<span class="default">result</span>)</span>
+requires <span class="paren1">(<span class="default">and <span class="paren2">(<span class="default">ral? ls0</span>)</span> <span class="paren2">(<span class="default">ral? ls1</span>)</span></span>)</span>
+ensures  <span class="paren1">(<span class="default">boolean? result</span>)</span></tt></pre>
+<h4 id="ral-eqv">ral-eqv?</h4><span class="definition procedure"><em>[procedure]</em> <tt>(ral-eqv? ls0 ls1)</tt>
+<br /></span>
+<pre><tt class="highlight scheme-language"><i><span class="symbol">function</span></i> <span class="paren1">(<span class="default">result</span>)</span>
+requires <span class="paren1">(<span class="default">and <span class="paren2">(<span class="default">ral? ls0</span>)</span> <span class="paren2">(<span class="default">ral? ls1</span>)</span></span>)</span>
+ensures  <span class="paren1">(<span class="default">boolean? result</span>)</span></tt></pre>
+<h4 id="ral-filter">ral-filter</h4><span class="definition procedure"><em>[procedure]</em> <tt>(ral-filter ls ok?)</tt>
+<br /></span>
+<pre><tt class="highlight scheme-language"><i><span class="symbol">function</span></i> <span class="paren1">(<span class="default">result</span>)</span>
+requires <span class="paren1">(<span class="default">and <span class="paren2">(<span class="default">ral? ls</span>)</span> <span class="paren2">(<span class="default">procedure? ok?</span>)</span> <span class="string">&quot;(ok? item)&quot;</span></span>)</span>
+ensures  <span class="paren1">(<span class="default">and <span class="paren2">(<span class="default">ral? result</span>)</span>
+              <span class="paren2">(<span class="default">fx&lt;= <span class="paren3">(<span class="default">ral-count result</span>)</span> <span class="paren3">(<span class="default">ral-count ls</span>)</span></span>)</span></span>)</span></tt></pre>
+<h4 id="ral-for-each">ral-for-each</h4><span class="definition procedure"><em>[procedure]</em> <tt>(ral-for-each ls proc)</tt>
+<br /></span>
+<pre><tt class="highlight scheme-language">command <span class="paren1">(<span class="default"><span class="paren2">(<span class="default">old new <span class="paren3">(<span class="default">constantly #t</span>)</span></span>)</span></span>)</span>
+requires <span class="paren1">(<span class="default">and <span class="paren2">(<span class="default">ral? ls</span>)</span> <span class="paren2">(<span class="default">procedure? proc</span>)</span> <span class="string">&quot;(proc item)&quot;</span></span>)</span>
+ensures  new</tt></pre>
+<h4 id="ral-from-upto">ral-from-upto</h4><span class="definition procedure"><em>[procedure]</em> <tt>(ral-from-upto ls from upto)</tt>
+<br /></span>
+<pre><tt class="highlight scheme-language"><i><span class="symbol">function</span></i> <span class="paren1">(<span class="default">result</span>)</span>
+requires <span class="paren1">(<span class="default">and <span class="paren2">(<span class="default">ral? ls</span>)</span> <span class="paren2">(<span class="default">fixnum? from</span>)</span> <span class="paren2">(<span class="default">fixnum? upto</span>)</span>
+              <span class="paren2">(<span class="default">fx&gt;= from 0</span>)</span> <span class="paren2">(<span class="default">fx&gt;= upto from</span>)</span>
+              <span class="paren2">(<span class="default">fx&lt;= upto <span class="paren3">(<span class="default">ral-count ls</span>)</span></span>)</span></span>)</span>
+ensures  <span class="paren1">(<span class="default">and <span class="paren2">(<span class="default">ral? result</span>)</span>
+              <span class="paren2">(<span class="default">fx= <span class="paren3">(<span class="default">ral-count result</span>)</span> <span class="paren3">(<span class="default">fx- upto from</span>)</span></span>)</span></span>)</span></tt></pre>
+<h4 id="ral-height">ral-height</h4><span class="definition procedure"><em>[procedure]</em> <tt>(ral-height ls)</tt>
+<br /></span>
+<pre><tt class="highlight scheme-language"><i><span class="symbol">function</span></i> <span class="paren1">(<span class="default">result</span>)</span>
+requires <span class="paren1">(<span class="default">ral? ls</span>)</span>
+ensures  <span class="paren1">(<span class="default">and <span class="paren2">(<span class="default">fixnum? result</span>)</span> <span class="paren2">(<span class="default">fx&gt; result 0</span>)</span></span>)</span></tt></pre>
+<h4 id="ral-insert">ral-insert!</h4><span class="definition procedure"><em>[procedure]</em> <tt>(ral-insert! ls place item)</tt>
+<br /></span>
+<pre><tt class="highlight scheme-language">command <span class="paren1">(<span class="default"><span class="paren2">(<span class="default">oldcount newcount <span class="paren3">(<span class="default"><i><span class="symbol">lambda</span></i> <span class="paren4">(<span class="default">ls place item</span>)</span> <span class="paren4">(<span class="default">ral-count ls</span>)</span></span>)</span></span>)</span>
+         <span class="paren2">(<span class="default">olditem newitem <span class="paren3">(<span class="default"><i><span class="symbol">lambda</span></i> <span class="paren4">(<span class="default">ls place item</span>)</span> <span class="paren4">(<span class="default">ral-ref ls place</span>)</span></span>)</span></span>)</span></span>)</span>
+requires <span class="paren1">(<span class="default">and <span class="paren2">(<span class="default">ral? ls</span>)</span> <span class="paren2">(<span class="default"><span class="paren3">(<span class="default">ral-item? ls</span>)</span> item</span>)</span>
+              <span class="paren2">(<span class="default">fixnum? place</span>)</span> <span class="paren2">(<span class="default">fx&gt;= place 0</span>)</span> <span class="paren2">(<span class="default">fx&lt;= place <span class="paren3">(<span class="default">ral-count ls</span>)</span></span>)</span></span>)</span>
+ensures  <span class="paren1">(<span class="default">and <span class="paren2">(<span class="default">fx= newcount <span class="paren3">(<span class="default">fx+ 1 oldcount</span>)</span></span>)</span> <span class="paren2">(<span class="default">equal? newitem item</span>)</span></span>)</span></tt></pre>
+<h4 id="ral-item">ral-item?</h4><span class="definition procedure"><em>[procedure]</em> <tt>(ral-item? ls)</tt>
+<br /></span>
+<pre><tt class="highlight scheme-language"><i><span class="symbol">function</span></i> <span class="paren1">(<span class="default">result</span>)</span>
+requires <span class="paren1">(<span class="default">ral? ls</span>)</span>
+ensures  <span class="paren1">(<span class="default">procedure? result</span>)</span></tt></pre>
+<h4 id="ral-join">ral-join</h4><span class="definition procedure"><em>[procedure]</em> <tt>(ral-join head tail)</tt>
+<br /></span>
+<pre><tt class="highlight scheme-language"><i><span class="symbol">function</span></i> <span class="paren1">(<span class="default">result</span>)</span>
+requires <span class="paren1">(<span class="default">and <span class="paren2">(<span class="default">ral? head</span>)</span> <span class="paren2">(<span class="default">ral? tail</span>)</span>
+              <span class="paren2">(<span class="default">eq? <span class="paren3">(<span class="default">ral-item? head</span>)</span> <span class="paren3">(<span class="default">ral-item? tail</span>)</span></span>)</span></span>)</span>
+ensures  <span class="paren1">(<span class="default">and <span class="paren2">(<span class="default">ral? result</span>)</span>
+              <span class="paren2">(<span class="default">fx= <span class="paren3">(<span class="default">ral-count result</span>)</span>
+                   <span class="paren3">(<span class="default">fx+ <span class="paren4">(<span class="default">ral-count head</span>)</span> <span class="paren4">(<span class="default">ral-count tail</span>)</span></span>)</span></span>)</span></span>)</span></tt></pre>
+<h4 id="ral-level">ral-level</h4><span class="definition procedure"><em>[procedure]</em> <tt>(ral-level ls)</tt>
+<br /></span>
+<pre><tt class="highlight scheme-language"><i><span class="symbol">function</span></i> <span class="paren1">(<span class="default">result</span>)</span>
+requires <span class="paren1">(<span class="default">ral? ls</span>)</span>
+ensures  <span class="paren1">(<span class="default">and <span class="paren2">(<span class="default">fixnum? result</span>)</span> <span class="paren2">(<span class="default">fx&gt; result 0</span>)</span>
+              <span class="paren2">(<span class="default">fx&lt; result <span class="paren3">(<span class="default">ral-height ls</span>)</span></span>)</span></span>)</span></tt></pre>
+<h4 id="ral-map">ral-map</h4><span class="definition procedure"><em>[procedure]</em> <tt>(ral-map ls fn)</tt>
+<br /></span><span class="definition procedure"><em>[procedure]</em> <tt>(ral-map ls fn item?)</tt>
+<br /></span>
+<pre><tt class="highlight scheme-language"><i><span class="symbol">function</span></i> <span class="paren1">(<span class="default">result</span>)</span>
+requires <span class="paren1">(<span class="default">and <span class="paren2">(<span class="default">ral? ls</span>)</span> <span class="paren2">(<span class="default">procedure? fn</span>)</span> <span class="string">&quot;(fn item)&quot;</span>
+              <span class="paren2">(<span class="default">procedure? item?</span>)</span> <span class="string">&quot;(item? item)&quot;</span></span>)</span>
+         <span class="comment">; default (eq? item? ral-item?)
+</span>ensures  <span class="paren1">(<span class="default">and <span class="paren2">(<span class="default">ral? result</span>)</span> <span class="paren2">(<span class="default">fx= <span class="paren3">(<span class="default">ral-count result</span>)</span> <span class="paren3">(<span class="default">ral-count ls</span>)</span></span>)</span>
+              <span class="paren2">(<span class="default">eq? item? <span class="paren3">(<span class="default">ral-item? result</span>)</span></span>)</span></span>)</span></tt></pre>
+<h4 id="ral-max-height">ral-max-height</h4><span class="definition procedure"><em>[procedure]</em> <tt>(ral-max-height ls)</tt>
+<br /></span>
+<pre><tt class="highlight scheme-language"><i><span class="symbol">function</span></i> <span class="paren1">(<span class="default">result</span>)</span>
+requires <span class="paren1">(<span class="default">ral? ls</span>)</span>
+ensures  <span class="paren1">(<span class="default">and <span class="paren2">(<span class="default">fixnum? result</span>)</span> <span class="paren2">(<span class="default">fx&gt; result 0</span>)</span></span>)</span></tt></pre>
+<h4 id="ral-node">ral-node?</h4><span class="definition procedure"><em>[procedure]</em> <tt>(ral-node? xpr)</tt>
+<br /></span>
+<pre><tt class="highlight scheme-language"><i><span class="symbol">function</span></i> <span class="paren1">(<span class="default">result</span>)</span>
+requires #t
+ensures  <span class="paren1">(<span class="default">boolean? result</span>)</span></tt></pre>
+<h4 id="ral-null">ral-null?</h4><span class="definition procedure"><em>[procedure]</em> <tt>(ral-null? ls)</tt>
+<br /></span>
+<pre><tt class="highlight scheme-language"><i><span class="symbol">function</span></i> <span class="paren1">(<span class="default">result</span>)</span>
+requires <span class="paren1">(<span class="default">ral? ls</span>)</span>
+ensures  <span class="paren1">(<span class="default">boolean? result</span>)</span></tt></pre>
+<h4 id="ral-place">ral-place</h4><span class="definition procedure"><em>[procedure]</em> <tt>(ral-place ls k)</tt>
+<br /></span>
+<pre><tt class="highlight scheme-language"><i><span class="symbol">function</span></i> <span class="paren1">(<span class="default">result</span>)</span>
+requires <span class="paren1">(<span class="default">and <span class="paren2">(<span class="default">ral? ls</span>)</span> <span class="paren2">(<span class="default">fixnum? k</span>)</span>
+              <span class="paren2">(<span class="default">fx&gt;= k 0</span>)</span> <span class="paren2">(<span class="default">fx&lt; k <span class="paren3">(<span class="default">ral-height ls</span>)</span></span>)</span></span>)</span>
+ensures  <span class="paren1">(<span class="default">and <span class="paren2">(<span class="default">fixnum? result</span>)</span> <span class="paren2">(<span class="default">fx&gt;= result -1</span>)</span>
+              <span class="paren2">(<span class="default">fx&lt; result <span class="paren3">(<span class="default">ral-count ls</span>)</span></span>)</span></span>)</span></tt></pre>
+<h4 id="ral-place-next">ral-place-next</h4><span class="definition procedure"><em>[procedure]</em> <tt>(ral-place-next ls k)</tt>
+<br /></span>
+<pre><tt class="highlight scheme-language"><i><span class="symbol">function</span></i> <span class="paren1">(<span class="default">result</span>)</span>
+requires <span class="paren1">(<span class="default">and <span class="paren2">(<span class="default">ral? ls</span>)</span> <span class="paren2">(<span class="default">fixnum? k</span>)</span>
+              <span class="paren2">(<span class="default">fx&gt;= k 0</span>)</span> <span class="paren2">(<span class="default">fx&lt; k <span class="paren3">(<span class="default">ral-height ls</span>)</span></span>)</span></span>)</span>
+ensures  <span class="paren1">(<span class="default">and <span class="paren2">(<span class="default">fixnum? result</span>)</span> <span class="paren2">(<span class="default">fx&gt;= result 0</span>)</span>
+              <span class="paren2">(<span class="default">fx&lt;= result <span class="paren3">(<span class="default">ral-count ls</span>)</span></span>)</span></span>)</span></tt></pre>
+<h4 id="ral-print">ral-print</h4><span class="definition procedure"><em>[procedure]</em> <tt>(ral-print ls)</tt>
+<br /></span>
+<pre><tt class="highlight scheme-language">command <span class="paren1">(<span class="default"><span class="paren2">(<span class="default">old new <span class="paren3">(<span class="default">constantly #t</span>)</span></span>)</span></span>)</span>
+requires <span class="paren1">(<span class="default">ral? ls</span>)</span>
+ensures  new</tt></pre>
+<h4 id="ral-ref">ral-ref</h4><span class="definition procedure"><em>[procedure]</em> <tt>(ral-ref ls place)</tt>
+<br /></span>
+<pre><tt class="highlight scheme-language"><i><span class="symbol">function</span></i> <span class="paren1">(<span class="default">result</span>)</span>
+requires <span class="paren1">(<span class="default">and <span class="paren2">(<span class="default">ral? ls</span>)</span> <span class="paren2">(<span class="default">fixnum? place</span>)</span>
+              <span class="paren2">(<span class="default">fx&gt;= place 0</span>)</span> <span class="paren2">(<span class="default">fx&lt; place <span class="paren3">(<span class="default">ral-count ls</span>)</span></span>)</span></span>)</span>
+ensures  <span class="paren1">(<span class="default"><span class="paren2">(<span class="default">ral-item? ls</span>)</span> result</span>)</span></tt></pre>
+<h4 id="ral-remove">ral-remove!</h4><span class="definition procedure"><em>[procedure]</em> <tt>(ral-remove! ls place)</tt>
+<br /></span>
+<pre><tt class="highlight scheme-language">command <span class="paren1">(<span class="default"><span class="paren2">(<span class="default">oldcount newcount <span class="paren3">(<span class="default"><i><span class="symbol">lambda</span></i> <span class="paren4">(<span class="default">ls place</span>)</span> <span class="paren4">(<span class="default">ral-count ls</span>)</span></span>)</span></span>)</span></span>)</span>
+requires <span class="paren1">(<span class="default">ral? ls</span>)</span>
+ensures  <span class="paren1">(<span class="default">and <span class="paren2">(<span class="default">fx= newcount <span class="paren3">(<span class="default">fx- oldcount 1</span>)</span></span>)</span></span>)</span></tt></pre>
+<h4 id="ral-restructure">ral-restructure</h4><span class="definition procedure"><em>[procedure]</em> <tt>(ral-restructure ls width)</tt>
+<br /></span><span class="definition procedure"><em>[procedure]</em> <tt>(ral-restructure ls width max-height)</tt>
+<br /></span>
+<pre><tt class="highlight scheme-language"><i><span class="symbol">function</span></i> <span class="paren1">(<span class="default">result</span>)</span>
+requires <span class="paren1">(<span class="default">and <span class="paren2">(<span class="default">ral? ls</span>)</span> <span class="paren2">(<span class="default">fixnum? width</span>)</span>
+              <span class="paren2">(<span class="default">fx&gt; width 1</span>)</span> <span class="paren2">(<span class="default">fixnum? max-height</span>)</span> <span class="paren2">(<span class="default">fx&gt; max-height 1</span>)</span></span>)</span>
+         <span class="comment">; default (fx= max-height (ral-max-height ls))
+</span>ensures  <span class="paren1">(<span class="default">and <span class="paren2">(<span class="default">ral? result</span>)</span> <span class="paren2">(<span class="default">fx= <span class="paren3">(<span class="default">ral-count ls</span>)</span> <span class="paren3">(<span class="default">ral-count result</span>)</span></span>)</span>
+              <span class="paren2">(<span class="default">fx= <span class="paren3">(<span class="default">ral-width result</span>)</span> width</span>)</span>
+              <span class="paren2">(<span class="default">fx= <span class="paren3">(<span class="default">ral-max-height result</span>)</span> max-height</span>)</span></span>)</span></tt></pre>
+<h4 id="ral-set">ral-set!</h4><span class="definition procedure"><em>[procedure]</em> <tt>(ral-set! ls place item)</tt>
+<br /></span>
+<pre><tt class="highlight scheme-language">command <span class="paren1">(<span class="default"><span class="paren2">(<span class="default">old new <span class="paren3">(<span class="default"><i><span class="symbol">lambda</span></i> <span class="paren4">(<span class="default">ls place item</span>)</span> <span class="paren4">(<span class="default">ral-ref ls place</span>)</span></span>)</span></span>)</span></span>)</span>
+requires <span class="paren1">(<span class="default">and <span class="paren2">(<span class="default">ral? ls</span>)</span> <span class="paren2">(<span class="default"><span class="paren3">(<span class="default">ral-item? ls</span>)</span> item</span>)</span>
+              <span class="paren2">(<span class="default">fixnum? place</span>)</span> <span class="paren2">(<span class="default">fx&gt;= place 0</span>)</span>
+              <span class="paren2">(<span class="default">fx&lt; place <span class="paren3">(<span class="default">ral-count ls</span>)</span></span>)</span></span>)</span>
+ensures  <span class="paren1">(<span class="default">equal? new item</span>)</span></tt></pre>
+<h4 id="ral-split">ral-split</h4><span class="definition procedure"><em>[procedure]</em> <tt>(ral-split ls place)</tt>
+<br /></span>
+<pre><tt class="highlight scheme-language"><i><span class="symbol">function</span></i> <span class="paren1">(<span class="default">head tail</span>)</span>
+requires <span class="paren1">(<span class="default">and <span class="paren2">(<span class="default">ral? ls</span>)</span> <span class="paren2">(<span class="default">fixnum? place</span>)</span>
+              <span class="paren2">(<span class="default">fx&gt;= place 0</span>)</span> <span class="paren2">(<span class="default">fx&lt; place <span class="paren3">(<span class="default">ral-count ls</span>)</span></span>)</span></span>)</span>
+ensures  <span class="paren1">(<span class="default">and <span class="paren2">(<span class="default">ral? head</span>)</span> <span class="paren2">(<span class="default">ral? tail</span>)</span>
+              <span class="paren2">(<span class="default">fx= <span class="paren3">(<span class="default">ral-count head</span>)</span> place</span>)</span>
+              <span class="paren2">(<span class="default">fx= <span class="paren3">(<span class="default">ral-count tail</span>)</span> <span class="paren3">(<span class="default">fx- <span class="paren4">(<span class="default">ral-count ls</span>)</span> place</span>)</span></span>)</span></span>)</span></tt></pre>
+<h4 id="ral-start">ral-start</h4><span class="definition procedure"><em>[procedure]</em> <tt>(ral-start ls)</tt>
+<br /></span>
+<pre><tt class="highlight scheme-language"><i><span class="symbol">function</span></i> <span class="paren1">(<span class="default">result</span>)</span>
+requires <span class="paren1">(<span class="default">ral? ls</span>)</span>
+ensures  <span class="paren1">(<span class="default">ral-node? result</span>)</span></tt></pre>
+<h4 id="ral-width">ral-width</h4><span class="definition procedure"><em>[procedure]</em> <tt>(ral-width ls)</tt>
+<br /></span>
+<pre><tt class="highlight scheme-language"><i><span class="symbol">function</span></i> <span class="paren1">(<span class="default">result</span>)</span>
+requires <span class="paren1">(<span class="default">ral? ls</span>)</span>
+ensures  <span class="paren1">(<span class="default">and <span class="paren2">(<span class="default">fixnum? result</span>)</span> <span class="paren2">(<span class="default">fx&gt; result 1</span>)</span></span>)</span></tt></pre>
+<h4 id="ral">ral?</h4><span class="definition procedure"><em>[procedure]</em> <tt>(ral? xpr)</tt>
+<br /></span>
+<pre><tt class="highlight scheme-language"><i><span class="symbol">function</span></i> <span class="paren1">(<span class="default">result</span>)</span>
+requires #t
+ensures  <span class="paren1">(<span class="default">boolean? result</span>)</span></tt></pre>
+<h3 id="examples">Examples</h3>
+<pre><tt class="highlight scheme-language">
+<span class="comment">;an empty ral of integers
+</span><span class="paren1">(<span class="default"><i><span class="symbol">define</span></i> ls <span class="paren2">(<span class="default">make-ral integer?</span>)</span></span>)</span>
+<span class="paren1">(<span class="default">ral? ls</span>)</span>
+<span class="paren1">(<span class="default">ral-null? ls</span>)</span>
+<span class="paren1">(<span class="default">fx= <span class="paren2">(<span class="default">ral-height ls</span>)</span> 1</span>)</span>
+
+<span class="comment">;populate it at the right end
+</span><span class="paren1">(<span class="default">ral-add! ls 0 1 2 3 4</span>)</span>
+<span class="paren1">(<span class="default">fx= <span class="paren2">(<span class="default">ral-count ls</span>)</span> 5</span>)</span>
+<span class="paren1">(<span class="default">equal? <span class="paren2">(<span class="default">ral-&gt;list ls</span>)</span> '<span class="paren2">(<span class="default">0 1 2 3 4</span>)</span></span>)</span>
+
+<span class="comment">;remove some items
+</span><span class="paren1">(<span class="default">ral-remove! ls 2</span>)</span>
+<span class="paren1">(<span class="default">fx= <span class="paren2">(<span class="default">ral-count ls</span>)</span> 4</span>)</span>
+<span class="paren1">(<span class="default">equal? <span class="paren2">(<span class="default">ral-&gt;list ls</span>)</span> '<span class="paren2">(<span class="default">0 1 3 4</span>)</span></span>)</span>
+<span class="paren1">(<span class="default">ral-remove! ls <span class="paren2">(<span class="default">fx- <span class="paren3">(<span class="default">ral-count ls</span>)</span> 1</span>)</span></span>)</span>
+<span class="paren1">(<span class="default">fx= <span class="paren2">(<span class="default">ral-count ls</span>)</span> 3</span>)</span>
+<span class="paren1">(<span class="default">equal? <span class="paren2">(<span class="default">ral-&gt;list ls</span>)</span> '<span class="paren2">(<span class="default">0 1 3</span>)</span></span>)</span>
+<span class="paren1">(<span class="default">ral-remove! ls 0</span>)</span>
+<span class="paren1">(<span class="default">fx= <span class="paren2">(<span class="default">ral-count ls</span>)</span> 2</span>)</span>
+<span class="paren1">(<span class="default">equal? <span class="paren2">(<span class="default">ral-&gt;list ls</span>)</span> '<span class="paren2">(<span class="default">1 3</span>)</span></span>)</span>
+
+<span class="comment">;insert an item
+</span><span class="paren1">(<span class="default">ral-insert! ls 1 2</span>)</span>
+<span class="paren1">(<span class="default">fx= <span class="paren2">(<span class="default">ral-ref ls 1</span>)</span> 2</span>)</span>
+<span class="paren1">(<span class="default">fx= <span class="paren2">(<span class="default">ral-count ls</span>)</span> 3</span>)</span>
+<span class="paren1">(<span class="default">equal? <span class="paren2">(<span class="default">ral-&gt;list ls</span>)</span> '<span class="paren2">(<span class="default">1 2 3</span>)</span></span>)</span>
+
+<span class="comment">;reset ral
+</span><span class="paren1">(<span class="default">ral-clear! ls</span>)</span>
+<span class="paren1">(<span class="default">ral-null? ls</span>)</span>
+
+<span class="comment">;populate ral again
+</span><span class="paren1">(<span class="default">do <span class="paren2">(<span class="default"><span class="paren3">(<span class="default">k 0 <span class="paren4">(<span class="default">fx+ 1 k</span>)</span></span>)</span></span>)</span>
+  <span class="paren2">(<span class="default"><span class="paren3">(<span class="default">fx= k 100</span>)</span></span>)</span>
+  <span class="paren2">(<span class="default">ral-add! ls k</span>)</span></span>)</span>
+<span class="paren1">(<span class="default">fx= <span class="paren2">(<span class="default">ral-count ls</span>)</span> 100</span>)</span>
+
+<span class="comment">;split, join and subral
+</span><span class="paren1">(<span class="default">ral-eql? fx=
+          ls
+          <span class="paren2">(<span class="default">receive <span class="paren3">(<span class="default">head tail</span>)</span> <span class="paren3">(<span class="default">ral-split ls 50</span>)</span>
+            <span class="paren3">(<span class="default">ral-join head tail</span>)</span></span>)</span></span>)</span>
+<span class="paren1">(<span class="default">equal?
+  <span class="paren2">(<span class="default">ral-&gt;list <span class="paren3">(<span class="default">ral-from-upto ls 20 70</span>)</span></span>)</span>
+  <span class="paren2">(<span class="default"><i><span class="symbol">let</span></i> <i><span class="symbol">loop</span></i> <span class="paren3">(<span class="default"><span class="paren4">(<span class="default">k 69</span>)</span> <span class="paren4">(<span class="default">result '<span class="paren5">(<span class="default"></span>)</span></span>)</span></span>)</span>
+    <span class="paren3">(<span class="default"><i><span class="symbol">if</span></i> <span class="paren4">(<span class="default">fx= k 19</span>)</span>
+      result
+      <span class="paren4">(<span class="default"><i><span class="symbol">loop</span></i> <span class="paren5">(<span class="default">fx- k 1</span>)</span> <span class="paren5">(<span class="default">cons k result</span>)</span></span>)</span></span>)</span></span>)</span></span>)</span>
+
+<span class="comment">;inspect and change an item in the middle
+</span><span class="paren1">(<span class="default">fx= <span class="paren2">(<span class="default">ral-ref ls 50</span>)</span> 50</span>)</span>
+<span class="paren1">(<span class="default">ral-set! ls 50 500</span>)</span>
+<span class="paren1">(<span class="default">fx= <span class="paren2">(<span class="default">ral-ref ls 50</span>)</span> 500</span>)</span>
+
+<span class="comment">;change item back again
+</span><span class="paren1">(<span class="default">ral-set! ls 50 50</span>)</span>
+<span class="paren1">(<span class="default">fx= <span class="paren2">(<span class="default">ral-ref ls 50</span>)</span> 50</span>)</span>
+
+<span class="comment">;change items at the ends and back again
+</span><span class="paren1">(<span class="default">ral-set! ls 0 1000</span>)</span>
+<span class="paren1">(<span class="default">fx= <span class="paren2">(<span class="default">ral-ref ls 0</span>)</span> 1000</span>)</span>
+<span class="paren1">(<span class="default">ral-set! ls 0 0</span>)</span>
+<span class="paren1">(<span class="default">fx= <span class="paren2">(<span class="default">ral-ref ls 0</span>)</span> 0</span>)</span>
+<span class="paren1">(<span class="default">ral-set! ls 99 1000</span>)</span>
+<span class="paren1">(<span class="default">fx= <span class="paren2">(<span class="default">ral-ref ls 99</span>)</span> 1000</span>)</span>
+<span class="paren1">(<span class="default">ral-set! ls 99 99</span>)</span>
+<span class="paren1">(<span class="default">fx= <span class="paren2">(<span class="default">ral-ref ls 99</span>)</span> 99</span>)</span>
+
+<span class="comment">;insert at left end
+</span><span class="paren1">(<span class="default">ral-add-left! ls -1 -2 -3</span>)</span>
+<span class="paren1">(<span class="default">fx= <span class="paren2">(<span class="default">ral-ref ls 0</span>)</span> -3</span>)</span>
+<span class="paren1">(<span class="default">fx= <span class="paren2">(<span class="default">ral-ref ls 1</span>)</span> -2</span>)</span>
+<span class="paren1">(<span class="default">fx= <span class="paren2">(<span class="default">ral-ref ls 2</span>)</span> -1</span>)</span>
+
+<span class="comment">;remove them again
+</span><span class="paren1">(<span class="default">ral-remove! ls 0</span>)</span>
+<span class="paren1">(<span class="default">ral-remove! ls 0</span>)</span>
+<span class="paren1">(<span class="default">ral-remove! ls 0</span>)</span>
+<span class="paren1">(<span class="default">fx= <span class="paren2">(<span class="default">ral-ref ls 0</span>)</span> 0</span>)</span>
+<span class="paren1">(<span class="default">fx= <span class="paren2">(<span class="default">ral-count ls</span>)</span> 100</span>)</span>
+
+<span class="comment">;insert at right end and remove it again
+</span><span class="paren1">(<span class="default">ral-add! ls 100 101</span>)</span>
+<span class="paren1">(<span class="default">fx= <span class="paren2">(<span class="default">ral-ref ls <span class="paren3">(<span class="default">fx- <span class="paren4">(<span class="default">ral-count ls</span>)</span> 1</span>)</span></span>)</span> 101</span>)</span>
+<span class="paren1">(<span class="default">ral-remove! ls <span class="paren2">(<span class="default">fx- <span class="paren3">(<span class="default">ral-count ls</span>)</span> 1</span>)</span></span>)</span>
+<span class="paren1">(<span class="default">ral-remove! ls <span class="paren2">(<span class="default">fx- <span class="paren3">(<span class="default">ral-count ls</span>)</span> 1</span>)</span></span>)</span>
+<span class="paren1">(<span class="default">fx= <span class="paren2">(<span class="default">ral-ref ls <span class="paren3">(<span class="default">fx- <span class="paren4">(<span class="default">ral-count ls</span>)</span> 1</span>)</span></span>)</span> 99</span>)</span>
+
+<span class="comment">;insert in the middle and remove it again
+</span><span class="paren1">(<span class="default">ral-insert! ls 20 200</span>)</span>
+<span class="paren1">(<span class="default">fx= <span class="paren2">(<span class="default">ral-ref ls 20</span>)</span> 200</span>)</span>
+<span class="paren1">(<span class="default">fx= <span class="paren2">(<span class="default">ral-ref ls 21</span>)</span> 20</span>)</span>
+<span class="paren1">(<span class="default">fx= <span class="paren2">(<span class="default">ral-count ls</span>)</span> 101</span>)</span>
+<span class="paren1">(<span class="default">ral-remove! ls 20</span>)</span>
+<span class="paren1">(<span class="default">fx= <span class="paren2">(<span class="default">ral-ref ls 20</span>)</span> 20</span>)</span>
+<span class="paren1">(<span class="default">fx= <span class="paren2">(<span class="default">ral-count ls</span>)</span> 100</span>)</span>
+
+<span class="comment">;restructure
+</span><span class="paren1">(<span class="default"><i><span class="symbol">define</span></i> lsr <span class="paren2">(<span class="default">ral-restructure ls 4 20</span>)</span></span>)</span>
+<span class="paren1">(<span class="default">ral-eql? fx= ls lsr</span>)</span>
+<span class="paren1">(<span class="default">fx= <span class="paren2">(<span class="default">ral-width lsr</span>)</span> 4</span>)</span>
+<span class="paren1">(<span class="default">fx= <span class="paren2">(<span class="default">ral-max-height lsr</span>)</span> 20</span>)</span>
+
+<span class="comment">;map and filter
+</span><span class="paren1">(<span class="default">equal? <span class="paren2">(<span class="default">ral-&gt;list <span class="paren3">(<span class="default">ral-map ls add1</span>)</span></span>)</span>
+        <span class="paren2">(<span class="default"><i><span class="symbol">let</span></i> <i><span class="symbol">loop</span></i> <span class="paren3">(<span class="default"><span class="paren4">(<span class="default">k 100</span>)</span> <span class="paren4">(<span class="default">result '<span class="paren5">(<span class="default"></span>)</span></span>)</span></span>)</span>
+          <span class="paren3">(<span class="default"><i><span class="symbol">if</span></i> <span class="paren4">(<span class="default">fx= k 0</span>)</span>
+            result
+            <span class="paren4">(<span class="default"><i><span class="symbol">loop</span></i> <span class="paren5">(<span class="default">fx- k 1</span>)</span> <span class="paren5">(<span class="default">cons k result</span>)</span></span>)</span></span>)</span></span>)</span></span>)</span>
+<span class="paren1">(<span class="default">equal? <span class="paren2">(<span class="default">ral-&gt;list <span class="paren3">(<span class="default">ral-filter ls odd?</span>)</span></span>)</span>
+        <span class="paren2">(<span class="default"><i><span class="symbol">let</span></i> <i><span class="symbol">loop</span></i> <span class="paren3">(<span class="default"><span class="paren4">(<span class="default">k 99</span>)</span> <span class="paren4">(<span class="default">result '<span class="paren5">(<span class="default"></span>)</span></span>)</span></span>)</span>
+          <span class="paren3">(<span class="default"><i><span class="symbol">if</span></i> <span class="paren4">(<span class="default">fx&lt; k 0</span>)</span>
+            result
+            <span class="paren4">(<span class="default"><i><span class="symbol">loop</span></i> <span class="paren5">(<span class="default">fx- k 2</span>)</span> <span class="paren5">(<span class="default">cons k result</span>)</span></span>)</span></span>)</span></span>)</span></span>)</span>
+</tt></pre>
+<h2 id="requirements">Requirements</h2>
+<p><a href="dbc" class="internal">dbc</a></p>
+<h2 id="last-update">Last update</h2>
+<p>Nov 27, 2013</p>
+<h2 id="author">Author</h2>
+<p><a href="/users/juergen-lorenz" class="internal">Juergen Lorenz</a></p>
+<h2 id="license">License</h2>
+<pre><tt>Copyright (c) 2012-2013, Juergen Lorenz
+All rights reserved.</tt></pre>
+<pre><tt>Redistribution and use in source and binary forms, with or without
+modification, are permitted provided that the following conditions are
+met:
+
+Redistributions of source code must retain the above copyright
+notice, this list of conditions and the following disclaimer.
+
+Redistributions in binary form must reproduce the above copyright
+notice, this list of conditions and the following disclaimer in the
+documentation and/or other materials provided with the distribution.
+Neither the name of the author nor the names of its contributors may be
+used to endorse or promote products derived from this software without
+specific prior written permission. 
+  
+THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS &quot;AS
+IS&quot; AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED
+TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A
+PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT
+HOLDERS OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
+SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED
+TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR
+PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF
+LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING
+NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
+SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.</tt></pre>
+<h2 id="version-history">Version History</h2>
+<dl>
+<dt>0.1.2</dt>
+<dd>tests updated</dd>
+<dt>0.1.1</dt>
+<dd>tests updated</dd>
+<dt>0.1</dt>
+<dd>initial import</dd></dl></div></body></html>
