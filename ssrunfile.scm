@@ -151,6 +151,7 @@
     (spheres/structure/multi-dimensional-array mbda)
     (spheres/structure/multi-dimensional-array tter)
     (spheres/structure red-black-tree)
+    (spheres/structure rope)
     (spheres/structure skip-list)
     (spheres/structure sparse-vector)
     (spheres/structure suffix-tree)

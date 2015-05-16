@@ -192,8 +192,8 @@
   ;;         (body (cadr args)))
   ;;    (if (null? bindings) (cons 'begin body)
   ;;        (apply (lambda (vars initializer)
-  ;;                 (let ((cont 
-  ;;                        (cons 'let-values* 
+  ;;                 (let ((cont
+  ;;                        (cons 'let-values*
   ;;                              (cons (cdr bindings) body))))
   ;;                   (cond
   ;;                    ((not (pair? vars)) ; regular let case, a single var
@@ -213,7 +213,7 @@
       ((let-values "bind" ((?b0 ?e0) ?binding ...) ?tmps ?body)
        (let-values "mktmp" ?b0 ?e0 () (?binding ...) ?tmps ?body))
       ((let-values "mktmp" () ?e0 ?args ?bindings ?tmps ?body)
-       (call-with-values 
+       (call-with-values
            (lambda () ?e0)
          (lambda ?args
            (let-values "bind" ?bindings ?tmps ?body))))
@@ -239,27 +239,27 @@
   ;; This code is in the public domain.
   (define-syntax case-lambda
     (syntax-rules ()
-      ((case-lambda 
-        (?a1 ?e1 ...) 
+      ((case-lambda
+        (?a1 ?e1 ...)
         ?clause1 ...)
        (lambda args
          (let ((l (length args)))
-           (case-lambda "CLAUSE" args l 
+           (case-lambda "CLAUSE" args l
                         (?a1 ?e1 ...)
                         ?clause1 ...))))
-      ((case-lambda "CLAUSE" ?args ?l 
-                    ((?a1 ...) ?e1 ...) 
+      ((case-lambda "CLAUSE" ?args ?l
+                    ((?a1 ...) ?e1 ...)
                     ?clause1 ...)
        (if (= ?l (length '(?a1 ...)))
            (apply (lambda (?a1 ...) ?e1 ...) ?args)
-           (case-lambda "CLAUSE" ?args ?l 
+           (case-lambda "CLAUSE" ?args ?l
                         ?clause1 ...)))
       ((case-lambda "CLAUSE" ?args ?l
-                    ((?a1 . ?ar) ?e1 ...) 
+                    ((?a1 . ?ar) ?e1 ...)
                     ?clause1 ...)
-       (case-lambda "IMPROPER" ?args ?l 1 (?a1 . ?ar) (?ar ?e1 ...) 
+       (case-lambda "IMPROPER" ?args ?l 1 (?a1 . ?ar) (?ar ?e1 ...)
                     ?clause1 ...))
-      ((case-lambda "CLAUSE" ?args ?l 
+      ((case-lambda "CLAUSE" ?args ?l
                     (?a1 ?e1 ...)
                     ?clause1 ...)
        (let ((?a1 ?args))
@@ -268,13 +268,13 @@
        (error "Wrong number of arguments to CASE-LAMBDA."))
       ((case-lambda "IMPROPER" ?args ?l ?k ?al ((?a1 . ?ar) ?e1 ...)
                     ?clause1 ...)
-       (case-lambda "IMPROPER" ?args ?l (+ ?k 1) ?al (?ar ?e1 ...) 
+       (case-lambda "IMPROPER" ?args ?l (+ ?k 1) ?al (?ar ?e1 ...)
                     ?clause1 ...))
-      ((case-lambda "IMPROPER" ?args ?l ?k ?al (?ar ?e1 ...) 
+      ((case-lambda "IMPROPER" ?args ?l ?k ?al (?ar ?e1 ...)
                     ?clause1 ...)
        (if (>= ?l ?k)
            (apply (lambda ?al ?e1 ...) ?args)
-           (case-lambda "CLAUSE" ?args ?l 
+           (case-lambda "CLAUSE" ?args ?l
                         ?clause1 ...)))))
 
   ;;! SRFI-31 A special form rec for recursive evaluation
@@ -449,10 +449,10 @@
   ;;           ((_ () <result>) <result>)
   ;;           ((_ (<hd> . <tl>) <result>)
   ;;            (%reverse <tl> (<hd> . <result>)))))
-  ;;        (%subst  
+  ;;        (%subst
   ;;         (syntax-rules ()
   ;;           ;; 1. Three argument form: substitute <new> for all occurrences of <old>
-  ;;           ;; in <form> 
+  ;;           ;; in <form>
   ;;           ((_ <new> <old> <form>)
   ;;            (letrec-syntax
   ;;                ((f (syntax-rules (<old>)
@@ -533,7 +533,7 @@
   ;;     `(let ((,var ,form1)) ,@rest-forms ,var)))
   (define-syntax begin0
     (syntax-rules ()
-      ((_ form form1 ... ) 
+      ((_ form form1 ... )
        (let ((val form)) form1 ... val))))
 
   ;;! push!
@@ -656,9 +656,47 @@
       ((_ . ol)
        (string->symbol (string-append-anything . ol)))))
 
-  
+
   ;;-----------------------------------------------------------------------------
   ;;!! Multiple values
+
+  (define-syntax define-values
+    (syntax-rules ()
+      ((define-values () expr)
+       (define dummy
+         (call-with-values (lambda () expr)
+           (lambda args #f))))
+      ((define-values (var) expr)
+       (define var expr))
+      ((define-values (var0 var1 ... varn) expr)
+       (begin
+         (define var0
+           (call-with-values (lambda () expr) list))
+         (define var1
+           (let ((v (cadr var0)))
+             (set-cdr! var0 (cddr var0))
+             v))
+         ...
+         (define varn
+           (let ((v (cadr var0)))
+             (set! var0 (car var0))
+             v))))
+      ((define-values (var0 var1 ... . var-dot) expr)
+       (begin
+         (define var0
+           (call-with-values (lambda () expr) list))
+         (define var1
+           (let ((v (cadr var0)))
+             (set-cdr! var0 (cddr var0))
+             v))
+         ...
+         (define var-dot
+           (let ((v (cdr var0)))
+             (set! var0 (car var0))
+             v))))
+      ((define-values var expr)
+       (define var
+         (call-with-values (lambda () expr) list)))))
 
   ;; List to values (as syntax)
   (define-syntax list->values
@@ -671,7 +709,7 @@
     (syntax-rules ()
       ((_ x)
        (apply values (vector->list x)))))
-    
+
   ;;! Values to list
   (define-syntax values->list
     (syntax-rules ()
@@ -733,5 +771,5 @@
     (syntax-rules ()
       ((_ ?a ?b)
        (pred2?+ equal? ?a ?b))))
-  
+
   (include "base.scm"))
