@@ -31,6 +31,11 @@
 ;; (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 ;; OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
+;; Source: https://bitbucket.org/evhan/rope.git
+;; commit 5cfc01404866cc6c9e1695b7fef87a6149a82c07
+;; Author: Evan Hanson <evhan@foldling.org>
+;; Date:   Fri Nov 22 14:34:06 2013 +1300
+
 (define string-copy!
   (case-lambda
    ((s1 s2)
