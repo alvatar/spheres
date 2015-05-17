@@ -1,0 +1,313 @@
+* DONE =heap->list=
+  CLOSED: [2013-03-19 Tue 13:28]
+  #+BEGIN_SRC scheme
+    (use cock
+         debug
+         define-record-and-printer
+         loops
+         vector-lib)
+    
+    (include "heap.scm")
+    (include "heap-core.scm")
+    
+    (define (element-copy element)
+      (make-element (element-key element)
+                    (element-datum element)))
+    
+    (define (heap-copy heap)
+      (let ((copy (make-heap
+                   (heap->? heap)
+                   (heap-<? heap)
+                   (heap-inf heap)
+                   (make-vector (heap-length heap))
+                   (heap-size heap)
+                   (hash-table-copy (heap-membership heap)))))
+        (vector-for-each
+         (lambda (i x)
+           (let ((element (vector-ref (heap-data heap) i)))
+             (when (element? element)
+               (vector-set! (heap-data copy) i (element-copy element)))))
+         (heap-data heap))
+        copy))
+    
+    (define (heap->list heap)
+      ;; Or can we work on the data directly?
+      (let ((heap (heap-copy heap)))
+        (do ((list '() (cons (heap-extract-extremum! heap) list)))
+            ((heap-empty? heap) list))))
+    
+    (define (heap->alist heap)
+      (let ((heap (heap-copy heap)))
+        (do ((list
+              '()
+              (let ((datum (heap-extremum heap)))
+                (alist-cons (heap-key heap datum)
+                            (heap-extract-extremum! heap)
+                            list))))
+            ((heap-empty? heap) list))))
+    
+    (let ((heap (make-max-heap)))
+      (do-times i 10 (let ((x (random 1000))) (heap-insert! heap x x)))
+      (debug
+       (heap->list heap)
+       (heap->alist heap)
+       heap))
+  #+END_SRC
+* DONE Some reasonable error when we take the extremum of an empty heap.
+  CLOSED: [2013-03-18 Mon 13:59]
+  - CLOSING NOTE [2013-03-18 Mon 13:59] \\
+    We had it for =heap-extract-extremum!= but not for =heap-extremum=.
+* TODO Need a =heap-size=.
+* TODO =heap-fold=, =heap-merge=, &c.?
+  What about =heap-map=, =heap-for-each=, =heap-filter=, =heap-copy=?
+* TODO Simplify the API with key + datum and multiple values.
+  Remove the composite with accessor and mutator.
+* TODO In =heap-change-key!=, should the key or datum go first?
+* TODO =heap-key/datum=: is this the right model?
+  If we were dealing in e.g. composite key-data or multiple values,
+  would this be necessary?
+* TODO Maybe we should have called this thing =priority-queue=.
+  I'm thinking of undoing the general heap operations.
+* TODO =heap-extract-extremum!= to =heap-extremum!=?
+* TODO Why not modify =heap-insert!= to take a key and datum?
+  Forget about this composite element-thing with accessors; in that
+  case, I suppose, =heap-extremum= and =heap-extract-extremum!= would
+  return two values: key and datum.
+* DONE What about cases with identical data but different priority?
+  CLOSED: [2012-10-01 Mon 01:36]
+  - CLOSING NOTE [2012-10-01 Mon 01:36] \\
+    We're enforcing the unique datum constraint; if you add an element
+    whose datum exists, we adjust the key.
+  Should we hash on datum and priority?
+
+  With identical elements, it's possible that the heap and membership
+  table are in an inconsistent state: if you delete one of the
+  elements, the membership table will claim it doesn't exist.
+
+  We're going to have to histogram it, therefore, and store both count
+  and index in the membership table. Deleting from the table
+  altogether on zero (but that's an optimization).
+
+  I have the feeling, too, that we should be doing membership on
+  key×datum.
+* TODO Don't expose the =.../index= functions.
+  We only really care about data, don't we? =.../index= is
+  implementation.
+* DONE Membership testing with an adherent hash-table?
+  CLOSED: [2012-09-27 Thu 05:31]
+* DONE Use vectors instead of lists.
+  CLOSED: [2012-09-27 Thu 05:31]
+  #+BEGIN_SRC scheme
+    (use (only aima define-record-and-printer)
+         debug
+         miscmacros
+         test
+         vector-lib)
+    
+    (define (parent i)
+      (- (inexact->exact (floor (/ (+ i 1) 2))) 1))
+    
+    (define (left i)
+      (+ (* 2 i) 1))
+    
+    (define (right i)
+      (+ (* 2 i) 1 1))
+    
+    (define-record-and-printer heap
+      >?
+      =?
+      inf
+      key
+      key-set!
+      data
+      size)
+    
+    (define (heap-length heap)
+      (vector-length (heap-data heap)))
+    
+    (define (heap-ref heap i)
+      (vector-ref (heap-data heap) i))
+    
+    (define (heap-set! heap i x)
+      (vector-set! (heap-data heap) i x))
+    
+    (define (heap-swap! heap i j)
+      (vector-swap! (heap-data heap) i j))
+    
+    (define (heapify! heap i)
+      (let ((heap->? (heap->? heap))
+            (heap-key (heap-key heap)))
+        (let ((left (left i))
+              (right (right i)))
+          (let* ((extremum (if (and (< left (heap-size heap))
+                                    (heap->?
+                                     (heap-key (heap-ref heap left))
+                                     (heap-key (heap-ref heap i))))
+                               left
+                               i))
+                 (extremum (if (and (< right (heap-size heap))
+                                    (heap->?
+                                     (heap-key (heap-ref heap right))
+                                     (heap-key (heap-ref heap extremum))))
+                               right
+                               extremum)))
+            (if (not (= extremum i))
+                (begin (heap-swap! heap i extremum)
+                       (heapify! heap extremum)))))))
+    
+    (define-record-and-printer element key datum)
+    
+    (define initial-heap-size (make-parameter 100))
+    
+    (define make-max-heap
+      (case-lambda
+       (()
+        (make-max-heap car set-car!))
+       ((key key-set!)
+        (make-max-heap key key-set! (make-vector (initial-heap-size)) 0))
+       ((key key-set! data)
+        ;; It's always 0 here, isn't it, unless we're passing in a valid
+        ;; heap? In which case: use the constructor directly.
+        ;;
+        ;; Should we build the heap automatically?
+        (make-max-heap key key-set! data (vector-length data)))
+       ((key key-set! data size)
+        (make-heap > = -inf key key-set! data size))))
+    
+    (define (figure-6.2)
+      (let ((data (list->vector (map list '(16 4 10 14 7 9 3 2 8 1)))))
+        (make-max-heap car set-car! data)))
+    
+    (define (test-figure-6.2 testandum heap)
+      (test testandum
+            '#((16) (14) (10) (8) (7) (9) (3) (2) (4) (1))
+            (heap-data heap)))
+    
+    (let ((heap (figure-6.2)))
+      (heapify! heap 1)
+      (test-figure-6.2 "heapify!" heap))
+    
+    (define (build-heap! heap)
+      (heap-size-set! heap (vector-length (heap-data heap)))
+      (let ((median (inexact->exact (floor (/ (heap-size heap) 2)))))
+        ;; Should be i - 1 here?
+        (do ((i (sub1 median) (sub1 i)))
+            ((negative? i))
+          (heapify! heap i))))
+    
+    (let ((heap (figure-6.2)))
+      (build-heap! heap)
+      (test-figure-6.2 "build-heap!" heap))
+    
+    (define (heap-extremum heap)
+      (heap-ref heap 0))
+    
+    (define (heap-extract-extremum! heap)
+      (if (zero? (heap-size heap))
+          (error "Heap underflow -- HEAP-EXTRACT-EXTREMUM!")
+          (let ((extremum (heap-extremum heap)))
+            (heap-set! heap 0 (heap-ref heap (- (heap-size heap) 1)))
+            (heap-size-set! heap (- (heap-size heap) 1))
+            (heapify! heap 0)
+            extremum)))
+    
+    (let ((heap (figure-6.2)))
+      (build-heap! heap)
+      (test "heap-extremum" '(16) (heap-extremum heap))
+      (test "heap-extract-extremum! -- extremum" '(16) (heap-extract-extremum! heap))
+      (test "heap-extract-extremum! -- data"
+            '#((14) (8) (10) (4) (7) (9) (3) (2) (1) (1))
+            (heap-data heap)))
+    
+    (define (heap-change-key! heap i new-key)
+      (let ((heap->? (heap->? heap))
+            (heap-=? (heap-=? heap))
+            (heap-key (heap-key heap)))
+        (let ((old-key (heap-key (heap-ref heap i))))
+          (if (or (heap->? new-key old-key)
+                  (heap-=? new-key old-key))
+              (begin
+                ((heap-key-set! heap) (heap-ref heap i) new-key)
+                (do ((i i (parent i)))
+                    ;; Do we also need to check for (negative? i)?
+                    ((or (zero? i)
+                         (heap->? (heap-key (heap-ref heap (parent i)))
+                                  (heap-key (heap-ref heap i)))))
+                (heap-swap! heap i (parent i))))
+              (error "Key violates heap-gradient -- HEAP-CHANGE-KEY!")))))
+    
+    (define (figure-6.5)
+      (let ((data (list->vector (map list '(16 14 10 8 7 9 3 2 4 1)))))
+        (make-max-heap car set-car! data)))
+    
+    (let ((heap (figure-6.5)))
+      (heap-change-key! heap 8 15)
+      (test "heap-change-key!"
+            '#((16) (15) (10) (14) (7) (9) (3) (2) (8) (1))
+            (heap-data heap)))
+    
+    (define (heap-insert! heap element)
+      (let ((heap-size (heap-size heap)))
+        (if (= heap-size (heap-length heap))
+            (heap-data-set! heap (vector-resize (heap-data heap) (* 2 heap-size))))
+        (heap-size-set! heap (+ heap-size 1))
+        (let ((key ((heap-key heap) element)))
+          ((heap-key-set! heap) element (heap-inf heap))
+          (heap-set! heap heap-size element)
+          (heap-change-key! heap heap-size key))))
+    
+    (let ((heap (figure-6.5)))
+      (heap-insert! heap '(21))
+      (test "heap-insert!"
+            '#((21)
+               (16)
+               (10)
+               (8)
+               (14)
+               (9)
+               (3)
+               (2)
+               (4)
+               (1)
+               (7)
+               #f
+               #f
+               #f
+               #f
+               #f
+               #f
+               #f
+               #f
+               #f)
+            (heap-data heap)))
+    
+    (define (heap-delete! heap i)
+      ;; Hypothesis
+      (let ((heap-size (- (heap-size heap) 1)))
+        (if (negative? heap-size)
+            (error "Heap underflow -- HEAP-DELETE!")
+            (begin
+              (heap-size-set! heap heap-size)
+              (heap-set! heap i (heap-ref heap heap-size))
+              (heapify! heap i)))))
+    
+    (let ((heap (figure-6.5)))
+      (heap-delete! heap 4)
+      (test "heap-delete!"
+            '#((16) (14) (10) (8) (1) (9) (3) (2) (4) (1))
+            (heap-data heap)))
+  #+END_SRC
+* DONE Dynamic resizing
+  CLOSED: [2012-09-27 Thu 05:31]
+  Do it exponentially.
+* DONE Payload mechanism
+  CLOSED: [2012-09-26 Wed 01:33]
+* CANCELED Use =max= instead of =extremum=?
+  CLOSED: [2012-09-27 Thu 05:31]
+  I.e., with the understanding that it's inverted in a min-heap.
+* CANCELED SRFI
+  CLOSED: [2012-09-27 Thu 05:31]
+  - CLOSING NOTE [2012-09-27 Thu 05:31] \\
+    Good question.
+  Why aren't there SRFIs about the fundamental datatypes: queues,
+  stacks, heaps?

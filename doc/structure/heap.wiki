@@ -1,0 +1,202 @@
+== heap
+
+Mutable heap with priority-queue operations and O(1) membership-testing
+[[toc:]]
+=== {{heap}}
+<record>heap</record>
+The heap data-structure
+; {{>?}} : Greater-than relation for keys
+; {{<?}} : Less-than relation for keys
+; {{inf}} : Infinity w.r.t. the inequality `>?'
+; {{data}} : Vector data-store underlying heap
+; {{size}} : Size of the heap as distinct from size of data
+; {{membership}} : Mapping from data to indices
+<enscript highlight="scheme">(define-record-and-printer heap >? <? inf data size membership)
+</enscript>
+=== {{heap-empty?}}
+<procedure>(heap-empty? heap) → boolean</procedure>
+Is the heap empty?
+; {{heap}} : The heap to check
+<enscript highlight="scheme">(define (heap-empty? heap) (zero? (heap-size heap)))
+</enscript>
+=== {{heap-member?}}
+<procedure>(heap-member? heap datum) → boolean</procedure>
+Is this datum a member in the heap?
+; {{heap}} : The heap in which to check
+; {{datum}} : The datum to check for
+<enscript highlight="scheme">(define (heap-member? heap datum) (and (heap-index heap datum) #t))
+</enscript>
+=== {{heap-key}}
+<procedure>(heap-key heap datum) → unspecified</procedure>
+Find the key, given the datum.
+; {{heap}} : The heap in which to search
+; {{datum}} : The datum whose key to find
+<enscript highlight="scheme">(define (heap-key heap datum)
+  (let ((index (heap-index heap datum)))
+    (and index (element-key (heap-ref heap index)))))
+</enscript>
+=== {{initial-heap-size}}
+<parameter>initial-heap-size → 100</parameter>
+Initial size of the heap data-store; exponentially resized on
+overflow.
+<enscript highlight="scheme">(define initial-heap-size (make-parameter 100))
+</enscript>
+=== {{make-max-heap}}
+<procedure>(make-max-heap) → max-heap</procedure>
+<procedure>(make-max-heap initial-heap-size) → max-heap</procedure>
+Make a max-heap.
+; {{size}} : Initial heap-size
+<enscript highlight="scheme">(define make-max-heap
+  (case-lambda
+    (() (make-max-heap (initial-heap-size)))
+    ((initial-heap-size)
+     (make-heap
+       >
+       <
+       -inf.0
+       (make-vector initial-heap-size)
+       0
+       (make-hash-table)))))
+</enscript>
+=== {{make-min-heap}}
+<procedure>(make-min-heap) → min-heap</procedure>
+<procedure>(make-min-heap initial-heap-size) → min-heap</procedure>
+Make a min-heap.
+; {{size}} : Initial heap-size
+<enscript highlight="scheme">(define make-min-heap
+  (case-lambda
+    (() (make-min-heap (initial-heap-size)))
+    ((initial-heap-size)
+     (make-heap
+       <
+       >
+       +inf.0
+       (make-vector initial-heap-size)
+       0
+       (make-hash-table)))))
+</enscript>
+=== {{heap-extremum}}
+<procedure>(heap-extremum heap) → datum</procedure>
+Peak at the heap's extremum (min or max).
+; {{heap}} : The heap at which to peek
+<enscript highlight="scheme">(define (heap-extremum heap)
+  (if (heap-empty? heap)
+    (error "Heap underflow -- HEAP-EXTREMUM")
+    (element-datum (heap-ref heap 0))))
+</enscript>
+=== {{heap-extract-extremum!}}
+<procedure>(heap-extract-extremum! heap) → datum</procedure>
+Return and delete the heap's extremum (min or max).
+; {{heap}} : The heap from which to extract
+<enscript highlight="scheme">(define (heap-extract-extremum! heap)
+  (let ((extremum (heap-extremum heap)))
+    (heap-set! heap 0 (heap-ref heap (- (heap-size heap) 1)))
+    (heap-size-set! heap (- (heap-size heap) 1))
+    (heapify!/index heap 0)
+    extremum))
+</enscript>
+=== {{heap-change-key!}}
+<procedure>(heap-change-key! heap datum new-key) → unspecified</procedure>
+Change the key of the element with datum to new-key along the
+heap-gradient.
+; {{heap}} : The heap in which to change
+; {{datum}} : The datum whose key to change
+; {{new-key}} : The new key to assign to element with datum
+<enscript highlight="scheme">(define (heap-change-key! heap datum new-key)
+  (let ((i (heap-index heap datum)))
+    (if i
+      (heap-change-key!/index heap i new-key)
+      (error "Datum not found -- HEAP-CHANGE-KEY!"))))
+</enscript>
+=== {{heap-insert!}}
+<procedure>(heap-insert! heap key datum) → unspecified</procedure>
+Insert a new element into the heap if the datum does not exist;
+otherwise, adjust its key.
+; {{heap}} : The heap in which to insert
+; {{element}} : The element to be inserted
+<enscript highlight="scheme">(define (heap-insert! heap key datum)
+  (if (heap-member? heap datum)
+    (heap-change-key! heap datum key)
+    (let ((heap-size (heap-size heap)))
+      (if (= heap-size (heap-length heap))
+        (heap-data-set! heap (vector-resize (heap-data heap) (* 2 heap-size))))
+      (heap-size-set! heap (+ heap-size 1))
+      (let ((element (make-element (heap-inf heap) datum)))
+        (heap-set! heap heap-size element)
+        (heap-change-key!/index heap heap-size key)))))
+</enscript>
+=== {{heap-delete!}}
+<procedure>(heap-delete! heap datum) → unspecified</procedure>
+Delete the element with datum
+; {{heap}} : The heap from which to delete
+; {{datum}} : The datum whose element to delete
+<enscript highlight="scheme">(define (heap-delete! heap datum)
+  (let ((i (heap-index heap datum)))
+    (if i
+      (heap-delete!/index heap i)
+      (error "Datum not found -- HEAP-DELETE!"))))
+</enscript>
+=== {{heap->list}}
+<procedure>(heap->list heap) → list</procedure>
+Convert the heap into a key-sorted list of values by iteratively
+extracting the extremum; see also [[heap->alist]].
+; {{heap}} : The heap to convert
+<enscript highlight="scheme">(define (heap->list heap)
+  (let ((heap (heap-copy heap)))
+    (do ((list '() (cons (heap-extract-extremum! heap) list)))
+        ((heap-empty? heap) list))))
+</enscript>
+=== {{heap->alist}}
+<procedure>(heap->alist heap) → alist</procedure>
+Convert the heap into a key-sorted list of key-value pairs by iteratively extracting the extremum; see also [[heap->list]].
+; {{heap}} : The heap to convert
+<enscript highlight="scheme">(define (heap->alist heap)
+  (let ((heap (heap-copy heap)))
+    (do ((list '()
+               (let ((datum (heap-extremum heap)))
+                 (alist-cons
+                   (heap-key heap datum)
+                   (heap-extract-extremum! heap)
+                   list))))
+        ((heap-empty? heap) list))))
+</enscript>
+=== About this egg
+
+==== Author
+
+[[/users/klutometis|Peter Danenberg]]
+==== Repository
+[[https://github.com/klutometis/heap]]
+==== License
+BSD
+==== Dependencies
+* [[define-record-and-printer]]
+* [[hahn]]
+* [[miscmacros]]
+* [[vector-lib]]
+
+==== Versions
+; [[https://github.com/klutometis/heap/releases/tag/0.1|0.1]] : Initial version
+; [[https://github.com/klutometis/heap/releases/tag/0.1.1|0.1.1]] : Add release-info.
+; [[https://github.com/klutometis/heap/releases/tag/0.1.2|0.1.2]] : Add test.
+; [[https://github.com/klutometis/heap/releases/tag/0.1.3|0.1.3]] : Update docs.
+; [[https://github.com/klutometis/heap/releases/tag/0.2|0.2]] : Membership-testing
+; [[https://github.com/klutometis/heap/releases/tag/0.2.2|0.2.2]] : Cleanup
+; [[https://github.com/klutometis/heap/releases/tag/0.3|0.3]] : Enforce unique data.
+; [[https://github.com/klutometis/heap/releases/tag/0.3.1|0.3.1]] : Fix make-min-heap.
+; [[https://github.com/klutometis/heap/releases/tag/0.4|0.4]] : Simplified data-based API
+; [[https://github.com/klutometis/heap/releases/tag/0.4.1|0.4.1]] : Remove phantom release.
+; [[https://github.com/klutometis/heap/releases/tag/0.4.2|0.4.2]] : With a note about cock-utils
+; [[https://github.com/klutometis/heap/releases/tag/0.4.3|0.4.3]] : Export heap-size.
+; [[https://github.com/klutometis/heap/releases/tag/0.4.4|0.4.4]] : Proper infinities
+; [[https://github.com/klutometis/heap/releases/tag/0.4.5|0.4.5]] : Add test-exit.
+; [[https://github.com/klutometis/heap/releases/tag/0.4.6|0.4.6]] : Remove AIMA.
+; [[https://github.com/klutometis/heap/releases/tag/0.4.7|0.4.7]] : Fix max heaps.
+; [[https://github.com/klutometis/heap/releases/tag/0.4.8|0.4.8]] : Add an empty-heap guard on heap-extremum.
+; [[https://github.com/klutometis/heap/releases/tag/0.4.9|0.4.9]] : heap->list, heap->alist
+; [[https://github.com/klutometis/heap/releases/tag/0.4.10|0.4.10]] : Remove the dependency on setup-helper-cock.
+; [[https://github.com/klutometis/heap/releases/tag/0.4.11|0.4.11]] : Remove debug.
+; [[https://github.com/klutometis/heap/releases/tag/0.4.12|0.4.12]] : Use hahn.
+==== Colophon
+
+Documented by [[/egg/hahn|hahn]].

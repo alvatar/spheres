@@ -145,6 +145,7 @@
     (spheres/structure fifo)
     (spheres/structure hash-table)
     (spheres/structure hash-trie)
+    (spheres/structure heap)
     (spheres/structure integer-set)
     (spheres/structure lru-cache)
     (spheres/structure multi-dimensional-array)
