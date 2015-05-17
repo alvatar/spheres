@@ -137,6 +137,7 @@
     (spheres/string u8vector)
     (spheres/string unicode)
     (spheres/structure a-list)
+    (spheres/structure array)
     (spheres/structure avl-tree)
     (spheres/structure bb-tree)
     (spheres/structure bit-vector)

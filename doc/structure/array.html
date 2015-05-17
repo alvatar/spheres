@@ -1,0 +1,588 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<title>Functional arrays - The Chicken Scheme wiki</title>
+<meta http-equiv="Content-Style-Type" content="text/css" />
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+<link rel="stylesheet" type="text/css" href="/chicken.css" /></head>
+<body>
+<div id="menu">
+<ul>
+<li><a href="/" class="internal">Wiki</a></li>
+<li><a href="http://code.call-cc.org/" class="external">Download</a></li>
+<li><a href="/manual/index" class="internal">Manual</a></li>
+<li><a href="/eggs" class="internal">Eggs</a></li>
+<li><a href="http://api.call-cc.org/doc/" class="external">API</a></li>
+<li><a href="http://tests.call-cc.org/" class="external">Tests</a></li>
+<li><a href="http://bugs.call-cc.org/" class="external">Bugs</a></li></ul></div>
+<div id="search">
+<form action="/search">
+<div><label>free text<input type="text" name="text" /></label><label>identifier<input type="text" name="ident" /></label><input type="submit" value="search" /><a href="/search-help">search help</a></div></form></div>
+<ul id="page-specific-links">
+<li><a href="?action=show">show</a></li>
+<li><a href="?action=edit" rel="nofollow">edit</a></li>
+<li><a href="?action=history">history</a></li></ul>
+<div id="content">
+<ul class="tags">
+<li>egg</li></ul>
+<div id="toc">
+<ol>
+<li><a href="#functional-arrays">Functional arrays</a>
+<ol>
+<li><a href="#module-structure">Module structure</a></li>
+<li><a href="#the-module-array-handlers">The module array-handlers</a>
+<ol>
+<li><a href="#array-handlers">array-handlers</a></li>
+<li><a href="#array-handler">array-handler?</a></li>
+<li><a href="#make-array-handler">make-array-handler</a></li>
+<li><a href="#array-handler-repeat">array-handler-repeat</a></li>
+<li><a href="#array-handler-iterate">array-handler-iterate</a></li>
+<li><a href="#array-handler-iterate-while">array-handler-iterate-while</a></li>
+<li><a href="#array-handler-iterate-until">array-handler-iterate-until</a></li>
+<li><a href="#array-handler-messages">array-handler-messages</a></li>
+<li><a href="#nary">nary</a></li>
+<li><a href="#nary">nary?</a></li>
+<li><a href="#assert">assert*</a></li></ol></li>
+<li><a href="#the-module-arrays">The module arrays</a>
+<ol>
+<li><a href="#arrays">arrays</a></li>
+<li><a href="#array">array?</a></li>
+<li><a href="#array-null">array-null?</a></li>
+<li><a href="#make-array">make-array</a></li>
+<li><a href="#array">array</a></li>
+<li><a href="#list-array">list-&gt;array</a></li>
+<li><a href="#vector-array">vector-&gt;array</a></li>
+<li><a href="#array-repeat">array-repeat</a></li>
+<li><a href="#array-iterate">array-iterate</a></li>
+<li><a href="#array-iterate-while">array-iterate-while</a></li>
+<li><a href="#array-iterate-until">array-iterate-until</a></li>
+<li><a href="#array-copy">array-copy</a></li>
+<li><a href="#array-list">array-&gt;list</a></li>
+<li><a href="#array-vector">array-&gt;vector</a></li>
+<li><a href="#array-cursor-start">array-cursor-start!</a></li>
+<li><a href="#array-cursor-next">array-cursor-next!</a></li>
+<li><a href="#array-cursor-goto">array-cursor-goto!</a></li>
+<li><a href="#array-cursor-finished">array-cursor-finished?</a></li>
+<li><a href="#array-cursor-item">array-cursor-item</a></li>
+<li><a href="#array-cursor-index">array-cursor-index</a></li>
+<li><a href="#array-memp">array-memp</a></li>
+<li><a href="#array-member">array-member</a></li>
+<li><a href="#array-memq">array-memq</a></li>
+<li><a href="#array-memv">array-memv</a></li>
+<li><a href="#array-handler">array-handler</a></li>
+<li><a href="#array-first">array-first</a></li>
+<li><a href="#array-rest">array-rest</a></li>
+<li><a href="#array-last">array-last</a></li>
+<li><a href="#array-butlast">array-butlast</a></li>
+<li><a href="#array-add">array-add!</a></li>
+<li><a href="#array-update">array-update!</a></li>
+<li><a href="#array-prune">array-prune!</a></li>
+<li><a href="#array-apply">array-apply</a></li>
+<li><a href="#array-reverse">array-reverse</a></li>
+<li><a href="#array-reverse">array-reverse!</a></li>
+<li><a href="#array-swap">array-swap!</a></li>
+<li><a href="#array-length">array-length</a></li>
+<li><a href="#array-count">array-count</a></li>
+<li><a href="#array-range">array-range</a></li>
+<li><a href="#array-item">array-item</a></li>
+<li><a href="#array-split-at">array-split-at</a></li>
+<li><a href="#array-split-with">array-split-with</a></li>
+<li><a href="#array-drop">array-drop</a></li>
+<li><a href="#array-drop-while">array-drop-while</a></li>
+<li><a href="#array-take">array-take</a></li>
+<li><a href="#array-take-while">array-take-while</a></li>
+<li><a href="#array-append">array-append</a></li>
+<li><a href="#array-append">array-append!</a></li>
+<li><a href="#array-map">array-map</a></li>
+<li><a href="#array-mappend">array-mappend</a></li>
+<li><a href="#array-for-each">array-for-each</a></li>
+<li><a href="#array-filter">array-filter</a></li>
+<li><a href="#array-equ">array-equ?</a></li>
+<li><a href="#array-equal">array-equal?</a></li>
+<li><a href="#array-eqv">array-eqv?</a></li>
+<li><a href="#array-eq">array-eq?</a></li>
+<li><a href="#array-remp">array-remp</a></li>
+<li><a href="#array-remove">array-remove</a></li>
+<li><a href="#array-remq">array-remq</a></li>
+<li><a href="#array-remv">array-remv</a></li>
+<li><a href="#array-remove-dups">array-remove-dups</a></li>
+<li><a href="#array-fold-left">array-fold-left</a></li>
+<li><a href="#array-fold-right">array-fold-right</a></li>
+<li><a href="#array-sorted">array-sorted?</a></li>
+<li><a href="#array-sort">array-sort!</a></li>
+<li><a href="#array-zip">array-zip</a></li>
+<li><a href="#array-unzip">array-unzip</a></li>
+<li><a href="#array-interpose">array-interpose</a></li>
+<li><a href="#array-every">array-every?</a></li>
+<li><a href="#array-some">array-some?</a></li>
+<li><a href="#array-in">array-in?</a></li>
+<li><a href="#array-bind">array-bind</a></li></ol></li>
+<li><a href="#the-module-sets">The module sets</a>
+<ol>
+<li><a href="#sets">sets</a></li>
+<li><a href="#set">set?</a></li>
+<li><a href="#set-null">set-null?</a></li>
+<li><a href="#make-set">make-set</a></li>
+<li><a href="#set-iterate">set-iterate</a></li>
+<li><a href="#set-iterate-while">set-iterate-while</a></li>
+<li><a href="#set-iterate-until">set-iterate-until</a></li>
+<li><a href="#list-set">list-&gt;set</a></li>
+<li><a href="#vector-set">vector-&gt;set</a></li>
+<li><a href="#set">set</a></li>
+<li><a href="#set-list">set-&gt;list</a></li>
+<li><a href="#set-vector">set-&gt;vector</a></li>
+<li><a href="#set-in">set-in</a></li>
+<li><a href="#set">set&lt;=</a></li>
+<li><a href="#set">set=</a></li>
+<li><a href="#set">set&gt;=</a></li>
+<li><a href="#set-filter">set-filter</a></li>
+<li><a href="#set-map">set-map</a></li>
+<li><a href="#set-for-each">set-for-each</a></li>
+<li><a href="#set-add">set-add!</a></li>
+<li><a href="#set-remove">set-remove!</a></li>
+<li><a href="#set-count">set-count</a></li>
+<li><a href="#set-copy">set-copy</a></li>
+<li><a href="#set-difference">set-difference</a></li>
+<li><a href="#set-union">set-union</a></li>
+<li><a href="#set-intersection">set-intersection</a></li>
+<li><a href="#set-every">set-every?</a></li>
+<li><a href="#set-some">set-some?</a></li>
+<li><a href="#set-apply">set-apply</a></li>
+<li><a href="#set-handler">set-handler</a></li>
+<li><a href="#set-equ">set-equ?</a></li>
+<li><a href="#set-item">set-item?</a></li></ol></li>
+<li><a href="#usage-of-cursors">Usage of cursors</a></li>
+<li><a href="#requirements">Requirements</a></li></ol></li>
+<li><a href="#last-update">Last update</a></li>
+<li><a href="#author">Author</a></li>
+<li><a href="#license">License</a></li>
+<li><a href="#version-history">Version History</a></li></ol></div>
+<h2 id="functional-arrays">Functional arrays</h2>
+<p>Functional arrays are like vectors, insofar as they are mutable and allow fast access to items stored at a particular position. Fast here means O(log n).</p>
+<p>Contrary to vectors functional arrays are unbounded, they can expand and shrink as needed. Adding and removing at the end, i.e. pruning, is cheap.  Moreover, arrays can be typed: adding and updating items works only, if the item passes an item? predicate supplied with the constructor. If no such predicate is supplied, any? is assumed.</p>
+<p>In this implementation, a functional array is internally represented by a procedure closed over a completely balanced tree which acts via message passing.  To arrive at an index position simply devide the position argument recursively by 2 until it reaches 1 and inspect quotient and remainder: If the latter is zero, follow the left, otherwise the right subtree.</p>
+<p>Besides the operations like item, update! add! and prune!, which operate on individual indexes we need operations, which operate on the array as a whole, like searching, copying or mapping. Of course, one could use the individual operations looping along the range of indexes. But this is slow, because if we had to go from index 365, say, to 366, we had to repeat the whole path in the local search tree except the last step.  To avoid this we maintain a local cursor which allows to process the array by stepping successively along each tree level in the correct order.</p>
+<p>Since access, adding and pruning is fast, arrays can ideally be used to implement sets. For example, to remove an item, simply swap! it to the end and prune! it. This doesn't work for arrays, since they are ordered by its indices, but it doesn't harm sets, which are unorderd.</p>
+<h3 id="module-structure">Module structure</h3>
+<p>We'll separate the library into three modules. The first contains the actual closure, named array-handler, which does most of the dirty work.</p>
+<p>The second is a record, which contains the array-handler as a field as well as two index positions, from (included) and upto (excluded) which allow fast subarray operations by simply sharing structure as in the pointer arithmetic of C-arrays. But note, that updating a subarray updates the original array as well. The same happens with the standard list procedure list-tail (but not with subvectors, which are freshly constructed).</p>
+<p>The third is the set implementation, a record as well, containing the handler and an equality-predicate, from which an item-predicate can be deduced. There is no point to consider ranges, since sets are unordered. But equality is needed, otherwise we don't know, if an item is already in the set.</p>
+<h3 id="the-module-array-handlers">The module array-handlers</h3>
+<h4 id="array-handlers">array-handlers</h4><span class="definition procedure"><em>[procedure]</em> <tt>(array-handlers [sym])</tt>
+<br /></span>
+<p>documentation procedure.</p>
+<h4 id="array-handler">array-handler?</h4><span class="definition procedure"><em>[procedure]</em> <tt>(array-handler? xpr)</tt>
+<br /></span>
+<p>type predicate.</p>
+<h4 id="make-array-handler">make-array-handler</h4><span class="definition procedure"><em>[procedure]</em> <tt>(make-array-handler [item?])</tt>
+<br /></span>
+<p>creates a new empty array-handler closure, which accepts items of type item?. If no item? is supplied, any? is used.</p>
+<h4 id="array-handler-repeat">array-handler-repeat</h4><span class="definition procedure"><em>[procedure]</em> <tt>(array-handler-repeat [item?] cnt item)</tt>
+<br /></span>
+<p>stores item of type item? cnt times in a new empty array-handler closure. If no item? is supplied, any? is used.</p>
+<h4 id="array-handler-iterate">array-handler-iterate</h4><span class="definition procedure"><em>[procedure]</em> <tt>(array-handler-iterate [item?] cnt fn start)</tt>
+<br /></span>
+<p>iterates function fn cnt times, starting with start of type item?, to make a new array-handler closure. If no item? is supplied, any? is used.</p>
+<h4 id="array-handler-iterate-while">array-handler-iterate-while</h4><span class="definition procedure"><em>[procedure]</em> <tt>(array-handler-iterate-while [item?] ok? fn start)</tt>
+<br /></span>
+<p>iterates function fn, starting with start of type item?, as long as fn's result passes the ok? test, to make a new array-handler closure. If no item? is supplied, any? is used.</p>
+<h4 id="array-handler-iterate-until">array-handler-iterate-until</h4><span class="definition procedure"><em>[procedure]</em> <tt>(array-handler-iterate-until [item?] ok? fn start)</tt>
+<br /></span>
+<p>iterates function fn, starting with start of type item?, as long as fn's result doesn't pass the ok? test, to make a new array-handler closure. If no item? is supplied, any? is used.</p>
+<h4 id="array-handler-messages">array-handler-messages</h4><span class="definition procedure"><em>[procedure]</em> <tt>(array-handler-messages)</tt>
+<br /></span>
+<p>returns the list of messages, accepted by the array-handler closure.</p>
+<h4 id="nary">nary</h4><span class="definition procedure"><em>[procedure]</em> <tt>(nary binop)</tt>
+<br /></span>
+<p>helper procedure, which makes a binary operator nary.</p>
+<h4 id="nary">nary?</h4><span class="definition procedure"><em>[procedure]</em> <tt>(nary? bincmp?)</tt>
+<br /></span>
+<p>helper procedure, which makes a binary comparison procedure nary.</p>
+<h4 id="assert">assert*</h4><span class="definition syntax"><em>[syntax]</em> <tt>(assert* loc . xprs)</tt>
+<br /></span>
+<p>checks xprs in sequence in the procedure loc.</p>
+<h3 id="the-module-arrays">The module arrays</h3>
+<h4 id="arrays">arrays</h4><span class="definition procedure"><em>[procedure]</em> <tt>(arrays [sym])</tt>
+<br /></span>
+<p>documentation procedure.</p>
+<h4 id="array">array?</h4><span class="definition procedure"><em>[procedure]</em> <tt>(array? xpr)</tt>
+<br /></span>
+<p>type predicate.</p>
+<h4 id="array-null">array-null?</h4><span class="definition procedure"><em>[procedure]</em> <tt>(array-null? xpr)</tt>
+<br /></span>
+<p>checks, if xpr evaluates to an empty array.</p>
+<h4 id="make-array">make-array</h4><span class="definition procedure"><em>[procedure]</em> <tt>(make-array [item?])</tt>
+<br /></span>
+<p>fundamental constructor. Returns an empty array with item type item? which defaults to any?</p>
+<h4 id="array">array</h4><span class="definition procedure"><em>[procedure]</em> <tt>(array [item?] . args)</tt>
+<br /></span>
+<p>The argument list args, which must be nonempty, is transformed to an arry.</p>
+<h4 id="list-array">list-&gt;array</h4><span class="definition procedure"><em>[procedure]</em> <tt>(list-&gt;array [item?] lst)</tt>
+<br /></span>
+<p>The argument list is transformed to a new arry. item? defaults to any?</p>
+<h4 id="vector-array">vector-&gt;array</h4><span class="definition procedure"><em>[procedure]</em> <tt>(vector-&gt;array [item?] vec)</tt>
+<br /></span>
+<p>The argument vector is transformed to a new array. item? defaults to any?</p>
+<h4 id="array-repeat">array-repeat</h4><span class="definition procedure"><em>[procedure]</em> <tt>(array-repeat [item?] cnt item)</tt>
+<br /></span>
+<p>stores item cnt times in a new array. If no item? is supplied, any? is used.</p>
+<h4 id="array-iterate">array-iterate</h4><span class="definition procedure"><em>[procedure]</em> <tt>(array-iterate [item?] cnt fn start)</tt>
+<br /></span>
+<p>iterates function fn cnt times, starting with start of type item?, to make a new array. If no item? is supplied, any? is used.</p>
+<h4 id="array-iterate-while">array-iterate-while</h4><span class="definition procedure"><em>[procedure]</em> <tt>(array-iterate-while [item?] ok? fn start)</tt>
+<br /></span>
+<p>iterates function fn, starting with start of type item?, as long as fn's result passes the ok? test, to make a new array. If no item? is supplied, any? is used.</p>
+<h4 id="array-iterate-until">array-iterate-until</h4><span class="definition procedure"><em>[procedure]</em> <tt>(array-iterate-until [item?] ok? fn start)</tt>
+<br /></span>
+<p>iterates function fn, starting with start of type item?, as long as fn's result doesn't pass the ok? test, to make a new array. If no item? is supplied, any? is used.</p>
+<h4 id="array-copy">array-copy</h4><span class="definition procedure"><em>[procedure]</em> <tt>(array-copy arr)</tt>
+<br /></span>
+<p>creates a fresh copy of its array argument.</p>
+<h4 id="array-list">array-&gt;list</h4><span class="definition procedure"><em>[procedure]</em> <tt>(array-&gt;list arr)</tt>
+<br /></span>
+<p>transforms its array argument to a list.</p>
+<h4 id="array-vector">array-&gt;vector</h4><span class="definition procedure"><em>[procedure]</em> <tt>(array-&gt;vector arr)</tt>
+<br /></span>
+<p>transforms its array argument to a vector.</p>
+<h4 id="array-cursor-start">array-cursor-start!</h4><span class="definition procedure"><em>[procedure]</em> <tt>(array-cursor-start! arr)</tt>
+<br /></span>
+<p>begins a travere of its array argument. Positions the cursor to the left of the lowest index.</p>
+<h4 id="array-cursor-next">array-cursor-next!</h4><span class="definition procedure"><em>[procedure]</em> <tt>(array-cursor-next! arr)</tt>
+<br /></span>
+<p>continues a travere of its array argument. To access an item, at least one move after array-cursor-start! must have happened.</p>
+<h4 id="array-cursor-goto">array-cursor-goto!</h4><span class="definition procedure"><em>[procedure]</em> <tt>(array-cursor-goto! ok? arr)</tt>
+<br /></span>
+<p>traverses the array util its cursor-item passes the ok? predicate.</p>
+<h4 id="array-cursor-finished">array-cursor-finished?</h4><span class="definition procedure"><em>[procedure]</em> <tt>(array-cursor-finished? arr)</tt>
+<br /></span>
+<p>checks, if the cursor has reached the end of the traverse.</p>
+<h4 id="array-cursor-item">array-cursor-item</h4><span class="definition procedure"><em>[procedure]</em> <tt>(array-cursor-item arr)</tt>
+<br /></span>
+<p>returns the current item of the cursor.</p>
+<h4 id="array-cursor-index">array-cursor-index</h4><span class="definition procedure"><em>[procedure]</em> <tt>(array-cursor-index arr)</tt>
+<br /></span>
+<p>returns the current index of the cursor.</p>
+<h4 id="array-memp">array-memp</h4><span class="definition procedure"><em>[procedure]</em> <tt>(array-memp ok? arr)</tt>
+<br /></span>
+<p>drops the first array items, which don't pass ok?. Returns #f if no item passes ok?</p>
+<h4 id="array-member">array-member</h4><span class="definition procedure"><em>[procedure]</em> <tt>(array-member item arr)</tt>
+<br /></span>
+<p>same as (array-memp (cut equal? &lt;&gt; item) arr)</p>
+<h4 id="array-memq">array-memq</h4><span class="definition procedure"><em>[procedure]</em> <tt>(array-memq item arr)</tt>
+<br /></span>
+<p>same as (array-memp (cut eq? &lt;&gt; item) arr)</p>
+<h4 id="array-memv">array-memv</h4><span class="definition procedure"><em>[procedure]</em> <tt>(array-memv item arr)</tt>
+<br /></span>
+<p>same as (array-memp (cut eqv? &lt;&gt; item) arr)</p>
+<h4 id="array-handler">array-handler</h4><span class="definition procedure"><em>[procedure]</em> <tt>(array-handler arr)</tt>
+<br /></span>
+<p>returns the underlying array-handler of the array.</p>
+<h4 id="array-first">array-first</h4><span class="definition procedure"><em>[procedure]</em> <tt>(array-first arr)</tt>
+<br /></span>
+<p>returns the array item at index 0.</p>
+<h4 id="array-rest">array-rest</h4><span class="definition procedure"><em>[procedure]</em> <tt>(array-rest arr)</tt>
+<br /></span>
+<p>drops the array item at index 0.</p>
+<h4 id="array-last">array-last</h4><span class="definition procedure"><em>[procedure]</em> <tt>(array-last arr)</tt>
+<br /></span>
+<p>returns the array item with highest index.</p>
+<h4 id="array-butlast">array-butlast</h4><span class="definition procedure"><em>[procedure]</em> <tt>(array-butlast arr)</tt>
+<br /></span>
+<p>takes all the array items except that with highest index.</p>
+<h4 id="array-add">array-add!</h4><span class="definition procedure"><em>[procedure]</em> <tt>(array-add! item arr)</tt>
+<br /></span>
+<p>adds an item after the highest index position.</p>
+<h4 id="array-update">array-update!</h4><span class="definition procedure"><em>[procedure]</em> <tt>(array-update! index new arr)</tt>
+<br /></span>
+<p>updates the item at index position with a new item.</p>
+<h4 id="array-prune">array-prune!</h4><span class="definition procedure"><em>[procedure]</em> <tt>(array-prune! arr)</tt>
+<br /></span>
+<p>removes the item at the highest index position.</p>
+<h4 id="array-apply">array-apply</h4><span class="definition procedure"><em>[procedure]</em> <tt>(array-apply fn . args)</tt>
+<br /></span>
+<p>applies procedure fn to args, which must be a nonempty list, whose last item is an array.</p>
+<h4 id="array-reverse">array-reverse</h4><span class="definition procedure"><em>[procedure]</em> <tt>(array-reverse arr)</tt>
+<br /></span>
+<p>creates a new array with items in reverse order.</p>
+<h4 id="array-reverse">array-reverse!</h4><span class="definition procedure"><em>[procedure]</em> <tt>(array-reverse! arr)</tt>
+<br /></span>
+<p>reverses the array destructively in place.</p>
+<h4 id="array-swap">array-swap!</h4><span class="definition procedure"><em>[procedure]</em> <tt>(array-swap! k l arr)</tt>
+<br /></span>
+<p>exchanges the array items at positions k and l.</p>
+<h4 id="array-length">array-length</h4><span class="definition procedure"><em>[procedure]</em> <tt>(array-length arr)</tt>
+<br /></span>
+<p>the length of its argument array.</p>
+<h4 id="array-count">array-count</h4><span class="definition procedure"><em>[procedure]</em> <tt>(array-count arr)</tt>
+<br /></span>
+<p>the number of items stored in the array's handler.</p>
+<h4 id="array-range">array-range</h4><span class="definition procedure"><em>[procedure]</em> <tt>(array-range from upto arr)</tt>
+<br /></span>
+<p>returns the subarray starting at index from (included) upto index upto (excluded).</p>
+<h4 id="array-item">array-item</h4><span class="definition procedure"><em>[procedure]</em> <tt>(array-item k arr)</tt>
+<br /></span>
+<p>returns the item at index position k.</p>
+<h4 id="array-split-at">array-split-at</h4><span class="definition procedure"><em>[procedure]</em> <tt>(array-split-at k arr)</tt>
+<br /></span>
+<p>splits the array at index position k, returning two values.</p>
+<h4 id="array-split-with">array-split-with</h4><span class="definition procedure"><em>[procedure]</em> <tt>(array-split-with ok? arr)</tt>
+<br /></span>
+<p>splits the array at the first index position, whose item passes ok?, returning two values.</p>
+<h4 id="array-drop">array-drop</h4><span class="definition procedure"><em>[procedure]</em> <tt>(array-drop k arr)</tt>
+<br /></span>
+<p>drops the first k items.</p>
+<h4 id="array-drop-while">array-drop-while</h4><span class="definition procedure"><em>[procedure]</em> <tt>(array-drop-while ok? arr)</tt>
+<br /></span>
+<p>drops the first items as long as they pass ok?.</p>
+<h4 id="array-take">array-take</h4><span class="definition procedure"><em>[procedure]</em> <tt>(array-take k arr)</tt>
+<br /></span>
+<p>takes the first k items.</p>
+<h4 id="array-take-while">array-take-while</h4><span class="definition procedure"><em>[procedure]</em> <tt>(array-take-while ok? arr)</tt>
+<br /></span>
+<p>takes the first items as long as they pass ok?.</p>
+<h4 id="array-append">array-append</h4><span class="definition procedure"><em>[procedure]</em> <tt>(array-append . arrs)</tt>
+<br /></span>
+<p>creates a new array by appending all of its argument arrays, provided they all have the same item type.</p>
+<h4 id="array-append">array-append!</h4><span class="definition procedure"><em>[procedure]</em> <tt>(array-append! . arrs)</tt>
+<br /></span>
+<p>appends destructively the arrays of (cdr args) to (car args). All arrays must have the same item type.</p>
+<h4 id="array-map">array-map</h4><span class="definition procedure"><em>[procedure]</em> <tt>(array-map [item?] fn . arrs)</tt>
+<br /></span>
+<p>maps the array arguments to a new array with item? (or any? if not provided) by means of function fn. The length of the new array is the minimum of the lengthes of arrs.</p>
+<h4 id="array-mappend">array-mappend</h4><span class="definition procedure"><em>[procedure]</em> <tt>(array-mappend fn . arrs)</tt>
+<br /></span>
+<p>combination of map and append: The same as (array-apply array-append (apply array-map fn arrs))</p>
+<h4 id="array-for-each">array-for-each</h4><span class="definition procedure"><em>[procedure]</em> <tt>(array-for-each proc . arrs)</tt>
+<br /></span>
+<p>applies procedure proc to the array arguments, until the first array argument reaches its end.</p>
+<h4 id="array-filter">array-filter</h4><span class="definition procedure"><em>[procedure]</em> <tt>(array-filter ok? arr)</tt>
+<br /></span>
+<p>filters the array argument with respect to the predicate ok? Returns two values, the array of those items, which passed the test, and the array of those which don't.</p>
+<h4 id="array-equ">array-equ?</h4><span class="definition procedure"><em>[procedure]</em> <tt>(array-equ? equ? . arrs)</tt>
+<br /></span>
+<p>checks if the array arguments are equal, where the items are compared with equ?. Moreover all array arguments must be of the same length and have the same item type.</p>
+<h4 id="array-equal">array-equal?</h4><span class="definition procedure"><em>[procedure]</em> <tt>(array-equal? . arrs)</tt>
+<br /></span>
+<p>the same as (array-equ? equal? . arrs)</p>
+<h4 id="array-eqv">array-eqv?</h4><span class="definition procedure"><em>[procedure]</em> <tt>(array-eqv? . arrs)</tt>
+<br /></span>
+<p>the same as (array-equ? eqv? . arrs)</p>
+<h4 id="array-eq">array-eq?</h4><span class="definition procedure"><em>[procedure]</em> <tt>(array-eq? . arrs)</tt>
+<br /></span>
+<p>the same as (array-equ? eq? . arrs)</p>
+<h4 id="array-remp">array-remp</h4><span class="definition procedure"><em>[procedure]</em> <tt>(array-remp ok? arr)</tt>
+<br /></span>
+<p>removes all items of arr which pass the ok? test. Second value of array-filter.</p>
+<h4 id="array-remove">array-remove</h4><span class="definition procedure"><em>[procedure]</em> <tt>(array-remove item arr)</tt>
+<br /></span>
+<p>the same as (array-remp (cut equal? &lt;&gt; item) arr).</p>
+<h4 id="array-remq">array-remq</h4><span class="definition procedure"><em>[procedure]</em> <tt>(array-remq item arr)</tt>
+<br /></span>
+<p>the same as (array-remp (cut eq? &lt;&gt; item) arr).</p>
+<h4 id="array-remv">array-remv</h4><span class="definition procedure"><em>[procedure]</em> <tt>(array-remv item arr)</tt>
+<br /></span>
+<p>the same as (array-remp (cut eqv? &lt;&gt; item) arr).</p>
+<h4 id="array-remove-dups">array-remove-dups</h4><span class="definition procedure"><em>[procedure]</em> <tt>(array-remove-dups equ? arr)</tt>
+<br /></span>
+<p>removes all duplicates of arr according to comparison wiht equ?</p>
+<h4 id="array-fold-left">array-fold-left</h4><span class="definition procedure"><em>[procedure]</em> <tt>(array-fold-left op base . arrs)</tt>
+<br /></span>
+<p>folds the arrays arrs from the left with op, starting at base.</p>
+<h4 id="array-fold-right">array-fold-right</h4><span class="definition procedure"><em>[procedure]</em> <tt>(array-fold-right op base . arrs)</tt>
+<br /></span>
+<p>folds the arrays arrs from the right with op, starting at base.</p>
+<h4 id="array-sorted">array-sorted?</h4><span class="definition procedure"><em>[procedure]</em> <tt>(array-sorted? &lt;? arr)</tt>
+<br /></span>
+<p>checks, if the array arr is sorted with respect to &lt;?</p>
+<h4 id="array-sort">array-sort!</h4><span class="definition procedure"><em>[procedure]</em> <tt>(array-sort! &lt;? arr)</tt>
+<br /></span>
+<p>destructively sorts the array argument in place with a combination of insertion- and quick-sort.</p>
+<h4 id="array-zip">array-zip</h4><span class="definition procedure"><em>[procedure]</em> <tt>(array-zip arr0 arr1)</tt>
+<br /></span>
+<p>combines two arrays to one, by taking items alternately from both. Both arrays must have equal item type.</p>
+<h4 id="array-unzip">array-unzip</h4><span class="definition procedure"><em>[procedure]</em> <tt>(array-unzip arr)</tt>
+<br /></span>
+<p>splits an array into two by populating its two array values alternately.</p>
+<h4 id="array-interpose">array-interpose</h4><span class="definition procedure"><em>[procedure]</em> <tt>(array-interpose sep arr)</tt>
+<br /></span>
+<p>creates a new array by separating the items of its array argument with the separator sep.</p>
+<h4 id="array-every">array-every?</h4><span class="definition procedure"><em>[procedure]</em> <tt>(array-every? ok? arr)</tt>
+<br /></span>
+<p>checks, if every item of arr passes the ok? test.</p>
+<h4 id="array-some">array-some?</h4><span class="definition procedure"><em>[procedure]</em> <tt>(array-some? ok? arr)</tt>
+<br /></span>
+<p>checks, if some item of arr passes the ok? test.</p>
+<h4 id="array-in">array-in?</h4><span class="definition procedure"><em>[procedure]</em> <tt>(array-in? =? arr0 arr1)</tt>
+<br /></span>
+<p>checks if arr0 a subrange of arr1.</p>
+<h4 id="array-bind">array-bind</h4><span class="definition syntax"><em>[syntax]</em> <tt>(array-bind (x ... . xs) arr xpr . xprs)</tt>
+<br /></span>
+<p>This macro allows for general pattern matching of arrays. Binds x ... to the first items of arr and xs to the remaining subarray and executes the body xpr . xprs in this context. A more featurefull solution would be to use the bindings module:</p>
+<pre><tt class="highlight scheme-language"><span class="paren1">(<span class="default">use bindings</span>)</span>
+<span class="paren1">(<span class="default">seq-length-ref-tail! array?
+                      array-length
+                      <span class="paren2">(<span class="default"><i><span class="symbol">lambda</span></i> <span class="paren3">(<span class="default">arr item</span>)</span> <span class="paren3">(<span class="default">array-item item arr</span>)</span></span>)</span>
+                      <span class="paren2">(<span class="default"><i><span class="symbol">lambda</span></i> <span class="paren3">(<span class="default">arr item</span>)</span> <span class="paren3">(<span class="default">array-drop item arr</span>)</span></span>)</span></span>)</span></tt></pre>
+<p>Then you can use bind and friends and freely mix arrays with other sequence types.</p>
+<h3 id="the-module-sets">The module sets</h3>
+<h4 id="sets">sets</h4><span class="definition procedure"><em>[procedure]</em> <tt>(sets [sym])</tt>
+<br /></span>
+<p>documentation procedure.</p>
+<h4 id="set">set?</h4><span class="definition procedure"><em>[procedure]</em> <tt>(set? xpr)</tt>
+<br /></span>
+<p>type predicate.</p>
+<h4 id="set-null">set-null?</h4><span class="definition procedure"><em>[procedure]</em> <tt>(set-null? xpr)</tt>
+<br /></span>
+<p>checks, if xpr evaluates to an empty set.</p>
+<h4 id="make-set">make-set</h4><span class="definition procedure"><em>[procedure]</em> <tt>(make-set [equ?])</tt>
+<br /></span>
+<p>creates a new empty set, whose items are compared with equ?, which defaults to eqv?</p>
+<h4 id="set-iterate">set-iterate</h4><span class="definition procedure"><em>[procedure]</em> <tt>(set-iterate [equ?] n fn start)</tt>
+<br /></span>
+<p>iterates function fn cnt times, starting with start to be compared with equ?, to make a new array. If no equ? is supplied, eqv? is used.</p>
+<h4 id="set-iterate-while">set-iterate-while</h4><span class="definition procedure"><em>[procedure]</em> <tt>(set-iterate-while [equ?] ok? fn start)</tt>
+<br /></span>
+<p>iterates function fn, starting with start to be compared with equ?, as long as fn's result passes the ok? test, to make a new array. If no equ? is supplied, eqv? is used.</p>
+<h4 id="set-iterate-until">set-iterate-until</h4><span class="definition procedure"><em>[procedure]</em> <tt>(set-iterate-until [equ?] ok? fn start)</tt>
+<br /></span>
+<p>iterates function fn, starting with start to be compared with equ?, as long as fn's result doesn't pass the ok? test, to make a new array. If no equ? is supplied, eqv? is used.</p>
+<h4 id="list-set">list-&gt;set</h4><span class="definition procedure"><em>[procedure]</em> <tt>(list-&gt;set [equ?] lst)</tt>
+<br /></span>
+<p>transforms a list into a set, whose items are compared with equ? If no equ? is supplied, eqv? is used.</p>
+<h4 id="vector-set">vector-&gt;set</h4><span class="definition procedure"><em>[procedure]</em> <tt>(vector-&gt;set [equ?] vec)</tt>
+<br /></span>
+<p>transforms a vector into a set, whose items are compared with equ? If no equ? is supplied, eqv? is used.</p>
+<h4 id="set">set</h4><span class="definition procedure"><em>[procedure]</em> <tt>(set [equ?] . args)</tt>
+<br /></span>
+<p>creates a new set with items from args compared with equ?. If no equ? is supplied, eqv? is used.</p>
+<h4 id="set-list">set-&gt;list</h4><span class="definition procedure"><em>[procedure]</em> <tt>(set-&gt;list st)</tt>
+<br /></span>
+<p>transforms a set into a list.</p>
+<h4 id="set-vector">set-&gt;vector</h4><span class="definition procedure"><em>[procedure]</em> <tt>(set-&gt;vector st)</tt>
+<br /></span>
+<p>transforms a set into a vector.</p>
+<h4 id="set-in">set-in</h4><span class="definition procedure"><em>[procedure]</em> <tt>(set-in item st)</tt>
+<br /></span>
+<p>checks, if item is in the set st; if so, returns its index, otherwise #f.</p>
+<h4 id="set">set&lt;=</h4><span class="definition procedure"><em>[procedure]</em> <tt>(set&lt;= set0 set1)</tt>
+<br /></span>
+<p>checks, if the set set0 contained in the set set1.</p>
+<h4 id="set">set=</h4><span class="definition procedure"><em>[procedure]</em> <tt>(set= set0 set1)</tt>
+<br /></span>
+<p>checks, if the sets set0 and set1 are equal, i.e. contain the same alements.</p>
+<h4 id="set">set&gt;=</h4><span class="definition procedure"><em>[procedure]</em> <tt>(set&gt;= set0 set1)</tt>
+<br /></span>
+<p>checks, if the set set0 contains the set set1.</p>
+<h4 id="set-filter">set-filter</h4><span class="definition procedure"><em>[procedure]</em> <tt>(set-filter ok? st)</tt>
+<br /></span>
+<p>filters the set st with respect to the predicate ok? Returns two values, the set of those items, which passed the test, and the set of those which don't.</p>
+<h4 id="set-map">set-map</h4><span class="definition procedure"><em>[procedure]</em> <tt>(set-map [equ?] fn . sets)</tt>
+<br /></span>
+<p>maps the sets with respect to the function fn to a set, whose items are compared with equ? The cardinality of the result is the minimum of the cardinalities of the arguments. If no equ? is supplied, eqv? is used.</p>
+<h4 id="set-for-each">set-for-each</h4><span class="definition procedure"><em>[procedure]</em> <tt>(set-for-each proc . sets)</tt>
+<br /></span>
+<p>applies procedure proc to sets until the first argument is null.</p>
+<h4 id="set-add">set-add!</h4><span class="definition procedure"><em>[procedure]</em> <tt>(set-add! item st)</tt>
+<br /></span>
+<p>adds item to the set st.</p>
+<h4 id="set-remove">set-remove!</h4><span class="definition procedure"><em>[procedure]</em> <tt>(set-remove! item st)</tt>
+<br /></span>
+<p>removes the item from the set st.</p>
+<h4 id="set-count">set-count</h4><span class="definition procedure"><em>[procedure]</em> <tt>(set-count st)</tt>
+<br /></span>
+<p>the cardinality of the set st.</p>
+<h4 id="set-copy">set-copy</h4><span class="definition procedure"><em>[procedure]</em> <tt>(set-copy st)</tt>
+<br /></span>
+<p>creates a copy of the set st.</p>
+<h4 id="set-difference">set-difference</h4><span class="definition procedure"><em>[procedure]</em> <tt>(set-difference set0 set1)</tt>
+<br /></span>
+<p>creates a new set by removing all items of set0, which are contained in set1. The comparison procedure of both sets must be the same.</p>
+<h4 id="set-union">set-union</h4><span class="definition procedure"><em>[procedure]</em> <tt>(set-union . sets)</tt>
+<br /></span>
+<p>creates a new set, which contains all items of all set arguments. The comparison procedure of all set arguments must be the same.</p>
+<h4 id="set-intersection">set-intersection</h4><span class="definition procedure"><em>[procedure]</em> <tt>(set-intersection . sets)</tt>
+<br /></span>
+<p>creates a new set, which contains only those items which are in all of its set arguments. The comparison procedure of all set arguments must be the same.</p>
+<h4 id="set-every">set-every?</h4><span class="definition procedure"><em>[procedure]</em> <tt>(set-every? ok? st)</tt>
+<br /></span>
+<p>checks, if every item of st passes the ok? test.</p>
+<h4 id="set-some">set-some?</h4><span class="definition procedure"><em>[procedure]</em> <tt>(set-some? ok? st)</tt>
+<br /></span>
+<p>checks, if some item of st passes the ok? test.</p>
+<h4 id="set-apply">set-apply</h4><span class="definition procedure"><em>[procedure]</em> <tt>(set-apply fn . args)</tt>
+<br /></span>
+<p>applies procedure fn to the arguments args, which must be nonempty and whose last value is an array.</p>
+<h4 id="set-handler">set-handler</h4><span class="definition procedure"><em>[procedure]</em> <tt>(set-handler st)</tt>
+<br /></span>
+<p>returns the handler closure of the set st.</p>
+<h4 id="set-equ">set-equ?</h4><span class="definition procedure"><em>[procedure]</em> <tt>(set-equ? st)</tt>
+<br /></span>
+<p>returns the comparison-procedure of the set st.</p>
+<h4 id="set-item">set-item?</h4><span class="definition procedure"><em>[procedure]</em> <tt>(set-item? st)</tt>
+<br /></span>
+<p>returns the item? predicate of the set st, computed from its comparison procedure.</p>
+<h3 id="usage-of-cursors">Usage of cursors</h3>
+<p>The metaphor for using cursors can in most cases be patterned after the following array-copy implementation:</p>
+<pre><tt class="highlight scheme-language"><span class="paren1">(<span class="default"><i><span class="symbol">define</span></i> <span class="paren2">(<span class="default">array-copy arr</span>)</span>
+  <span class="paren2">(<span class="default"><i><span class="symbol">let</span></i> <span class="paren3">(<span class="default"><span class="paren4">(<span class="default">result <span class="paren5">(<span class="default">make-array <span class="paren6">(<span class="default">array-item? arr</span>)</span></span>)</span></span>)</span></span>)</span>
+    <span class="paren3">(<span class="default">array-cursor-start! arr</span>)</span>
+    <span class="paren3">(<span class="default"><i><span class="symbol">let</span></i> <i><span class="symbol">loop</span></i> <span class="paren4">(<span class="default"></span>)</span>
+      <span class="paren4">(<span class="default">array-cursor-next! arr</span>)</span>
+      <span class="paren4">(<span class="default"><i><span class="symbol">cond</span></i>
+        <span class="paren5">(<span class="default"><span class="paren6">(<span class="default">array-cursor-finished? arr</span>)</span>
+         result</span>)</span>
+        <span class="paren5">(<span class="default">else
+          <span class="paren6">(<span class="default">array-add! <span class="paren1">(<span class="default">array-cursor-item arr</span>)</span> result</span>)</span>
+          <span class="paren6">(<span class="default"><i><span class="symbol">loop</span></i></span>)</span></span>)</span></span>)</span></span>)</span></span>)</span></span>)</span></tt></pre>
+<p>Using the handler closure directly, the pattern looks like this:</p>
+<pre><tt class="highlight scheme-language"><span class="paren1">(<span class="default"><i><span class="symbol">define</span></i> <span class="paren2">(<span class="default">set-copy st</span>)</span>
+  <span class="paren2">(<span class="default"><i><span class="symbol">let</span></i> <span class="paren3">(<span class="default"><span class="paren4">(<span class="default">result <span class="paren5">(<span class="default">make-set <span class="paren6">(<span class="default">set-equ? st</span>)</span></span>)</span></span>)</span></span>)</span>
+    <span class="paren3">(<span class="default"><i><span class="symbol">if</span></i> <span class="paren4">(<span class="default">set-null? st</span>)</span>
+      result
+      <span class="paren4">(<span class="default"><i><span class="symbol">let</span></i> <span class="paren5">(<span class="default"><span class="paren6">(<span class="default">handler <span class="paren1">(<span class="default">set-handler st</span>)</span></span>)</span></span>)</span>
+        <span class="paren5">(<span class="default"><span class="paren6">(<span class="default">handler 'cursor-start!</span>)</span></span>)</span>
+        <span class="paren5">(<span class="default"><i><span class="symbol">let</span></i> <i><span class="symbol">loop</span></i> <span class="paren6">(<span class="default"></span>)</span>
+          <span class="paren6">(<span class="default"><span class="paren1">(<span class="default">handler 'cursor-next!</span>)</span></span>)</span>
+          <span class="paren6">(<span class="default"><i><span class="symbol">cond</span></i>
+            <span class="paren1">(<span class="default"><span class="paren2">(<span class="default"><span class="paren3">(<span class="default">handler 'cursor-finished?</span>)</span></span>)</span> result</span>)</span>
+            <span class="paren1">(<span class="default">else
+              <span class="paren2">(<span class="default">set-add! <span class="paren3">(<span class="default">handler 'cursor-item</span>)</span> result</span>)</span>
+              <span class="paren2">(<span class="default"><i><span class="symbol">loop</span></i></span>)</span></span>)</span></span>)</span></span>)</span></span>)</span></span>)</span></span>)</span></span>)</span></tt></pre>
+<p>Note, that you mustn't use the array-handler closure in arrays directly, since the closure has no idea of fields from and upto. Those are added in the wrapper record.</p>
+<h3 id="requirements">Requirements</h3>
+<p>None</p>
+<h2 id="last-update">Last update</h2>
+<p>Oct 27, 2014</p>
+<h2 id="author">Author</h2>
+<p><a href="/users/juergen-lorenz" class="internal">Juergen Lorenz</a></p>
+<h2 id="license">License</h2>
+<pre><tt>Copyright (c) 2014, Juergen Lorenz
+All rights reserved.</tt></pre>
+<pre><tt>Redistribution and use in source and binary forms, with or without
+modification, are permitted provided that the following conditions are
+met:
+
+Redistributions of source code must retain the above copyright
+notice, this list of conditions and the following disclaimer.
+
+Redistributions in binary form must reproduce the above copyright
+notice, this list of conditions and the following disclaimer in the
+documentation and/or other materials provided with the distribution.
+Neither the name of the author nor the names of its contributors may be
+used to endorse or promote products derived from this software without
+specific prior written permission. 
+  
+THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS &quot;AS
+IS&quot; AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED
+TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A
+PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT
+HOLDERS OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
+SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED
+TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR
+PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF
+LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING
+NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
+SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.</tt></pre>
+<h2 id="version-history">Version History</h2>
+<dl>
+<dt>0.1</dt>
+<dd>initial import</dd></dl></div></body></html>
