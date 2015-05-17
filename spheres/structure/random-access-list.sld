@@ -41,21 +41,3 @@
   (import (spheres/core base))
 
   (include "random-access-list.scm"))
-
-
-
-;; (import scheme
-;;   (only chicken
-;;         define-record-type define-record-printer optional when unless
-;;         define-inline condition-case let-optionals void fxmin fxmax fxshr
-;;         fx+ fx- fx>= fx> fx< fx= fx<= gensym vector-resize getter-with-setter)
-;;         ; get-output-string open-output-string)
-;;   (only data-structures o identity list-of?)
-;;   (only extras format random))
-;; (import scheme
-;;         dbc
-;;         (only chicken cut
-;;               fixnum? fx+ fx- fx>= fx> fx< fx<= fx=)
-;;                                         ; get-output-string open-output-string)
-;;         (only data-structures list-of? constantly)
-;;         (prefix %random-access-lists %))
