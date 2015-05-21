@@ -92,6 +92,7 @@
     (spheres/math interval)
     (spheres/math matrix)
     (spheres/math prime)
+    (spheres/math statistics)
     (spheres/math vect2)
     (spheres/net mime)
     (spheres/net mime-types)
