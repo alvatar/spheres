@@ -24,7 +24,7 @@
 typedef enum
 {
     NOT_AVAILABLE,
-    
+
     IPHONE_2G,
     IPHONE_3G,
     IPHONE_3GS,
@@ -37,13 +37,13 @@ typedef enum
     IPHONE_5C_CDMA_GSM,
     IPHONE_5S,
     IPHONE_5S_CDMA_GSM,
-    
+
     IPOD_TOUCH_1G,
     IPOD_TOUCH_2G,
     IPOD_TOUCH_3G,
     IPOD_TOUCH_4G,
     IPOD_TOUCH_5G,
-    
+
     IPAD,
     IPAD_2,
     IPAD_2_WIFI,
@@ -55,17 +55,17 @@ typedef enum
     IPAD_4,
     IPAD_4_WIFI,
     IPAD_4_GSM_CDMA,
-    
+
     IPAD_MINI,
     IPAD_MINI_WIFI,
     IPAD_MINI_WIFI_CDMA,
     IPAD_MINI_RETINA_WIFI,
     IPAD_MINI_RETINA_WIFI_CDMA,
-    
+
     IPAD_AIR_WIFI,
     IPAD_AIR_WIFI_GSM,
     IPAD_AIR_WIFI_CDMA,
-    
+
     SIMULATOR
 } Hardware;
 
@@ -86,7 +86,7 @@ typedef enum
 /** This method returns YES if the current device is better than the hardware passed */
 - (BOOL)isCurrentDeviceHardwareBetterThan:(Hardware)hardware;
 
-/** This method returns the resolution for still image that can be received 
+/** This method returns the resolution for still image that can be received
  from back camera of the current device. Resolution returned for image oriented landscape right. **/
 - (CGSize)backCameraStillImageResolutionInPixels;
 
@@ -150,13 +150,13 @@ typedef enum
     if ([hardware isEqualToString:@"iPhone5,4"])    return IPHONE_5C_CDMA_GSM;
     if ([hardware isEqualToString:@"iPhone6,1"])    return IPHONE_5S;
     if ([hardware isEqualToString:@"iPhone6,2"])    return IPHONE_5S_CDMA_GSM;
-    
+
     if ([hardware isEqualToString:@"iPod1,1"])      return IPOD_TOUCH_1G;
     if ([hardware isEqualToString:@"iPod2,1"])      return IPOD_TOUCH_2G;
     if ([hardware isEqualToString:@"iPod3,1"])      return IPOD_TOUCH_3G;
     if ([hardware isEqualToString:@"iPod4,1"])      return IPOD_TOUCH_4G;
     if ([hardware isEqualToString:@"iPod5,1"])      return IPOD_TOUCH_5G;
-    
+
     if ([hardware isEqualToString:@"iPad1,1"])      return IPAD;
     if ([hardware isEqualToString:@"iPad1,2"])      return IPAD_3G;
     if ([hardware isEqualToString:@"iPad2,1"])      return IPAD_2_WIFI;
@@ -177,8 +177,8 @@ typedef enum
     if ([hardware isEqualToString:@"iPad4,3"])      return IPAD_AIR_WIFI_CDMA;
     if ([hardware isEqualToString:@"iPad4,4"])      return IPAD_MINI_RETINA_WIFI;
     if ([hardware isEqualToString:@"iPad4,5"])      return IPAD_MINI_RETINA_WIFI_CDMA;
-    
-    
+
+
     if ([hardware isEqualToString:@"i386"])         return SIMULATOR;
     if ([hardware isEqualToString:@"x86_64"])       return SIMULATOR;
     return NOT_AVAILABLE;
@@ -199,13 +199,13 @@ typedef enum
     if ([hardware isEqualToString:@"iPhone5,4"])    return @"iPhone 5C (Global)";
     if ([hardware isEqualToString:@"iPhone6,1"])    return @"iPhone 5S (GSM)";
     if ([hardware isEqualToString:@"iPhone6,2"])    return @"iPhone 5S (Global)";
-    
+
     if ([hardware isEqualToString:@"iPod1,1"])      return @"iPod Touch (1 Gen)";
     if ([hardware isEqualToString:@"iPod2,1"])      return @"iPod Touch (2 Gen)";
     if ([hardware isEqualToString:@"iPod3,1"])      return @"iPod Touch (3 Gen)";
     if ([hardware isEqualToString:@"iPod4,1"])      return @"iPod Touch (4 Gen)";
     if ([hardware isEqualToString:@"iPod5,1"])      return @"iPod Touch (5 Gen)";
-    
+
     if ([hardware isEqualToString:@"iPad1,1"])      return @"iPad (WiFi)";
     if ([hardware isEqualToString:@"iPad1,2"])      return @"iPad 3G";
     if ([hardware isEqualToString:@"iPad2,1"])      return @"iPad 2 (WiFi)";
@@ -228,7 +228,7 @@ typedef enum
     if ([hardware isEqualToString:@"iPad4,5"])      return @"iPad Mini Retina (WiFi+CDMA)";
     if ([hardware isEqualToString:@"i386"])         return @"Simulator";
     if ([hardware isEqualToString:@"x86_64"])       return @"Simulator";
-    
+
     NSLog(@"This is a device which is not listed in this category. Please visit https://github.com/inderkumarrathore/UIDevice-Hardware and add a comment there.");
     NSLog(@"Your device hardware string is: %@", hardware);
     if ([hardware hasPrefix:@"iPhone"]) return @"iPhone";
@@ -253,13 +253,13 @@ typedef enum
     if ([hardware isEqualToString:@"iPhone5,4"])    return @"iPhone 5C";
     if ([hardware isEqualToString:@"iPhone6,1"])    return @"iPhone 5S";
     if ([hardware isEqualToString:@"iPhone6,2"])    return @"iPhone 5S";
-    
+
     if ([hardware isEqualToString:@"iPod1,1"])      return @"iPod Touch (1 Gen)";
     if ([hardware isEqualToString:@"iPod2,1"])      return @"iPod Touch (2 Gen)";
     if ([hardware isEqualToString:@"iPod3,1"])      return @"iPod Touch (3 Gen)";
     if ([hardware isEqualToString:@"iPod4,1"])      return @"iPod Touch (4 Gen)";
     if ([hardware isEqualToString:@"iPod5,1"])      return @"iPod Touch (5 Gen)";
-    
+
     if ([hardware isEqualToString:@"iPad1,1"])      return @"iPad";
     if ([hardware isEqualToString:@"iPad1,2"])      return @"iPad";
     if ([hardware isEqualToString:@"iPad2,1"])      return @"iPad 2";
@@ -280,17 +280,17 @@ typedef enum
     if ([hardware isEqualToString:@"iPad4,3"])      return @"iPad Air";
     if ([hardware isEqualToString:@"iPad4,4"])      return @"iPad Mini Retina";
     if ([hardware isEqualToString:@"iPad4,5"])      return @"iPad Mini Retina";
-    
+
     if ([hardware isEqualToString:@"i386"])         return @"Simulator";
     if ([hardware isEqualToString:@"x86_64"])       return @"Simulator";
-    
+
     NSLog(@"This is a device which is not listed in this category. Please visit https://github.com/inderkumarrathore/UIDevice-Hardware and add a comment there.");
     NSLog(@"Your device hardware string is: %@", hardware);
-    
+
     if ([hardware hasPrefix:@"iPhone"]) return @"iPhone";
     if ([hardware hasPrefix:@"iPod"]) return @"iPod";
     if ([hardware hasPrefix:@"iPad"]) return @"iPad";
-    
+
     return nil;
 }
 
@@ -309,13 +309,13 @@ typedef enum
         case IPHONE_5C_CDMA_GSM:    return 5.4f;
         case IPHONE_5S:    return 6.1f;
         case IPHONE_5S_CDMA_GSM:    return 6.2f;
-            
+
         case IPOD_TOUCH_1G:    return 1.1f;
         case IPOD_TOUCH_2G:    return 2.1f;
         case IPOD_TOUCH_3G:    return 3.1f;
         case IPOD_TOUCH_4G:    return 4.1f;
         case IPOD_TOUCH_5G:    return 5.1f;
-            
+
         case IPAD:    return 1.1f;
         case IPAD_3G:    return 1.2f;
         case IPAD_2_WIFI:    return 2.1f;
@@ -335,7 +335,7 @@ typedef enum
         case IPAD_AIR_WIFI_CDMA:    return 4.3f;
         case IPAD_MINI_RETINA_WIFI:    return 4.4f;
         case IPAD_MINI_RETINA_WIFI_CDMA:    return 4.5f;
-            
+
         case SIMULATOR:    return 100.0f;
         case NOT_AVAILABLE:    return 200.0f;
     }
@@ -375,20 +375,20 @@ typedef enum
         case IPHONE_5C_CDMA_GSM:
             return CGSizeMake(3264, 2448);
             break;
-            
+
         case IPOD_TOUCH_4G:
             return CGSizeMake(960, 720);
             break;
         case IPOD_TOUCH_5G:
             return CGSizeMake(2440, 1605);
             break;
-            
+
         case IPAD_2_WIFI:
         case IPAD_2:
         case IPAD_2_CDMA:
             return CGSizeMake(872, 720);
             break;
-            
+
         case IPAD_MINI_WIFI:
         case IPAD_MINI:
         case IPAD_MINI_WIFI_CDMA:
@@ -445,3 +445,68 @@ ___result = (char *) c;
 
 end-c-lambda
 ))
+
+
+;;----------------------------------------------------------------------------
+;;!! Interface with UIDevice Class.
+
+(define currentDevice-batteryLevel
+  (c-lambda () float
+    "___result = [[UIDevice currentDevice] batteryLevel];"))
+
+(define currentDevice-batteryMonitoringEnabled
+  (c-lambda () bool
+    "___result = [UIDevice currentDevice].batteryMonitoringEnabled;"))
+
+(define currentDevice-batteryMonitoringEnabled-set!
+  (c-lambda (bool) void
+    "[UIDevice currentDevice].batteryMonitoringEnabled = ___arg1;"))
+
+(define currentDevice-multitaskingSupported
+  (c-lambda () bool
+    "___result = [UIDevice currentDevice].multitaskingSupported;"))
+
+(define currentDevice-model
+  (c-lambda () NSString*
+    "___result = [[UIDevice currentDevice] model];"))
+
+(define currentDevice-name
+  (c-lambda () NSString*
+    "___result = [[UIDevice currentDevice] name];"))
+
+(define currentDevice-systemName
+  (c-lambda () NSString*
+    "___result = [[UIDevice currentDevice] systemName];"))
+
+(define currentDevice-systemVersion
+  (c-lambda () NSString*
+    "___result = [[UIDevice currentDevice] systemVersion];"))
+
+(define currentDevice-uniqueIdentifier
+  (c-lambda () NSString*
+    "___result = [[[UIDevice currentDevice] identifierForVendor] UUIDString];"))
+
+(define (device-status)
+  (currentDevice-batteryMonitoringEnabled-set! #t)
+  (list (currentDevice-batteryLevel)
+        (currentDevice-batteryMonitoringEnabled)
+        (currentDevice-multitaskingSupported)
+        (currentDevice-model)
+        (currentDevice-name)
+        (currentDevice-systemName)
+        (currentDevice-systemVersion)
+        (currentDevice-uniqueIdentifier)))
+
+(define (device-model)
+  (let ((m (currentDevice-model)))
+    (cond ((has-prefix? m "iPhone")
+           'iPhone)
+          ((has-prefix? m "iPod touch")
+           'iPod-touch)
+          ((has-prefix? m "iPad")
+           'iPad)
+          (else
+           #f))))
+
+(define (UDID)
+  (currentDevice-uniqueIdentifier))
