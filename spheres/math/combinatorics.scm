@@ -11,7 +11,7 @@
   (define (insert l n e)
     (if (= 0 n)
         (cons e l)
-        (cons (car l) 
+        (cons (car l)
               (insert (cdr l) (- n 1) e))))
   (define (seq start end)
     (if (= start end)
@@ -26,6 +26,17 @@
                                   (seq 0 (length p))))
                            (permute (cdr l)))))))
 
+(define (permutations-for-each proc set)
+  (if (null? set)
+      (proc '())
+      (for-each
+       (lambda (x)
+         (permutations-for-each
+          (lambda (sub-perm)
+            (proc (cons x sub-perm)))
+          (delete x set)))
+       set)))
+
 ;;! Combinations of a list
 (define (combinations m lst)
   (let comb ((m m)
@@ -35,6 +46,20 @@
           (else (append (map (lambda (y) (cons (car lst) y))
                              (comb (- m 1) (cdr lst)))
                         (comb m (cdr lst)))))))
+
+(define (combinations-for-each proc set n)
+  (if (zero? n)
+      (proc '())
+      (let ((n2 (- n 1)))
+        (pair-for-each
+         (lambda (pr)
+           (let ((first (car pr)))
+             (combinations-for-each
+              (lambda (sub-comb)
+                (proc (cons first sub-comb)))
+              (cdr pr)
+              n2)))
+         set))))
 
 ;;! Non-continuous sequences found in a list
 (define (non-continuous-sequences lst)
@@ -64,6 +89,16 @@
         (append (map (lambda (element) (cons (car set) element))
                      rest)
                 rest))))
+
+;; orderedx
+(define (power-set-for-each proc set)
+  (let ((size (length set)))
+    (let loop ((i 0))
+      (if (> i size)
+          '()
+          (begin
+            (combinations-for-each proc set i)
+            (loop (+ i 1)))))))
 
 ;;! All subsets of a given size
 ;; .author Oleg Kiselyov
@@ -105,7 +140,56 @@
 		     (let fold ((bs bs) (accum accum))
 		       (if (null? bs) accum
 			   (fold (cdr bs)
-				 (append 
+				 (append
 				  (map (lambda (lst) (append lst (car bs))) as)
 				  accum))))))))))
   (loop l (length l) n '()))
+
+;;! All combinations of one element from each set)
+;; .author Alex Shinn, 2003
+(define (cartesian-product lol)
+  (if (null? lol)
+      (list '())
+      (let ((l (car lol))
+            (rest (cartesian-product (cdr lol))))
+        (append-map
+         (lambda (x)
+           (map (lambda (sub-prod) (cons x sub-prod)) rest))
+         l))))
+
+(define (cartesian-product-for-each proc lol)
+  (if (null? lol)
+      (proc '())
+      (for-each
+       (lambda (x)
+         (cartesian-product-for-each
+          (lambda (sub-prod)
+            (proc (cons x sub-prod)))
+          (cdr lol)))
+       (car lol))))
+
+;; The above is left fixed (it varies elements to the right first).
+;; Below is a right fixed product which could be defined with two
+;; reverses but is short enough to warrant the performance gain of a
+;; separate procedure.
+
+;;(define (cartesian-product-right lol)
+;;  (map reverse (cartesian-product (reverse lol))))
+
+(define (cartesian-product-right lol)
+  (if (null? lol)
+      (list '())
+      (let ((l (car lol))
+            (rest (cartesian-product (cdr lol))))
+        (append-map
+         (lambda (sub-prod)
+           (map (lambda (x) (cons x sub-prod)) l))
+         rest))))
+
+(define (cartesian-product-right-for-each proc lol)
+  (if (null? lol)
+      (proc '())
+      (cartesian-product-right-for-each
+       (lambda (sub-prod)
+         (for-each (lambda (x) (proc (cons x sub-prod))) (car lol)))
+       (cdr lol))))
