@@ -1,0 +1,158 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<title>lazy-seq - The Chicken Scheme wiki</title>
+<meta http-equiv="Content-Style-Type" content="text/css" />
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+<link rel="stylesheet" type="text/css" href="/chicken.css" /></head>
+<body>
+<div id="menu">
+<ul>
+<li><a href="/" class="internal">Wiki</a></li>
+<li><a href="http://code.call-cc.org/" class="external">Download</a></li>
+<li><a href="/manual/index" class="internal">Manual</a></li>
+<li><a href="/eggs" class="internal">Eggs</a></li>
+<li><a href="http://api.call-cc.org/doc/" class="external">API</a></li>
+<li><a href="http://tests.call-cc.org/" class="external">Tests</a></li>
+<li><a href="http://bugs.call-cc.org/" class="external">Bugs</a></li></ul></div>
+<div id="search">
+<form action="/search">
+<div><label>free text<input type="text" name="text" /></label><label>identifier<input type="text" name="ident" /></label><input type="submit" value="search" /><a href="/search-help">search help</a></div></form></div>
+<ul id="page-specific-links">
+<li><a href="?action=show">show</a></li>
+<li><a href="?action=edit" rel="nofollow">edit</a></li>
+<li><a href="?action=history">history</a></li></ul>
+<div id="content">
+<ul class="tags">
+<li>egg</li></ul>
+<h2 id="lazy-seq">lazy-seq</h2>
+<p>A lazy sequence implementation inspired by <a href="http://clojure.org/lazy" class="external">Clojure's</a>. It is an alternative to <a href="srfi-41" class="internal">SRFI 41</a>. See <a href="http://ceaude.twoticketsplease.de/articles/lazy-sequences-in-scheme.html" class="external">this article for the motivation of creating this egg and a comparison with SRFI 41</a>.</p>
+<div id="toc">
+<ol>
+<li><a href="#lazy-seq">lazy-seq</a>
+<ol>
+<li><a href="#api">API</a></li>
+<li><a href="#examples">Examples</a>
+<ol>
+<li><a href="#defining-a-custom-lazy-seq">Defining a custom <tt>lazy-seq</tt></a></li></ol></li>
+<li><a href="#about-this-egg">About this egg</a>
+<ol>
+<li><a href="#source">Source</a></li>
+<li><a href="#author">Author</a></li>
+<li><a href="#version-history">Version history</a></li>
+<li><a href="#license">License</a></li></ol></li></ol></li></ol></div>
+<h3 id="api">API</h3><span class="definition procedure"><em>[procedure]</em> <tt>(make-lazy-seq body)</tt>
+<br /></span>
+<p>Returns a <tt>lazy-seq</tt> object. <tt>body</tt> is a thunk which will be called when the sequence is realized. It is expected to return one of the following things:</p>
+<ul>
+<li>The empty list to signify the end of the sequence</li>
+<li>A pair with the sequence's head in the <tt>car</tt> and a <tt>lazy-seq</tt> representing the sequence's tail  in the <tt>cdr</tt></li>
+<li>Another <tt>lazy-seq</tt> which will be realized recursively when the sequence is realized</li></ul><span class="definition syntax"><em>[syntax]</em> <tt>(lazy-seq body ...)</tt>
+<br /></span>
+<p>Convenience syntax for <tt>make-lazy-seq</tt> with <tt>body ...</tt> being the thunk's body.</p><span class="definition procedure"><em>[procedure]</em> <tt>(lazy-seq? seq)</tt>
+<br /></span>
+<p>Predicate for checking whether <tt>seq</tt> is a <tt>lazy-seq</tt>.</p><span class="definition procedure"><em>[procedure]</em> <tt>(lazy-seq-realized? seq)</tt>
+<br /></span>
+<p>Predicate for checking whether <tt>seq</tt> has already been realized.</p><span class="definition procedure"><em>[procedure]</em> <tt>(lazy-null? seq)</tt>
+<br /></span>
+<p>Predicate for checking whether <tt>seq</tt> is null. Realizes <tt>seq</tt>.</p><span class="definition procedure"><em>[procedure]</em> <tt>(lazy-seq-&gt;list seq)</tt>
+<br /></span>
+<p>Completely realizes <tt>seq</tt> and returns a list of its elements. Should not be called on infinite sequences.</p><span class="definition procedure"><em>[procedure]</em> <tt>(list-&gt;lazy-seq list)</tt>
+<br /></span>
+<p>Turns <tt>list</tt> into a realized <tt>lazy-seq</tt>.</p><span class="definition procedure"><em>[procedure]</em> <tt>(lazy-head seq)</tt>
+<br /></span>
+<p>Realizes <tt>seq</tt> and returns its head.</p><span class="definition procedure"><em>[procedure]</em> <tt>(lazy-tail seq)</tt>
+<br /></span>
+<p>Realizes <tt>seq</tt> and returns its tail.</p><span class="definition procedure"><em>[procedure]</em> <tt>(lazy-length seq)</tt>
+<br /></span>
+<p>Completely realizes <tt>seq</tt> and returns its length. Should not be called on infinite sequences.</p><span class="definition procedure"><em>[procedure]</em> <tt>(lazy-append seqs ...)</tt>
+<br /></span>
+<p>Returns a <tt>lazy-seq</tt> representing the concatenation of <tt>seqs</tt>.</p><span class="definition procedure"><em>[procedure]</em> <tt>(lazy-append-map proc seqs ...)</tt>
+<br /></span>
+<p>Returns a <tt>lazy-seq</tt> which is the concatenation of <tt>lazy-seq</tt>s resulting from applying <tt>proc</tt> to each element in <tt>seqs</tt>.</p><span class="definition procedure"><em>[procedure]</em> <tt>(lazy-reverse seq)</tt>
+<br /></span>
+<p>Returns a <tt>lazy-seq</tt> of the reversed <tt>seq</tt>. Note that even realizing just the head of the returned <tt>lazy-seq</tt> will realize <tt>seq</tt> completely. Infinite sequences can't be reversed.</p><span class="definition procedure"><em>[procedure]</em> <tt>(lazy-take n seq)</tt>
+<br /></span>
+<p>Returns a <tt>lazy-seq</tt> of the first <tt>n</tt> elements of <tt>seq</tt>.</p><span class="definition procedure"><em>[procedure]</em> <tt>(lazy-drop n seq)</tt>
+<br /></span>
+<p>Returns a <tt>lazy-seq</tt> of all but the first <tt>n</tt> elements of <tt>seq</tt>.</p><span class="definition procedure"><em>[procedure]</em> <tt>(lazy-take-while pred? seq)</tt>
+<br /></span>
+<p>Returns a <tt>lazy-seq</tt> of all leading elements of <tt>seq</tt> satisfying <tt>pred?</tt>.</p><span class="definition procedure"><em>[procedure]</em> <tt>(lazy-drop-while pred? seq)</tt>
+<br /></span>
+<p>Returns a <tt>lazy-seq</tt> of <tt>seq</tt> without all leading elements satisfying <tt>pred?</tt>.</p><span class="definition procedure"><em>[procedure]</em> <tt>(lazy-ref n seq)</tt>
+<br /></span>
+<p>Realizes <tt>seq</tt> up to the <tt>n</tt>th element and returns that element.</p><span class="definition procedure"><em>[procedure]</em> <tt>(lazy-map proc seqs ...)</tt>
+<br /></span>
+<p>Returns a <tt>lazy-seq</tt> of applying <tt>proc</tt> to each element in <tt>seqs</tt>. Terminates with the sortest of <tt>seqs</tt>.</p><span class="definition procedure"><em>[procedure]</em> <tt>(lazy-filter pred? seq)</tt>
+<br /></span>
+<p>Returns a <tt>lazy-seq</tt> of elements from <tt>seq</tt> satisfying <tt>pred?</tt>.</p><span class="definition procedure"><em>[procedure]</em> <tt>(lazy-each proc seqs ...)</tt>
+<br /></span>
+<p>Completely realizes <tt>seqs</tt> and applies <tt>proc</tt> to each item for its side-effect. Terminates with the sortest of <tt>seqs</tt>.</p><span class="definition procedure"><em>[procedure]</em> <tt>(lazy-iterate proc x)</tt>
+<br /></span>
+<p>Returns a <tt>lazy-seq</tt> with a head of <tt>x</tt> and a tail of applying <tt>proc</tt> to the preceding element.</p><span class="definition procedure"><em>[procedure]</em> <tt>(lazy-repeat x)</tt>
+<br /></span>
+<p>Returns an infinite <tt>lazy-seq</tt> of <tt>x</tt>.</p><span class="definition procedure"><em>[procedure]</em> <tt>(lazy-repeatedly thunk)</tt>
+<br /></span>
+<p>Returns an infinite <tt>lazy-seq</tt> of the return value of <tt>thunk</tt> at the time an element is realized.</p><span class="definition procedure"><em>[procedure]</em> <tt>(lazy-cycle seq)</tt>
+<br /></span>
+<p>Returns a <tt>lazy-seq</tt> which infinitely cycles through <tt>seq</tt>.</p><span class="definition procedure"><em>[procedure]</em> <tt>(lazy-numbers #!key (step 1) (start 0) count)</tt>
+<br /></span>
+<p>Returns a <tt>lazy-seq</tt> of numbers starting at <tt>start</tt> and increasing by <tt>step</tt>. When <tt>count</tt> is a positive number the sequence terminates after <tt>count</tt> elements. Otherwise it is infinte.</p><span class="definition procedure"><em>[procedure]</em> <tt>(input-port-&gt;lazy-seq port read)</tt>
+<br /></span>
+<p>Returns a <tt>lazy-seq</tt> of the results of applying <tt>read</tt> to <tt>port</tt> (which must be an input port). The sequence terminates when <tt>read</tt> returns <tt>#!eof</tt>. The <tt>port</tt> is not closed automatically by this procedure.</p>
+<h3 id="examples">Examples</h3>
+<h4 id="defining-a-custom-lazy-seq">Defining a custom <tt>lazy-seq</tt></h4>
+<pre><tt class="highlight scheme-language"><span class="paren1">(<span class="default"><i><span class="symbol">define</span></i> odd-numbers
+  <span class="paren2">(<span class="default"><i><span class="symbol">let</span></i> next <span class="paren3">(<span class="default"><span class="paren4">(<span class="default">n 0</span>)</span></span>)</span>
+    <span class="paren3">(<span class="default">lazy-seq
+      <span class="paren4">(<span class="default"><i><span class="symbol">if</span></i> <span class="paren5">(<span class="default">odd? n</span>)</span>
+        <span class="paren5">(<span class="default">cons n <span class="paren6">(<span class="default">next <span class="paren1">(<span class="default">+ n 1</span>)</span></span>)</span></span>)</span>
+        <span class="paren5">(<span class="default">next <span class="paren6">(<span class="default">+ n 1</span>)</span></span>)</span></span>)</span></span>)</span></span>)</span></span>)</span>
+
+<span class="paren1">(<span class="default">lazy-ref 5 odd-numbers</span>)</span> <span class="comment">; =&gt; 11</span></tt></pre>
+<p>Note that <tt>odd-numbers</tt> can be defined more conveniently like this:</p>
+<pre><tt class="highlight scheme-language"><span class="paren1">(<span class="default"><i><span class="symbol">define</span></i> odd-numbers
+  <span class="paren2">(<span class="default">lazy-filter odd? <span class="paren3">(<span class="default">lazy-numbers</span>)</span></span>)</span></span>)</span></tt></pre>
+<h3 id="about-this-egg">About this egg</h3>
+<h4 id="source">Source</h4>
+<p>The <a href="https://bitbucket.org/DerGuteMoritz/lazy-seq" class="external">source code is hosted at Bitbucket</a>. Feel free to fork it and send pull requests there.</p>
+<h4 id="author">Author</h4>
+<p><a href="/users/moritz-heidkamp" class="internal">Moritz Heidkamp</a></p>
+<h4 id="version-history">Version history</h4>
+<dl>
+<dt>0.0.3</dt>
+<dd>Add <tt>lazy-length</tt>, <tt>lazy-reverse</tt> and <tt>lazy-cycle</tt></dd>
+<dt>0.0.2</dt>
+<dd>Add <tt>lazy-take-while</tt> and <tt>lazy-drop-while</tt></dd>
+<dt>0.0.1</dt>
+<dd>Initial release</dd></dl>
+<h4 id="license">License</h4>
+<pre><tt> Copyright (c) 2012, Moritz Heidkamp
+ All rights reserved.
+ 
+ Redistribution and use in source and binary forms, with or without
+ modification, are permitted provided that the following conditions are
+ met:
+ 
+ Redistributions of source code must retain the above copyright
+ notice, this list of conditions and the following disclaimer.
+ 
+ Redistributions in binary form must reproduce the above copyright
+ notice, this list of conditions and the following disclaimer in the
+ documentation and/or other materials provided with the distribution.
+ 
+ Neither the name of the author nor the names of its contributors may
+ be used to endorse or promote products derived from this software
+ without specific prior written permission.
+ 
+ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+ &quot;AS IS&quot; AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
+ LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS
+ FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE
+ COPYRIGHT HOLDERS OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT,
+ INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
+ (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR
+ SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION)
+ HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT,
+ STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
+ ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED
+ OF THE POSSIBILITY OF SUCH DAMAGE.</tt></pre></div></body></html>
