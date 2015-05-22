@@ -1,0 +1,153 @@
+<html lang="en">
+<head>
+<title>The Limit - slib</title>
+<meta http-equiv="Content-Type" content="text/html">
+<meta name="description" content="slib">
+<meta name="generator" content="makeinfo 4.13">
+<link title="Top" rel="start" href="index.html#Top">
+<link rel="up" href="Mathematical-Packages.html#Mathematical-Packages" title="Mathematical Packages">
+<link rel="prev" href="Minimizing.html#Minimizing" title="Minimizing">
+<link rel="next" href="Commutative-Rings.html#Commutative-Rings" title="Commutative Rings">
+<link href="http://www.gnu.org/software/texinfo/" rel="generator-home" title="Texinfo Homepage">
+<!--
+This manual is for SLIB (version 3b4, May 2013),
+the portable Scheme library.
+
+Copyright (C) 1993, 1994, 1995, 1996, 1997, 1998, 1999, 2000, 2001,
+2002, 2003, 2004, 2005, 2006, 2007, 2008 Free Software Foundation, Inc.
+
+     Permission is granted to copy, distribute and/or modify this
+     document under the terms of the GNU Free Documentation License,
+     Version 1.3 or any later version published by the Free Software
+     Foundation; with no Invariant Sections, no Front-Cover Texts, and
+     no Back-Cover Texts.  A copy of the license is included in the
+     section entitled ``GNU Free Documentation License.''
+-->
+<meta http-equiv="Content-Style-Type" content="text/css">
+<style type="text/css"><!--
+  pre.display { font-family:inherit }
+  pre.format  { font-family:inherit }
+  pre.smalldisplay { font-family:inherit; font-size:smaller }
+  pre.smallformat  { font-family:inherit; font-size:smaller }
+  pre.smallexample { font-size:smaller }
+  pre.smalllisp    { font-size:smaller }
+  span.sc    { font-variant:small-caps }
+  span.roman { font-family:serif; font-weight:normal; } 
+  span.sansserif { font-family:sans-serif; font-weight:normal; } 
+--></style>
+<link rel="icon" href="../Logo/SCM.ico">
+<link rel="shortcut icon" href="../Logo/SCM.ico">
+</head>
+<body>
+<div class="node">
+<a name="The-Limit"></a>
+<p>
+Next:&nbsp;<a rel="next" accesskey="n" href="Commutative-Rings.html#Commutative-Rings">Commutative Rings</a>,
+Previous:&nbsp;<a rel="previous" accesskey="p" href="Minimizing.html#Minimizing">Minimizing</a>,
+Up:&nbsp;<a rel="up" accesskey="u" href="Mathematical-Packages.html#Mathematical-Packages">Mathematical Packages</a>
+<hr>
+</div>
+
+<h3 class="section">5.14 The Limit</h3>
+
+<div class="defun">
+&mdash; library procedure: <b>limit</b><var> proc x1 x2 k<a name="index-limit-1009"></a></var><br>
+&mdash; library procedure: <b>limit</b><var> proc x1 x2<a name="index-limit-1010"></a></var><br>
+<blockquote>
+       <p><var>Proc</var> must be a procedure taking a single inexact real argument. 
+<var>K</var> is the number of points on which <var>proc</var> will be called; it
+defaults to 8.
+
+       <p>If <var>x1</var> is finite, then <var>Proc</var> must be continuous on the
+half-open interval:
+
+       <p>( <var>x1</var> .. <var>x1</var>+<var>x2</var> ]
+
+       <p>And <var>x2</var> should be chosen small enough so that <var>proc</var> is
+expected to be monotonic or constant on arguments between <var>x1</var> and
+<var>x1</var> + <var>x2</var>.
+
+       <p><code>Limit</code> computes the limit of <var>proc</var> as its argument
+approaches <var>x1</var> from <var>x1</var> + <var>x2</var>. 
+<code>Limit</code> returns a real number or real infinity or &lsquo;<samp><span class="samp">#f</span></samp>&rsquo;.
+
+       <p>If <var>x1</var> is not finite, then <var>x2</var> must be a finite nonzero real
+with the same sign as <var>x1</var>; in which case <code>limit</code> returns:
+
+       <p><code>(limit (lambda (x) (proc (/ x))) 0.0 (/ </code><var>x2</var><code>) </code><var>k</var><code>)</code>
+
+       <p><code>Limit</code> examines the magnitudes of the differences between
+successive values returned by <var>proc</var> called with a succession of
+numbers from <var>x1</var>+<var>x2</var>/<var>k</var> to <var>x1</var>.
+
+       <p>If the magnitudes of differences are monotonically decreasing, then
+then the limit is extrapolated from the degree n polynomial passing
+through the samples returned by <var>proc</var>.
+
+       <p>If the magnitudes of differences are increasing as fast or faster than
+a hyperbola matching at <var>x1</var>+<var>x2</var>, then a real infinity with
+sign the same as the differences is returned.
+
+       <p>If the magnitudes of differences are increasing more slowly than the
+hyperbola matching at <var>x1</var>+<var>x2</var>, then the limit is
+extrapolated from the quadratic passing through the three samples
+closest to <var>x1</var>.
+
+       <p>If the magnitudes of differences are not monotonic or are not
+completely within one of the above categories, then #f is returned. 
+</p></blockquote></div>
+
+<pre class="example">     ;; constant
+     (limit (lambda (x) (/ x x)) 0 1.0e-9)           ==&gt; 1.0
+     (limit (lambda (x) (expt 0 x)) 0 1.0e-9)        ==&gt; 0.0
+     (limit (lambda (x) (expt 0 x)) 0 -1.0e-9)       ==&gt; +inf.0
+     ;; linear
+     (limit + 0 976.5625e-6)                         ==&gt; 0.0
+     (limit - 0 976.5625e-6)                         ==&gt; 0.0
+     ;; vertical point of inflection
+     (limit sqrt 0 1.0e-18)                          ==&gt; 0.0
+     (limit (lambda (x) (* x (log x))) 0 1.0e-9)     ==&gt; -102.70578127633066e-12
+     (limit (lambda (x) (/ x (log x))) 0 1.0e-9)     ==&gt; 96.12123142321669e-15
+     ;; limits tending to infinity
+     (limit + +inf.0 1.0e9)                          ==&gt; +inf.0
+     (limit + -inf.0 -1.0e9)                         ==&gt; -inf.0
+     (limit / 0 1.0e-9)                              ==&gt; +inf.0
+     (limit / 0 -1.0e-9)                             ==&gt; -inf.0
+     (limit (lambda (x) (/ (log x) x)) 0 1.0e-9)     ==&gt; -inf.0
+     (limit (lambda (x) (/ (magnitude (log x)) x)) 0 -1.0e-9)
+                                                     ==&gt; -inf.0
+     ;; limit doesn't exist
+     (limit sin +inf.0 1.0e9)                        ==&gt; #f
+     (limit (lambda (x) (sin (/ x))) 0 1.0e-9)       ==&gt; #f
+     (limit (lambda (x) (sin (/ x))) 0 -1.0e-9)      ==&gt; #f
+     (limit (lambda (x) (/ (log x) x)) 0 -1.0e-9)    ==&gt; #f
+     ;; conditionally convergent - return #f
+     (limit (lambda (x) (/ (sin x) x)) +inf.0 1.0e222)
+                                                     ==&gt; #f
+     ;; asymptotes
+     (limit / -inf.0 -1.0e222)                       ==&gt; 0.0
+     (limit / +inf.0 1.0e222)                        ==&gt; 0.0
+     (limit (lambda (x) (expt x x)) 0 1.0e-18)       ==&gt; 1.0
+     (limit (lambda (x) (sin (/ x))) +inf.0 1.0e222) ==&gt; 0.0
+     (limit (lambda (x) (/ (+ (exp (/ x)) 1))) 0 1.0e-9)
+                                                     ==&gt; 0.0
+     (limit (lambda (x) (/ (+ (exp (/ x)) 1))) 0 -1.0e-9)
+                                                     ==&gt; 1.0
+     (limit (lambda (x) (real-part (expt (tan x) (cos x)))) (/ pi 2) 1.0e-9)
+                                                     ==&gt; 1.0
+     ;; This example from the 1979 Macsyma manual grows so rapidly
+     ;;  that x2 must be less than 41.  It correctly returns e^2.
+     (limit (lambda (x) (expt (+ x (exp x) (exp (* 2 x))) (/ x))) +inf.0 40)
+                                                     ==&gt; 7.3890560989306504
+     ;; LIMIT can calculate the proper answer when evaluation
+     ;; of the function at the limit point does not:
+     (tan (atan +inf.0))                             ==&gt; 16.331778728383844e15
+     (limit tan (atan +inf.0) -1.0e-15)              ==&gt; +inf.0
+     (tan (atan +inf.0))                             ==&gt; 16.331778728383844e15
+     (limit tan (atan +inf.0) 1.0e-15)               ==&gt; -inf.0
+     ((lambda (x) (expt (exp (/ -1 x)) x)) 0)        ==&gt; 1.0
+     (limit (lambda (x) (expt (exp (/ -1 x)) x)) 0 1.0e-9)
+                                                     ==&gt; 0.0
+</pre>
+  </body></html>
+

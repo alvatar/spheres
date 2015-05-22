@@ -1,0 +1,106 @@
+<html lang="en">
+<head>
+<title>Minimizing - slib</title>
+<meta http-equiv="Content-Type" content="text/html">
+<meta name="description" content="slib">
+<meta name="generator" content="makeinfo 4.13">
+<link title="Top" rel="start" href="index.html#Top">
+<link rel="up" href="Mathematical-Packages.html#Mathematical-Packages" title="Mathematical Packages">
+<link rel="prev" href="Root-Finding.html#Root-Finding" title="Root Finding">
+<link rel="next" href="The-Limit.html#The-Limit" title="The Limit">
+<link href="http://www.gnu.org/software/texinfo/" rel="generator-home" title="Texinfo Homepage">
+<!--
+This manual is for SLIB (version 3b4, May 2013),
+the portable Scheme library.
+
+Copyright (C) 1993, 1994, 1995, 1996, 1997, 1998, 1999, 2000, 2001,
+2002, 2003, 2004, 2005, 2006, 2007, 2008 Free Software Foundation, Inc.
+
+     Permission is granted to copy, distribute and/or modify this
+     document under the terms of the GNU Free Documentation License,
+     Version 1.3 or any later version published by the Free Software
+     Foundation; with no Invariant Sections, no Front-Cover Texts, and
+     no Back-Cover Texts.  A copy of the license is included in the
+     section entitled ``GNU Free Documentation License.''
+-->
+<meta http-equiv="Content-Style-Type" content="text/css">
+<style type="text/css"><!--
+  pre.display { font-family:inherit }
+  pre.format  { font-family:inherit }
+  pre.smalldisplay { font-family:inherit; font-size:smaller }
+  pre.smallformat  { font-family:inherit; font-size:smaller }
+  pre.smallexample { font-size:smaller }
+  pre.smalllisp    { font-size:smaller }
+  span.sc    { font-variant:small-caps }
+  span.roman { font-family:serif; font-weight:normal; } 
+  span.sansserif { font-family:sans-serif; font-weight:normal; } 
+--></style>
+<link rel="icon" href="../Logo/SCM.ico">
+<link rel="shortcut icon" href="../Logo/SCM.ico">
+</head>
+<body>
+<div class="node">
+<a name="Minimizing"></a>
+<p>
+Next:&nbsp;<a rel="next" accesskey="n" href="The-Limit.html#The-Limit">The Limit</a>,
+Previous:&nbsp;<a rel="previous" accesskey="p" href="Root-Finding.html#Root-Finding">Root Finding</a>,
+Up:&nbsp;<a rel="up" accesskey="u" href="Mathematical-Packages.html#Mathematical-Packages">Mathematical Packages</a>
+<hr>
+</div>
+
+<h3 class="section">5.13 Minimizing</h3>
+
+<p><code>(require 'minimize)</code>
+<a name="index-minimize-1006"></a><a name="index-minimize-1007"></a>
+
+<p class="noindent">The Golden Section Search
+<a rel="footnote" href="#fn-1" name="fnd-1"><sup>1</sup></a>
+algorithm finds minima of functions which
+are expensive to compute or for which derivatives are not available. 
+Although optimum for the general case, convergence is slow,
+requiring nearly 100 iterations for the example (x^3-2x-5).
+
+<p class="noindent">If the derivative is available, Newton-Raphson is probably a better
+choice.  If the function is inexpensive to compute, consider
+approximating the derivative.
+
+<div class="defun">
+&mdash; Function: <b>golden-section-search</b><var> f x0 x1 prec<a name="index-golden_002dsection_002dsearch-1008"></a></var><br>
+<blockquote>
+       <p><var>x_0</var> are <var>x_1</var> real numbers.  The (single argument)
+procedure <var>f</var> is unimodal over the open interval (<var>x_0</var>,
+<var>x_1</var>).  That is, there is exactly one point in the interval for
+which the derivative of <var>f</var> is zero.
+
+       <p><code>golden-section-search</code> returns a pair (<var>x</var> . <var>f</var>(<var>x</var>)) where <var>f</var>(<var>x</var>)
+is the minimum.  The <var>prec</var> parameter is the stop criterion.  If
+<var>prec</var> is a positive number, then the iteration continues until
+<var>x</var> is within <var>prec</var> from the true value.  If <var>prec</var> is
+a negative integer, then the procedure will iterate <var>-prec</var>
+times or until convergence.  If <var>prec</var> is a procedure of seven
+arguments, <var>x0</var>, <var>x1</var>, <var>a</var>, <var>b</var>, <var>fa</var>, <var>fb</var>,
+and <var>count</var>, then the iterations will stop when the procedure
+returns <code>#t</code>.
+
+       <p>Analytically, the minimum of x^3-2x-5 is 0.816497.
+     <pre class="example">          (define func (lambda (x) (+ (* x (+ (* x x) -2)) -5)))
+          (golden-section-search func 0 1 (/ 10000))
+                ==&gt; (816.4883855245578e-3 . -6.0886621077391165)
+          (golden-section-search func 0 1 -5)
+                ==&gt; (819.6601125010515e-3 . -6.088637561916407)
+          (golden-section-search func 0 1
+                                 (lambda (a b c d e f g ) (= g 500)))
+                ==&gt; (816.4965933140557e-3 . -6.088662107903635)
+</pre>
+       </blockquote></div>
+
+  <div class="footnote">
+<hr>
+<h4>Footnotes</h4><p class="footnote"><small>[<a name="fn-1" href="#fnd-1">1</a>]</small> David Kahaner, Cleve Moler, and Stephen Nash
+<cite>Numerical Methods and Software</cite>
+Prentice-Hall, 1989, ISBN 0-13-627258-4</p>
+
+  <hr></div>
+
+  </body></html>
+

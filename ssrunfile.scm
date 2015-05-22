@@ -92,6 +92,7 @@
     (spheres/math factor)
     (spheres/math interval)
     (spheres/math matrix)
+    (spheres/math numerical)
     (spheres/math prime)
     (spheres/math statistics)
     (spheres/math vect2)
