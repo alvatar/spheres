@@ -90,6 +90,7 @@
     (spheres/math combinatorics)
     (spheres/math euclidean)
     (spheres/math factor)
+    (spheres/math interpolation)
     (spheres/math interval)
     (spheres/math matrix)
     (spheres/math numerical)
