@@ -2,3 +2,4 @@
 *.o1
 .DS_Store
 _termite.log
+*-%-merged.scm

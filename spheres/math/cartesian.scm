@@ -1,4 +1,4 @@
-;;!!! Euclidean space matrix operations
+;;!!! Basic cartesian geometry operations
 ;; .author Alvaro Castro-Castilla, 2013-2015
 
 (define (make-identity-matrix4x4)

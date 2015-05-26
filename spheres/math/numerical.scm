@@ -240,9 +240,13 @@
 ;; promotional, or sales literature without prior written consent in
 ;; each case.
 
-(define (finite? val)
-  (and (not (= val (+ 1 val val)))
-       (= val val)))
+(cond-expand
+ (gambit
+  #!void)
+ (else
+  (define (finite? val)
+    (and (not (= val (+ 1 val val)))
+         (= val val)))))
 
 (define (inv-root f1 f2 f3 prec)
   (define f1^2 (* f1 f1))
