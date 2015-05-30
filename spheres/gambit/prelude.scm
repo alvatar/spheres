@@ -10,7 +10,7 @@
 ;; Provide any of this options:
 ;; - a file path
 ;; - a library definition
-;; - a procedure that one run yields a file path
+;; - a procedure that when run yields a file path
 (define-macro (include file-or-library)
   ;; Allow building paths as a result of a procedure
   (if (procedure? file-or-library)
@@ -41,6 +41,9 @@
         forms)
        `(begin ,@forms)))))
 
+;; Provide any of this options:
+;; - a file path
+;; - a library definition
 (define-macro load
   (lambda (file-or-library . extra)
     (cond ((string? file-or-library)

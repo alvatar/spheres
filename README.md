@@ -14,11 +14,11 @@ The libraries are implemented in R7RS style. Support and installation depends on
 [![Gambit Version](http://img.shields.io/badge/Gambit version -4.7.6-blue.svg)](http://gambitscheme.org)
 [![Build Status](https://travis-ci.org/fourthbit/spheres.svg?branch=master)](https://travis-ci.org/fourthbit/spheres)
 
-In order to use these libraries, we need to provide Gambit with _R7RS libraries_ and _syntax-rules_ support. See below for current limitations. The following process will set up Gambit for use with SchemeSpheres:
+In order to use these libraries, we need to provide Gambit with _R7RS libraries_ and _syntax-rules_ support. See below for current limitations. The following process will set up Gambit for use with SchemeSpheres in Linux, OSX or Windows:
 
-1. Compile the syntax expander: go to /spheres/gambit and run ./compile-scsc.sh
-2. Copy the .gambcini file to your _HOME_ directory. This is Gambit's initialization file.
-3. (optional) Copy the _spheres/_ directory into your Gambit's installation library directory (i.e. /usr/local/Gambit/lib)
+1. Compile the syntax expander: go to /spheres/gambit and run ./compile-scsc.sh. This file provides improved syntax-rules support for Gambit.
+2. Copy the .gambcini file to your _HOME_ directory. This is Gambit's initialization file, and it is configured to load the syntax expander and a minimal R7RS layer.
+3. (optional) Copy the _spheres/_ directory into your Gambit's installation library directory (i.e. /usr/local/Gambit/lib).
 4. Update all .gambcini paths to where your Spheres files are located (either Gambit's library directory, if you copied the files there, or any other path where you choose to leave Spheres' files).
 
 ## Basic usage
