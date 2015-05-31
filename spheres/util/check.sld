@@ -4,7 +4,10 @@
           check-report
           check-set-mode!
           check-reset!
-          check-passed?)
+          check-passed?
+
+          check:mode
+          check:proc)
   (import (spheres/algorithm comprehension))
 
   ;;!! Check
