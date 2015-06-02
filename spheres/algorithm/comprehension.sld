@@ -30,7 +30,9 @@
           :let
           :parallel
           :while
-          :until)
+          :until
+          
+          :-dispatch)
 
   ;;! (do-ec q ... cmd)
   ;;   handles nested, if/not/and/or, begin, :let, and calls generator 
