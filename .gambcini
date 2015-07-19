@@ -1,13 +1,13 @@
 ;; SchemeSpheres configuration file for Gambit
 ;; For setup, you need to update 1) and 2)
 
-;; -- 1) ADD THE DIRECTORY THE ROOT /spheres, AND PATHS WHERE YOU HAVE THE LIBRARIES
+;; -- 1) ADD THE ROOT SEARCH PATH /spheres, AND PATHS WHERE YOU HAVE THE LIBRARIES
 (define %%spheres-root-search-paths
-  `("~/spheres"
+  `("~~lib/spheres"
     "~/Dropbox/projects/spheres"
     ,(with-exception-handler (lambda (e) "~~") (lambda () (getenv "TRAVIS_BUILD_DIR")))))
 (define %%spheres-library-paths
-  `("~/spheres"
+  `("~~lib/spheres"
     "~/Dropbox/projects/spheres"
     ,(with-exception-handler (lambda (e) "~~") (lambda () (getenv "TRAVIS_BUILD_DIR")))))
 

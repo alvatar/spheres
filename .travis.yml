@@ -5,6 +5,7 @@ language: c
 install:
   - git clone https://github.com/feeley/gambit.git
   - cd gambit
+  - git checkout a831c124d16a3e6496f481b68be180335978e30c
   - ./configure
   - make from-scratch
   - sudo make install
