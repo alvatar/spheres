@@ -1,4 +1,4 @@
-sudo: required
+sudo: false
 
 language: c
 
@@ -6,18 +6,18 @@ install:
   - git clone https://github.com/feeley/gambit.git
   - cd gambit
   - git checkout a831c124d16a3e6496f481b68be180335978e30c
-  - ./configure
+  - ./configure --prefix=$HOME/gambit
   - make from-scratch
-  - sudo make install
+  - make install
   - cd ..
   - git clone https://github.com/fourthbit/ssrun.git
   - cd ssrun
-  - sudo PATH="$PATH:/usr/local/Gambit-C/bin/" ./install.sh
+  - PATH="$HOME/gambit/:$PATH" ./install.sh
   - cd ..
   - wget https://raw.githubusercontent.com/fourthbit/spheres/master/.gambcini -O ~/.gambcini
 
 script:
-  - export PATH="$PATH:/usr/local/Gambit-C/bin/"
+  - export PATH="$HOME/gambit:$PATH"
   - cd spheres/gambit
   - ./compile-scsc.sh
   - cd ../..
