@@ -17,7 +17,7 @@ install:
   - wget https://raw.githubusercontent.com/fourthbit/spheres/master/.gambcini -O ~/.gambcini
 
 script:
-  - export PATH="$HOME/gambit/bin/:$PATH"
+  - export PATH="$HOME/gambit/bin/:$HOME/ssrun/:$PATH"
   - cd spheres/gambit
   - ./compile-scsc.sh
   - cd ../..
