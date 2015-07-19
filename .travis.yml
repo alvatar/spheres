@@ -12,12 +12,12 @@ install:
   - cd ..
   - git clone https://github.com/fourthbit/ssrun.git
   - cd ssrun
-  - PATH="$HOME/gambit/:$PATH" ./install.sh
+  - PATH="$HOME/gambit/bin/:$PATH" ./install.sh
   - cd ..
   - wget https://raw.githubusercontent.com/fourthbit/spheres/master/.gambcini -O ~/.gambcini
 
 script:
-  - export PATH="$HOME/gambit:$PATH"
+  - export PATH="$HOME/gambit/bin/:$PATH"
   - cd spheres/gambit
   - ./compile-scsc.sh
   - cd ../..
