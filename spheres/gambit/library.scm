@@ -75,11 +75,15 @@
 
 ;;! Throw a library parse error
 (define^ (%library-error-parse lib)
-  (error "Error parsing library declaration: " lib))
+  (raise "Error parsing library declaration: " lib))
 
 ;;! Throw a library not found error
 (define^ (%library-error-not-found lib)
-  (error "Library not found: " lib))
+  (raise "Library not found: " lib))
+
+;;! Throw a not-r7rs library error
+(define^ (%library-error-not-r7rs-format lib)
+  (raise "R7RS library format expected" lib))
 
 (define^ (%find-library lib)
   (if (not (%library? lib)) (%library-error-parse lib))
@@ -248,52 +252,54 @@
 
 ;;! Expand cond-expand-features and eval syntax definitions, return imports, exports, includes, macro name definitions
 (define^ (%library-read-syntax lib #!key (eval? #f))
+  ;;(%library-error-not-r7rs-format lib)
   (let ((lib-path (%find-library-path lib))
         (lib-sld (%find-library-sld lib)))
     (if lib-sld
-        (let* ((file-sexps (with-input-from-file lib-sld read))
-               (define-library-args (cdr file-sexps))
-               (expanded-cond-features (%expand-cond-features define-library-args))
-               (syntax-defines (%library:filter
-                                (lambda (sexp) (let ((head-sexp (car sexp)))
-                                            (or (eq? head-sexp 'define-syntax)
-                                                (eq? head-sexp 'define-macro)
-                                                (eq? head-sexp '##begin)
-                                                (eq? head-sexp 'begin))))
-                                expanded-cond-features))
-               (syntax-definitions (make-table))
-               (found-imports '())
-               (found-exports '())
-               (found-includes '()))
-          (let recur ((sexps expanded-cond-features))
-            (or (null? sexps)
-                (let ((head (car sexps)))
-                  (if (and (pair? head) (not (null? head)))
-                      (begin (case (car head)
-                               ((import)
-                                (set! found-imports (append (cdr head) found-imports)))
-                               ((export)
-                                (set! found-exports (append (cdr head) found-exports)))
-                               ((include)
-                                (let* ((incl (string-append lib-path (cadr head))))
-                                  (if (file-exists? incl)
-                                      (set! found-includes (cons incl found-includes))
-                                      (error (string-append (object->string head) " in library "
-                                                            (object->string lib) " not found")))))
-                               ((define-syntax)
-                                (table-set! syntax-definitions (cadr head) (list 'define-syntax))
-                                (if eval? (eval head)))
-                               ((define-macro)
-                                (table-set! syntax-definitions (caadr head) (list 'define-macro))
-                                (if eval? (eval head)))
-                               ((begin ##begin)
-                                (recur (cdr head))))
-                             (recur (cdr sexps)))))))
-          (values
-           (reverse found-imports)
-           (reverse found-exports)
-           (reverse found-includes)
-           syntax-definitions))
+        (let ((file-sexps (with-input-from-file lib-sld read)))
+          ;; TODO: check proper r7rs syntax
+          (let* ((define-library-args (cdr file-sexps))
+                 (expanded-cond-features (%expand-cond-features define-library-args))
+                 (syntax-defines (%library:filter
+                                  (lambda (sexp) (let ((head-sexp (car sexp)))
+                                              (or (eq? head-sexp 'define-syntax)
+                                                  (eq? head-sexp 'define-macro)
+                                                  (eq? head-sexp '##begin)
+                                                  (eq? head-sexp 'begin))))
+                                  expanded-cond-features))
+                 (syntax-definitions (make-table))
+                 (found-imports '())
+                 (found-exports '())
+                 (found-includes '()))
+            (let recur ((sexps expanded-cond-features))
+              (or (null? sexps)
+                  (let ((head (car sexps)))
+                    (if (and (pair? head) (not (null? head)))
+                        (begin (case (car head)
+                                 ((import)
+                                  (set! found-imports (append (cdr head) found-imports)))
+                                 ((export)
+                                  (set! found-exports (append (cdr head) found-exports)))
+                                 ((include)
+                                  (let* ((incl (string-append lib-path (cadr head))))
+                                    (if (file-exists? incl)
+                                        (set! found-includes (cons incl found-includes))
+                                        (error (string-append (object->string head) " in library "
+                                                              (object->string lib) " not found")))))
+                                 ((define-syntax)
+                                  (table-set! syntax-definitions (cadr head) (list 'define-syntax))
+                                  (if eval? (eval head)))
+                                 ((define-macro)
+                                  (table-set! syntax-definitions (caadr head) (list 'define-macro))
+                                  (if eval? (eval head)))
+                                 ((begin ##begin)
+                                  (recur (cdr head))))
+                               (recur (cdr sexps)))))))
+            (values
+             (reverse found-imports)
+             (reverse found-exports)
+             (reverse found-includes)
+             syntax-definitions)))
         (values #f #f #f #f))))
 
 ;;! Get only the imports
@@ -486,8 +492,9 @@
            ;; To make visible only the libraries loaded by the user: (eq? v 'user)
            (if (or (eq? v 'auto) (eq? v 'user))
                (receive (_ exports __ macro-defs) (%library-read-syntax lib)
-                        (emit-code!
-                         (%library-make-namespace-form lib exports macro-defs)))))
+                        (if (and exports macro-defs)
+                            (emit-code!
+                             (%library-make-namespace-form lib exports macro-defs))))))
          %library-loaded-libraries)))
-  (if #f (pp (cons '##begin output-code)))
+  (if #f (pp (cons '##begin output-code))) ; Set #t to debug
   (cons '##begin output-code))
