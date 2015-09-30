@@ -14,7 +14,7 @@ install:
   - cd ssrun
   - PATH="$HOME/gambit/bin/:$PATH" ./install.sh
   - cd ..
-  - wget https://raw.githubusercontent.com/fourthbit/spheres/master/.gambcini -O ~/.gambcini
+  - wget https://raw.githubusercontent.com/fourthbit/spheres/master/.gambini -O ~/.gambini
 
 script:
   - export PATH="$HOME/gambit/bin/:$HOME/ssrun/:$PATH"
