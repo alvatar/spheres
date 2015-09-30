@@ -1,4 +1,4 @@
-#!/usr/local/Gambit-C/bin/gsi -:dar1
+#!/usr/local/Gambit/bin/gsi -:dar1
 
 (include "bench.scm")
 

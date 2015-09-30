@@ -38,7 +38,7 @@
     (if master (sense-cleanup-processes))
     (save-current-buffer
       (message "Running pump...")
-      (set-buffer (make-comint name "/usr/local/Gambit-C/bin/sense-pump"
+      (set-buffer (make-comint name "/usr/local/Gambit/bin/sense-pump"
                                nil (number-to-string port)))
       (inferior-scheme-mode)
       (if master (sense-make-scheme-buffer))
@@ -86,7 +86,7 @@
   (sense-kill)
   (let ((proc (start-process "sense"
                              "*sense-messages*"
-                             "/usr/local/Gambit-C/bin/sense-emacs"
+                             "/usr/local/Gambit/bin/sense-emacs"
                              "20000")))
     (set-process-filter proc 'sense-receive-command)
     (message "Sense server started...")))

@@ -1,4 +1,4 @@
 #!/bin/sh 
 
 LOC=`dirname $BASH_SOURCE`
-/usr/local/Gambit-C/bin/gsi -:dar,h10000 "$LOC"/debug-server.scm $1 emacs
+/usr/local/Gambit/bin/gsi -:dar,h10000 "$LOC"/debug-server.scm $1 emacs

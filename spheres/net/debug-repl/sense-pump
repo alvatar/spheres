@@ -1,4 +1,4 @@
 #!/bin/sh 
 
 LOC=`dirname $BASH_SOURCE`
-/usr/local/Gambit-C/bin/gsi -:dar,tE "$LOC"/pump.scm $1
+/usr/local/Gambit/bin/gsi -:dar,tE "$LOC"/pump.scm $1
