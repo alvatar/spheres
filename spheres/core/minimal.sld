@@ -17,6 +17,7 @@
           quicksort
           string-split
           string-concatenate
-          string-join)
+          string-join
+          unfold)
 
   (include "minimal.scm"))
