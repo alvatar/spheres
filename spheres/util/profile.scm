@@ -1,4 +1,4 @@
-;;!!! Minimalistic profiling
+;;!!! Lightweight profiling
 ;;
 ;; .author Phil Dawe
 ;; .author Alvaro Castro-Castilla, 2012-2015
@@ -7,7 +7,7 @@
 (define %%*timerhash* (make-table))
 
 ;;! Reset the timer table
-(define (%reset-timer) (set! %%*timerhash* (make-table)))
+(define (%%reset-timer) (set! %%*timerhash* (make-table)))
 
 ;;! Core procedure measuring time
 (define (%%accum-time name thunk)
@@ -22,7 +22,7 @@
     res))
 
 ;;! Get the times for timed functions
-(define (%get-times)
+(define (%%get-times)
   (letrec ((quicksort
             (lambda (l gt?)
               (define (split-by l p k)

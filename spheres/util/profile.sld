@@ -1,14 +1,14 @@
-;;!!! Minimalistic profiling
+;;!!! Lightweight profiling
 ;;
 ;; .author Phil Dawe
 ;; .author Alvaro Castro-Castilla, 2012-2015
 
 (define-library (spheres/util profile)
+  (export %%reset-timer
+          %%accum-time
+          %%get-times
 
-  (export (%reset-timer
-           %%accum-time
-           %get-times
-           define/profile))
+          define/profile)
 
   (define-syntax define/profile
     (syntax-rules (lambda)
