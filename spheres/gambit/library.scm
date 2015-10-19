@@ -358,8 +358,11 @@
 ;; Create all necessary namespace definitions for a library
 (define^ (%library-make-prelude lib #!optional (imports (%library-imports lib)))
   (if (%find-library-sld lib)
-      `(,@(%library-make-namespace-form lib '() '() allow-empty?: #t)
+      `(;; 1. Make all symbols internal to the library
+        ,@(%library-make-namespace-form lib '() '() allow-empty?: #t)
+        ;; 2. Import Gambit's native symbols
         (##include "~~lib/gambit#.scm")
+        ;; 3. Import syntax-rules/case symbols
         (##namespace ("" $make-environment
                       $sc-put-cte
                       $syntax-dispatch
@@ -379,14 +382,19 @@
                       $update-module
                       $include-file-hook
                       $generate-id
-                      syntax-case-debug))
-        (##namespace ("" %load-library
+                      syntax-case-debug
+                      ;; load-library procedures
+                      %load-library
                       %library-loaded-libraries))
+        ;; 4. Import dependencies' symbols
         ,@(apply append (map
                          (lambda (import-lib)
                            (receive (_ exports __ macro-defs) (%library-read-syntax import-lib)
                                     (%library-make-namespace-form import-lib exports macro-defs)))
-                         imports)))
+                         imports))
+        ;; 5. Import own symbols to make sure that if the library overwrites any they will be captured
+        ,@(receive (_ exports __ macro-defs) (%library-read-syntax lib)
+                   (%library-make-namespace-form lib exports macro-defs)))
       '(#!void)))
 
 ;;! Hash table containing info about loaded libraries
