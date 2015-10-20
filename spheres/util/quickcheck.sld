@@ -7,7 +7,7 @@
           run-test
           generate!
           test!
-          assert
+          assert!
           make-quickcheck-exception
           quickcheck-exception?
           quickcheck-exception-message
