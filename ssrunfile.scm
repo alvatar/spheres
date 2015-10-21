@@ -205,6 +205,7 @@
           (ssrun#compile-library
            lib
            cond-expand-features: '(debug)
+           delete-intermediate: #t
            expander: (if (memq 'gambit ftrs)
                          'gambit
                          'syntax-case)))))
