@@ -11,7 +11,7 @@ The libraries are implemented in R7RS style. Support and installation depends on
 
 ### Installation for Gambit Scheme
 
-[![Gambit Version](http://img.shields.io/badge/Gambit version -4.8.0-blue.svg)](http://gambitscheme.org)
+[![Gambit Version](http://img.shields.io/badge/Gambit version -4.8.1-blue.svg)](http://gambitscheme.org)
 [![Build Status](https://travis-ci.org/fourthbit/spheres.svg?branch=master)](https://travis-ci.org/fourthbit/spheres)
 
 In order to use these libraries, we need to provide Gambit with _R7RS libraries_ and _syntax-rules_ support. See below for current limitations. The following process will set up Gambit for use with Spheres in Linux, OSX or Windows:
