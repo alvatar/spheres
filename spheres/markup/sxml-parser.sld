@@ -9,5 +9,7 @@
           html-entity-unicode-numbers
           html-entity-unicode-chars)
   (import (spheres/core base))
+  (import (spheres/string string))
+
 
   (include "sxml-parser.scm"))
