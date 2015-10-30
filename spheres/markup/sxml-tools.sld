@@ -68,7 +68,14 @@
           sxml:attr->html
           sxml:string->html
           sxml:non-terminated-html-tag?
-          sxml:sxml->html)
+          sxml:sxml->html
+	  sxml:node?
+	  ntype??
+	  select-kids
+	  as-nodeset
+	  nodeset?
+	  map-union
+	  sxml:child)
 
   (import (spheres/core base)
           (spheres/string string))
