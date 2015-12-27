@@ -637,9 +637,9 @@
   (check-arg procedure? p unfold)
   (check-arg procedure? f unfold)
   (check-arg procedure? g unfold)
-  (if tail-gen
+  (if (pair? tail-gen)
       (let recur ((seed seed))
-        (if (p seed) (tail-gen seed)
+        (if (p seed) ((car tail-gen) seed)
             (cons (f seed) (recur (g seed)))))
       (let recur ((seed seed))
         (if (p seed) '()
