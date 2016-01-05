@@ -11,7 +11,9 @@
           prototype:deep-clone-method
           prototype:make-setter-getter
           make-prototype-object
+	  prototype-object?
           prototype:make-dispatch-table
+	  prototype:find-method
           string<<
           $
           <<
