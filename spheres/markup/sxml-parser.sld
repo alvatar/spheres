@@ -8,6 +8,7 @@
           xml-string->sxml-read-to-idx/all-data
           html-entity-unicode-numbers
           html-entity-unicode-chars)
-  (import (spheres/core base))
+  (import (spheres/core base)
+          (spheres/string string))
 
   (include "sxml-parser.scm"))
