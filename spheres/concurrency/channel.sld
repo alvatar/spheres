@@ -16,25 +16,45 @@
           chan-select
           chan-select*)
 
-  (define-macro (chan-select x r t)
-    (let loop ((forms (cdr x)) ;; original specs+timeout
-               (timeout #f)
-               (timeout-proc #f)
-               (specs '())) ;; non-timeout specs
-      (if (pair? forms)
-          (let ((spec (car forms)))
-            (if (number? (car spec))
-                (if timeout
-                    (error "multiple timeouts specified" spec)
-                    (loop (cdr forms)
-                          (car spec)           ;; timeout in seconds
-                          `(lambda () ,@(cdr spec)) ;; timeout body
-                          specs))
-                (loop (cdr forms)
-                      timeout timeout-proc
-                      (cons spec specs))))
-          `(,(r 'chan-select*)
-            (,(r '%chan-select) ,@(reverse specs))
-            ,timeout ,timeout-proc))))
+  (import (spheres/core match))
+
+  (define-syntax go
+    (syntax-rules ()
+      ((_ body ...)
+       (thread-start! (lambda () body ...)))))
+
+  ;; turn gochan-select form into `((,chan1 . ,proc1) (,chan2 . ,proc2) ...)
+  (define-syntax gochan-select-alist
+    (syntax-rules (-> <- else)
+
+      ;; recv without ok flag
+      ((_ ((channel -> varname) body ...) rest ...)
+       `((,channel ,(lambda (varname ok) (if ok (begin body ...))))
+         ,@(gochan-select-alist rest ...)))
+      ;; recv with ok flag
+      ((_ ((channel -> varname ok) body ...) rest ...)
+       `((,channel ,(lambda (varname ok) (begin body ...)))
+         ,@(gochan-select-alist rest ...)))
+      ;; send without ok flag
+      ((_ ((channel <- msg) body ...) rest ...)
+       `((,channel ,(lambda (_ ok) (if ok (begin body ...))) ,msg)
+         ,@(gochan-select-alist rest ...)))
+      ;; send with ok flag
+      ((_ ((channel <- msg ok) body ...) rest ...)
+       `((,channel ,(lambda (_ ok) (begin body ...)) ,msg)
+         ,@(gochan-select-alist rest ...)))
+      ;; default (no rest ..., else must be last expression)
+      ((_ (else body ...))
+       `((else ,(lambda (_ _) (begin body ...)))))
+
+      ((_) '())))
+
+  (define-syntax gochan-select
+    (syntax-rules ()
+      ((_ form ...)
+       (call-with-values
+           (lambda () (gochan-select* (gochan-select-alist form ...)))
+         (lambda (?msg ?ok ?meta)
+           (?meta ?msg ?ok))))))
 
   (include "channel.scm"))

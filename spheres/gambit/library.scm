@@ -424,7 +424,7 @@
                                     (recur (cdr rest)))))))
            (args-str
             (string-append (symbol->string task) "[" inner-args-str "]")))
-      (if #f ;; verbose
+      (if #t ;; verbose
           (begin (println "Call task: " task)
                  (println "Arguments: " (object->string arguments))
                  (println "In: " where)
