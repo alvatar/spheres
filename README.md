@@ -4,7 +4,7 @@ _A set of tools and libraries for real-life Scheme. Multiplatform and mobile._
 
 **IMPORTANT NOTE: This repository is deprecated and SchemeSpheres discontinued. However, progress is now being made as smaller libraries, using the new r7rs support in Gambit, which render some of the ideas here implemented obsolete.**
 
-Some of these are:
+Some of these new projects are:
 
 - [base](github.com/alvatar/base)
 - [gles2](github.com/alvatar/gles2)
