@@ -2,7 +2,16 @@
 
 _A set of tools and libraries for real-life Scheme. Multiplatform and mobile._
 
-[![Join the chat at https://gitter.im/fourthbit/spheres](https://badges.gitter.im/Join%20Chat.svg)](https://gitter.im/fourthbit/spheres?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
+**IMPORTANT NOTE: This repository is deprecated and SchemeSpheres discontinued. However, progress is now being made as smaller libraries, using the new r7rs support in Gambit, which render some of the ideas here implemented obsolete.**
+
+Some of these are:
+
+- [base](github.com/alvatar/base)
+- [gles2](github.com/alvatar/gles2)
+- [sdl2](github.com/alvatar/sdl2)
+- [ffi-utils](github.com/alvatar/ffi-utils)
+
+
 
 
 ## Installation
