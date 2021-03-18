@@ -1,4 +1,4 @@
-[![Spheres](http://www.schemespheres.org/assets/scheme-spheres-c309430cd6d751febdd151c2b30de701.png)](http://www.schemespheres.org)
+# SchemeSpheres
 
 _A set of tools and libraries for real-life Scheme. Multiplatform and mobile._
 
